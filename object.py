@@ -99,7 +99,6 @@ class DQWheel:
             filelist.append(filename)
             self.filelist.append(filename)
         #
-        print(filelist)
         self.timelimit(timekey=name,limit=self.barrierlimit,init=True)
         while not self.timelimit(timekey=name,limit=self.barrierlimit,init=False):
             if ionode:
@@ -107,16 +106,15 @@ class DQWheel:
                 for i in filelist:
                     barrieryes= barrieryes and not os.path.exists(i)
                 if barrieryes:
-                    TimeECHO("+++++MASTER:同步完成"+name)
+                    TimeECHO("MASTER:同步完成"+name)
                     return True
             else:
                 if self.removefile(filelist[mynode-1]):
                     return True
-            sleep(5)
+            sleep(10)
         self.touchfile(self.辅助同步文件)
-        if ionode:
-            for i in filelist: self.removefile(i)
-            TimeErr("同步失败")
+        for i in filelist: self.removefile(i)
+        TimeErr("同步失败")
         return False
     #读取变量
     def read_dict(self,var_dict_file="position_dict.txt"):
@@ -614,46 +612,27 @@ class wzrj_task:
         if not self.组队模式: return
         #...............................................................
         #当多人组队模式时，这里要暂时保证是房间中，因为邀请系统还没写好
-        重新进房file="辅助模式进房间.txt"
-        self.Tool.removefile(重新进房file)
         self.Tool.barriernode(self.mynode,self.totalnode,"组队进房间")
         self.Tool.timelimit(timekey=f"组队模式进房间{self.mynode}",limit=60*5,init=True)
-        while True:
-            if self.Tool.timelimit(timekey=f"组队模式进房间{self.mynode}",limit=60*17,init=False):
-                self.Tool.touch同步文件()
-            if self.Tool.存在同步文件(): return True
-            #
-            取消准备=Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540),threshold=0.9)
-            if not self.房主:
-                self.Tool.timelimit(timekey=f"辅助进房{self.mynode}",limit=60*5,init=True)
-                while not exists(取消准备):
-                    if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}",limit=60*5,init=False): break
-                    if self.Tool.存在同步文件(): return True
-                    if os.path.exists(重新进房file): break
-                    #
-                    #需要小号和主号建立亲密关系，并在主号中设置亲密关系自动进入房间
-                    TimeECHO(self.prefix+"不在房间中")
-                    self.单人进入人机匹配房间()
-                    进房=Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540),threshold=0.9)
-                    进房间=Template(r"tpl1699181937521.png", record_pos=(0.348, -0.194), resolution=(960, 540),threshold=0.9)
-                    if self.Tool.existsTHENtouch(进房):
-                        TimeECHO(self.prefix+"找到房间")
-                        if self.Tool.existsTHENtouch(进房间):
-                            TimeECHO(self.prefix+"尝试进入房间中")
-                    #
-                if not exists(取消准备):
-                    self.Tool.touchfile(重新进房file)
-            #
-            if self.Tool.存在同步文件(): return True
-            if not self.Tool.barriernode(self.mynode,self.totalnode,"结束组队进房间"): 
-                self.Tool.touch同步文件()
-            #
-            if os.path.exists(重新进房file):
-                TimeErr(self.prefix+"进入房间失败,...重启虚拟机中")
-                self.移动端.重启APP(mynode*30)
-            #
-            if self.判断房间中() and not exists(取消准备):
-                return True
+        if self.Tool.存在同步文件(): return True
+        取消准备=Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540),threshold=0.9)
+        if not self.房主:
+            self.Tool.timelimit(timekey=f"辅助进房{self.mynode}",limit=60*5,init=True)
+            while not exists(取消准备):
+                if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}",limit=60*5,init=False): break
+                if self.Tool.存在同步文件(): return True
+                #
+                #需要小号和主号建立亲密关系，并在主号中设置亲密关系自动进入房间
+                TimeECHO(self.prefix+"不在房间中")
+                self.单人进入人机匹配房间()
+                进房=Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540),threshold=0.9)
+                进房间=Template(r"tpl1699181937521.png", record_pos=(0.348, -0.194), resolution=(960, 540),threshold=0.9)
+                if self.Tool.existsTHENtouch(进房):
+                    TimeECHO(self.prefix+"找到房间")
+                    if self.Tool.existsTHENtouch(进房间):
+                        TimeECHO(self.prefix+"尝试进入房间中")
+        self.Tool.barriernode(self.mynode,self.totalnode,"结束组队进房间")
+        return
 
     def 进行人机匹配(self,times=1):
         if self.Tool.存在同步文件(): return True
@@ -1034,7 +1013,7 @@ class wzrj_task:
             TimeECHO(self.prefix+f".运行次数{runstep}")
             #
             #运行时间检测
-            startclock=5;endclock=24 #服务器5点刷新礼包和信誉积分等
+            startclock=-5;endclock=24 #服务器5点刷新礼包和信誉积分等
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
             while hour >= endclock or hour < startclock:
