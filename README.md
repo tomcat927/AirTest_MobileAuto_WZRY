@@ -1,0 +1,2 @@
+# AirTest_MobileAuto_WZRY
+面向对象的AirTest多进程框架
