@@ -93,6 +93,7 @@ class DQWheel:
             else:
                 return False
     def removefile(self,filename):
+        #
         try:
             os.remove(filename)
             TimeECHO(self.prefix+"删除["+filename+"]成功") 
@@ -142,7 +143,7 @@ class DQWheel:
         #
         if ionode:
             TimeECHO(self.prefix+"."*10)
-            TimeECHO(self.prefix+f"同步开始>{name}")
+            TimeECHO(self.prefix+f">>>>>同步开始>{name}")
         #
         for i in np.arange(1,totalnode):
             filename=f".tmp.barrier.{i}.{name}.txt"
@@ -159,7 +160,7 @@ class DQWheel:
                     barrieryes= barrieryes and not os.path.exists(i)
                 if barrieryes:
                     TimeECHO(self.prefix+"."*10)
-                    TimeECHO(self.prefix+f"同步完成>{name}")
+                    TimeECHO(self.prefix+f"<<<<<同步完成>{name}")
                     return True
             else:
                 if self.removefile(filelist[mynode-1]):
@@ -274,7 +275,8 @@ class DQWheel:
             主辅通信成功=False
             filename=f".tmp.barrier.mom.{i}.{name}.in.txt"
             if ionode:
-                myrandom=str(random.randint(totalnode+100, 500))
+                hour,minu,sec=self.time_getHMS()
+                myrandom=str(random.randint(totalnode+100, 500))+f"{hour}{minu}{sec}"
                 self.removefile(filename)
                 self.touchfile(filename,content=myrandom)
                 lockfile=f".tmp.barrier.mom.{myrandom}.{name}.in.txt"
@@ -287,6 +289,10 @@ class DQWheel:
                         break
                     sleep(1)
                 同步成功=同步成功 and 主辅通信成功
+                if 同步成功:
+                    TimeECHO(prefix+f"同步{i}成功")
+                else:
+                    TimeECHO(prefix+f"同步{i}失败")
                 continue
             else:
                 #辅助节点,找到特定
@@ -300,27 +306,26 @@ class DQWheel:
                         主辅通信成功=self.removefile(lockfile)
                         同步成功=False
                     else:
-                        TimeECHO(prefix+"寻找全部通信成功文件"+全部通信成功文件)
+                        TimeECHO(prefix+f"正在寻找全部通信成功文件>{全部通信成功文件}<")
                         if os.path.exists(全部通信成功文件):
                             同步成功=True
                             break
+                        sleep(5)
                     sleep(1)
         #到此处完成
         #因为是逐一进行同步的,所以全部通信成功文件只能由最后一个node负责删除
         if 同步成功:
             TimeECHO(prefix+"同步成功")
             if ionode:
+                self.clean文件()
                 self.touchfile(全部通信成功文件)
                 self.removefile(同步文件)
-            if mynode == totalnode-1 and 同步成功:
-                self.removefile(全部通信成功文件)
         else:
             TimeErr(prefix+"同步失败")
             return False
         #
         sleep(sleeptime)
         self.barriernode(mynode,totalnode,"同步等待结束")
-        if ionode: self.clean文件()
         return True
     
     def time_getHM(self):
@@ -328,6 +333,12 @@ class DQWheel:
         hour=current_time.hour
         minu=current_time.minute
         return hour,minu
+    def time_getHMS(self):
+        current_time=datetime.now(eastern_eight_tz)
+        hour=current_time.hour
+        minu=current_time.minute
+        sec=current_time.second
+        return hour,minu,sec
     
 
 
@@ -383,10 +394,12 @@ class deviceOB:
         #设备ID,用于控制设备重启关闭省电等,为docker和虚拟机使用
         self.设备ID=None
         self.mynode=mynode
+        self.prefix=f"({self.mynode})"
         self.totalnode=totalnode
         self.PID=-10 #Windows+Blustack专用,关闭特定虚拟机
         #
         self.连接设备()
+        self.prefix=f"({self.mynode})"
         #APPID
         self.APPID="com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.APPID=APPID if APPID else self.APPID
@@ -396,7 +409,6 @@ class deviceOB:
         self.实体终端 = "mac" in self.控制端 or "ios" in self.设备类型
         self.容器优化 = "linux" in self.控制端 and "android" in self.设备类型
         #
-        self.prefix=f"({self.mynode})"
 
 
     #尝试连接timesMax次,当前是times次
@@ -536,7 +548,7 @@ class deviceOB:
 class wzry_task:
 #备注
 #新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
-    def __init__(self,移动端,对战模式,shiftnode=-1):
+    def __init__(self,移动端,对战模式,shiftnode=-1,debug=False):
         self.移动端=移动端
         self.mynode=self.移动端.mynode
         self.totalnode=self.移动端.totalnode
@@ -549,17 +561,17 @@ class wzry_task:
         self.异常终止=False
         self.异常信息=None
         self.对战模式=对战模式 #"5v5匹配" or "王者模拟战"
+        self.debug=debug #本地调试模式
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
         self.选择人机模式=True
         self.选择英雄=True
         #
         self.Tool=DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt",
                           mynode=self.mynode,totalnode=self.totalnode,容器优化=self.移动端.容器优化)
-        if self.mynode == 0: self.Tool.init_clean()
+        if self.房主: self.Tool.init_clean()
         if self.totalnode > 1:
             self.Tool.touch同步文件()
             self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=10)
-        self.Tool.removefile(self.Tool.辅助同步文件)
         self.Tool.barriernode(self.mynode,self.totalnode,"WZRYinit")
         #.
         self.结束游戏FILE="WZRY.ENDGAME.txt"
@@ -594,14 +606,33 @@ class wzry_task:
         if exists(Template(r"tpl1693669091002.png", record_pos=(-0.003, -0.015), resolution=(960, 540))):
             TimeECHO(self.prefix+"网络优化提示")
             self.Tool.existsTHENtouch(Template(r"tpl1693669117249.png", record_pos=(-0.102, 0.116), resolution=(960, 540)),"下次吧")
-
+    def 确定按钮(self):
+        确定按钮=[]
+        确定按钮.append(Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540)))
+        确定按钮.append(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)))
+        确定按钮.append(Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540)))
+        确定按钮.append(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540),threshold=0.8))
+        for i in 确定按钮:
+            self.Tool.existsTHENtouch(i,f"确定{i}",savepos=False)
+    def 关闭按钮(self):
+        关闭按钮=[]
+        关闭按钮.append(Template(r"tpl1692947351223.png",record_pos=(0.428, -0.205), resolution=(960, 540),threshold=0.9))
+        关闭按钮.append(Template(r"tpl1699616162254.png", record_pos=(0.38, -0.237), resolution=(960, 540),threshold=0.9))
+        关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
+        关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540),threshold=0.9))
+        for i in 关闭按钮:
+            self.Tool.LoopTouch(i,f"确定{i}",savepos=False)
+        #
     def 进入大厅(self,times=1):
         TimeECHO(self.prefix+"尝试进入大厅")
+        if self.Tool.存在同步文件(): return True
+        self.移动端.打开APP()
         if self.判断大厅中():
             return True
         if self.判断对战中():
             self.Tool.timelimit(timekey="结束对战",limit=60*15)
             处理对战="模拟战" in self.对战模式
+            if self.mynode > 2: 处理对战=True
             while self.判断对战中(处理对战):
                 TimeECHO(self.prefix+"尝试进入大厅:对战sleep")
                 sleep(30)
@@ -610,11 +641,12 @@ class wzry_task:
         战绩页面=[]
         战绩页面.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
         战绩页面.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
+        战绩页面.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
         战绩页面.append(Template(r"tpl1699677835926.png", record_pos=(0.011, -0.134), resolution=(960, 540)))
         战绩页面.append(Template(r"tpl1699677870739.png", record_pos=(-0.369, 0.085), resolution=(960, 540)))
         战绩页面.append(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
         战绩页面.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
-        
+                
         战绩页面中=False 
         for i in 战绩页面:
             if exists(i):
@@ -629,24 +661,30 @@ class wzry_task:
         WIFI更新资源=Template(r"tpl1694357134235.png", record_pos=(-0.004, -0.019), resolution=(960, 540))
         if exists(WIFI更新资源):
             self.Tool.existsTHENtouch(Template(r"tpl1694357142735.png", record_pos=(-0.097, 0.116), resolution=(960, 540)))
+        if self.判断大厅中():return True
         #更新图形显示设置
         显示设置=Template(r"tpl1694359268612.png", record_pos=(-0.002, 0.12), resolution=(960, 540))
         if exists(显示设置):
             self.Tool.existsTHENtouch(Template(r"tpl1694359275922.png", record_pos=(-0.113, 0.124), resolution=(960, 540)))
+        if self.判断大厅中():return True
         #
+        if self.Tool.存在同步文件(): return True
         self.登录游戏()
         #返回图标
         返回图标=Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540),threshold=0.9)
-        self.Tool.LoopTouch(返回图标,"返回图标",loop=10,savepos=False)
+        self.Tool.LoopTouch(返回图标,"返回图标",loop=5,savepos=False)
+        if self.判断大厅中():return True
+        self.确定按钮()
         if exists(Template(r"tpl1693886922690.png", record_pos=(-0.005, 0.114), resolution=(960, 540))):
             self.Tool.existsTHENtouch(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)),"确定按钮")
         if self.判断大厅中():return True
-        #
+        if self.Tool.存在同步文件(): return True
         #邀请
         if exists(Template(r"tpl1692951548745.png", record_pos=(0.005, 0.084), resolution=(960, 540))):
             关闭邀请=Template(r"tpl1692951558377.png", record_pos=(0.253, -0.147), resolution=(960, 540),threshold=0.9)
             self.Tool.LoopTouch(关闭邀请,"关闭邀请",loop=5,savepos=False)
         if self.判断大厅中():return True
+        if self.Tool.存在同步文件(): return True
         #
         times=times+1
         #
@@ -672,7 +710,9 @@ class wzry_task:
 
     def 登录游戏(self):
         #更新公告
+        if self.Tool.存在同步文件(): return True
         更新公告=Template(r"tpl1692946575591.png", record_pos=(0.103, -0.235), resolution=(960, 540),threshold=0.9)
+        self.移动端.打开APP()
         if exists(更新公告):
             for igengxin in np.arange(30):
                 TimeECHO(self.prefix+"更新中%d"%(igengxin))
@@ -711,7 +751,10 @@ class wzry_task:
             TimeECHO(self.prefix+"关闭家长莫模式")
             touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
             sleep(5)
-        #现在打开可能会放一段视频，怎么跳过呢？
+        #现在打开可能会放一段视频，怎么跳过呢？使用0.1的精度测试一下.利用历史记录了
+        随意点击=Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540),threshold=0.9)
+        self.Tool.existsTHENtouch(随意点击,"随意点击k",savepos=True)
+        #
         开始游戏=Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540),threshold=0.9)
         if self.Tool.existsTHENtouch(开始游戏,"登录界面.开始游戏",savepos=False):
             sleep(10)
@@ -747,7 +790,7 @@ class wzry_task:
         #
         self.Tool.timelimit(timekey="活动关闭",limit=60*5,init=True)
         for i in 关闭图标集合:
-            self.Tool.LoopTouch(i,f"活动关闭集合{i}",loop=5,savepos=False)
+            self.Tool.LoopTouch(i,f"活动关闭集合{i}",loop=3,savepos=False)
             if self.判断大厅中(): return True
         #
         while exists(今日不再弹出):#当活动海报太大时，容易识别关闭图标错误，此时采用历史的关闭图标位置
@@ -912,9 +955,10 @@ class wzry_task:
         while True:
             房间中的开始按钮=Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540))
             if self.房主:
-                if self.判断房间中(): self.Tool.existsTHENtouch(房间中的开始按钮,"开始匹配按钮")
-            else:
-                TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
+                if self.判断房间中(): 
+                    self.Tool.existsTHENtouch(房间中的开始按钮,"开始匹配按钮")
+                else:
+                    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
             if self.Tool.timelimit(timekey="确认匹配",limit=60*1,init=False): TimeErr(self.prefix+"超时,队友未确认匹配或大概率程序卡死")
             if self.Tool.timelimit(timekey="超时确认匹配",limit=60*5,init=False): 
                 TimeErr(self.prefix+"超时太久,退出匹配")
@@ -991,8 +1035,10 @@ class wzry_task:
             return self.结束人机匹配_模拟战()        
         self.Tool.timelimit(timekey="结束人机匹配",limit=60*15,init=True)
         jixu=False
+        返回房间按钮=Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540),threshold=0.9)
         while True:
             if self.Tool.存在同步文件(): return True
+            if exists(返回房间按钮): jixu=True
             if self.Tool.timelimit(timekey="结束人机匹配",limit=60*15,init=False):
                 TimeErr(self.prefix+"结束人机匹配时间超时")
                 self.Tool.touch同步文件()
@@ -1024,6 +1070,7 @@ class wzry_task:
             #都尝试一次返回
             if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
                 sleep(2)
+            self.确定按钮()
 
             if self.Tool.existsTHENtouch(Template(r"tpl1689667161679.png", record_pos=(-0.001, 0.226), resolution=(960, 540))):
                 TimeECHO(self.prefix+"MVP继续")
@@ -1058,12 +1105,15 @@ class wzry_task:
             #
             sleep(10)  
             if not jixu:
+                if self.Tool.timelimit(timekey="结束人机匹配",limit=60*2,init=False):
+                    jixu=True
                 TimeECHO(self.prefix+"未监测到继续,sleep...")
+                sleep(20)
                 continue
             # 返回大厅
             # 因为不能保证返回辅助账户返回房间，所以返回大厅更稳妥
             if self.对战结束返回房间:
-                if self.Tool.existsTHENtouch(Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540),threshold=0.9),"返回房间"):
+                if self.Tool.existsTHENtouch(返回房间按钮,"返回房间"):
                     sleep(10)
                 self.网络优化()
                 if self.判断房间中(): return
@@ -1125,6 +1175,7 @@ class wzry_task:
             if self.判断大厅中(): return
     #
     def 每日礼包(self):
+        if self.Tool.存在同步文件(): return True
         self.每日礼包_每日任务()
         self.每日礼包_邮件礼包()
         self.每日礼包_妲己礼物()
@@ -1169,7 +1220,8 @@ class wzry_task:
         if self.Tool.existsTHENtouch(本周活跃1,"本周活跃1"): self.Tool.existsTHENtouch(确定按钮,"确定"); sleep(5)
         if self.Tool.existsTHENtouch(本周活跃2,"本周活跃2"): self.Tool.existsTHENtouch(确定按钮,"确定"); sleep(5)
         #
-        self.Tool.LoopTouch(返回)
+        self.Tool.LoopTouch(返回,"返回")
+        self.确定按钮()
         return True
         #
         #邮件礼包
@@ -1230,7 +1282,7 @@ class wzry_task:
                              TimeECHO(self.prefix+"领邮件礼包超时.....")
                              return self.每日礼包_邮件礼包(times)
             self.Tool.LoopTouch(系统礼物确定,"系统礼物确定",loop=10)
-        self.Tool.LoopTouch(返回)
+        self.Tool.LoopTouch(返回,"返回")
         return True
                                       
         #妲己礼物
@@ -1270,6 +1322,7 @@ class wzry_task:
             self.Tool.LoopTouch(收下,"收下",loop=10)
         self.Tool.existsTHENtouch(能力测试关闭,"能力测试关闭")
         self.Tool.LoopTouch(返回,"返回")
+        self.确定按钮()
         return True
 
 #状态判断
@@ -1297,7 +1350,7 @@ class wzry_task:
                 self.Tool.timelimit(timekey="endgame",limit=60*30,init=True)
                 while self.Tool.existsTHENtouch(对战):
                     TimeECHO(self.prefix+"加速对战中")
-                    sleep(10) #
+                    sleep(30) #
                     if self.Tool.timelimit(timekey="endgame",limit=60*30,init=False):
                         TimeErr(self.prefix+"对战中游戏时间过长,重启游戏") #存在对战的时间超过20min,大概率卡死了
                         self.移动端.重启APP(10)
@@ -1363,6 +1416,8 @@ class wzry_task:
 #开始运行
     def 进行人机匹配对战循环(self):
         #初始化
+        self.移动端.打开APP()
+        if self.房主:TimeECHO("->"*10)
         if self.Tool.存在同步文件(): return True
         if not self.判断房间中():
             self.进入大厅()
@@ -1374,13 +1429,19 @@ class wzry_task:
         #进行对战
         self.进行人机匹配()
         if self.Tool.存在同步文件(): return True
+        加速对战=False
+        if self.debug : 加速对战=True
+        while self.判断对战中_模拟战(加速对战):
+            TimeECHO(self.prefix+"处理对战中")
+            if self.Tool.存在同步文件(): return True
         #结束对战
         self.结束人机匹配()
         self.Tool.barriernode(self.mynode,self.totalnode,"结束对战")
         #
         if self.Tool.存在同步文件(): return True
         #
-        self.Tool.clean文件()
+        if self.mynode == 0: self.Tool.clean文件()
+        if self.房主: TimeECHO("<-"*10)
         #
     def RUN(self):#程序入口
         runstep=0
@@ -1390,6 +1451,7 @@ class wzry_task:
         while True:
             if self.Tool.存在同步文件():#单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
+                if not self.移动端.device: self.移动端.连接设备()
                 self.移动端.关闭APP()
                 self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=60*5)#后面出现健康系统警告也会直接回来的
                 self.Tool.removefile(self.Tool.辅助同步文件)
@@ -1401,7 +1463,7 @@ class wzry_task:
             TimeECHO(self.prefix+f".运行次数{runstep}")
             #
             #运行时间检测
-            startclock=5;endclock=24 #服务器5点刷新礼包和信誉积分等
+            startclock=5;endclock=12 #服务器5点刷新礼包和信誉积分等
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
             while hour >= endclock or hour < startclock:
@@ -1412,7 +1474,9 @@ class wzry_task:
                 leftmin=max((startclock-hour)*60-minu,0)
                 if self.移动端.容器优化:leftmin=leftmin+self.mynode*30
                 TimeECHO(self.prefix+"预计等待%d min ~ %3.2f h"%(leftmin,leftmin/60.0))
+                if self.debug: leftmin=0.5
                 self.移动端.重启APP(leftmin*60)
+                if self.debug: break
                 sleep(mynode*10)
                 hour,minu=self.Tool.time_getHM()
             #
@@ -1440,6 +1504,7 @@ class auto_airtest:
         self.totalnode=totalnode
         self.设备类型=设备类型.lower()
         self.prefix=f"({self.mynode}/{self.totalnode})"
+        self.debug=False
         #设备信息
         LINK_dict={}
         if "android" in self.设备类型:
@@ -1454,10 +1519,11 @@ class auto_airtest:
             LINK_dict[2]="ios:///http://"+"192.168.12.130:8100"
             LINK_dict[3]="ios:///http://"+"192.168.12.130:8100"
             LINK_dict[4]="ios:///http://"+"192.168.12.130:8100"
-        #当在这里手动指定Link时,自动进行修正
-        #LINK_dict[0]="Android:///"+"192.168.192.10:5555"
-        #LINK_dict[1]="Android:///"+"192.168.192.10:5565"
-        #LINK_dict[1]="ios:///http://169.254.148.222:8100"
+        if self.debug:
+            #当在这里手动指定Link时,自动进行修正
+            LINK_dict[0]="Android:///"+"192.168.192.10:5555"
+            LINK_dict[1]="Android:///"+"192.168.192.10:5565"
+            LINK_dict[totalnode-1]="ios:///http://169.254.148.222:8100"
         #if "ios" in LINK_dict[0]: os.system("tidevice wdaproxy -B  com.cndaqiang.WebDriverAgentRunner.xctrunner > tidevice.result.txt 2>&1 &")
         #
         self.LINK=LINK_dict[mynode]
@@ -1470,7 +1536,7 @@ class auto_airtest:
             return
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
-        TASK=wzry_task(self.移动端,对战模式,shiftnode=-1)
+        TASK=wzry_task(self.移动端,对战模式,shiftnode=-1,debug=self.debug)
         TASK.RUN()
         #
     def printINFO(self):
@@ -1518,6 +1584,7 @@ if __name__ == "__main__":
 
     
         
+
 
 
 
