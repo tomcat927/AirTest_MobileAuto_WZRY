@@ -9,7 +9,7 @@
 #################################
 
 import sys,os
-from airtest.core.api import start_app,stop_app,Template,connect_device,touch,exists,sleep
+from airtest.core.api import start_app,stop_app,Template,connect_device,touch,exists,sleep,swipe
 import numpy as np
 import random
 import logging
@@ -126,7 +126,8 @@ class DQWheel:
     def touch同步文件(self):
         TimeECHO(self.prefix+f"创建同步文件{self.辅助同步文件}")
         self.touchfile(self.辅助同步文件)
-        self.filelist.append(self.辅助同步文件)
+        #该文件不添加到列表,仅在成功同步后才删除
+        #self.filelist.append(self.辅助同步文件)
     def 存在同步文件(self):
         return os.path.exists(self.辅助同步文件)
     def clean文件(self):
@@ -137,7 +138,7 @@ class DQWheel:
     #
     def barriernode(self,mynode,totalnode,name="barrierFile"):
         if totalnode < 2: return True
-        if os.path.exists(self.辅助同步文件): return True
+        if self.Tool.存在同步文件(): return True
         filelist=[]
         ionode= mynode == 0 or totalnode == 1
         #
@@ -153,7 +154,7 @@ class DQWheel:
         #
         self.timelimit(timekey=name,limit=self.barrierlimit,init=True)
         while not self.timelimit(timekey=name,limit=self.barrierlimit,init=False):
-            if os.path.exists(self.辅助同步文件): return True
+            if self.Tool.存在同步文件(): return True
             if ionode:
                 barrieryes=True
                 for i in filelist:
@@ -166,9 +167,9 @@ class DQWheel:
                 if self.removefile(filelist[mynode-1]):
                     return True
             sleep(10)
-        self.touchfile(self.辅助同步文件)
         for i in filelist: self.removefile(i)
-        TimeErr(self.prefix+"同步失败")
+        self.touch同步文件()
+        TimeErr(self.prefix+":barriernode>{name}<同步失败")
         return False
     #读取变量
     def read_dict(self,var_dict_file="position_dict.txt"):
@@ -315,13 +316,13 @@ class DQWheel:
         #到此处完成
         #因为是逐一进行同步的,所以全部通信成功文件只能由最后一个node负责删除
         if 同步成功:
-            TimeECHO(prefix+"同步成功")
+            TimeECHO(prefix+"同步等待成功")
             if ionode:
                 self.clean文件()
                 self.touchfile(全部通信成功文件)
                 self.removefile(同步文件)
         else:
-            TimeErr(prefix+"同步失败")
+            TimeErr(prefix+"同步等待失败")
             return False
         #
         sleep(sleeptime)
@@ -543,7 +544,124 @@ class deviceOB:
 
 
 
-
+class wzyd_libao:
+   def __init__(self):
+      self.Tool=DQWheel()
+      self.体验币成功=False
+      self.APPID="com.tencent.gamehelper.smoba"
+      self.prefix="王者营地:"
+   def RUN(self):
+      self.体验货币()
+      self.营地币兑换碎片()
+      self.每日福利()
+      stop_app(self.APPID)
+   def 体验货币(self,times=0):
+      TimeECHO(self.prefix+"体验币")
+      start_app(self.APPID)
+      sleep(5)
+      times=times+1
+      if times > 10: return False
+      战绩图标=Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960))
+      if not self.Tool.existsTHENtouch(战绩图标,self.prefix+"战绩图标"): return self.体验货币(times)
+      图标=Template(r"tpl1699873841208.png", record_pos=(-0.441, -0.809), resolution=(540, 960))
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"集合"): return self.体验货币(times)
+      图标=Template(r"tpl1699873913813.png", record_pos=(-0.374, -0.043), resolution=(540, 960))
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"体验服"): return self.体验货币(times)
+      图标=Template(r"tpl1699873941409.png", record_pos=(0.387, -0.128), resolution=(540, 960))
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"进入体验服"): return self.体验货币(times)
+      图标=Template(r"tpl1699873949811.png", record_pos=(-0.006, 0.176), resolution=(540, 960))
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"奖励兑换"): return self.体验货币(times)
+      #
+      奖励页面=Template(r"tpl1699874011609.png", record_pos=(0.165, 0.48), resolution=(540, 960))
+      pos=False
+      for i in range(10):
+          sleep(10)
+          pos=exists(奖励页面)
+          if pos: break
+      if not pos:
+         TimeECHO(self.prefix+"没进入奖励兑换页面")
+         return self.体验货币(times)
+      #
+      swipe(pos, vector=[-0.0372, -0.5912])
+      碎片奖励=Template(r"tpl1699874679212.png", record_pos=(-0.233, 0.172), resolution=(540, 960),threshold=0.9)
+      奖励位置=False
+      for i in range(10):
+          sleep(2)
+          奖励位置=exists(碎片奖励)
+          if 奖励位置: break
+          swipe(pos, vector=[-0.0372, -0.5912])
+      if not 奖励位置:
+         TimeECHO(self.prefix+"没找到体验币")
+         return self.体验货币(times)
+      #
+      touch(奖励位置)
+      成功领取=Template(r"tpl1699874950410.png", record_pos=(-0.002, -0.006), resolution=(540, 960))
+      if exists(成功领取):
+         TimeECHO(self.prefix+"成功领取")
+      else:
+         TimeECHO(self.prefix+"领取过了/体验币不够")
+      return
+      #
+   
+   def 每日福利(self):
+      TimeECHO(self.prefix+"每日福利")
+      #每日签到
+      start_app(self.APPID)
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872241675.png", record_pos=(0.313, -0.372), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)))
+      #每日任务
+      sleep(5)
+      start_app(self.APPID)
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872273081.png", record_pos=(0.326, 0.046), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)))
+      return
+   
+   def 营地币兑换碎片(self,times=0):
+      TimeECHO(self.prefix+"营地币兑换碎片")
+      times=times+1
+      if times > 10: return False
+      start_app(self.APPID)
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960)))
+      sleep(5)
+      self.Tool.existsTHENtouch(Template(r"tpl1699872561488.png", record_pos=(-0.317, 0.331), resolution=(540, 960)))
+      兑换页面=Template(r"tpl1699873075417.png", record_pos=(0.437, 0.167), resolution=(540, 960))
+      pos=False
+      for i in range(10):
+          sleep(10)
+          pos=exists(兑换页面)
+          if pos: break
+      if not pos:
+         TimeECHO(self.prefix+"没进入营地币兑换页面")
+         return self.营地币兑换碎片(times)
+      swipe(pos, vector=[0.0156, -0.4067])
+      碎片奖励=Template(r"tpl1699873407201.png", record_pos=(0.009, 0.667), resolution=(540, 960))
+      奖励位置=False
+      for i in range(10):
+          sleep(2)
+          奖励位置=exists(碎片奖励)
+          if 奖励位置: break
+          swipe(pos, vector=[0.0156, -0.4067])
+      if not 奖励位置:
+         TimeECHO(self.prefix+"没找到营地币")
+         return self.营地币兑换碎片(times)
+      touch(奖励位置)
+      self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
+      self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
 
 class wzry_task:
 #备注
@@ -561,7 +679,7 @@ class wzry_task:
         self.异常终止=False
         self.异常信息=None
         self.对战模式=对战模式 #"5v5匹配" or "王者模拟战"
-        self.debug=debug #本地调试模式
+        self.debug="darwin" in sys.platform.lower() #本地调试模式
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
         self.选择人机模式=True
         self.选择英雄=True
@@ -1179,6 +1297,16 @@ class wzry_task:
         self.每日礼包_每日任务()
         self.每日礼包_邮件礼包()
         self.每日礼包_妲己礼物()
+        if self.mynode == 0:
+            if "android" in self.移动端.设备类型:
+                try:
+                    王者营地=wzyd_libao()
+                    王者营地.RUN()
+                    TimeECHO(self.prefix+"王者营地礼包通过")
+                except:
+                    TimeECHO(self.prefix+"王者营地礼包出错")
+            self.移动端.打开APP()
+
 
     def 每日礼包_每日任务(self,times=1):
         if self.Tool.存在同步文件(): return True
@@ -1349,6 +1477,7 @@ class wzry_task:
             if 处理:
                 self.Tool.timelimit(timekey="endgame",limit=60*30,init=True)
                 while self.Tool.existsTHENtouch(对战):
+                    if self.Tool.存在同步文件(): return True
                     TimeECHO(self.prefix+"加速对战中")
                     sleep(30) #
                     if self.Tool.timelimit(timekey="endgame",limit=60*30,init=False):
@@ -1453,8 +1582,8 @@ class wzry_task:
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
                 if not self.移动端.device: self.移动端.连接设备()
                 self.移动端.关闭APP()
-                self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=60*5)#后面出现健康系统警告也会直接回来的
-                self.Tool.removefile(self.Tool.辅助同步文件)
+                if not self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=60*5): #后面出现健康系统警告也会直接回来的
+                   continue
             #运行前统一冰行变凉
             runstep=runstep+1
             self.runinfo["runstep"]=runstep
@@ -1472,7 +1601,7 @@ class wzry_task:
                 #计算休息时间
                 hour,minu=self.Tool.time_getHM()
                 leftmin=max((startclock-hour)*60-minu,0)
-                if self.移动端.容器优化:leftmin=leftmin+self.mynode*30
+                if self.移动端.容器优化:leftmin=leftmin+self.mynode*1#这里的单位是分钟,每个node别差别太大
                 TimeECHO(self.prefix+"预计等待%d min ~ %3.2f h"%(leftmin,leftmin/60.0))
                 if self.debug: leftmin=0.5
                 self.移动端.重启APP(leftmin*60)
@@ -1480,18 +1609,21 @@ class wzry_task:
                 sleep(mynode*10)
                 hour,minu=self.Tool.time_getHM()
             #
+            if self.Tool.存在同步文件(): continue
             self.Tool.barriernode(self.mynode,self.totalnode,"准备进入战斗循环")
             #
             #礼包
             if runstep%10 == 0:
                 self.每日礼包()
             #
+            if self.Tool.存在同步文件(): continue
             self.移动端.打开APP()
             #
             #开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
+            if self.Tool.存在同步文件(): continue
             #
-            if self.移动端.实体终端 and False: 
+            if self.移动端.实体终端 and self.debug: 
                 TimeECHO(self.prefix+":实体终端,休息设备")
                 self.移动端.关闭APP()
                 sleep(60*0.5)
@@ -1504,7 +1636,7 @@ class auto_airtest:
         self.totalnode=totalnode
         self.设备类型=设备类型.lower()
         self.prefix=f"({self.mynode}/{self.totalnode})"
-        self.debug=False
+        self.debug=True
         #设备信息
         LINK_dict={}
         if "android" in self.设备类型:
@@ -1523,7 +1655,7 @@ class auto_airtest:
             #当在这里手动指定Link时,自动进行修正
             LINK_dict[0]="Android:///"+"192.168.192.10:5555"
             LINK_dict[1]="Android:///"+"192.168.192.10:5565"
-            LINK_dict[totalnode-1]="ios:///http://169.254.148.222:8100"
+            #LINK_dict[totalnode-1]="ios:///http://169.254.148.222:8100"
         #if "ios" in LINK_dict[0]: os.system("tidevice wdaproxy -B  com.cndaqiang.WebDriverAgentRunner.xctrunner > tidevice.result.txt 2>&1 &")
         #
         self.LINK=LINK_dict[mynode]
@@ -1583,18 +1715,6 @@ if __name__ == "__main__":
 
 
     
-        
-
-
-
-
-
-
-
-
-
-
-
 
 
 
