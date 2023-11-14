@@ -138,7 +138,7 @@ class DQWheel:
     #
     def barriernode(self,mynode,totalnode,name="barrierFile"):
         if totalnode < 2: return True
-        if self.Tool.存在同步文件(): return True
+        if self.存在同步文件(): return True
         filelist=[]
         ionode= mynode == 0 or totalnode == 1
         #
@@ -154,7 +154,7 @@ class DQWheel:
         #
         self.timelimit(timekey=name,limit=self.barrierlimit,init=True)
         while not self.timelimit(timekey=name,limit=self.barrierlimit,init=False):
-            if self.Tool.存在同步文件(): return True
+            if self.存在同步文件(): return True
             if ionode:
                 barrieryes=True
                 for i in filelist:
@@ -404,7 +404,7 @@ class deviceOB:
         #APPID
         self.APPID="com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.APPID=APPID if APPID else self.APPID
-        start_app(self.APPID)
+        start_app(self.APPID);sleep(5)
         #
         self.实体终端=False
         self.实体终端 = "mac" in self.控制端 or "ios" in self.设备类型
@@ -514,7 +514,7 @@ class deviceOB:
         stop_app(self.APPID)
     def 打开APP(self):
         TimeECHO(self.prefix+f"打开APP中")
-        start_app(self.APPID)
+        start_app(self.APPID);sleep(5)
         sleep(20)
 
     def 重启APP(self,sleeptime=0):
@@ -551,13 +551,15 @@ class wzyd_libao:
       self.APPID="com.tencent.gamehelper.smoba"
       self.prefix="王者营地:"
    def RUN(self):
-      self.体验货币()
       self.营地币兑换碎片()
+      self.体验货币()
       self.每日福利()
       stop_app(self.APPID)
    def 体验货币(self,times=0):
-      TimeECHO(self.prefix+"体验币")
-      start_app(self.APPID)
+      TimeECHO(self.prefix+f"体验币{times}")
+      if times > 0: sleep(5)
+      stop_app(self.APPID)
+      start_app(self.APPID);sleep(5)
       sleep(5)
       times=times+1
       if times > 10: return False
@@ -603,10 +605,12 @@ class wzyd_libao:
       return
       #
    
-   def 每日福利(self):
-      TimeECHO(self.prefix+"每日福利")
+   def 每日福利(self,times=0):
+      if times > 0: sleep(5)
+      TimeECHO(self.prefix+f"每日福利{times}")
       #每日签到
-      start_app(self.APPID)
+      stop_app(self.APPID)
+      start_app(self.APPID);sleep(5)
       sleep(5)
       self.Tool.existsTHENtouch(Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960)))
       sleep(5)
@@ -617,7 +621,7 @@ class wzyd_libao:
       self.Tool.existsTHENtouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)))
       #每日任务
       sleep(5)
-      start_app(self.APPID)
+      start_app(self.APPID);sleep(5)
       sleep(5)
       self.Tool.existsTHENtouch(Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960)))
       sleep(5)
@@ -629,10 +633,12 @@ class wzyd_libao:
       return
    
    def 营地币兑换碎片(self,times=0):
-      TimeECHO(self.prefix+"营地币兑换碎片")
+      TimeECHO(self.prefix+f"营地币兑换碎片{times}")
+      if times > 0: sleep(5)
       times=times+1
       if times > 10: return False
-      start_app(self.APPID)
+      stop_app(self.APPID)
+      start_app(self.APPID);sleep(5)
       sleep(5)
       self.Tool.existsTHENtouch(Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960)))
       sleep(5)
@@ -750,7 +756,7 @@ class wzry_task:
         if self.判断对战中():
             self.Tool.timelimit(timekey="结束对战",limit=60*15)
             处理对战="模拟战" in self.对战模式
-            if self.mynode > 2: 处理对战=True
+            if self.debug: 处理对战=True
             while self.判断对战中(处理对战):
                 TimeECHO(self.prefix+"尝试进入大厅:对战sleep")
                 sleep(30)
@@ -1294,18 +1300,16 @@ class wzry_task:
     #
     def 每日礼包(self):
         if self.Tool.存在同步文件(): return True
+        if self.mynode == 0:
+            if "android" in self.移动端.设备类型:
+                TimeECHO(self.prefix+"王者营地礼包开始")
+                王者营地=wzyd_libao()
+                王者营地.RUN()
+                TimeECHO(self.prefix+"王者营地礼包结束")
+            self.移动端.打开APP()
         self.每日礼包_每日任务()
         self.每日礼包_邮件礼包()
         self.每日礼包_妲己礼物()
-        if self.mynode == 0:
-            if "android" in self.移动端.设备类型:
-                try:
-                    王者营地=wzyd_libao()
-                    王者营地.RUN()
-                    TimeECHO(self.prefix+"王者营地礼包通过")
-                except:
-                    TimeECHO(self.prefix+"王者营地礼包出错")
-            self.移动端.打开APP()
 
 
     def 每日礼包_每日任务(self,times=1):
@@ -1576,7 +1580,7 @@ class wzry_task:
         runstep=0
         对战次数=0
         self.移动端.打开APP()
-        #self.每日礼包()
+        self.每日礼包()
         while True:
             if self.Tool.存在同步文件():#单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
