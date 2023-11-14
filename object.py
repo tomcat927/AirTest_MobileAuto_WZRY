@@ -748,7 +748,7 @@ class wzry_task:
             self.Tool.LoopTouch(i,f"确定{i}",savepos=False)
         #
     def 进入大厅(self,times=1):
-        TimeECHO(self.prefix+"尝试进入大厅")
+        TimeECHO(self.prefix+f"尝试进入大厅{times}")
         if self.Tool.存在同步文件(): return True
         self.移动端.打开APP()
         if self.判断大厅中():
@@ -936,10 +936,10 @@ class wzry_task:
     def 单人进入人机匹配房间(self,times=1):
         if self.Tool.存在同步文件(): return True
         if "模拟战" in self.对战模式:
-            TimeECHO(self.prefix+"单人进入人机匹配房间_模拟战")
+            TimeECHO(self.prefix+f"单人进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
         #
-        TimeECHO(self.prefix+"单人进入人机匹配房间")
+        TimeECHO(self.prefix+f"单人进入人机匹配房间{times}")
         if self.判断对战中(): self.结束人机匹配()
         if self.判断房间中(): return True
         self.进入大厅()
@@ -1314,7 +1314,6 @@ class wzry_task:
 
     def 每日礼包_每日任务(self,times=1):
         if self.Tool.存在同步文件(): return True
-        TimeECHO(self.prefix+"领任务礼包")
         #
         if times == 1:
             self.Tool.timelimit(timekey="领任务礼包",limit=60*5,init=True)
@@ -1328,7 +1327,7 @@ class wzry_task:
         self.进入大厅()
         #
         #每日任务
-        TimeECHO(self.prefix+"领任务礼包:每日任务")
+        TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
         赛季任务界面=Template(r"tpl1693294751097.png", record_pos=(-0.11, -0.001), resolution=(960, 540))
         任务=Template(r"tpl1693192971740.png", record_pos=(0.204, 0.241), resolution=(960, 540),threshold=0.9)
         self.Tool.existsTHENtouch(任务,"任务按钮")
@@ -1359,7 +1358,6 @@ class wzry_task:
         #邮件礼包
     def 每日礼包_邮件礼包(self,times=1):
         if self.Tool.存在同步文件(): return True
-        TimeECHO(self.prefix+"领任务礼包")
         #
         if times == 1:
             self.Tool.timelimit(timekey="领任务礼包",limit=60*5,init=True)
@@ -1371,7 +1369,7 @@ class wzry_task:
         #
         times=times+1
         self.进入大厅()
-        TimeECHO(self.prefix+"领任务礼包:领邮件礼包")
+        TimeECHO(self.prefix+f"领任务礼包:领邮件礼包{times}")
         邮件图标=Template(r"tpl1694441018032.png", record_pos=(0.35, -0.251), resolution=(960, 540))
         好友邮件=Template(r"tpl1694441042380.png", record_pos=(-0.453, -0.188), resolution=(960, 540))
         收到邮件=Template(r"tpl1694441057562.png", record_pos=(-0.31, -0.199), resolution=(960, 540))
@@ -1420,7 +1418,6 @@ class wzry_task:
         #妲己礼物
     def 每日礼包_妲己礼物(self,times=1):
         if self.Tool.存在同步文件(): return True
-        TimeECHO(self.prefix+"领任务礼包")
         #
         if times == 1:
             self.Tool.timelimit(timekey="领任务礼包",limit=60*5,init=True)
@@ -1432,7 +1429,7 @@ class wzry_task:
         #
         times=times+1
         self.进入大厅()
-        TimeECHO(self.prefix+"领任务礼包:小妲己礼物")
+        TimeECHO(self.prefix+f"领任务礼包:小妲己礼物{times}")
 
         小妲己=Template(r"tpl1694441259292.png", record_pos=(0.458, 0.21), resolution=(960, 540))
         一键领奖=Template(r"tpl1694442066106.png", record_pos=(-0.134, 0.033), resolution=(960, 540))
@@ -1580,7 +1577,7 @@ class wzry_task:
         runstep=0
         对战次数=0
         self.移动端.打开APP()
-        self.每日礼包()
+        #self.每日礼包()
         while True:
             if self.Tool.存在同步文件():#单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
@@ -1596,7 +1593,7 @@ class wzry_task:
             TimeECHO(self.prefix+f".运行次数{runstep}")
             #
             #运行时间检测
-            startclock=5;endclock=12 #服务器5点刷新礼包和信誉积分等
+            startclock=5;endclock=23 #服务器5点刷新礼包和信誉积分等
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
             while hour >= endclock or hour < startclock:
