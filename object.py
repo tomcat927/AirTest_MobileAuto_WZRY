@@ -754,7 +754,6 @@ class wzry_task:
     def 进入大厅(self,times=1):
         TimeECHO(self.prefix+f"尝试进入大厅{times}")
         if self.Tool.存在同步文件(): return True
-        self.移动端.打开APP()
         if self.判断大厅中():
             return True
         if self.判断对战中():
@@ -781,6 +780,7 @@ class wzry_task:
                 战绩页面中=True
                 TimeECHO(self.prefix+"尝试进入大厅:战绩页面")
                 break
+        self.移动端.打开APP()
         if 战绩页面中: self.结束人机匹配()
         self.网络优化()
         #各种异常，异常图标,比如网速不佳、画面设置、
@@ -1029,7 +1029,6 @@ class wzry_task:
         self.Tool.barriernode(self.mynode,self.totalnode,"结束组队进房间")
         return
     def 单人进入人机匹配房间_模拟战(self,times=1):
-        self.移动端.打开APP()
         if self.判断对战中(): self.结束人机匹配()
         if self.判断房间中(): return True
         self.进入大厅()
@@ -1072,7 +1071,6 @@ class wzry_task:
 
     def 进行人机匹配(self,times=1):
         if self.Tool.存在同步文件(): return True
-        self.移动端.打开APP()
         if times == 1:
             self.Tool.timelimit(timekey="进行人机匹配",limit=60*10,init=True)
         times=times+1
@@ -1561,7 +1559,6 @@ class wzry_task:
 #开始运行
     def 进行人机匹配对战循环(self):
         #初始化
-        self.移动端.打开APP()
         if self.房主:TimeECHO("->"*10)
         if self.Tool.存在同步文件(): return True
         if not self.判断房间中():
