@@ -1612,7 +1612,7 @@ class wzry_task:
                 self.每日礼包()
                 #计算休息时间
                 hour,minu=self.Tool.time_getHM()
-                leftmin=max((startclock-hour)*60-minu,0)
+                leftmin=max(((startclock+24-hour)%24)*60-minu,0)
                 if self.移动端.容器优化:leftmin=leftmin+self.mynode*1#这里的单位是分钟,每个node别差别太大
                 TimeECHO(self.prefix+"预计等待%d min ~ %3.2f h"%(leftmin,leftmin/60.0))
                 if self.debug: leftmin=0.5
