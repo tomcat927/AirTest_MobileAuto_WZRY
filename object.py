@@ -301,7 +301,7 @@ class DQWheel:
                     if not 主辅通信成功:
                         myrandom=self.readfile(filename)[0].strip()
                         if len(myrandom) <=1:
-                            sleep(1)
+                            sleep(20)
                             continue
                         lockfile=f".tmp.barrier.mom.{myrandom}.{name}.in.txt"
                         主辅通信成功=self.removefile(lockfile)
@@ -701,6 +701,10 @@ class wzry_task:
         self.结束游戏FILE="WZRY.ENDGAME.txt"
         self.Tool.removefile(self.结束游戏FILE)
         #
+        self.王者营地礼包=False
+        if ":5555" in self.移动端.LINK:
+            self.王者营地礼包=True
+        TimeECHO(self.prefix+f"本节点领取王者礼包:{self.王者营地礼包}")
 
         self.runinfo={}
         #一些图库
@@ -935,6 +939,7 @@ class wzry_task:
 
     def 单人进入人机匹配房间(self,times=1):
         if self.Tool.存在同步文件(): return True
+        self.移动端.打开APP()
         if "模拟战" in self.对战模式:
             TimeECHO(self.prefix+f"单人进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
@@ -1024,6 +1029,7 @@ class wzry_task:
         self.Tool.barriernode(self.mynode,self.totalnode,"结束组队进房间")
         return
     def 单人进入人机匹配房间_模拟战(self,times=1):
+        self.移动端.打开APP()
         if self.判断对战中(): self.结束人机匹配()
         if self.判断房间中(): return True
         self.进入大厅()
@@ -1066,6 +1072,7 @@ class wzry_task:
 
     def 进行人机匹配(self,times=1):
         if self.Tool.存在同步文件(): return True
+        self.移动端.打开APP()
         if times == 1:
             self.Tool.timelimit(timekey="进行人机匹配",limit=60*10,init=True)
         times=times+1
@@ -1300,18 +1307,22 @@ class wzry_task:
     #
     def 每日礼包(self):
         if self.Tool.存在同步文件(): return True
-        if self.mynode == 0:
-            if "android" in self.移动端.设备类型:
-                TimeECHO(self.prefix+"王者营地礼包开始")
-                王者营地=wzyd_libao()
-                王者营地.RUN()
-                TimeECHO(self.prefix+"王者营地礼包结束")
-            self.移动端.打开APP()
+        self.移动端.打开APP()
         self.每日礼包_每日任务()
         self.每日礼包_邮件礼包()
         self.每日礼包_妲己礼物()
+        if self.王者营地礼包:
+            self.移动端.关闭APP()
+            self.每日礼包_王者营地()
+            self.移动端.打开APP()
 
 
+    def 每日礼包_王者营地(self):
+        TimeECHO(self.prefix+"王者营地礼包开始")
+        王者营地=wzyd_libao()
+        王者营地.RUN()
+        TimeECHO(self.prefix+"王者营地礼包结束")
+            
     def 每日礼包_每日任务(self,times=1):
         if self.Tool.存在同步文件(): return True
         #
@@ -1539,7 +1550,11 @@ class wzry_task:
     def 健康系统(self):
         if exists(Template(r"tpl1689666921933.png", record_pos=(0.122, -0.104), resolution=(960, 540))):
             TimeECHO(self.prefix+"您已禁赛")
-            if self.组队模式: self.Tool.touch同步文件()
+            if self.组队模式:
+                self.Tool.touch同步文件()
+            else:
+                self.移动端.重启APP(60*10)
+
             return True
         return False
 
@@ -1576,13 +1591,12 @@ class wzry_task:
     def RUN(self):#程序入口
         runstep=0
         对战次数=0
-        self.移动端.打开APP()
-        #self.每日礼包()
         while True:
+            if not self.移动端.device: self.移动端.连接设备()
             if self.Tool.存在同步文件():#单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
-                if not self.移动端.device: self.移动端.连接设备()
-                self.移动端.关闭APP()
+                self.移动端.重启设备(sleeptime=self.mynode*10)
+                if self.王者营地礼包: self.每日礼包_王者营地()
                 if not self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=60*5): #后面出现健康系统警告也会直接回来的
                    continue
             #运行前统一冰行变凉
