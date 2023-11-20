@@ -86,6 +86,7 @@ class DQWheel:
         if not timekey in self.timedict.keys(): init = True
         if init:
             self.timedict[timekey]=time.time()
+            return False
         else:
             if time.time()-self.timedict[timekey] > limit:
                 self.timedict[timekey]=time.time()
@@ -249,9 +250,35 @@ class DQWheel:
             return True
         else:
             return False
+    def 必须同步等待成功(self,mynode,totalnode,同步文件="",sleeptime=60*5):
+        if totalnode < 2:
+            self.removefile(同步文件)
+            return True
+        if self.存在同步文件():#单进程各种原因出错时,多进程无法同步时
+            TimeECHO(self.prefix+"-."*20)
+            TimeECHO(self.prefix+"存在同步文件,需要同步程序")
+            #第一次尝试同步
+            self.同步等待(mynode,totalnode,同步文件,sleeptime)
+            #如果还存在说明同步等待失败,那么改成hh:waitminu*N时刻进行同步
+            while self.存在同步文件():
+                waitminu=int( min(59,5*totalnode) )
+                TimeErr(self.prefix+f"仍然存在同步文件,进行{waitminu}分钟一次的循环")
+                hour,minu,sec=self.time_getHMS()
+                minu=minu%waitminu
+                if minu > totalnode:
+                    sleepsec=(waitminu-minu)*60-sec
+                    TimeECHO(self.prefix+f"等待{sleepsec}s")
+                    sleep()
+                    continue
+                if self.同步等待(mynode,totalnode,同步文件,10): break
+        TimeECHO(self.prefix+"-+"*20)
+        return not self.存在同步文件()
+
     def 同步等待(self,mynode,totalnode,同步文件="",sleeptime=60*5):
         同步文件=同步文件 if len(同步文件) > 1 else self.辅助同步文件
-        if totalnode < 2: return True
+        if totalnode < 2:
+            self.removefile(同步文件)
+            return True
         ionode= mynode == 0 or totalnode == 1
         self.filelist.append(同步文件)
         #同步等待是为了处理,程序因为各种原因无法同步,程序出粗.
@@ -268,8 +295,10 @@ class DQWheel:
         同步成功=True
         name=同步文件
         全部通信成功文件=同步文件+".同步完成.txt"
+        全部通信失败文件=同步文件+".同步失败.txt"
         self.filelist.append(全部通信成功文件)
         if ionode: self.removefile(全部通信成功文件)
+        if ionode: self.removefile(全部通信失败文件)
         for i in np.arange(1,totalnode):
             if mynode > 0 and mynode != i: continue
             sleep(mynode*5)
@@ -286,43 +315,52 @@ class DQWheel:
                 self.touchfile(lockfile)
                 self.filelist.append(filename)
                 self.filelist.append(lockfile)
+                #开始通信循环
                 for sleeploop in np.arange(60*5):
                     if not os.path.exists(lockfile):
                         主辅通信成功=True
                         break
                     sleep(1)
+                #判断通信成功与否
                 同步成功=同步成功 and 主辅通信成功
                 if 同步成功:
                     TimeECHO(prefix+f"同步{i}成功")
                 else:
                     TimeECHO(prefix+f"同步{i}失败")
+                    self.touchfile(全部通信失败文件)
+                    return False
                 continue
             else:
-                #辅助节点,找到特定
-                for sleeploop in np.arange(60*(5+totalnode*5)):
+                同步成功=False
+                #辅助节点,找到特定,就循环5分钟
+                for sleeploop in np.arange(60*5*(totalnode-1)):
+                    #主辅通信循环
                     if not 主辅通信成功:
                         myrandom=self.readfile(filename)[0].strip()
                         if len(myrandom) <=1:
-                            sleep(20)
+                            sleep(1)
                             continue
                         lockfile=f".tmp.barrier.mom.{myrandom}.{name}.in.txt"
                         主辅通信成功=self.removefile(lockfile)
-                        同步成功=False
                     else:
                         TimeECHO(prefix+f"正在寻找全部通信成功文件>{全部通信成功文件}<")
                         if os.path.exists(全部通信成功文件):
                             同步成功=True
                             break
-                        sleep(5)
+                        if os.path.exists(全部通信失败文件):
+                            TimeErr(prefix+"监测到全部通信失败文件")
+                            return False
                     sleep(1)
         #到此处完成
         #因为是逐一进行同步的,所以全部通信成功文件只能由最后一个node负责删除
+        同步成功=同步成功 and not os.path.exists(全部通信失败文件)
         if 同步成功:
             TimeECHO(prefix+"同步等待成功")
             if ionode:
                 self.clean文件()
                 self.touchfile(全部通信成功文件)
                 self.removefile(同步文件)
+                self.removefile(全部通信失败文件)
         else:
             TimeErr(prefix+"同步等待失败")
             return False
@@ -330,7 +368,7 @@ class DQWheel:
         TimeECHO(self.prefix+f"需要sleep{sleeptime}")
         sleep(sleeptime)
         self.barriernode(mynode,totalnode,"同步等待结束")
-        return True
+        return not os.path.exists(同步文件)
     
     def time_getHM(self):
         current_time=datetime.now(eastern_eight_tz)
@@ -576,25 +614,29 @@ class wzyd_libao:
       times=times+1
       if times > 10: return False
       战绩图标=Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960))
-      if not self.Tool.existsTHENtouch(战绩图标,self.prefix+"战绩图标"): return self.体验货币(times)
+      if not self.Tool.existsTHENtouch(战绩图标,self.prefix+"战绩图标"): return self.体验服礼物(times)
       图标=Template(r"tpl1699873841208.png", record_pos=(-0.441, -0.809), resolution=(540, 960))
-      if not self.Tool.existsTHENtouch(图标,self.prefix+"集合"): return self.体验货币(times)
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"集合"): return self.体验服礼物(times)
       图标=Template(r"tpl1699873913813.png", record_pos=(-0.374, -0.043), resolution=(540, 960))
-      if not self.Tool.existsTHENtouch(图标,self.prefix+"体验服"): return self.体验货币(times)
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"体验服"): return self.体验服礼物(times)
       图标=Template(r"tpl1699873941409.png", record_pos=(0.387, -0.128), resolution=(540, 960))
-      if not self.Tool.existsTHENtouch(图标,self.prefix+"进入体验服"): return self.体验货币(times)
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"进入体验服"): return self.体验服礼物(times)
       图标=Template(r"tpl1699873949811.png", record_pos=(-0.006, 0.176), resolution=(540, 960))
-      if not self.Tool.existsTHENtouch(图标,self.prefix+"奖励兑换"): return self.体验货币(times)
+      if not self.Tool.existsTHENtouch(图标,self.prefix+"奖励兑换"): return self.体验服礼物(times)
       #
       奖励页面=Template(r"tpl1699874011609.png", record_pos=(0.165, 0.48), resolution=(540, 960))
       pos=False
       for i in range(10):
           sleep(10)
           pos=exists(奖励页面)
-          if pos: break
+          if pos:
+              break
+          else:
+            TimeECHO(self.prefix+f"寻找奖励兑换页面中{i}")
+              
       if not pos:
          TimeECHO(self.prefix+"没进入奖励兑换页面")
-         return self.体验货币(times)
+         return self.体验服礼物(times)
       #
       swipe(pos, vector=[-0.0372, -0.5912])
       碎片奖励=Template(r"tpl1699874679212.png", record_pos=(-0.233, 0.172), resolution=(540, 960),threshold=0.9)
@@ -602,11 +644,14 @@ class wzyd_libao:
       for i in range(10):
           sleep(2)
           奖励位置=exists(碎片奖励)
-          if 奖励位置: break
+          if 奖励位置:
+              break
+          else:
+            TimeECHO(self.prefix+f"寻找碎片奖励中{i}")
           swipe(pos, vector=[-0.0372, -0.5912])
       if not 奖励位置:
          TimeECHO(self.prefix+"没找到体验币")
-         return self.体验货币(times)
+         return self.体验服礼物(times)
       #
       touch(奖励位置)
       成功领取=Template(r"tpl1699874950410.png", record_pos=(-0.002, -0.006), resolution=(540, 960))
@@ -663,7 +708,10 @@ class wzyd_libao:
       for i in range(10):
           sleep(10)
           pos=exists(兑换页面)
-          if pos: break
+          if pos:
+              break
+          else:
+            TimeECHO(self.prefix+f"寻找兑换页面中{i}")
       if not pos:
          TimeECHO(self.prefix+"没进入营地币兑换页面")
          return self.营地币兑换碎片(times)
@@ -673,7 +721,10 @@ class wzyd_libao:
       for i in range(10):
           sleep(2)
           奖励位置=exists(碎片奖励)
-          if 奖励位置: break
+          if 奖励位置:
+              break
+          else:
+            TimeECHO(self.prefix+f"寻找营地货换碎片中{i}")
           swipe(pos, vector=[0.0156, -0.4067])
       if not 奖励位置:
          TimeECHO(self.prefix+"没找到营地币")
@@ -710,7 +761,7 @@ class wzry_task:
         if self.房主: self.Tool.init_clean()
         if self.totalnode > 1:
             self.Tool.touch同步文件()
-            self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=10)
+            self.Tool.必须同步等待成功(self.mynode,self.totalnode,sleeptime=10)
         self.Tool.barriernode(self.mynode,self.totalnode,"WZRYinit")
         #.
         self.结束游戏FILE="WZRY.ENDGAME.txt"
@@ -909,6 +960,11 @@ class wzry_task:
         用户协议同意=Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540),threshold=0.9)
         self.Tool.existsTHENtouch(用户协议同意,"用户协议同意")
         #
+        if self.健康系统():
+            if self.组队:
+                self.Tool.touch同步文件()
+                sleep(30)
+            return True
         #动态下载资源提示
         回归礼物=Template(r"tpl1699607355777.png", resolution=(1136, 640))
         if exists(回归礼物):
@@ -1137,6 +1193,8 @@ class wzry_task:
         if not self.判断房间中():
             self.Tool.touch同步文件()
             TimeErr(self.prefix+":不在房间中,无法进行匹配")
+        #这里需要barrier一下,不然下面主节点如果提前点击领匹配,这里可能无法判断
+        self.Tool.barriernode(self.mynode,self.totalnode,"人机匹配预判断房间")
         #
         self.Tool.timelimit(timekey="确认匹配",limit=60*1,init=True)
         self.Tool.timelimit(timekey="超时确认匹配",limit=60*5,init=True)
@@ -1333,6 +1391,7 @@ class wzry_task:
                 while self.判断对战中(True): #开始处理准备结束
                     sleep(10)
                     sleeploop=sleeploop+1
+                    if self.Tool.存在同步文件(): return True
                     if sleeploop > 20: break #虚拟机王者程序卡住了
                 #++++++滴哦
                 for loop in range(30):#等待时间太长
@@ -1370,18 +1429,86 @@ class wzry_task:
     #
     def 每日礼包(self):
         if self.Tool.存在同步文件(): return True
-        self.移动端.打开APP()
-        self.每日礼包_每日任务()
-        self.每日礼包_邮件礼包()
-        self.每日礼包_妲己礼物()
-        if self.王者营地礼包:
-            self.移动端.关闭APP()
-            self.每日礼包_王者营地()
+        if self.Tool.timelimit("领游戏礼包",limit=60*60*3,init=False):
             self.移动端.打开APP()
+            self.每日礼包_每日任务()
+            self.每日礼包_邮件礼包()
+            self.每日礼包_妲己礼物()
+            self.战队礼包()
+            self.友情礼包()
+            TimeECHO(self.prefix+"钻石夺宝没有代码需求,攒够了一起转")
+        else:
+            TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
+        if self.王者营地礼包:
+            self.每日礼包_王者营地()
+            
+            
+
+    def 战队礼包(self):
+        self.进入大厅()
+        #
+        #战队礼包
+        TimeECHO(self.prefix+f":战队礼包")
+        self.Tool.existsTHENtouch(Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540))  ,"战队"); sleep(10)
+        self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540))  ,"展开战队"); sleep(10)
+        self.Tool.existsTHENtouch(Template(r"tpl1700403174640.png", record_pos=(0.079, 0.236), resolution=(960, 540))  ,"战队商店"); sleep(10)
+        self.Tool.existsTHENtouch(Template(r"tpl1700403186636.png", record_pos=(0.158, -0.075), resolution=(960, 540),target_pos=8) ,"英雄碎片"); sleep(10)
+        self.Tool.existsTHENtouch(Template(r"tpl1700403207652.png", record_pos=(0.092, 0.142), resolution=(960, 540))  ,"领取"); sleep(10)
+        self.Tool.existsTHENtouch(Template(r"tpl1700403218837.png", record_pos=(0.098, 0.117), resolution=(960, 540))  ,"确定"); sleep(10)
+        return
+    def 友情礼包(self):
+        self.进入大厅()
+        #
+        #友情礼包,虽然每次只领取了一个,但是每周/日领取了多次,一周内是可以领完上限的
+        TimeECHO(self.prefix+f":友情礼包")
+        TimeECHO(self.prefix+f":对战友情币")
+        if not self.Tool.existsTHENtouch(Template(r"tpl1700454802287.png", record_pos=(0.242, -0.251), resolution=(960, 540))) : return; sleep(5)       
+        if not self.Tool.existsTHENtouch(Template(r"tpl1700454817255.png", record_pos=(-0.447, 0.166), resolution=(960, 540))) : return; sleep(5)       
+        self.Tool.existsTHENtouch(Template(r"tpl1700454833319.png", record_pos=(0.416, 0.011), resolution=(960, 540)))
+        self.Tool.existsTHENtouch(Template(r"tpl1700454842665.png", record_pos=(0.001, 0.163), resolution=(960, 540)))
+        #奖励兑换
+        if not self.Tool.existsTHENtouch(Template(r"tpl1700454852769.png", record_pos=(-0.332, 0.191), resolution=(960, 540))) : return; sleep(5)
+        #积分
+        if self.Tool.existsTHENtouch(Template(r"tpl1700454863912.png", record_pos=(-0.124, -0.004), resolution=(960, 540))): 
+            sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454872767.png", record_pos=(0.32, 0.228), resolution=(960, 540))) : sleep(5)  
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540))): sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)))  : sleep(5)
+        #碎片
+        if self.Tool.existsTHENtouch(Template(r"tpl1700454908937.png", record_pos=(0.039, 0.004), resolution=(960, 540))):
+            sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454916324.png", record_pos=(0.317, 0.226), resolution=(960, 540))): sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540))): sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)))  : sleep(5)    
+        #碎片
+        if self.Tool.existsTHENtouch(Template(r"tpl1700454935340.png", record_pos=(-0.28, 0.153), resolution=(960, 540)))  :
+            sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454947514.png", record_pos=(0.321, 0.227), resolution=(960, 540))) : sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540))) : sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)))   : sleep(5)  
+        #铭文 
+        if self.Tool.existsTHENtouch(Template(r"tpl1700455034567.png", record_pos=(-0.123, 0.155), resolution=(960, 540))) :     
+            sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700455039770.png", record_pos=(0.321, 0.226), resolution=(960, 540)))  : sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540))) : sleep(5)      
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)))   : sleep(5)      
+        #包箱
+        if self.Tool.existsTHENtouch(Template(r"tpl1700454970340.png", record_pos=(-0.12, -0.154), resolution=(960, 540))) :      
+            sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454978914.png", record_pos=(0.32, 0.228), resolution=(960, 540)))  : sleep(5)     
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)))   : sleep(5)    
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540))): sleep(5)       
+
+
+
 
 
     def 每日礼包_王者营地(self):
         TimeECHO(self.prefix+"王者营地礼包开始")
+        if not self.Tool.timelimit("领营地礼包",limit=60*60*3,init=False):
+            TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
+            return
+        self.移动端.关闭APP()
         if "ios" in self.移动端.设备类型:
             APPID="com.tencent.smobagamehelper"
         elif "android" in self.移动端.设备类型:
@@ -1390,8 +1517,12 @@ class wzry_task:
             TimeErr(self.prefix+":无法判断设备类型")
             return
         王者营地=wzyd_libao(APPID=APPID)
-        王者营地.RUN()
-        TimeECHO(self.prefix+"王者营地礼包结束")
+        try:
+            王者营地.RUN()
+            TimeErr(self.prefix+"王者营地礼包领取成功")
+        except:
+            TimeErr(self.prefix+"王者营地礼包领取失败")
+        self.移动端.打开APP()
             
     def 每日礼包_每日任务(self,times=1):
         if self.Tool.存在同步文件(): return True
@@ -1441,9 +1572,9 @@ class wzry_task:
         if self.Tool.存在同步文件(): return True
         #
         if times == 1:
-            self.Tool.timelimit(timekey="领任务礼包",limit=60*5,init=True)
+            self.Tool.timelimit(timekey="领邮件礼包",limit=60*5,init=True)
         else:
-            if self.Tool.timelimit(timekey="领任务礼包",limit=60*5,init=False):
+            if self.Tool.timelimit(timekey="领邮件礼包",limit=60*5,init=False):
                 TimeErr(self.prefix+"领任务礼包超时")
                 return False
         if times > 10: return False
@@ -1621,7 +1752,7 @@ class wzry_task:
             if not exists(关闭钱袋子) and not exists(钱袋子): return False
             if self.Tool.timelimit(timekey="endgame",limit=60*20,init=False): break
             sleep(10)
-
+            if self.Tool.存在同步文件(): return True
         return 正在对战
 
     def 健康系统(self):
@@ -1668,21 +1799,21 @@ class wzry_task:
         对战次数=0
         while True:
             if not self.移动端.device: self.移动端.连接设备()
+            #如果多次
             if self.Tool.存在同步文件():#单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
+                self.移动端.关闭APP()
+                if self.王者营地礼包:self.每日礼包_王者营地()
+                self.Tool.必须同步等待成功(self.mynode,self.totalnode,sleeptime=60*5)
+                #
                 self.移动端.重启设备(sleeptime=self.mynode*10)
-                if self.王者营地礼包: self.每日礼包_王者营地()
-                if not self.Tool.同步等待(self.mynode,self.totalnode,sleeptime=60*5): #后面出现健康系统警告也会直接回来的
-                   continue
-            #运行前统一冰行变凉
-            runstep=runstep+1
-            self.runinfo["runstep"]=runstep
-            self.runinfo=self.Tool.bcastvar(self.mynode,self.totalnode,var=self.runinfo,name="bcastruninfo")
-            runstep=self.runinfo["runstep"]
-            TimeECHO(self.prefix+f"运行次数{runstep}")
             #
+            #礼包
+            if runstep%5 == 0: #实际礼包还有1h间隔限制,这里取的runstep小没事
+                self.每日礼包()
             #运行时间检测
             startclock=5;endclock=23 #服务器5点刷新礼包和信誉积分等
+            if self.移动端.实体终端 and self.totalnode == 1: endclock=19
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
             while hour >= endclock or hour < startclock:
@@ -1706,20 +1837,25 @@ class wzry_task:
             if self.Tool.存在同步文件(): continue
             self.Tool.barriernode(self.mynode,self.totalnode,"准备进入战斗循环")
             #
-            #礼包
-            if runstep%10 == 0:
-                self.每日礼包()
+
             #
             if self.Tool.存在同步文件(): continue
+            #
+            runstep=runstep+1
+            #运行前统一冰行变凉
+            self.runinfo["runstep"]=runstep
+            self.runinfo=self.Tool.bcastvar(self.mynode,self.totalnode,var=self.runinfo,name="bcastruninfo")
+            runstep=self.runinfo["runstep"]
+            TimeECHO(self.prefix+f"运行次数{runstep}")
             #
             #开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
             if self.Tool.存在同步文件(): continue
             #
-            if self.移动端.实体终端: 
+            if self.移动端.实体终端 and self.Tool.timelimit("休息手机",limit=60*30,init=False):
                 TimeECHO(self.prefix+":实体终端,休息设备")
                 #self.移动端.关闭APP()
-                sleep(60*0.5)
+                sleep(60*2)
         
 
 
@@ -1751,6 +1887,7 @@ class auto_airtest:
             LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
             LINK_dict[totalnode-1]="ios:///http://169.254.83.56:8100"
             self.debug = False #仅用于设置ios连接,程序还是正常运行
+        #使用端口映射成8200后, usb接口老频繁失灵，怀疑与这个有关,还是采用默认的方式
         #if "ios" in LINK_dict[0]: os.system("tidevice wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang1.xctrunner > tidevice.result.txt 2>&1 &")
         #
         self.LINK=LINK_dict[mynode]
@@ -1809,7 +1946,8 @@ if __name__ == "__main__":
             p.join()
 
 
-    
+
+
 
 
 

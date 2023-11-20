@@ -2,12 +2,14 @@
 面向对象的AirTest多进程框架
 * 提供了多进程支持,多个基于文件的同步广播工具
 * AirTest设备控制代码,重启APP,重启设备端(androidcontain/Linux, BlueStack/Windows)
-* 仅需替换`self.APPID`和`TASK=wzrj_task(self.移动端,"5v5匹配",0)`即可对新APP进行分适配
+* 仅需替换`self.APPID`和`TASK=wzrj_task(self.移动端,"5v5匹配",0)`即可对新APP进行适配
 * ISO端搭建和后续更新和学习AirTest也许会在这里[Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
 
 ## 致谢
 第一次尝试进行面向对象编程,还有很多面向过程的影子.
+
 本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目,是我学习AirTest脚本的主要参考.
+
 本脚本的历史版本[WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11),[WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
 
 ## 控制端运行方式
