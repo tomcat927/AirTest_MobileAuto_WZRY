@@ -4,6 +4,7 @@
 * AirTest设备控制代码,重启APP,重启设备端(androidcontain/Linux, BlueStack/Windows)
 * 仅需替换`self.APPID`和`TASK=wzrj_task(self.移动端,"5v5匹配",0)`即可对新APP进行适配
 * ISO端搭建和后续更新和学习AirTest也许会在这里[Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+* 全程自动运行,无人值守. 包括自动启动虚拟机/docker,自动组队对战领礼包
 
 ## 致谢
 第一次尝试进行面向对象编程,还有很多面向过程的影子.
@@ -69,3 +70,6 @@ python -u object.py -n 2>&1 | tee result
 - Android
 - IOS(测试通过 15.8,16.2)
 
+
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=cndaqiang/AirTest_MobileAuto_WZRY&type=Date)](https://star-history.com/#cndaqiang/AirTest_MobileAuto_WZRY&Date)

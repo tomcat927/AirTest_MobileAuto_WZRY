@@ -305,13 +305,13 @@ class DQWheel:
             if not os.path.exists(同步文件): return True
             #
             主辅通信成功=False
-            filename=f".tmp.barrier.mom.{i}.{name}.in.txt"
+            filename=f".tmp.barrier.{i}.{name}.in.txt"
             if ionode:
                 hour,minu,sec=self.time_getHMS()
                 myrandom=str(random.randint(totalnode+100, 500))+f"{hour}{minu}{sec}"
                 self.removefile(filename)
                 self.touchfile(filename,content=myrandom)
-                lockfile=f".tmp.barrier.mom.{myrandom}.{name}.in.txt"
+                lockfile=f".tmp.barrier.{myrandom}.{name}.in.txt"
                 self.touchfile(lockfile)
                 self.filelist.append(filename)
                 self.filelist.append(lockfile)
@@ -340,7 +340,7 @@ class DQWheel:
                         if len(myrandom) <=1:
                             sleep(1)
                             continue
-                        lockfile=f".tmp.barrier.mom.{myrandom}.{name}.in.txt"
+                        lockfile=f".tmp.barrier.{myrandom}.{name}.in.txt"
                         主辅通信成功=self.removefile(lockfile)
                     else:
                         TimeECHO(prefix+f"正在寻找全部通信成功文件>{全部通信成功文件}<")
@@ -736,30 +736,33 @@ class wzyd_libao:
 class wzry_task:
 #备注
 #新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
-    def __init__(self,移动端,对战模式,shiftnode=-1,debug=False):
+    def __init__(self,移动端,对战模式,shiftnode=-1,debug=False,限时组队时间=14):
         self.移动端=移动端
         self.mynode=self.移动端.mynode
         self.totalnode=self.移动端.totalnode
         self.组队模式=self.totalnode > 1
+        self.房主=self.mynode == 0 or self.totalnode == 1
         self.prefix=f"({self.mynode})"
         #
-        self.房主=self.mynode == 0 or self.totalnode == 1
-        self.对战时间=[5,24] #单位hour
         self.对战结束返回房间=True
-        self.异常终止=False
-        self.异常信息=None
         self.对战模式=对战模式 #"5v5匹配" or "王者模拟战"
         self.debug=debug #本地调试模式,加速,测试所有功能
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
         self.选择人机模式=True
-        self.青铜段位=False
+        self.青铜段位=os.path.exists("青铜模式.txt")
+        #
+        self.对战时间=[4.5,23] #单位hour,对战时间取4.5是为了让程序在4点时启动领取昨日没领完的礼包
+        #当hour小于此数字时才是组队模式
+        self.限时组队时间=限时组队时间
+        self.totalnode_bak=self.totalnode
+
         #<难度3蓝色,4紫色,5红色
         self.选择英雄=True
         #
         self.Tool=DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt",
                           mynode=self.mynode,totalnode=self.totalnode,容器优化=self.移动端.容器优化)
         if self.房主: self.Tool.init_clean()
-        if self.totalnode > 1:
+        if self.组队模式:
             self.Tool.touch同步文件()
             self.Tool.必须同步等待成功(self.mynode,self.totalnode,sleeptime=10)
         self.Tool.barriernode(self.mynode,self.totalnode,"WZRYinit")
@@ -772,7 +775,7 @@ class wzry_task:
             self.王者营地礼包=True
         if "ios" in self.移动端.LINK:
             self.王者营地礼包=True
-        TimeECHO(self.prefix+f"本节点领取王者礼包:{self.王者营地礼包}")
+        TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
 
         self.runinfo={}
         #一些图库
@@ -887,7 +890,7 @@ class wzry_task:
         times=times+1
         #
         if self.健康系统():
-            if self.组队:
+            if self.组队模式:
                 self.Tool.touch同步文件()
                 sleep(30)
                 return True
@@ -898,7 +901,7 @@ class wzry_task:
         if times < 15 and times%4 == 0:
             self.移动端.重启APP(10)
         if times > 15:
-            if self.组队:
+            if self.组队模式:
                 TimeErr(self.prefix+"进入大厅times太多,创建同步文件")
                 self.Tool.touch同步文件()
                 return True
@@ -938,9 +941,7 @@ class wzry_task:
                 self.移动端.重启APP(60*60*4)
             else:
                 TimeErr(self.prefix+"需要重新登录:创建同步文件")
-                self.Tool.touch同步文件()
-                self.异常终止=True
-                self.异常信息="需要重新登录"
+                if self.组队模式: self.Tool.touch同步文件()
                 return
         #
         #
@@ -961,7 +962,7 @@ class wzry_task:
         self.Tool.existsTHENtouch(用户协议同意,"用户协议同意")
         #
         if self.健康系统():
-            if self.组队:
+            if self.组队模式:
                 self.Tool.touch同步文件()
                 sleep(30)
             return True
@@ -1063,7 +1064,7 @@ class wzry_task:
         禁赛提示=Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
         if exists(禁赛提示):
             TimeECHO(self.prefix+"禁赛提示无法进行匹配")
-            self.Tool.touch同步文件()
+            if self.组队模式: self.Tool.touch同步文件()
             return True
         #
         #段位限制
@@ -1076,8 +1077,8 @@ class wzry_task:
                 self.Tool.existsTHENtouch(段位,"选择段位",savepos=False)
                 self.Tool.existsTHENtouch(开始练习,"开始练习")
                 self.Tool.touchfile("青铜模式.txt")
-                self.Tool.touch同步文件()
-                if self.组队模式:
+                if self.组队模式: 
+                    self.Tool.touch同步文件()
                     return
                 else:
                     return self.单人进入人机匹配房间(times)
@@ -1089,7 +1090,7 @@ class wzry_task:
                 if self.Tool.existsTHENtouch(开始练习,"开始练习"): sleep(10)
                 if self.Tool.timelimit(timekey="单人进入人机匹配房间",limit=60*10,init=False):
                     TimeErr(self.prefix+":单人进入人机匹配房间超时,touch同步文件")
-                    self.Tool.touch同步文件()
+                    if self.组队模式: self.Tool.touch同步文件()
                     return True
             return self.单人进入人机匹配房间(times)
         return True
@@ -1108,7 +1109,7 @@ class wzry_task:
             if os.path.exists("青铜模式.txt"):
                 self.青铜段位=True
                 TimeECHO(self.prefix+":有的节点有问题,只能进行青铜对战,重新设置对战模式")
-                self.Tool.touch同步文件()
+                if self.组队模式: self.Tool.touch同步文件()
                 return
         if not self.房主: sleep(self.mynode*10)
         self.Tool.timelimit(timekey=f"组队模式进房间{self.mynode}",limit=60*5,init=True)
@@ -1191,7 +1192,7 @@ class wzry_task:
             self.Tool.timelimit(timekey="进行人机匹配",limit=60*10,init=True)
         times=times+1
         if not self.判断房间中():
-            self.Tool.touch同步文件()
+            if self.组队模式: self.Tool.touch同步文件()
             TimeErr(self.prefix+":不在房间中,无法进行匹配")
         #这里需要barrier一下,不然下面主节点如果提前点击领匹配,这里可能无法判断
         self.Tool.barriernode(self.mynode,self.totalnode,"人机匹配预判断房间")
@@ -1218,7 +1219,7 @@ class wzry_task:
                 if 队友确认5v5匹配:
                     TimeErr(self.prefix+":模拟战误入5v5")
                     self.进入大厅()
-                    self.Tool.touch同步文件()
+                    if self.组队模式: self.Tool.touch同步文件()
                     return
                 队友确认匹配=self.判断对战中()
                 if 队友确认匹配:
@@ -1292,7 +1293,7 @@ class wzry_task:
                 continue
             if self.Tool.timelimit(timekey="结束人机匹配",limit=60*15,init=False):
                 TimeErr(self.prefix+"结束人机匹配时间超时")
-                self.Tool.touch同步文件()
+                if self.组队模式: self.Tool.touch同步文件()
                 return self.进入大厅()
             if self.健康系统() or self.判断大厅中():
                 TimeErr(self.prefix+"结束人机匹配:健康系统or处在大厅")
@@ -1762,7 +1763,6 @@ class wzry_task:
                 self.Tool.touch同步文件()
             else:
                 self.移动端.重启APP(60*10)
-
             return True
         return False
 
@@ -1812,10 +1812,22 @@ class wzry_task:
             if runstep%5 == 0: #实际礼包还有1h间隔限制,这里取的runstep小没事
                 self.每日礼包()
             #运行时间检测
-            startclock=5;endclock=23 #服务器5点刷新礼包和信誉积分等
+            startclock=self.对战时间[0];endclock=self.对战时间[1] #服务器5点刷新礼包和信誉积分等
             if self.移动端.实体终端 and self.totalnode == 1: endclock=19
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
+            #
+            #当hour小于此数字时才是组队模式
+            if hour >  self.限时组队时间 and not self.Tool.存在同步文件() and runstep > 0 and self.totalnode > 1:
+                TimeECHO(self.prefix+"限时进入单人模式")
+                self.totalnode=1
+                self.移动端.关闭APP()
+            if hour <  self.限时组队时间:
+                self.totalnode=self.totalnode_bak
+            self.组队模式=self.totalnode > 1
+            if self.组队模式: TimeECHO(self.prefix+"组队模式")
+            self.房主=self.mynode == 0 or self.totalnode == 1
+            #
             while hour >= endclock or hour < startclock:
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.每日礼包()
@@ -1836,8 +1848,6 @@ class wzry_task:
             #
             if self.Tool.存在同步文件(): continue
             self.Tool.barriernode(self.mynode,self.totalnode,"准备进入战斗循环")
-            #
-
             #
             if self.Tool.存在同步文件(): continue
             #
@@ -1900,8 +1910,12 @@ class auto_airtest:
             return
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
-        TASK=wzry_task(self.移动端,对战模式,shiftnode=-1,debug=self.debug)
-        TASK.RUN()
+        while True:
+            try:
+                TASK=wzry_task(self.移动端,对战模式,shiftnode=-1,debug=self.debug)
+                TASK.RUN()
+            except:
+                TimeErr(self.prefix)
         #
     def printINFO(self):
         TimeECHO(self.prefix+f"{self.prefix}:LINK={self.LINK}")
@@ -1924,9 +1938,12 @@ if __name__ == "__main__":
         try:
             para2=int(sys.argv[1])
         except:
-            para2=1
-        mynode=0;totalnode=abs(para2)
-        multi_run = para2 < 0
+            para2=0
+        if para2 >= 0:
+            mynode=para2;totalnode=1
+        else:
+            mynode=0;totalnode=abs(para2)
+            multi_run = True
     else:#组队模式,但是自己单进程跑
         mynode=int(sys.argv[1])
         totalnode=int(sys.argv[2])
