@@ -686,7 +686,7 @@ class deviceOB:
         except:
             TimeErr(self.prefix+f"{self.LINK}:链接失败")
             if "ios" in self.设备类型:
-                TimeECHO("重新插拔数据线")
+                TimeECHO(self.prefix+"重新插拔数据线")
         #
         if times <= timesMax:
             TimeECHO(self.prefix+f"{self.LINK}:链接失败,重启设备再次连接")
@@ -738,10 +738,25 @@ class deviceOB:
                 TimeErr(self.prefix+f"启动失败")
                 return False
     def 关闭设备(self):
+        #ios
         if "ios" in self.设备类型:
-            TimeECHO(self.prefix+f"IOS暂不支持关闭")
-            sleep(10)
-            return True
+            if "mac" in self.控制端 or "127.0.0.1" in self.LINK:
+                TimeECHO(self.prefix+f"测试本地IOS关闭中")
+                command="tidevice reboot"
+            else:
+                TimeECHO(self.prefix+f"当前模式无法关闭IOS")
+                return False
+            try:
+                exit_code = os.system(command)
+                if exit_code == 0:
+                    TimeECHO(self.prefix+f"启动成功")
+                    return True
+                else:
+                    TimeECHO(self.prefix+f"启动失败")
+                    return False
+            except:
+                TimeErr(self.prefix+f"启动失败")
+                return False
         #android
         try:
             if "mac" in self.控制端 or "127.0.0.1" not in self.LINK:
@@ -1006,7 +1021,7 @@ class wzry_task:
         self.选择人机模式=True
         self.青铜段位=os.path.exists("青铜模式.txt")
         #
-        self.对战时间=[4.5,25] #单位hour,对战时间取4.5是为了让程序在4点时启动领取昨日没领完的礼包
+        self.对战时间=[5.1,23] #单位hour,对战时间取4.5是为了让程序在4点时启动领取昨日没领完的礼包
         #当hour小于此数字时才是组队模式
         self.限时组队时间=限时组队时间
         self.totalnode_bak=self.totalnode
@@ -1102,6 +1117,8 @@ class wzry_task:
         关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
         关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540),threshold=0.9))
         关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
+        关闭按钮.append(Template(r"tpl1700918628072.png", record_pos=(-0.059, 0.211), resolution=(960, 540)))
+
         for i in 关闭按钮:
             self.Tool.LoopTouch(i,f"关闭按钮{i}",loop=3,savepos=False)
         #
@@ -1201,6 +1218,7 @@ class wzry_task:
                 self.Tool.touch同步文件()
                 return True
             else:
+               self.touch同步文件(self.独立同步文件)
                self.移动端.关闭APP()
                return False
 
@@ -1244,16 +1262,14 @@ class wzry_task:
         #这里需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540),threshold=0.9)):
             TimeECHO(self.prefix+"需要重新登录")
-            if self.移动端.容器优化: 
-                TimeECHO(self.prefix+"需要重新登录")
-                self.移动端.重启APP(60*60*4)
+            hour,minu=self.Tool.time_getHM()
+            leftmin=max((23-hour)*60-minu,30)
+            if self.组队模式:
+                TimeErr(self.prefix+"需要重新登录:创建同步文件")
+                self.Tool.touch同步文件()
             else:
-                if self.组队模式:
-                    TimeErr(self.prefix+"需要重新登录:创建同步文件")
-                    self.Tool.touch同步文件()
-                else:
-                    TimeECHO(self.prefix+"需要重新登录")
-                    self.移动端.重启APP(60*60*4)
+                TimeECHO(self.prefix+"需要重新登录")
+                self.移动端.重启APP(60*leftmin)
         #
         #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
@@ -1412,6 +1428,7 @@ class wzry_task:
                 if self.Tool.existsTHENtouch(开始练习,"开始练习"): sleep(10)
                 if self.Tool.timelimit(timekey="单人进入人机匹配房间",limit=60*10,init=False):
                     TimeErr(self.prefix+":单人进入人机匹配房间超时,touch同步文件")
+                    if not self.组队模式: self.touch同步文件(self.独立同步文件)
                     if self.组队模式: self.Tool.touch同步文件()
                     return True
             return self.单人进入人机匹配房间(times)
@@ -1621,6 +1638,9 @@ class wzry_task:
                 if self.组队模式:
                     TimeErr(self.prefix+"结束人机匹配时间超时 and 组队touch同步文件")
                     self.Tool.touch同步文件()
+                    return
+                else:
+                    self.touch同步文件(self.独立同步文件)
                     return
                 return self.进入大厅()
             if self.判断对战中():
@@ -2200,7 +2220,7 @@ class wzry_task:
         if self.Tool.存在同步文件(): return True
         #
         if self.mynode == 0: self.Tool.clean文件()
-        if self.房主: TimeECHO("<-"*10)
+        if self.房主: TimeECHO(self.prefix+"<-"*10)
         #
     def RUN(self):#程序入口
         runstep=0
@@ -2308,7 +2328,7 @@ class wzry_task:
                 if not connect_status(): continue
                 self.每日礼包()
             #
-            if self.移动端.实体终端 and self.Tool.timelimit("休息手机",limit=60*30,init=False):
+            if self.移动端.实体终端 and self.Tool.timelimit("休息手机",limit=60*60,init=False):
                 TimeECHO(self.prefix+":实体终端,休息设备")
                 #self.移动端.关闭APP()
                 sleep(60*2)
