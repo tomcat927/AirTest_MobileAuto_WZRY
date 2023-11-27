@@ -712,7 +712,7 @@ class deviceOB:
                     #
             except:
                 TimeECHO(self.prefix+f"IOS重启失败")
-            sleep(10)
+            sleep(20)
             return True
         #android
         try:
@@ -750,6 +750,7 @@ class deviceOB:
                 exit_code = os.system(command)
                 if exit_code == 0:
                     TimeECHO(self.prefix+f"启动成功")
+                    sleep(60)
                     return True
                 else:
                     TimeECHO(self.prefix+f"启动失败")
@@ -1264,6 +1265,7 @@ class wzry_task:
             TimeECHO(self.prefix+"需要重新登录")
             hour,minu=self.Tool.time_getHM()
             leftmin=max((23-hour)*60-minu,30)
+            leftmin=min(leftmin,60)
             if self.组队模式:
                 TimeErr(self.prefix+"需要重新登录:创建同步文件")
                 self.Tool.touch同步文件()
@@ -2249,7 +2251,7 @@ class wzry_task:
                 if self.王者营地礼包 and  not connect_status(): self.每日礼包_王者营地()
                 self.Tool.必须同步等待成功(mynode=self.mynode,totalnode=self.totalnode,
                                     同步文件=self.Tool.辅助同步文件,sleeptime=60*5)
-                self.移动端.重启设备(sleeptime=self.mynode*10)
+                self.移动端.重启APP(sleeptime=self.mynode*10+60)
             #------------------------------------------------------------------------------
             #现在所有进程都在这里了,开始判断单个节点的问题,以及是否退出
             #检查本节点是否需要独立同步(重置连接)
@@ -2279,7 +2281,7 @@ class wzry_task:
             #
             #当hour小于此数字时才是组队模式
             #这里的同步文件是怕有的进程跑的太快了，刚好错过这个时间点
-            if hour >  self.限时组队时间 and not self.Tool.存在同步文件() and runstep > 0 and self.totalnode > 1:
+            if hour >=  self.限时组队时间 and not self.Tool.存在同步文件() and runstep > 0 and self.totalnode > 1:
                 TimeECHO(self.prefix+"限时进入单人模式")
                 self.totalnode=1
                 self.进入大厅()
