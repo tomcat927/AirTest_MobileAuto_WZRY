@@ -126,7 +126,7 @@ ST.OPDELAY = 1
 ST.THRESHOLD_STRICT = 0.8  # assert_exists语句touch(Template(r"tpl1689665366952.png", record_pos=(-0.425, -0.055), resolution=(960, 540)))的默认阈值，一般比THRESHOLD更高一些
 ST.THRESHOLD = 0.8  # 其他语句的默认阈值
 #ST.FIND_TIMEOUT=10 #*2 #获取截图的时间限制
-#ST.FIND_TIMEOUT_TMP=3#匹配图形的时间限制, 也许可以再改小些加速
+ST.FIND_TIMEOUT_TMP=1#匹配图形的时间限制, 也许可以再改小些加速
 #时间参数
 import time
 #防止服务器时区不同,设定时间为东八区
@@ -1558,7 +1558,7 @@ class wzry_task:
                 TimeErr(self.prefix+"超时太久,退出匹配")
                 return False
             自己确定匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540),threshold=0.8),"确定匹配按钮")
-            if 自己确定匹配: sleep(15) #自己确定匹配后给流出时间
+            #if 自己确定匹配: sleep(15) #自己确定匹配后给流出时间
             队友确认5v5匹配 = exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540),threshold=0.9))
             #
             if "模拟战" in self.对战模式:
@@ -1642,7 +1642,7 @@ class wzry_task:
                     self.Tool.touch同步文件()
                     return
                 else:
-                    self.touch同步文件(self.独立同步文件)
+                    self.Tool.touch同步文件(self.Tool.独立同步文件)
                     return
                 return self.进入大厅()
             if self.判断对战中():
@@ -1740,12 +1740,13 @@ class wzry_task:
         self.check_connect_status()
         if self.Tool.存在同步文件(): return True
         self.Tool.timelimit(timekey="结束人机匹配",limit=60*20,init=True)
-        self.Tool.barriernode(self.mynode,self.totalnode,"checkend_init")
         while True:
             if self.Tool.timelimit(timekey="结束人机匹配",limit=60*30,init=False) or self.健康系统() or self.判断大厅中():
                 TimeErr(self.prefix+"结束游戏时间过长 OR 健康系统 OR 大厅中")
                 return self.进入大厅()
             if self.判断房间中(): return
+            点击屏幕继续=Template(r"tpl1701229138066.png", record_pos=(-0.002, 0.226), resolution=(960, 540))
+            self.Tool.existsTHENtouch(点击屏幕继续,self.prefix+"点击屏幕继续")
             if self.判断对战中(False):
                 sleeploop=0
                 while self.判断对战中(True): #开始处理准备结束
@@ -1829,7 +1830,14 @@ class wzry_task:
         图标=Template(r"tpl1700803051511.png", record_pos=(0.379, -0.172), resolution=(960, 540))
         if not self.Tool.existsTHENtouch(图标,"玉镖夺魁"):
             TimeECHO("找不到玉镖夺魁图标:活动结束或者大厅变幻图标")
-            return
+            TimeECHO("找不到玉镖夺魁图标:尝试切换入口")
+            touch(Template(r"tpl1701428211463.png", record_pos=(0.463, -0.089), resolution=(960, 540)))
+            touch(Template(r"tpl1701428223494.png", record_pos=(-0.442, -0.101), resolution=(960, 540)))
+            touch(Template(r"tpl1701428233468.png", record_pos=(-0.354, 0.16), resolution=(960, 540)))
+            参与=Template(r"tpl1701428241862.png", record_pos=(0.08, 0.216), resolution=(960, 540))
+            if not self.Tool.existsTHENtouch(参与,"参与夺魁图标"):
+                TimeECHO("找不到玉镖夺魁图标:切换入口失败")
+                return
         #
         领取加号=[]
         领取加号.append( Template(r"tpl1700803174309.png", record_pos=(0.227, -0.21), resolution=(960, 540),target_pos=2) )
@@ -2164,6 +2172,8 @@ class wzry_task:
     def 健康系统(self):
         if exists(Template(r"tpl1689666921933.png", record_pos=(0.122, -0.104), resolution=(960, 540))):
             TimeECHO(self.prefix+"您已禁赛")
+            确定=Template(r"tpl1701171103293.png", record_pos=(-0.004, 0.081), resolution=(1136, 640))
+            self.Tool.existsTHENtouch(确定,self.prefix+"确定禁赛")
             if self.组队模式:
                 TimeECHO(self.prefix+"您已禁赛 and 组队touch同步文件")
                 self.Tool.touch同步文件()
@@ -2427,5 +2437,6 @@ if __name__ == "__main__":
             out = p.map_async(multi_start,m_cpu).get()
             p.close()
             p.join()
+
 
 
