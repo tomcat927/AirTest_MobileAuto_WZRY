@@ -8,6 +8,10 @@
 # What   : IOS/Android 自动化任务  #
 #################################
 #.......
+import sys,os
+import numpy as np
+import random
+import traceback
 #重写函数#
 from airtest.core.api import Template,connect_device,sleep
 from airtest.core.api import exists as exists_o
@@ -111,11 +115,6 @@ def stop_app(*args, **kwargs):
             return False
     return result
 #........................
-import sys,os
-import numpy as np
-import random
-import signal
-import traceback
 import logging
 logger = logging.getLogger("airtest")
 logger.setLevel(logging.WARNING)
@@ -126,7 +125,7 @@ ST.OPDELAY = 1
 ST.THRESHOLD_STRICT = 0.8  # assert_exists语句touch(Template(r"tpl1689665366952.png", record_pos=(-0.425, -0.055), resolution=(960, 540)))的默认阈值，一般比THRESHOLD更高一些
 ST.THRESHOLD = 0.8  # 其他语句的默认阈值
 #ST.FIND_TIMEOUT=10 #*2 #获取截图的时间限制
-ST.FIND_TIMEOUT_TMP=1#匹配图形的时间限制, 也许可以再改小些加速
+#ST.FIND_TIMEOUT_TMP=1#匹配图形的时间限制, 也许可以再改小些加速
 #时间参数
 import time
 #防止服务器时区不同,设定时间为东八区
@@ -881,6 +880,8 @@ class wzyd_libao:
       图标=Template(r"tpl1699873841208.png", record_pos=(-0.441, -0.809), resolution=(540, 960))
       if not self.Tool.existsTHENtouch(图标,self.prefix+"集合"): return self.体验服礼物(times)
       图标=Template(r"tpl1699873913813.png", record_pos=(-0.374, -0.043), resolution=(540, 960))
+      图标=Template(r"tpl1701491971438.png", record_pos=(-0.38, -0.039), resolution=(540, 960))
+
       if not self.Tool.existsTHENtouch(图标,self.prefix+"体验服"): return self.体验服礼物(times)
       图标=Template(r"tpl1699873941409.png", record_pos=(0.387, -0.128), resolution=(540, 960))
       if not self.Tool.existsTHENtouch(图标,self.prefix+"进入体验服"): return self.体验服礼物(times)
@@ -1007,7 +1008,7 @@ class wzyd_libao:
 class wzry_task:
 #备注
 #新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
-    def __init__(self,移动端,对战模式,shiftnode=-1,debug=False,限时组队时间=12):
+    def __init__(self,移动端,对战模式,shiftnode=-1,debug=False,限时组队时间=10):
         self.移动端=移动端
         self.mynode=self.移动端.mynode
         self.totalnode=self.移动端.totalnode
@@ -1078,13 +1079,20 @@ class wzry_task:
         self.runinfo={}
         #一些图库
         self.大厅对战图标=Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
+        #头像数据
+        英雄_诸葛=Template(r"tpl1701436812155.png", record_pos=(-0.454, 0.134), resolution=(1136, 640))
+        英雄_妲己=Template(r"tpl1691818492021.png", record_pos=(-0.278, 0.029), resolution=(960, 540))
+        英雄_牙=Template(r"tpl1701436836229.png", record_pos=(0.107, -0.085), resolution=(1136, 640))
+        英雄_烈=Template(r"tpl1701436844556.png", record_pos=(0.203, 0.025), resolution=(1136, 640))
+        英雄_八戒=Template(r"tpl1701573854122.png", record_pos=(0.297, 0.135), resolution=(1136, 640))
+        英雄_亚瑟=Template(r"tpl1685515357752.png", record_pos=(-0.359, 0.129), resolution=(960, 540))
         #一些数据
         参战英雄线路_dict={}
         参战英雄头像_dict={}
         参战英雄线路_dict[(shiftnode+0)%6]=Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540)) 
-        参战英雄头像_dict[(shiftnode+0)%6]=Template(r"tpl1685515357752.png", record_pos=(-0.359, 0.129), resolution=(960, 540))
+        参战英雄头像_dict[(shiftnode+0)%6]=英雄_八戒
         参战英雄线路_dict[(shiftnode+1)%6]=Template(r"tpl1689665455905.png", record_pos=(-0.066, -0.256), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+1)%6]=Template(r"tpl1691818492021.png", record_pos=(-0.278, 0.029), resolution=(960, 540))
+        参战英雄头像_dict[(shiftnode+1)%6]=英雄_诸葛
         参战英雄线路_dict[(shiftnode+2)%6]=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
         参战英雄头像_dict[(shiftnode+2)%6]=Template(r"tpl1690442530784.png", record_pos=(0.11, -0.083), resolution=(960, 540))
         参战英雄线路_dict[(shiftnode+3)%6]=Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
@@ -1145,6 +1153,11 @@ class wzry_task:
         TimeECHO(self.prefix+f"尝试进入大厅{times}")
         self.check_connect_status()
         if self.Tool.存在同步文件(): return True
+        if "ios" in self.移动端.LINK:
+            配件不支持=Template(r"tpl1701523669097.png", record_pos=(-0.001, 0.002), resolution=(1136, 640))
+            关闭配件不支持=Template(r"tpl1701523677678.png", record_pos=(-0.004, 0.051), resolution=(1136, 640))
+            if exists(配件不支持):
+                self.Tool.existsTHENtouch(关闭配件不支持,"关闭配件不支持")
         if self.判断大厅中():
             return True
         if self.判断对战中():
@@ -1349,6 +1362,11 @@ class wzry_task:
     def 单人进入人机匹配房间(self,times=1):
         self.check_connect_status()
         if self.Tool.存在同步文件(): return True
+        if "ios" in self.移动端.LINK:
+            配件不支持=Template(r"tpl1701523669097.png", record_pos=(-0.001, 0.002), resolution=(1136, 640))
+            关闭配件不支持=Template(r"tpl1701523677678.png", record_pos=(-0.004, 0.051), resolution=(1136, 640))
+            if exists(配件不支持):
+                self.Tool.existsTHENtouch(关闭配件不支持,"关闭配件不支持")
         if "模拟战" in self.对战模式:
             TimeECHO(self.prefix+f"首先进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
@@ -1546,13 +1564,15 @@ class wzry_task:
         self.Tool.timelimit(timekey="确认匹配",limit=60*1,init=True)
         self.Tool.timelimit(timekey="超时确认匹配",limit=60*5,init=True)
         #
+        自己确定匹配=False
+        loop=0
         while True:
             房间中的开始按钮=Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540))
             if self.房主:
-                if self.判断房间中(): 
+                #if self.判断房间中(): 
                     self.Tool.existsTHENtouch(房间中的开始按钮,"开始匹配按钮")
-                else:
-                    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
+                #else:
+                #    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
             if self.Tool.timelimit(timekey="确认匹配",limit=60*1,init=False): TimeErr(self.prefix+"超时,队友未确认匹配或大概率程序卡死")
             if self.Tool.timelimit(timekey="超时确认匹配",limit=60*5,init=False): 
                 TimeErr(self.prefix+"超时太久,退出匹配")
@@ -2080,23 +2100,19 @@ class wzry_task:
         return False
     def 判断房间中(self):
         #长平之战等满人状态时
-        文字判断=[]
-        文字判断.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
-        文字判断.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
-        文字判断.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
-        文字判断.append(Template(r"tpl1700304340928.png", record_pos=(0.323, -0.254), resolution=(960, 540)))
-        for i in 文字判断:
+        房间判断=[]
+        房间判断.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
+        房间判断.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
+        房间判断.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
+        房间判断.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
+        房间判断.append(Template(r"tpl1700304340928.png", record_pos=(0.323, -0.254), resolution=(960, 540)))
+        for i in 房间判断:
             TimeECHO(self.prefix+f"判断房间:{i}")
             if exists(i):
-                TimeECHO(self.prefix+f"正在房间中[文字判断]{i}")
+                TimeECHO(self.prefix+f"正在房间中{i}")
                 return True        
-        if exists(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540))):
-            TimeECHO(self.prefix+f"判断房间:2")
-            TimeECHO(self.prefix+"正在房间中")
-            return True
-        else:
-            TimeECHO(self.prefix+"不在房间中")
-            return False
+        TimeECHO(self.prefix+"不在房间中")
+        return False
     def 判断对战中(self,处理=False):
         if "模拟战" in self.对战模式:
             return self.判断对战中_模拟战(处理)
@@ -2373,6 +2389,7 @@ class auto_airtest:
             LINK_dict[0]="Android:///"+"192.168.192.10:5555"
             LINK_dict[1]="Android:///"+"192.168.192.10:5565"
             LINK_dict[2]="ios:///http://127.0.0.1:8200"
+            LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
             #LINK_dict[totalnode-1]="ios:///http://169.254.83.56:8100"
             #LINK_dict[2]="ios:///http://169.254.83.56:8100"
             self.debug = False #仅用于设置ios连接,程序还是正常运行
@@ -2389,7 +2406,7 @@ class auto_airtest:
             TimeErr(self.prefix+f"{self.prefix}:连接设备失败,退出")
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
-        TASK=wzry_task(self.移动端,对战模式,shiftnode=-1,debug=self.debug)
+        TASK=wzry_task(self.移动端,对战模式,shiftnode=0,debug=self.debug)
         TASK.RUN()
         self.移动端.关闭APP()
         #
@@ -2437,6 +2454,7 @@ if __name__ == "__main__":
             out = p.map_async(multi_start,m_cpu).get()
             p.close()
             p.join()
+
 
 
 
