@@ -705,7 +705,7 @@ class deviceOB:
                     #tidevice不支持企业签名的WDA
                     self.LINKport=str(int(self.LINKport)+1)
                     self.LINK=self.LINKhead+self.LINKport
-                    os.system(f"tidevice wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner --port {self.LINKport} > tidevice.result.txt 2>&1 &")
+                    os.system(f"tidevice $(cat para.txt) wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner --port {self.LINKport} > tidevice.result.txt 2>&1 &")
                 else:
                     TimeErr(self.prefix+": tidevice list 无法找到设备, IOS重启失败")
                     #
@@ -1063,7 +1063,9 @@ class wzry_task:
         self.Tool.barriernode(self.mynode,self.totalnode,"WZRYinit")
         #.
         self.结束游戏FILE="WZRY.ENDGAME.txt"
+        self.SLEEPFILE="WZRY.SLEEP.txt"
         self.Tool.removefile(self.结束游戏FILE)
+        self.Tool.removefile(self.SLEEPFILE)
         #
         self.王者营地礼包=False
         if ":5555" in self.移动端.LINK:
@@ -1077,13 +1079,20 @@ class wzry_task:
         self.Tool.timedict["领营地礼包"]=0
 
         self.runinfo={}
+        self.runinfo["runstep"]=0
         #一些图库
         self.大厅对战图标=Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
         #头像数据
         英雄_诸葛=Template(r"tpl1701436812155.png", record_pos=(-0.454, 0.134), resolution=(1136, 640))
         英雄_妲己=Template(r"tpl1691818492021.png", record_pos=(-0.278, 0.029), resolution=(960, 540))
+        英雄_海诺=Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
         英雄_牙=Template(r"tpl1701436836229.png", record_pos=(0.107, -0.085), resolution=(1136, 640))
+        英雄_孙尚香=Template(r"tpl1690442530784.png", record_pos=(0.11, -0.083), resolution=(960, 540))
         英雄_烈=Template(r"tpl1701436844556.png", record_pos=(0.203, 0.025), resolution=(1136, 640))
+        英雄_桑启=Template(r"tpl1701750374410.png", record_pos=(0.202, 0.024), resolution=(1136, 640))
+        英雄_太乙=Template(r"tpl1690442560069.png", record_pos=(0.11, 0.025), resolution=(960, 540))
+        英雄_云中=Template(r"tpl1701750390892.png", record_pos=(-0.172, 0.24), resolution=(1136, 640))
+        英雄_凯=Template(r"tpl1689665521942.png", record_pos=(0.108, -0.086), resolution=(960, 540))
         英雄_八戒=Template(r"tpl1701573854122.png", record_pos=(0.297, 0.135), resolution=(1136, 640))
         英雄_亚瑟=Template(r"tpl1685515357752.png", record_pos=(-0.359, 0.129), resolution=(960, 540))
         #一些数据
@@ -1092,15 +1101,15 @@ class wzry_task:
         参战英雄线路_dict[(shiftnode+0)%6]=Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540)) 
         参战英雄头像_dict[(shiftnode+0)%6]=英雄_八戒
         参战英雄线路_dict[(shiftnode+1)%6]=Template(r"tpl1689665455905.png", record_pos=(-0.066, -0.256), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+1)%6]=英雄_诸葛
+        参战英雄头像_dict[(shiftnode+1)%6]=英雄_海诺
         参战英雄线路_dict[(shiftnode+2)%6]=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+2)%6]=Template(r"tpl1690442530784.png", record_pos=(0.11, -0.083), resolution=(960, 540))
+        参战英雄头像_dict[(shiftnode+2)%6]=英雄_牙
         参战英雄线路_dict[(shiftnode+3)%6]=Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+3)%6]=Template(r"tpl1690442560069.png", record_pos=(0.11, 0.025), resolution=(960, 540))
+        参战英雄头像_dict[(shiftnode+3)%6]=英雄_桑启
         参战英雄线路_dict[(shiftnode+4)%6]=Template(r"tpl1686048521443.png", record_pos=(0.06, -0.259), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+4)%6]=Template(r"tpl1689665521942.png", record_pos=(0.108, -0.086), resolution=(960, 540))
+        参战英雄头像_dict[(shiftnode+4)%6]=英雄_云中
         参战英雄线路_dict[(shiftnode+5)%6]=Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+5)%6]=Template(r"tpl1690442560069.png", record_pos=(0.11, 0.025), resolution=(960, 540))
+        参战英雄头像_dict[(shiftnode+5)%6]=英雄_太乙
         self.参战英雄线路=参战英雄线路_dict[self.mynode%6]
         self.参战英雄头像=参战英雄头像_dict[self.mynode%6]
         self.备战英雄线路=参战英雄线路_dict[(self.mynode+3)%6]
@@ -2293,6 +2302,9 @@ class wzry_task:
             self.Tool.removefile(self.Tool.独立同步文件)
             #
             #------------------------------------------------------------------------------
+            while os.path.exists(self.SLEEPFILE):
+                TimeECHO(self.prefix+f"检测到{self.SLEEPFILE}, sleep(5min)")
+                sleep(60*5)
             #------------------------------------------------------------------------------
             #------------------------------------------------------------------------------
             #下面就是正常的循环流程了
