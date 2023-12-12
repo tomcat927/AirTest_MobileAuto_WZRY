@@ -1466,8 +1466,8 @@ class wzry_task:
                 TimeECHO(self.prefix+":高阶段位已达上限,采用青铜模式")
                 self.青铜段位=True
                 self.选择人机模式=True
-                段位=难度1图标
-                self.Tool.existsTHENtouch(段位,"选择段位",savepos=False)
+                段位key="青铜段位"
+                self.Tool.existsTHENtouch(段位图标[段位key],"选择"+段位key,savepos=False)
                 self.Tool.existsTHENtouch(开始练习,"开始练习")
                 self.Tool.touchfile("青铜模式.txt")
                 if self.组队模式: 
