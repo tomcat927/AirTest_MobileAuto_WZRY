@@ -2395,25 +2395,6 @@ class wzry_task:
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
             #
-            #当hour小于此数字时才是组队模式
-            #这里的同步文件是怕有的进程跑的太快了，刚好错过这个时间点
-            if hour >=  self.限时组队时间 and not self.Tool.存在同步文件() and runstep > 0 and self.totalnode > 1:
-                TimeECHO(self.prefix+"限时进入单人模式")
-                self.totalnode=1
-                self.进入大厅()
-            if hour <  self.限时组队时间:
-                self.totalnode=self.totalnode_bak
-                if hour <  startclock+1:
-                    self.标准触摸对战=True#每天早上的前几场对战使用标准触摸,这样可以完成一些系统任务
-            else:
-                if self.totalnode_bak > 1 and self.totalnode == 1:
-                    if os.path.exists(self.临时组队FILE):
-                        TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
-                        self.totalnode=self.totalnode_bak
-            self.组队模式=self.totalnode > 1
-            if self.组队模式: TimeECHO(self.prefix+"组队模式")
-            self.房主=self.mynode == 0 or self.totalnode == 1
-            #
             while hour >= endclock or hour < startclock:
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.每日礼包()
@@ -2432,6 +2413,27 @@ class wzry_task:
                 self.选择人机模式=True
                 self.青铜段位=False
                 self.Tool.removefile("青铜模式.txt")
+            #
+            hour,minu=self.Tool.time_getHM()
+            #当hour小于此数字时才是组队模式
+            #这里的同步文件是怕有的进程跑的太快了，刚好错过这个时间点
+            if hour >=  self.限时组队时间 and not self.Tool.存在同步文件() and runstep > 0 and self.totalnode > 1:
+                TimeECHO(self.prefix+"限时进入单人模式")
+                self.totalnode=1
+                self.进入大厅()
+            if hour <  self.限时组队时间:
+                self.totalnode=self.totalnode_bak
+                if hour <  startclock+1:
+                    self.标准触摸对战=True#每天早上的前几场对战使用标准触摸,这样可以完成一些系统任务
+            else:
+                if self.totalnode_bak > 1 and self.totalnode == 1:
+                    if os.path.exists(self.临时组队FILE):
+                        TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
+                        self.totalnode=self.totalnode_bak
+            self.组队模式=self.totalnode > 1
+            if self.组队模式: TimeECHO(self.prefix+"组队模式")
+            self.房主=self.mynode == 0 or self.totalnode == 1
+
             #
             if self.Tool.存在同步文件(): continue
             self.Tool.barriernode(self.mynode,self.totalnode,"准备进入战斗循环")
