@@ -2330,6 +2330,7 @@ class wzry_task:
         #
     def RUN(self):#程序入口
         runstep=0
+        jinristep=0
         对战次数=0
         while True:
             #------------------------------------------------------------------------------
@@ -2413,6 +2414,7 @@ class wzry_task:
                 self.选择人机模式=True
                 self.青铜段位=False
                 self.Tool.removefile("青铜模式.txt")
+                jinristep=0
             #
             hour,minu=self.Tool.time_getHM()
             #当hour小于此数字时才是组队模式
@@ -2433,6 +2435,7 @@ class wzry_task:
             self.组队模式=self.totalnode > 1
             if self.组队模式: TimeECHO(self.prefix+"组队模式")
             self.房主=self.mynode == 0 or self.totalnode == 1
+            #
 
             #
             if self.Tool.存在同步文件(): continue
@@ -2442,11 +2445,13 @@ class wzry_task:
             #
             #------------------------------------------------------------------------------
             runstep=runstep+1
+            jinristep=jinristep+1
+
             #运行前统一变量
             self.runinfo["runstep"]=runstep
             self.runinfo=self.Tool.bcastvar(self.mynode,self.totalnode,var=self.runinfo,name="bcastruninfo")
             runstep=self.runinfo["runstep"]
-            TimeECHO(self.prefix+f"运行次数{runstep}")
+            TimeECHO(self.prefix+f"运行次数{runstep}|今日步数{jinristep}")
             #
             #开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()

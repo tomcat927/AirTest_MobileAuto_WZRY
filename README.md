@@ -1,11 +1,11 @@
 # AirTest_MobileAuto_WZRY
 面向对象的AirTest多进程框架
 * 提供了多进程支持,多个基于文件的同步广播工具
-* AirTest设备控制代码,重启APP,重启设备端(androidcontain/Linux, BlueStack/Windows)
+* AirTest设备控制代码,重启APP,重启设备端(androidcontain/Linux, BlueStack/Windows, iphone/MacOS)
 * 仅需替换`self.APPID`和`TASK=wzrj_task(self.移动端,"5v5匹配",0)`即可对新APP进行适配
 * ISO端搭建和后续更新和学习AirTest也许会在这里[Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
 * 全程自动运行,无人值守. 包括自动启动虚拟机/docker,自动组队对战、领礼包
-* 套壳AirTest函数,减少网络故障获取截图失败导致的程序终止. 然而远程还会有意外:ios有时需要重新插拔数据线才能`tidevice list`检测到设备.
+* 套壳AirTest函数,减少网络故障获取截图失败导致的程序终止. 极小概率有意外:ios有时需要重新插拔数据线才能`tidevice list`检测到设备.
 
 
 ## 致谢
