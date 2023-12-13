@@ -1,5 +1,6 @@
 # AirTest_MobileAuto_WZRY
 面向对象的AirTest多进程框架
+
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/cndaqiang/AirTest_MobileAuto_WZRY?color=60c5ba&style=for-the-badge)
 [![GitHub release (by tag)](https://img.shields.io/github/downloads/cndaqiang/AirTest_MobileAuto_WZRY/0.3/total)](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/archive/refs/tags/0.3.tar.gz)
