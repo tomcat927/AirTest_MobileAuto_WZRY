@@ -3,7 +3,7 @@
 
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/cndaqiang/AirTest_MobileAuto_WZRY?color=60c5ba&style=for-the-badge)
-[![GitHub release (by tag)](https://img.shields.io/github/downloads/cndaqiang/AirTest_MobileAuto_WZRY/0.3/total)](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/archive/refs/tags/0.3.tar.gz)
+[![GitHub release (by tag)](https://img.shields.io/github/downloads/cndaqiang/AirTest_MobileAuto_WZRY/latest)](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases/latest)
 
 * 提供了多进程支持,多个基于文件的同步广播工具
 * AirTest设备控制代码,重启APP,重启设备端(androidcontain/Linux, BlueStack/Windows, iphone/MacOS)

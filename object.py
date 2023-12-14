@@ -2081,6 +2081,7 @@ class wzry_task:
         我知道了=Template(r"tpl1694441175302.png", record_pos=(-0.1, 0.116), resolution=(960, 540))
         系统礼物确定=Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         黄色礼物确定=Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540))
+        系统礼物关闭=Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
 
         返回=Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         self.Tool.existsTHENtouch(邮件图标)
@@ -2101,10 +2102,13 @@ class wzry_task:
             #
         if self.Tool.existsTHENtouch(系统邮件):
             self.Tool.existsTHENtouch(系统快速领取,"系统快速领取",savepos=False)
+            self.Tool.LoopTouch(系统礼物关闭,"系统礼物关闭",loop=5)
             self.Tool.LoopTouch(黄色礼物确定,"黄色礼物确定",loop=10)
             while self.Tool.existsTHENtouch(系统礼物确定,"系统礼物确定"):
                 if exists(解锁语音界面): self.Tool.existsTHENtouch(我知道了,"我知道了")
+                self.Tool.LoopTouch(系统礼物关闭,"系统礼物关闭",loop=5)
                 self.Tool.LoopTouch(黄色礼物确定,"黄色礼物确定",loop=10)
+                self.Tool.existsTHENtouch(系统礼物关闭,"系统礼物关闭",savepos=False)
                 if self.Tool.timelimit(timekey="领邮件礼包",limit=60*5,init=False):
                              TimeECHO(self.prefix+"领邮件礼包超时.....")
                              return self.每日礼包_邮件礼包(times)
@@ -2396,9 +2400,11 @@ class wzry_task:
             if runstep==0: startclock=-1;endclock=25
             hour,minu=self.Tool.time_getHM()
             #
+            新的一天=False
             while hour >= endclock or hour < startclock:
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.每日礼包()
+                self.移动端.关闭APP()
                 #计算休息时间
                 hour,minu=self.Tool.time_getHM()
                 leftmin=max(((startclock+24-hour)%24)*60-minu,1)
@@ -2406,15 +2412,21 @@ class wzry_task:
                 if self.移动端.容器优化:leftmin=leftmin+self.mynode*1#这里的单位是分钟,每个node别差别太大
                 TimeECHO(self.prefix+"预计等待%d min ~ %3.2f h"%(leftmin,leftmin/60.0))
                 if self.debug: leftmin=0.5
-                self.移动端.重启APP(leftmin*60);
+                if leftmin > 60:
+                    self.移动端.重启APP(leftmin*60)
+                else:
+                    sleep(leftmin*60);
                 if self.王者营地礼包: self.每日礼包_王者营地()
-                self.登录游戏()
                 if self.debug: break
                 hour,minu=self.Tool.time_getHM()
                 self.选择人机模式=True
                 self.青铜段位=False
                 self.Tool.removefile("青铜模式.txt")
                 jinristep=0
+                新的一天=True
+            if 新的一天:
+                self.移动端.重启APP(10);
+                self.登录游戏()
             #
             hour,minu=self.Tool.time_getHM()
             #当hour小于此数字时才是组队模式
