@@ -891,7 +891,11 @@ class wzyd_libao:
       图标=Template(r"tpl1699873949811.png", record_pos=(-0.006, 0.176), resolution=(540, 960),threshold=0.9)
       if not self.Tool.existsTHENtouch(图标,self.prefix+"奖励兑换"): return self.体验服礼物(times)
       sleep(5)
-      #
+      #有时候会让重新登录
+      重新登录=Template(r"tpl1702610976931.png", record_pos=(0.0, 0.033), resolution=(540, 960))
+      if self.Tool.existsTHENtouch(重新登录,self.prefix+"重新登录"):
+          self.Tool.touchfile(self.prefix+"重新登录体验服.txt")
+          return
       奖励页面=Template(r"tpl1699874011609.png", record_pos=(0.165, 0.48), resolution=(540, 960),threshold=0.9)
       pos=False
       #这里是等待刷新的过程,不用sleep那么久
