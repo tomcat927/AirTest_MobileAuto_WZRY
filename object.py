@@ -1075,6 +1075,7 @@ class wzry_task:
         self.SLEEPFILE="WZRY.SLEEP.txt"
         self.触摸对战FILE="WZRY.TOUCH.txt"
         self.临时组队FILE="WZRY.组队.txt"
+        self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         #self.Tool.removefile(self.触摸对战FILE)
@@ -1646,11 +1647,18 @@ class wzry_task:
         #
         #选择英雄
         if self.选择英雄 and self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)),"展开英雄",savepos=False):
-            sleep(1)
-            self.Tool.existsTHENtouch(self.参战英雄线路,"参战英雄线路",savepos=True)
-            sleep(5)
-            self.Tool.existsTHENtouch(self.参战英雄头像,"参战英雄头像",savepos=True)
-            sleep(1)
+            if os.path.exists(self.重新设置英雄FILE):
+                TimeECHO(self.prefix+":重新设置英雄")
+                exec_insert=self.Tool.readfile(self.重新设置英雄FILE)
+                for i_insert in exec_insert:
+                    TimeECHO(self.prefix+"run:"+i_insert,end="")
+                    exec(i_insert)
+            else:
+                sleep(1)
+                self.Tool.existsTHENtouch(self.参战英雄线路,"参战英雄线路",savepos=True)
+                sleep(5)
+                self.Tool.existsTHENtouch(self.参战英雄头像,"参战英雄头像",savepos=True)
+                sleep(1)
             #分路重复.png
             if exists(Template(r"tpl1689668119154.png", record_pos=(0.0, -0.156), resolution=(960, 540))):
                 TimeECHO(self.prefix+"分路冲突，切换英雄")
@@ -2358,7 +2366,7 @@ class wzry_task:
             #强制同步
             #这里是能正常点击,但是可能进入了异常的界面/禁赛等原因导致的重置部分
             #这里的同步是只有本程序的并行,不依赖于airtest等库,因此一定可以执行的
-            if self.Tool.存在同步文件(self.Tool.辅助同步文件):#单进程各种原因出错时,多进程无法同步时
+            if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):#单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
                 self.移动端.关闭APP()
                 if self.王者营地礼包 and  not connect_status(): self.每日礼包_王者营地()
@@ -2388,9 +2396,7 @@ class wzry_task:
             while os.path.exists(self.SLEEPFILE):
                 TimeECHO(self.prefix+f"检测到{self.SLEEPFILE}, sleep(5min)")
                 sleep(60*5)
-            self.标准触摸对战=os.path.exists(self.触摸对战FILE)
-            if self.标准触摸对战:
-                TimeECHO(self.prefix+f"检测到{self.触摸对战FILE}, 使用标准模式对战,并且模拟人手触摸")
+            
                 
             #------------------------------------------------------------------------------
             #------------------------------------------------------------------------------
@@ -2441,8 +2447,6 @@ class wzry_task:
                 self.进入大厅()
             if hour <  self.限时组队时间:
                 self.totalnode=self.totalnode_bak
-                if hour <  startclock+1:
-                    self.标准触摸对战=True#每天早上的前几场对战使用标准触摸,这样可以完成一些系统任务
             else:
                 if self.totalnode_bak > 1 and self.totalnode == 1:
                     if os.path.exists(self.临时组队FILE):
@@ -2462,7 +2466,19 @@ class wzry_task:
             #------------------------------------------------------------------------------
             runstep=runstep+1
             jinristep=jinristep+1
-
+            #
+            #------------------------------------------------------------------------------
+            #增加对战模式
+            self.标准触摸对战=os.path.exists(self.触摸对战FILE)
+            if self.标准触摸对战:
+                TimeECHO(self.prefix+f"检测到{self.触摸对战FILE}, 使用标准模式对战,并且模拟人手触摸")
+            #
+            #每天早上的前2场对战使用标准触摸,这样可以完成一些系统任务
+            if jinristep <  1: self.标准触摸对战=True
+            #每天抽出几场用于完成系统检测
+            if jinristep % 8 and not self.组队模式: self.标准触摸对战=True
+            #每天晚上的最后几场对战使用标准触摸,这样可以完成一些5v5必须胜利的系统任务
+            #------------------------------------------------------------------------------
             #运行前统一变量
             self.runinfo["runstep"]=runstep
             self.runinfo=self.Tool.bcastvar(self.mynode,self.totalnode,var=self.runinfo,name="bcastruninfo")

@@ -8,7 +8,7 @@
 * 提供了多进程支持,多个基于文件的同步广播工具
 * AirTest设备控制代码,重启APP,重启设备端(androidcontain/Linux, BlueStack/Windows, iphone/MacOS)
 * 仅需替换`self.APPID`和`TASK=wzrj_task(self.移动端,"5v5匹配",0)`即可对新APP进行适配
-* ISO端搭建和后续更新和学习AirTest也许会在这里[Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+* IOS端搭建和后续更新和学习AirTest也许会在这里[Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
 * 全程自动运行,无人值守. 包括自动启动虚拟机/docker,自动组队对战、领礼包
 * 套壳AirTest函数,减少网络故障获取截图失败导致的程序终止. 极小概率有意外:ios有时需要重新插拔数据线才能`tidevice list`检测到设备.
 
@@ -85,6 +85,25 @@ python -u object.py (n-1) n
 - Android
 - IOS(测试通过 15.8,16.2)
 
+## WZRY部分代码说明
+### 文件控制
+控制文件`txt`不参与仓库同步
+
+| 文件  | 功能  | 备注  |
+| :------------: | :------------: | :------------: |
+|  `self.结束游戏FILE="WZRY.ENDGAME.txt"` | 本局结束后关闭WZRYAPP, 同时结束对战循环  | 用户创建  |
+|  `self.SLEEPFILE="WZRY.SLEEP.txt"` |  本局结束后`sleep(5min)`直到该文件被删除, 用于暂停代码,手动进行抽奖领礼包  | 用户创建   |
+|`self.触摸对战FILE="WZRY.TOUCH.txt"` |在对战过程中尝试移动英雄和平A,用于满足一些任务对标准人机对战非挂机的检测判断 |用户创建 |
+| `self.临时组队FILE="WZRY.组队.txt"`| 仅适用于并行组队模式, 现在代码中组队模式仅在每天的前几个小时, 后面如果还想组队又不想重跑程序，可以通过创建该文件恢复组队模式| 用户创建|
+|`self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"` |不修改代码和重启程序,修改对战过程中使用的英雄,内容见`WZRY.node.重新设置英雄.py`  |用户创建 |
+|`var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt"` | 存储很多图片坐标点的文件,减少图片识别时间,删除后重新识别 | 程序自动生成|
+|`青铜模式.txt`|存在则进行青铜快速人机,不存在则进行星耀人机|程序自动生成/用户创建
+|`NeedRebarrier.txt`|多进程运行时,强制跳过当前所有任务,进行统一的barrier|程序出错自动生成/用户创建|
+| `self.prefix+"NeedRebarrier.txt"` |本进程跳过所有任务,回到循环开头,重新初始化 |  程序出错自动生成/用户创建 |
+|`self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成,用户删除|
+
+
+## DQWheel说明
 
 ## Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=cndaqiang/AirTest_MobileAuto_WZRY&type=Date)](https://star-history.com/#cndaqiang/AirTest_MobileAuto_WZRY&Date)
