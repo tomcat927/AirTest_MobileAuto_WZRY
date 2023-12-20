@@ -1462,8 +1462,8 @@ class wzry_task:
                 self.Tool.touch同步文件()
                 return True
             else:
-                sleep(30)
-                return self.单人进入人机匹配房间(times)
+                self.touch同步文件(self.独立同步文件)
+                return True
         #
         #段位限制
         if not self.青铜段位: #其他段位有次数限制
@@ -1651,7 +1651,8 @@ class wzry_task:
                 TimeECHO(self.prefix+":重新设置英雄")
                 exec_insert=self.Tool.readfile(self.重新设置英雄FILE)
                 for i_insert in exec_insert:
-                    TimeECHO(self.prefix+"run:"+i_insert,end="")
+                    if '#' == i_insert[0]: continue
+                    TimeECHO(self.prefix+"run: "+i_insert[:-1])
                     exec(i_insert)
             else:
                 sleep(1)
