@@ -844,10 +844,15 @@ class deviceOB:
 class wzyd_libao:
    def __init__(self,prefix="",APPID="com.tencent.gamehelper.smoba"):
       self.体验币成功=False
+      self.营地活动=True
       self.APPID=APPID
       self.prefix=prefix+"王者营地:"
       self.IOS="smobagamehelper" in self.APPID
       self.个人界面图标=Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
+      self.战绩图标=Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960),threshold=0.9)
+      if self.营地活动:
+          self.个人界面图标=Template(r"tpl1703259800661.png", record_pos=(0.372, 0.728), resolution=(540, 960))
+          self.战绩图标=Template(r"tpl1703259792669.png", record_pos=(0.176, 0.728), resolution=(540, 960))
       self.每日福利图标=Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
       if self.IOS:
         self.每日福利图标=Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
@@ -875,8 +880,7 @@ class wzyd_libao:
       sleep(5)
       times=times+1
       if times > 10: return False
-      战绩图标=Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960),threshold=0.9)
-      if not self.Tool.existsTHENtouch(战绩图标,self.prefix+"战绩图标"): return self.体验服礼物(times)
+      if not self.Tool.existsTHENtouch(self.战绩图标,self.prefix+"战绩图标"): return self.体验服礼物(times)
       sleep(5)
       图标=Template(r"tpl1699873841208.png", record_pos=(-0.441, -0.809), resolution=(540, 960),threshold=0.9)
       if not self.Tool.existsTHENtouch(图标,self.prefix+"集合"): return self.体验服礼物(times)
@@ -1097,6 +1101,8 @@ class wzry_task:
         self.Tool.timedict["领游戏礼包"]=0
         self.Tool.timedict["领营地礼包"]=0
         self.Tool.timedict["六国远征战"]=0
+        #self.每日礼包_王者营地()
+
         #
         #
         self.runinfo={}
