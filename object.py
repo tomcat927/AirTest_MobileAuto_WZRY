@@ -1031,6 +1031,7 @@ class wzry_task:
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
         self.选择人机模式=True
         self.青铜段位=os.path.exists("青铜模式.txt")
+        self.进行六国远征=True
         #
         self.对战时间=[5.1,23] #单位hour,对战时间取4.5是为了让程序在4点时启动领取昨日没领完的礼包
         #当hour小于此数字时才是组队模式
@@ -2557,6 +2558,7 @@ class wzry_task:
                 else:
                     sleep(leftmin*60);
                 if self.王者营地礼包: self.每日礼包_王者营地()
+
                 if self.debug: break
                 hour,minu=self.Tool.time_getHM()
                 self.选择人机模式=True
@@ -2564,6 +2566,7 @@ class wzry_task:
                 self.Tool.removefile("青铜模式.txt")
                 jinristep=0
                 新的一天=True
+                self.进行六国远征 = not self.六国远征()
             if 新的一天:
                 self.移动端.重启APP(10);
                 self.登录游戏()
@@ -2586,6 +2589,8 @@ class wzry_task:
             if self.组队模式: TimeECHO(self.prefix+"组队模式")
             self.房主=self.mynode == 0 or self.totalnode == 1
             #
+            if not self.组队模式 and self.进行六国远征:
+                self.进行六国远征 = not self.六国远征()
 
             #
             if self.Tool.存在同步文件(): continue
@@ -2673,7 +2678,6 @@ class auto_airtest:
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
         TASK=wzry_task(self.移动端,对战模式,shiftnode=-4,debug=self.debug)
-        TASK.六国远征(); return
         TASK.RUN()
         self.移动端.关闭APP()
         #
