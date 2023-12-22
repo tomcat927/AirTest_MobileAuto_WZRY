@@ -1093,6 +1093,7 @@ class wzry_task:
         #设置为0,可以保证下次必刷礼包
         self.Tool.timedict["领游戏礼包"]=0
         self.Tool.timedict["领营地礼包"]=0
+        self.Tool.timedict["六国远征战"]=0
         #
         #
         self.runinfo={}
@@ -2200,12 +2201,12 @@ class wzry_task:
             self.六国远征_进入界面(times)
         sleep(2)
         冒险玩法=Template(r"tpl1703206553221.png", record_pos=(-0.433, -0.132), resolution=(960, 540))
-        六国远征=Template(r"tpl1703206565024.png", record_pos=(0.152, -0.027), resolution=(960, 540))
+        六国远征入口=Template(r"tpl1703206565024.png", record_pos=(0.152, -0.027), resolution=(960, 540))
         if not self.Tool.existsTHENtouch(冒险玩法,"冒险玩法"):
             TimeErr(self.prefix+":六国:找不到冒险玩法")
             self.六国远征_进入界面(times)
         sleep(2)
-        if not self.Tool.existsTHENtouch(六国远征,"六国远征"):
+        if not self.Tool.existsTHENtouch(六国远征入口,"六国远征入口"):
             TimeErr(self.prefix+":六国:找不到六国远征界面")
             self.六国远征_进入界面(times)
         sleep(2)
@@ -2238,26 +2239,28 @@ class wzry_task:
             return False
         #           
         #
-        #正式开始探索
-        self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*20,init=True)
+        #正式开始探索,基本上10分钟才能完成一轮，所以这个时间就取50
+        self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*50,init=True)
         self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*5,init=True)
         while True:
             if self.健康系统(): return False
             if self.Tool.存在同步文件(): return False
-            if self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*20,init=False):
+            if self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*30,init=False):
                 TimeECHO(self.prefix+":探索时间达到上限")
                 return False
             #探索过程中检测界面
             if self.六国远征_界面判断():
                 self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*5,init=True)
                 TimeECHO(self.prefix+":检测到远征界面")
+                for i in range(len(关卡)):
+                    if exists(关卡[i]):
+                        TimeECHO(self.prefix+f":存在关卡{i+1}")
+                    else:
+                        break
             else:
                 if self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*10,init=False):
                     TimeECHO(self.prefix+":五分钟内未检测到远征界面")
                     if not self.六国远征_进入界面(): return False
-            #黑色终止和正常终止容易识别成同一个，这句话完全无意义，无作用
-            if exists(中止探索):
-                TimeECHO(self.prefix+":仍在探索中")
             if self.Tool.existsTHENtouch(自动探索,"自动探索",savepos=False):
                 for i in range(10):
                     if exists(任务完成): break
@@ -2265,7 +2268,7 @@ class wzry_task:
                     sleep(10)
             if exists(任务完成0):#也可能是普通的一局结束
                 TimeECHO(self.prefix+":领取本局/轮奖励")
-                self.Tool.existsTHENtouch(蓝色确定,"蓝色确定",savepos=True)
+                self.Tool.existsTHENtouch(蓝色确定,"蓝色确定",savepos=False)
             #
             if exists(任务完成):
                 TimeECHO(self.prefix+":自动探索一轮完成.回到界面.准备重置")
@@ -2285,13 +2288,21 @@ class wzry_task:
                     if not exists(关卡[-1]):
                         TimeECHO(self.prefix+":存在未探索关卡,继续探索")
                         continue
+                    #这个时刻,自动探索，结束自动探索都是可能的
                     if exists(黑色中止):
                         TimeECHO(self.prefix+":不存在继续探索按钮,重置次数达到上限")
                         return True
+                    if exists(黑色探索):
+                        TimeECHO(self.prefix+":不存在继续探索按钮,重置次数达到上限")
+                        return True
                     #当天重置次数以用完
+            sleep(30)
 
     def 六国远征(self):
         TimeECHO(self.prefix+":开始进行六国远征模式")
+        if not self.Tool.timelimit("六国远征战",limit=60*60*2,init=False):
+            TimeECHO(self.prefix+"时间太短,暂时不六国远征战")
+            return
         self.check_connect_status()
         if self.Tool.存在同步文件(): return False
         if not self.六国远征_进入界面():
@@ -2333,10 +2344,10 @@ class wzry_task:
                 TimeECHO(self.prefix+"加速对战中:建议把自动买装备和自动技能加点打开,更真实一些")
                 self.Tool.timelimit(timekey="endgame",limit=60*30,init=True)
                 移动pos=False
-                self.Tool.timelimit(timekey="check_connect_status",limit=30,init=True)
+                self.Tool.timelimit(timekey="check_connect_status",limit=60,init=True)
                 while self.Tool.existsTHENtouch(对战):
                     TimeECHO(self.prefix+"加速对战中:对战按钮")
-                    if self.Tool.timelimit(timekey="check_connect_status",limit=30,init=False):
+                    if self.Tool.timelimit(timekey="check_connect_status",limit=60,init=False):
                         self.check_connect_status()
                     if self.Tool.存在同步文件(): return True
                     if not 移动pos: 
@@ -2558,7 +2569,8 @@ class wzry_task:
                 else:
                     sleep(leftmin*60);
                 if self.王者营地礼包: self.每日礼包_王者营地()
-
+                self.进行六国远征 = not self.六国远征()
+                #
                 if self.debug: break
                 hour,minu=self.Tool.time_getHM()
                 self.选择人机模式=True
@@ -2566,7 +2578,6 @@ class wzry_task:
                 self.Tool.removefile("青铜模式.txt")
                 jinristep=0
                 新的一天=True
-                self.进行六国远征 = not self.六国远征()
             if 新的一天:
                 self.移动端.重启APP(10);
                 self.登录游戏()
@@ -2591,6 +2602,8 @@ class wzry_task:
             #
             if not self.组队模式 and self.进行六国远征:
                 self.进行六国远征 = not self.六国远征()
+                if self.进行六国远征:
+                    TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
 
             #
             if self.Tool.存在同步文件(): continue

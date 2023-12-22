@@ -98,7 +98,7 @@ python -u object.py (n-1) n
 |`self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"` |不修改代码和重启程序,修改对战过程中使用的英雄,内容见`WZRY.node.重新设置英雄.py`  |用户创建 |
 |`var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt"` | 存储很多图片坐标点的文件,减少图片识别时间,删除后重新识别 | 程序自动生成|
 |`青铜模式.txt`|存在则进行青铜快速人机,不存在则进行星耀人机|程序自动生成/用户创建
-|`NeedRebarrier.txt`|多进程运行时,强制跳过当前所有任务,进行统一的barrier|程序出错自动生成/用户创建|
+|`NeedRebarrier.txt`|多进程运行时,强制跳过当前所有任务,进行统一的barrier. 即使多进程模式已经对于各自为战的状态，这一文件也强制让所有进程进行一次barrier|程序出错自动生成/用户创建|
 | `self.prefix+"NeedRebarrier.txt"` |本进程跳过所有任务,回到循环开头,重新初始化 |  程序出错自动生成/用户创建 |
 |`self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成,用户删除|
 
