@@ -2168,6 +2168,135 @@ class wzry_task:
         self.Tool.LoopTouch(返回,"返回")
         self.确定按钮()
         return True
+    #
+    def 六国远征_界面判断(self):
+        六国界面图=Template(r"tpl1703206627245.png", record_pos=(-0.379, -0.255), resolution=(960, 540))
+        六国商店入口=Template(r"tpl1703207698623.png", record_pos=(-0.287, 0.219), resolution=(960, 540))
+        平台1=Template(r"tpl1703206581622.png", record_pos=(-0.298, -0.131), resolution=(960, 540))
+        if exists(六国界面图): return True
+        if exists(六国商店入口): return True
+        if exists(平台1): return True
+        return False
+    def 六国远征_进入界面(self,times=1):
+        self.check_connect_status()
+        if self.Tool.存在同步文件(): return False
+        if self.六国远征_界面判断(): return True
+        TimeECHO(self.prefix+":六国远征_进入界面")
+        #
+        if times == 1:
+            self.Tool.timelimit(timekey="六国远征_进入界面",limit=60*5,init=True)
+        else:
+            if self.Tool.timelimit(timekey="六国远征_进入界面",limit=60*5,init=False):
+                TimeErr(self.prefix+"六国远征_进入界面超时")
+                return False
+        if times > 10: return False
+        #
+        times=times+1
+        self.进入大厅()
+        万象天工=Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
+        if not self.Tool.existsTHENtouch(万象天工,"万象天工"):
+            TimeErr(self.prefix+":六国:找不到万象天工")
+            self.六国远征_进入界面(times)
+        sleep(2)
+        冒险玩法=Template(r"tpl1703206553221.png", record_pos=(-0.433, -0.132), resolution=(960, 540))
+        六国远征=Template(r"tpl1703206565024.png", record_pos=(0.152, -0.027), resolution=(960, 540))
+        if not self.Tool.existsTHENtouch(冒险玩法,"冒险玩法"):
+            TimeErr(self.prefix+":六国:找不到冒险玩法")
+            self.六国远征_进入界面(times)
+        sleep(2)
+        if not self.Tool.existsTHENtouch(六国远征,"六国远征"):
+            TimeErr(self.prefix+":六国:找不到六国远征界面")
+            self.六国远征_进入界面(times)
+        sleep(2)
+        if not self.六国远征_界面判断(): 
+            return self.六国远征_进入界面(times)
+        return True
+    #进入界面后再Call,这里默认已经进入界面了,不再进行重复检测
+    def 六国远征_自动探索(self,times=1):
+        if self.Tool.存在同步文件(): return False
+        自动探索=Template(r"tpl1703206610423.png", record_pos=(0.284, 0.22), resolution=(960, 540),threshold=0.9)
+        黑色探索=Template(r"tpl1703213113333.png", record_pos=(0.286, 0.22), resolution=(960, 540))
+        中止探索=Template(r"tpl1703206826450.png", record_pos=(0.285, 0.22), resolution=(960, 540))
+        黑色中止=Template(r"tpl1703214613742.png", record_pos=(0.284, 0.218), resolution=(960, 540))
+        重置次数=Template(r"tpl1703207708968.png", record_pos=(0.001, 0.22), resolution=(960, 540))
+        任务完成=Template(r"tpl1703207598362.png", record_pos=(0.083, -0.176), resolution=(960, 540),threshold=0.9)
+        任务完成0=Template(r"tpl1703207566167.png", record_pos=(-0.014, -0.156), resolution=(960, 540))
+        蓝色确定=Template(r"tpl1703207573159.png", record_pos=(-0.002, 0.163), resolution=(960, 540))
+        黄色确定=Template(r"tpl1703207718965.png", record_pos=(0.095, 0.117), resolution=(960, 540))
+        #每日首通的图标,只显示一次
+        关卡=[]
+        关卡.append(Template(r"tpl1703206581622.png", record_pos=(-0.298, -0.131), resolution=(960, 540)))
+        关卡.append(Template(r"tpl1703206592623.png", record_pos=(-0.056, -0.212), resolution=(960, 540)))
+        关卡.append(Template(r"tpl1703207999598.png", record_pos=(-0.111, 0.027), resolution=(960, 540)))
+        关卡.append(Template(r"tpl1703208004794.png", record_pos=(0.077, -0.032), resolution=(960, 540)))
+        关卡.append(Template(r"tpl1703208010005.png", record_pos=(0.306, 0.032), resolution=(960, 540)))
+        关卡.append(Template(r"tpl1703208015389.png", record_pos=(0.191, -0.163), resolution=(960, 540)))
+        #
+        if not self.六国远征_界面判断():
+            TimeErr(self.prefix+":六国_自动探索:找不到六国远征界面")
+            return False
+        #           
+        #
+        #正式开始探索
+        self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*20,init=True)
+        self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*5,init=True)
+        while True:
+            if self.健康系统(): return False
+            if self.Tool.存在同步文件(): return False
+            if self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*20,init=False):
+                TimeECHO(self.prefix+":探索时间达到上限")
+                return False
+            #探索过程中检测界面
+            if self.六国远征_界面判断():
+                self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*5,init=True)
+                TimeECHO(self.prefix+":检测到远征界面")
+            else:
+                if self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*10,init=False):
+                    TimeECHO(self.prefix+":五分钟内未检测到远征界面")
+                    if not self.六国远征_进入界面(): return False
+            #黑色终止和正常终止容易识别成同一个，这句话完全无意义，无作用
+            if exists(中止探索):
+                TimeECHO(self.prefix+":仍在探索中")
+            if self.Tool.existsTHENtouch(自动探索,"自动探索",savepos=False):
+                for i in range(10):
+                    if exists(任务完成): break
+                    TimeECHO(self.prefix+f"探索中....{i}/10")
+                    sleep(10)
+            if exists(任务完成0):#也可能是普通的一局结束
+                TimeECHO(self.prefix+":领取本局/轮奖励")
+                self.Tool.existsTHENtouch(蓝色确定,"蓝色确定",savepos=True)
+            #
+            if exists(任务完成):
+                TimeECHO(self.prefix+":自动探索一轮完成.回到界面.准备重置")
+                #多加几个判断
+                if not exists(关卡[0]):
+                    TimeECHO(self.prefix+":不存在关卡1,不该重置,返回")
+                    continue
+                else:
+                    TimeECHO(self.prefix+":存在关卡1")
+                    if not exists(关卡[-1]):
+                        TimeECHO(self.prefix+":不存在关卡-1,不该重置,返回")
+                        continue
+                #
+                if self.Tool.existsTHENtouch(重置次数,"重置次数",savepos=False):
+                    sleep(5)
+                    self.Tool.existsTHENtouch(黄色确定,"确定重置",savepos=False)
+                    if not exists(关卡[-1]):
+                        TimeECHO(self.prefix+":存在未探索关卡,继续探索")
+                        continue
+                    if exists(黑色中止):
+                        TimeECHO(self.prefix+":不存在继续探索按钮,重置次数达到上限")
+                        return True
+                    #当天重置次数以用完
+
+    def 六国远征(self):
+        TimeECHO(self.prefix+":开始进行六国远征模式")
+        self.check_connect_status()
+        if self.Tool.存在同步文件(): return False
+        if not self.六国远征_进入界面():
+            TimeECHO(self.prefix+":无法进行六国远征模式")
+            return False
+        return self.六国远征_自动探索()
 
 #状态判断
     def 判断大厅中(self):
@@ -2391,7 +2520,7 @@ class wzry_task:
             #------------------------------------------------------------------------------
             if os.path.exists(self.结束游戏FILE):
                 TimeECHO(self.prefix+f"检测到{self.结束游戏FILE}, stop")
-                self.Tool.关闭APP()
+                self.移动端.关闭APP()
                 return
             #
             while os.path.exists(self.SLEEPFILE):
@@ -2526,7 +2655,7 @@ class auto_airtest:
             LINK_dict[0]="Android:///"+"192.168.192.10:5555"
             LINK_dict[1]="Android:///"+"192.168.192.10:5565"
             LINK_dict[2]="ios:///http://127.0.0.1:8200"
-            LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
+            #LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
             #LINK_dict[totalnode-1]="ios:///http://169.254.83.56:8100"
             #LINK_dict[2]="ios:///http://169.254.83.56:8100"
             self.debug = False #仅用于设置ios连接,程序还是正常运行
@@ -2544,6 +2673,7 @@ class auto_airtest:
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
         TASK=wzry_task(self.移动端,对战模式,shiftnode=-4,debug=self.debug)
+        TASK.六国远征(); return
         TASK.RUN()
         self.移动端.关闭APP()
         #
@@ -2591,5 +2721,9 @@ if __name__ == "__main__":
             out = p.map_async(multi_start,m_cpu).get()
             p.close()
             p.join()
+
+#建议配置一些吸血的强势英雄：吕布、曹操、白起、夏侯惇、蒙恬
+#死了系统会自动调英雄,所以没太大必要？
+#赢得很干脆才能有20金币,普通胜利是>5
 
 
