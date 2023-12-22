@@ -1017,6 +1017,9 @@ class wzyd_libao:
 class wzry_task:
 #备注
 #新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
+#需要传递中文时,由于精简后无法输入中文,在shell中建
+# redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
+
     def __init__(self,移动端,对战模式,shiftnode=0,debug=False,限时组队时间=10):
         self.移动端=移动端
         self.mynode=self.移动端.mynode
@@ -1267,7 +1270,7 @@ class wzry_task:
                 self.Tool.touch同步文件()
                 return True
             else:
-               self.touch同步文件(self.独立同步文件)
+               self.Tool.touch同步文件(self.Tool.独立同步文件)
                self.移动端.关闭APP()
                return False
 
@@ -1491,7 +1494,7 @@ class wzry_task:
                 if self.Tool.existsTHENtouch(开始练习,"开始练习"): sleep(10)
                 if self.Tool.timelimit(timekey="单人进入人机匹配房间",limit=60*10,init=False):
                     TimeErr(self.prefix+":单人进入人机匹配房间超时,touch同步文件")
-                    if not self.组队模式: self.touch同步文件(self.独立同步文件)
+                    if not self.组队模式: self.Tool.touch同步文件(self.Tool.独立同步文件)
                     if self.组队模式: self.Tool.touch同步文件()
                     return True
             return self.单人进入人机匹配房间(times)
@@ -2738,9 +2741,3 @@ if __name__ == "__main__":
             out = p.map_async(multi_start,m_cpu).get()
             p.close()
             p.join()
-
-#建议配置一些吸血的强势英雄：吕布、曹操、白起、夏侯惇、蒙恬
-#死了系统会自动调英雄,所以没太大必要？
-#赢得很干脆才能有20金币,普通胜利是>5
-
-
