@@ -1143,7 +1143,7 @@ class wzry_task:
         self.Tool.timedict["领营地礼包"]=0
         self.Tool.timedict["六国远征战"]=0
         #self.每日礼包_妲己礼物()
-        self.每日礼包()
+        #self.每日礼包()
         #self.每日礼包_王者营地()
         #self.六国远征()
 
