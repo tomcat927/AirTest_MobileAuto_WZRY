@@ -1096,14 +1096,6 @@ class wzry_task:
         if "ios" in self.移动端.LINK:
             self.王者营地礼包=True
         TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
-        self.每日礼包() #刷新礼包的领取计时
-        #设置为0,可以保证下次必刷礼包
-        self.Tool.timedict["领游戏礼包"]=0
-        self.Tool.timedict["领营地礼包"]=0
-        self.Tool.timedict["六国远征战"]=0
-        #self.每日礼包_王者营地()
-
-        #
         #
         self.runinfo={}
         self.runinfo["runstep"]=0
@@ -1142,6 +1134,18 @@ class wzry_task:
         self.参战英雄头像=参战英雄头像_dict[self.mynode%6]
         self.备战英雄线路=参战英雄线路_dict[(self.mynode+3)%6]
         self.备战英雄头像=参战英雄头像_dict[(self.mynode+3)%6]
+        #
+        #刷新礼包的领取计时
+        self.每日礼包()
+        self.六国远征()
+        #设置为0,可以保证下次必刷礼包
+        self.Tool.timedict["领游戏礼包"]=0
+        self.Tool.timedict["领营地礼包"]=0
+        self.Tool.timedict["六国远征战"]=0
+        #self.每日礼包_妲己礼物()
+        self.每日礼包()
+        #self.每日礼包_王者营地()
+        #self.六国远征()
 
     #网络优化提示
     def 网络优化(self):
@@ -1722,7 +1726,6 @@ class wzry_task:
         返回房间按钮=Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540),threshold=0.9)
         while True:
             self.check_connect_status()
-            self.check_connect_status()
             if self.Tool.存在同步文件(): return True
             if self.Tool.timelimit(timekey="结束人机匹配",limit=60*15,init=False):
                 TimeErr(self.prefix+"结束人机匹配时间超时")
@@ -1904,7 +1907,8 @@ class wzry_task:
             self.每日礼包_妲己礼物()
             self.战队礼包()
             self.友情礼包()
-            self.玉镖夺魁()
+            #20231223 玉镖夺魁 活动关闭
+            #self.玉镖夺魁()
             TimeECHO(self.prefix+"钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
@@ -2156,19 +2160,23 @@ class wzry_task:
         times=times+1
         self.进入大厅()
         TimeECHO(self.prefix+f"领任务礼包:小妲己礼物{times}")
-
-        小妲己=Template(r"tpl1694441259292.png", record_pos=(0.458, 0.21), resolution=(960, 540))
+        #小妲己的图标会变化
+        妲己图标=[]
+        妲己图标.append(Template(r"tpl1694441259292.png", record_pos=(0.458, 0.21), resolution=(960, 540)))
+        妲己图标.append(Template(r"tpl1703297029482.png", record_pos=(0.451, 0.207), resolution=(960, 540)))
         一键领奖=Template(r"tpl1694442066106.png", record_pos=(-0.134, 0.033), resolution=(960, 540))
         去领取=Template(r"tpl1694442088041.png", record_pos=(-0.135, 0.107), resolution=(960, 540))
         收下=Template(r"tpl1694442103573.png", record_pos=(-0.006, 0.181), resolution=(960, 540))
         确定=Template(r"tpl1694442122665.png", record_pos=(-0.003, 0.165), resolution=(960, 540))
         返回=Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540))
         能力测试关闭=Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
-
         #
-        if not self.Tool.existsTHENtouch(小妲己,"小妲己"):
+        进入成功=False
+        for i in range(len(妲己图标)):
             if not self.判断大厅中(): self.进入大厅()
-            if not self.Tool.existsTHENtouch(小妲己,"小妲己"): return self.每日礼包_妲己礼物(times)
+            进入成功=self.Tool.existsTHENtouch(妲己图标[i],f"妲己图标{i}")
+            if 进入成功: break
+        if not 进入成功: return self.每日礼包_妲己礼物(times)
         #
         if exists(一键领奖):
             self.Tool.existsTHENtouch(去领取,"去领取")
@@ -2306,12 +2314,12 @@ class wzry_task:
                         return True
                     #当天重置次数以用完
             sleep(30)
-
+    #六国远征获取的金币不受欢迎5v5对战上限限制,可以额外获得金币
     def 六国远征(self):
-        TimeECHO(self.prefix+":开始进行六国远征模式")
         if not self.Tool.timelimit("六国远征战",limit=60*60*2,init=False):
             TimeECHO(self.prefix+"时间太短,暂时不六国远征战")
             return
+        TimeECHO(self.prefix+":开始进行六国远征模式")
         self.check_connect_status()
         if self.Tool.存在同步文件(): return False
         if not self.六国远征_进入界面():
@@ -2577,6 +2585,11 @@ class wzry_task:
                     self.移动端.重启APP(leftmin*60)
                 else:
                     sleep(leftmin*60);
+                if not self.check_connect_status():
+                    self.移动端.连接设备()
+                    self.移动端.重启APP(30)
+                if self.Tool.存在同步文件(): return True
+
                 if self.王者营地礼包: self.每日礼包_王者营地()
                 self.进行六国远征 = not self.六国远征()
                 #
