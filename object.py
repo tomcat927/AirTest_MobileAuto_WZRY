@@ -1498,7 +1498,8 @@ class wzry_task:
         #
         if not self.判断房间中():
             #有时候长时间不进去被禁赛了
-            while self.Tool.existsTHENtouch(Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540)),"不匹配被禁赛的确定按钮"):
+            确定按钮=Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
+            while self.Tool.existsTHENtouch(确定按钮,"不匹配被禁赛的确定按钮"):
                 sleep(20)
                 if self.Tool.existsTHENtouch(开始练习,"开始练习"): sleep(10)
                 if self.Tool.timelimit(timekey="单人进入人机匹配房间",limit=60*10,init=False):
@@ -1743,6 +1744,8 @@ class wzry_task:
                 continue
             if self.判断房间中(): return
             if self.判断大厅中(): return
+            确定按钮=Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
+            self.Tool.existsTHENtouch(确定按钮,"回归对战的奖励确定按钮",savepos=False)
             if exists(返回房间按钮): jixu=True
             if self.健康系统():
                 TimeErr(self.prefix+"结束人机匹配:健康系统")
