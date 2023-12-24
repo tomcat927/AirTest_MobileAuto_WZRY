@@ -2318,7 +2318,27 @@ class wzry_task:
                     self.移动端.重启APP(10)
                     return self.六国远征_自动探索(times)
             #对战中判断,这句话没有什么用,就是单纯跑一下
-            self.判断对战中()
+            #windows的虚拟机,容易对战结束后卡在对战界面，如果联系60s都是对战界面,建议点击右上角退出游戏
+            if self.判断对战中():
+                还在对战=True
+                for i in range(30):
+                    还在对战=self.判断对战中()
+                    if not 还在对战: break
+                    sleep(5)
+                if 还在对战:
+                    TimeECHO(self.prefix+"还在对战,可能卡住,手动退出")
+                    设置按钮=Template(r"tpl1703433283847.png", record_pos=(0.47, -0.258), resolution=(960, 540))
+                    退出本局=Template(r"tpl1703433372804.png", record_pos=(-0.01, 0.218), resolution=(960, 540))
+                    继续=Template(r"tpl1703433396250.png", record_pos=(0.0, 0.241), resolution=(960, 540))
+                    self.Tool.existsTHENtouch(设置按钮,"设置按钮",savepos=True)
+                    sleep(5)
+                    self.Tool.existsTHENtouch(退出本局,"退出本局",savepos=True)
+                    sleep(5)
+                    #退出两次时怕有点击屏幕继续
+                    self.Tool.existsTHENtouch(退出本局,"退出本局",savepos=True)
+                    sleep(5)
+                    self.Tool.existsTHENtouch(继续,"继续",savepos=False)
+                    break
             if self.Tool.existsTHENtouch(自动探索,"自动探索",savepos=False):
                 self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
             #有时候会卡住,需要手动点击一下,而且容易卡多次
