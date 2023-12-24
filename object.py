@@ -832,10 +832,14 @@ class deviceOB:
                 TimeECHO(self.prefix+f"...taskkill_sleep: {i}/{nstep}",end='\r')
                 sleep(printtime)
         TimeECHO(self.prefix+f"打开程序")
-        self.打开APP()
-        TimeECHO(self.prefix+f"打开程序成功,sleep60*2")
-        sleep(60*2)
-        return True
+        if self.打开APP():
+            TimeECHO(self.prefix+f"打开程序成功,sleep60*2")
+            sleep(60*2)
+            return True
+        else:
+            TimeECHO(self.prefix+f"打开程序失败")
+            return False
+
 
 
 
@@ -859,6 +863,9 @@ class wzyd_libao:
       self.Tool=DQWheel(prefix=self.prefix)
 
    def RUN(self):
+      if not start_app(self.APPID):
+          TimeECHO(self.prefix+"营地无法打开,返回")
+          return False
       #营地货币目前仅支持ios领取
       if not self.IOS: self.体验服礼物()
       self.营地币兑换碎片()
