@@ -1038,7 +1038,6 @@ class wzry_task:
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
         self.选择人机模式=True
         self.青铜段位=os.path.exists("青铜模式.txt")
-        self.进行六国远征=True
         #
         self.对战时间=[5.1,23] #单位hour,对战时间取4.5是为了让程序在4点时启动领取昨日没领完的礼包
         #当hour小于此数字时才是组队模式
@@ -1137,7 +1136,7 @@ class wzry_task:
         #
         #刷新礼包的领取计时
         self.每日礼包()
-        self.六国远征()
+        self.进行六国远征 = not self.六国远征()
         #设置为0,可以保证下次必刷礼包
         self.Tool.timedict["领游戏礼包"]=0
         self.Tool.timedict["领营地礼包"]=0
@@ -2211,6 +2210,7 @@ class wzry_task:
         if times > 10: return False
         #
         times=times+1
+        TimeECHO(self.prefix+":六国远征_准备从大厅重新进入六国界面")
         self.进入大厅()
         万象天工=Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
         if not self.Tool.existsTHENtouch(万象天工,"万象天工"):
@@ -2230,26 +2230,48 @@ class wzry_task:
         if not self.六国远征_界面判断(): 
             return self.六国远征_进入界面(times)
         return True
+    def 六国远征_重置次数(self):
+        if not self.六国远征_进入界面():
+            TimeECHO(self.prefix+":无法进行六国远征模式,重置次数失败")
+            return False
+        #
+        重置次数=Template(r"tpl1703207708968.png", record_pos=(0.001, 0.22), resolution=(960, 540))
+        黄色确定=Template(r"tpl1703207718965.png", record_pos=(0.095, 0.117), resolution=(960, 540))
+        关卡=[]
+        关卡.append(Template(r"tpl1703208015389.png", record_pos=(0.191, -0.163), resolution=(960, 540),threshold=0.9))
+        #
+        TimeECHO(self.prefix+":六国远征.准备重置次数")
+        if self.Tool.existsTHENtouch(重置次数,"重置次数",savepos=False):
+            sleep(5)
+            self.Tool.existsTHENtouch(黄色确定,"确定重置",savepos=False)
+            sleep(5)
+            if not exists(关卡[-1]):
+                TimeECHO(self.prefix+":重置成功")
+                return True
+            else:
+                TimeECHO(self.prefix+f":找到{关卡[-1]},重置失败")
+                return False
+        else:
+            TimeECHO(self.prefix+":找不到重置按钮")
+            return False
+
     #进入界面后再Call,这里默认已经进入界面了,不再进行重复检测
     def 六国远征_自动探索(self,times=1):
         if self.Tool.存在同步文件(): return False
         自动探索=Template(r"tpl1703206610423.png", record_pos=(0.284, 0.22), resolution=(960, 540),threshold=0.9)
-        黑色探索=Template(r"tpl1703213113333.png", record_pos=(0.286, 0.22), resolution=(960, 540))
-        中止探索=Template(r"tpl1703206826450.png", record_pos=(0.285, 0.22), resolution=(960, 540))
-        黑色中止=Template(r"tpl1703214613742.png", record_pos=(0.284, 0.218), resolution=(960, 540))
-        重置次数=Template(r"tpl1703207708968.png", record_pos=(0.001, 0.22), resolution=(960, 540))
         任务完成=Template(r"tpl1703207598362.png", record_pos=(0.083, -0.176), resolution=(960, 540),threshold=0.9)
         任务完成0=Template(r"tpl1703207566167.png", record_pos=(-0.014, -0.156), resolution=(960, 540))
         蓝色确定=Template(r"tpl1703207573159.png", record_pos=(-0.002, 0.163), resolution=(960, 540))
         黄色确定=Template(r"tpl1703207718965.png", record_pos=(0.095, 0.117), resolution=(960, 540))
+        挑战按钮=Template(r"tpl1703343022624.png", record_pos=(0.221, 0.201), resolution=(960, 540))
         #每日首通的图标,只显示一次
         关卡=[]
-        关卡.append(Template(r"tpl1703206581622.png", record_pos=(-0.298, -0.131), resolution=(960, 540)))
-        关卡.append(Template(r"tpl1703206592623.png", record_pos=(-0.056, -0.212), resolution=(960, 540)))
-        关卡.append(Template(r"tpl1703207999598.png", record_pos=(-0.111, 0.027), resolution=(960, 540)))
-        关卡.append(Template(r"tpl1703208004794.png", record_pos=(0.077, -0.032), resolution=(960, 540)))
-        关卡.append(Template(r"tpl1703208010005.png", record_pos=(0.306, 0.032), resolution=(960, 540)))
-        关卡.append(Template(r"tpl1703208015389.png", record_pos=(0.191, -0.163), resolution=(960, 540)))
+        关卡.append(Template(r"tpl1703206581622.png", record_pos=(-0.298, -0.131), resolution=(960, 540),threshold=0.9))
+        关卡.append(Template(r"tpl1703206592623.png", record_pos=(-0.056, -0.212), resolution=(960, 540),threshold=0.9))
+        关卡.append(Template(r"tpl1703207999598.png", record_pos=(-0.111, 0.027), resolution=(960, 540),threshold=0.9))
+        关卡.append(Template(r"tpl1703208004794.png", record_pos=(0.077, -0.032), resolution=(960, 540),threshold=0.9))
+        关卡.append(Template(r"tpl1703208010005.png", record_pos=(0.306, 0.032), resolution=(960, 540),threshold=0.9))
+        关卡.append(Template(r"tpl1703208015389.png", record_pos=(0.191, -0.163), resolution=(960, 540),threshold=0.9))
         #
         if not self.六国远征_界面判断():
             TimeErr(self.prefix+":六国_自动探索:找不到六国远征界面")
@@ -2257,17 +2279,22 @@ class wzry_task:
         #           
         #
         #正式开始探索,基本上10分钟才能完成一轮，所以这个时间就取50
-        self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*50,init=True)
-        self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*5,init=True)
+        if times == 1: self.Tool.timelimit(timekey="六国远征_闯关计时",limit=60*50,init=True)
+        #是因为容易卡住,所以设置这个上限,在一段时间内必须能检测到界面
+        self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*10,init=True)
+        times=times+1
+        if times > 2:
+            TimeErr(self.prefix+":六国_自动探索:次数太多,放弃")
+            return False
         while True:
             if self.健康系统(): return False
             if self.Tool.存在同步文件(): return False
-            if self.Tool.timelimit(timekey="六国远征_自动探索上限",limit=60*30,init=False):
+            if self.Tool.timelimit(timekey="六国远征_闯关计时",limit=60*50,init=False):
                 TimeECHO(self.prefix+":探索时间达到上限")
                 return False
             #探索过程中检测界面
             if self.六国远征_界面判断():
-                self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*5,init=True)
+                self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
                 TimeECHO(self.prefix+":检测到远征界面")
                 for i in range(len(关卡)):
                     if exists(关卡[i]):
@@ -2275,14 +2302,36 @@ class wzry_task:
                     else:
                         break
             else:
-                if self.Tool.timelimit(timekey="六国远征_远征界面上限",limit=60*10,init=False):
-                    TimeECHO(self.prefix+":五分钟内未检测到远征界面")
-                    if not self.六国远征_进入界面(): return False
+                if self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=False):
+                    TimeECHO(self.prefix+":10分钟内未检测到远征界面")
+                    TimeECHO(self.prefix+":有概率界面卡住,重启APP")
+                    self.移动端.重启APP(10)
+                    return self.六国远征_自动探索(times)
+            #对战中判断,这句话没有什么用,就是单纯跑一下
+            self.判断对战中()
             if self.Tool.existsTHENtouch(自动探索,"自动探索",savepos=False):
-                for i in range(10):
-                    if exists(任务完成): break
-                    TimeECHO(self.prefix+f"探索中....{i}/10")
-                    sleep(10)
+                self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
+            #有时候会卡住,需要手动点击一下,而且容易卡多次
+            if exists(挑战按钮):
+                TimeECHO(self.prefix+"检测到挑战按钮")
+                sleep(10)
+                if self.Tool.existsTHENtouch(挑战按钮,"挑战按钮",savepos=False):
+                   TimeECHO(self.prefix+":卡在挑战按钮,点击跳过")
+                   sleep(10)
+                   self.Tool.LoopTouch(挑战按钮,"挑战按钮",loop=10,savepos=False)
+                   if exists(挑战按钮):
+                       TimeErr(self.prefix+":仍有挑战按钮,大概率英雄已经死完了,准备重置次数")
+                       if self.六国远征_重置次数():
+                          TimeECHO(self.prefix+"成功重置,继续今日挑战")
+                          continue
+                       else:
+                          TimeECHO(self.prefix+"无法重置,结束今日挑战")
+                          return True
+                   else:
+                       TimeECHO(self.prefix+":挑战按钮消失,跳过成功")
+                       self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
+                       continue
+            #
             if exists(任务完成0):#也可能是普通的一局结束
                 TimeECHO(self.prefix+":领取本局/轮奖励")
                 self.Tool.existsTHENtouch(蓝色确定,"蓝色确定",savepos=False)
@@ -2299,22 +2348,14 @@ class wzry_task:
                         TimeECHO(self.prefix+":不存在关卡-1,不该重置,返回")
                         continue
                 #
-                if self.Tool.existsTHENtouch(重置次数,"重置次数",savepos=False):
-                    sleep(5)
-                    self.Tool.existsTHENtouch(黄色确定,"确定重置",savepos=False)
-                    if not exists(关卡[-1]):
-                        TimeECHO(self.prefix+":存在未探索关卡,继续探索")
-                        continue
-                    #这个时刻,自动探索，结束自动探索都是可能的
-                    if exists(黑色中止):
-                        TimeECHO(self.prefix+":不存在继续探索按钮,重置次数达到上限")
-                        return True
-                    if exists(黑色探索):
-                        TimeECHO(self.prefix+":不存在继续探索按钮,重置次数达到上限")
-                        return True
-                    #当天重置次数以用完
+                if self.六国远征_重置次数():
+                    continue
+                else:
+                    TimeECHO(self.prefix+"无法重置,不再继续探索")
+                    return True
             sleep(30)
     #六国远征获取的金币不受欢迎5v5对战上限限制,可以额外获得金币
+    #当英雄太少,铭文不够时,进行六国模式,容易发生英雄死完了,一轮没通关
     def 六国远征(self):
         if not self.Tool.timelimit("六国远征战",limit=60*60*2,init=False):
             TimeECHO(self.prefix+"时间太短,暂时不六国远征战")
@@ -2639,13 +2680,15 @@ class wzry_task:
             #
             #------------------------------------------------------------------------------
             #增加对战模式
-            self.标准触摸对战=os.path.exists(self.触摸对战FILE)
+            if os.path.exists(self.触摸对战FILE):
+                TimeECHO(self.prefix+f"检测到{self.触摸对战FILE}")
+                self.标准触摸对战=True
             #每天早上的前1场对战使用标准触摸,这样可以完成一些系统任务
             if jinristep <  2: self.标准触摸对战=True
             #每天抽出几场用于完成系统检测
             if jinristep % 8 == 0 and not self.组队模式: self.标准触摸对战=True
             if self.标准触摸对战:
-                TimeECHO(self.prefix+f"检测到{self.触摸对战FILE}, 使用标准模式对战,并且模拟人手触摸")
+                TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             #------------------------------------------------------------------------------
             #运行前统一变量
             self.runinfo["runstep"]=runstep
@@ -2760,3 +2803,4 @@ if __name__ == "__main__":
             out = p.map_async(multi_start,m_cpu).get()
             p.close()
             p.join()
+
