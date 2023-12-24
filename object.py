@@ -2325,7 +2325,7 @@ class wzry_task:
                           TimeECHO(self.prefix+"成功重置,继续今日挑战")
                           continue
                        else:
-                          TimeECHO(self.prefix+"无法重置,结束今日挑战")
+                          TimeECHO(self.prefix+"无法重置,远征完成,结束今日挑战")
                           return True
                    else:
                        TimeECHO(self.prefix+":挑战按钮消失,跳过成功")
@@ -2351,7 +2351,7 @@ class wzry_task:
                 if self.六国远征_重置次数():
                     continue
                 else:
-                    TimeECHO(self.prefix+"无法重置,不再继续探索")
+                    TimeECHO(self.prefix+"无法重置,远征完成,不再继续探索")
                     return True
             sleep(30)
     #六国远征获取的金币不受欢迎5v5对战上限限制,可以额外获得金币
@@ -2612,6 +2612,7 @@ class wzry_task:
             #
             新的一天=False
             while hour >= endclock or hour < startclock:
+                #这里仅领礼包,不要插入六国远征等不稳定的任务
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.每日礼包()
                 self.移动端.关闭APP()
@@ -2630,9 +2631,8 @@ class wzry_task:
                     self.移动端.连接设备()
                     self.移动端.重启APP(30)
                 if self.Tool.存在同步文件(): return True
-
+                self.进行六国远征 = True
                 if self.王者营地礼包: self.每日礼包_王者营地()
-                self.进行六国远征 = not self.六国远征()
                 #
                 if self.debug: break
                 hour,minu=self.Tool.time_getHM()
@@ -2663,6 +2663,7 @@ class wzry_task:
             if self.组队模式: TimeECHO(self.prefix+"组队模式")
             self.房主=self.mynode == 0 or self.totalnode == 1
             #
+            #仅在单人模式时进行六国远征
             if not self.组队模式 and self.进行六国远征:
                 self.进行六国远征 = not self.六国远征()
                 if self.进行六国远征:
@@ -2680,13 +2681,18 @@ class wzry_task:
             #
             #------------------------------------------------------------------------------
             #增加对战模式
+            self.标准触摸对战=False
             if os.path.exists(self.触摸对战FILE):
                 TimeECHO(self.prefix+f"检测到{self.触摸对战FILE}")
                 self.标准触摸对战=True
-            #每天早上的前1场对战使用标准触摸,这样可以完成一些系统任务
-            if jinristep <  2: self.标准触摸对战=True
             #每天抽出几场用于完成系统检测
+            #暂时关闭祖组队时,还触摸对战的功能,因为作用不大,还降低胜率
+            #if jinristep % 4 == 0 and self.组队模式: self.标准触摸对战=True
             if jinristep % 8 == 0 and not self.组队模式: self.标准触摸对战=True
+            #希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
+            if not self.青铜段位 and self.标准触摸对战:
+                TimeECHO(self.prefix+f"非青铜局不模拟人手触摸")
+                self.标准触摸对战=False
             if self.标准触摸对战:
                 TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             #------------------------------------------------------------------------------
