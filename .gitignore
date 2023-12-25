@@ -1,6 +1,7 @@
 #macos
 .DS_Store
 result*
+._*png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
