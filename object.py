@@ -1489,7 +1489,7 @@ class wzry_task:
                 self.Tool.touch同步文件()
                 return True
             else:
-                self.touch同步文件(self.独立同步文件)
+                self.Tool.touch同步文件(self.独立同步文件)
                 return True
         #
         #段位限制
