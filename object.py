@@ -2301,6 +2301,8 @@ class wzry_task:
             if self.Tool.存在同步文件(): return False
             if self.Tool.timelimit(timekey="六国远征_闯关计时",limit=60*50,init=False):
                 TimeECHO(self.prefix+":探索时间达到上限")
+                #这里其实还在探索关卡,直接return不行,程序还在探索
+                self.移动端.重启APP(10)
                 return False
             #探索过程中检测界面
             if self.六国远征_界面判断():
@@ -2312,6 +2314,7 @@ class wzry_task:
                     else:
                         break
             else:
+                self.Tool.existsTHENtouch(蓝色确定,"成就确定",savepos=False)
                 if self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=False):
                     TimeECHO(self.prefix+":10分钟内未检测到远征界面")
                     TimeECHO(self.prefix+":有概率界面卡住,重启APP")
@@ -2362,6 +2365,8 @@ class wzry_task:
                        self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
                        continue
             #
+            #达成六国的各种成就
+            
             if exists(任务完成0):#也可能是普通的一局结束
                 TimeECHO(self.prefix+":领取本局/轮奖励")
                 self.Tool.existsTHENtouch(蓝色确定,"蓝色确定",savepos=False)
@@ -2696,6 +2701,7 @@ class wzry_task:
             #仅在单人模式时进行六国远征
             if not self.组队模式 and self.进行六国远征:
                 self.进行六国远征 = not self.六国远征()
+                self.进入大厅()
                 if self.进行六国远征:
                     TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
 
