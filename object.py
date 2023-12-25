@@ -813,6 +813,7 @@ class deviceOB:
             sleep(20)
         if "com.tencent.tmgp.sgame" in self.APPID: #IOS
             sleep(30) #ipSE的打开APP是在是太慢了
+        return True
 
     def 重启APP(self,sleeptime=0):
         TimeECHO(self.prefix+f"重启APP中")
