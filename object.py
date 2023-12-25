@@ -1144,10 +1144,12 @@ class wzry_task:
         #刷新礼包的领取计时
         self.每日礼包()
         self.进行六国远征 = not self.六国远征()
+        self.进行武道大会 = not self.武道大会()
         #设置为0,可以保证下次必刷礼包
         self.Tool.timedict["领游戏礼包"]=0
         self.Tool.timedict["领营地礼包"]=0
         self.Tool.timedict["六国远征战"]=0
+        self.Tool.timedict["武道大会"]=0
         #self.每日礼包_妲己礼物()
         #self.每日礼包()
         #self.每日礼包_王者营地()
@@ -2402,7 +2404,101 @@ class wzry_task:
             TimeECHO(self.prefix+":无法进行六国远征模式")
             return False
         return self.六国远征_自动探索()
-
+    #
+    #懒得分写成好几个了
+    def 武道大会(self):
+        if not self.Tool.timelimit("武道大会",limit=60*60*2,init=False):
+            TimeECHO(self.prefix+"时间太短,暂时不武道大会")
+            return False
+        TimeECHO(self.prefix+":开始进行武道大会")
+        self.check_connect_status()
+        if self.Tool.存在同步文件(): return False
+        #进入对战
+        武道界面=Template(r"tpl1703483575207.png", record_pos=(-0.357, -0.25), resolution=(960, 540))
+        if not exists(武道界面):
+            self.进入大厅()
+            万象天工=Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
+            if not self.Tool.existsTHENtouch(万象天工,"万象天工"):
+                TimeErr(self.prefix+":找不到万象天工")
+                self.进入大厅()
+                if not self.Tool.existsTHENtouch(万象天工,"万象天工"):
+                    TimeErr(self.prefix+":第二次无法找不到万象天工,武道大会失败")
+                    return False
+            sleep(2)
+            #
+            冒险玩法=Template(r"tpl1703206553221.png", record_pos=(-0.433, -0.132), resolution=(960, 540))
+            武道大会入口=Template(r"tpl1703482944918.png", record_pos=(-0.158, -0.028), resolution=(960, 540))
+            if not self.Tool.existsTHENtouch(冒险玩法,"冒险玩法"):
+                TimeErr(self.prefix+":武道:找不到冒险玩法")
+            sleep(2)
+            if not self.Tool.existsTHENtouch(武道大会入口,"武道大会入口"):
+                TimeErr(self.prefix+":找不到武道大会入口")
+            sleep(2)
+        #
+        if not exists(武道界面):
+            TimeErr(self.prefix+":最后也没有找到武道大会")
+            return False
+        #
+        self.Tool.timelimit(timekey="武道大会_计时",limit=60*50,init=True)
+        while True:
+            #.............................................
+            if not exists(武道界面):
+                TimeErr(self.prefix+":不在武道大会初始界面")
+                return False
+            #.............................................
+            if self.健康系统(): return False
+            if self.Tool.存在同步文件(): return False
+            if self.Tool.timelimit(timekey="武道大会_计时",limit=60*50,init=False):
+                TimeECHO(self.prefix+":武道大会达到上限")
+                #这里其实还在探索关卡,直接return不行,程序还在探索
+                self.移动端.重启APP(10)
+                return False
+            #
+            挑战按钮1=Template(r"tpl1703482958121.png", record_pos=(0.307, 0.106), resolution=(960, 540))
+            self.Tool.existsTHENtouch(挑战按钮1,"主挑战按钮",savepos=True)
+            sleep(5)
+            #这里等待判断是不是对战次数达到上限
+            if exists(武道界面):
+                TimeECHO(self.prefix+":武道大会今日达标")
+                return True
+            挑战按钮2=Template(r"tpl1703482967110.png", record_pos=(0.122, -0.046), resolution=(960, 540))
+            self.Tool.existsTHENtouch(挑战按钮2,"次挑战按钮",savepos=True)
+            sleep(5)
+            没选择英雄时=Template(r"tpl1703483013544.png", record_pos=(0.427, -0.011), resolution=(960, 540))
+            if exists(没选择英雄时):
+                TimeErr(self.prefix+":需要手动选择英雄")
+                return False
+            确定挑战=Template(r"tpl1703483092932.png", record_pos=(0.427, 0.239), resolution=(960, 540))
+            self.Tool.existsTHENtouch(确定挑战,"确定挑战",savepos=True)
+            #sleep至对战阶段,这个要判断勤点,不然直接循环的就太久了
+            for i in range(60):
+                if self.判断对战中(): break #流程正常
+                TimeECHO(self.prefix+":sleep等待对战检测")
+                sleep(2)
+            #等待对战结束
+            for i in range(10):
+                if self.判断对战中(): 
+                    TimeECHO(self.prefix+":sleep等待对战结束")
+                    sleep(90)#等待长一点时间
+                else:
+                    sleep(30) #避免刚结束对战，程序有点小卡
+                    break
+            #
+            任意点击继续=Template(r"tpl1703483189920.png", record_pos=(0.003, 0.228), resolution=(960, 540))
+            self.Tool.existsTHENtouch(任意点击继续,"任意点击继续",savepos=True); sleep(10)
+            确定继续=Template(r"tpl1703483203726.png", record_pos=(0.302, 0.23), resolution=(960, 540))
+            self.Tool.existsTHENtouch(确定继续,"确定继续"); sleep(10)
+            任意继续=Template(r"tpl1703483241120.png", record_pos=(-0.006, -0.255), resolution=(960, 540))
+            self.Tool.existsTHENtouch(任意继续,"任意继续"); sleep(10)
+            继续按钮=Template(r"tpl1703483264138.png", record_pos=(-0.002, 0.24), resolution=(960, 540))
+            self.Tool.existsTHENtouch(继续按钮,"继续按钮"); sleep(10)
+            if not exists(武道界面):
+                TimeECHO(self.prefix+"找不到武道界面了,重新进入界面")
+                sleep(30)
+                self.进入大厅()
+                self.Tool.existsTHENtouch(万象天工,"万象天工")
+                self.Tool.existsTHENtouch(冒险玩法,"冒险玩法")
+                self.Tool.existsTHENtouch(武道大会入口,"武道大会入口")
 #状态判断
     def 判断大厅中(self):
         if exists(self.大厅对战图标):
@@ -2667,6 +2763,7 @@ class wzry_task:
                     self.移动端.重启APP(30)
                 if self.Tool.存在同步文件(): return True
                 self.进行六国远征 = True
+                self.进行武道大会 = True
                 if self.王者营地礼包: self.每日礼包_王者营地()
                 #
                 if self.debug: break
@@ -2699,12 +2796,17 @@ class wzry_task:
             self.房主=self.mynode == 0 or self.totalnode == 1
             #
             #仅在单人模式时进行六国远征
-            if not self.组队模式 and self.进行六国远征:
-                self.进行六国远征 = not self.六国远征()
-                self.进入大厅()
+            if not self.组队模式:
                 if self.进行六国远征:
-                    TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
-
+                    self.进行六国远征 = not self.六国远征()
+                    self.进入大厅()
+                    if self.进行六国远征:
+                        TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
+                if self.进行武道大会:
+                    self.进行武道大会= not self.武道大会()
+                    self.进入大厅()
+                    if self.进行武道大会:
+                        TimeECHO(self.prefix+"武道大会探索未结束,需要重复进行探索")
             #
             if self.Tool.存在同步文件(): continue
             self.Tool.barriernode(self.mynode,self.totalnode,"准备进入战斗循环")
@@ -2798,8 +2900,9 @@ class auto_airtest:
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
         TASK=wzry_task(self.移动端,对战模式,shiftnode=-4,debug=self.debug)
+        #TASK.武道大会()
         TASK.RUN()
-        self.移动端.关闭APP()
+        #self.移动端.关闭APP()
         #
     def printINFO(self):
         TimeECHO(self.prefix+f"{self.prefix}:LINK={self.LINK}")
