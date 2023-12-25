@@ -2900,9 +2900,8 @@ class auto_airtest:
         #
         对战模式="模拟战" if "moni" in __file__ else "5v5匹配"
         TASK=wzry_task(self.移动端,对战模式,shiftnode=-4,debug=self.debug)
-        #TASK.武道大会()
         TASK.RUN()
-        #self.移动端.关闭APP()
+        self.移动端.关闭APP()
         #
     def printINFO(self):
         TimeECHO(self.prefix+f"{self.prefix}:LINK={self.LINK}")
