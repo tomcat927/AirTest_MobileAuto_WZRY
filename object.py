@@ -2496,6 +2496,7 @@ class wzry_task:
             if self.Tool.existsTHENtouch(黄色确定,"段位提升黄色确定"): sleep(10)
             继续按钮=Template(r"tpl1703483264138.png", record_pos=(-0.002, 0.24), resolution=(960, 540))
             self.Tool.existsTHENtouch(继续按钮,"继续按钮"); sleep(10)
+            if self.健康系统(): return False
             if not exists(武道界面):
                 TimeECHO(self.prefix+"找不到武道界面了,重新进入界面")
                 sleep(30)
