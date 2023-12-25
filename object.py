@@ -2458,7 +2458,8 @@ class wzry_task:
             self.Tool.existsTHENtouch(挑战按钮1,"主挑战按钮",savepos=True)
             sleep(5)
             #这里等待判断是不是对战次数达到上限
-            if exists(武道界面):
+            挑战界面=Template(r"tpl1703482977909.png", record_pos=(-0.002, -0.116), resolution=(960, 540))
+            if not exists(挑战界面):
                 TimeECHO(self.prefix+":武道大会今日达标")
                 return True
             挑战按钮2=Template(r"tpl1703482967110.png", record_pos=(0.122, -0.046), resolution=(960, 540))
