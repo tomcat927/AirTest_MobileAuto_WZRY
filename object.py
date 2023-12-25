@@ -1088,14 +1088,16 @@ class wzry_task:
         #.
         self.结束游戏FILE="WZRY.ENDGAME.txt"
         self.SLEEPFILE="WZRY.SLEEP.txt"
-        self.触摸对战FILE="WZRY.TOUCH.txt"
+        self.触摸对战FILE="WZRY.TOUCH.txt" #在5v5的对战过程中,频繁触摸,提高金币数量
+        self.标准模式触摸对战FILE="WZRY.标准模式TOUCH.txt" #检测到该文件后该次对战使用5v5标准对战模式
         self.临时组队FILE="WZRY.组队.txt"
         self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         #self.Tool.removefile(self.触摸对战FILE)
         #self.Tool.removefile(self.临时组队FILE)
-        self.标准触摸对战=os.path.exists(self.触摸对战FILE)
+        self.触摸对战=os.path.exists(self.触摸对战FILE)
+        self.标准触摸对战=os.path.exists(self.标准模式触摸对战FILE)
         #
         self.王者营地礼包=False
         if ":5555" in self.移动端.LINK:
@@ -1215,6 +1217,7 @@ class wzry_task:
             处理对战="模拟战" in self.对战模式
             if self.debug: 处理对战=True
             if self.标准触摸对战: 处理对战=True
+            if self.触摸对战: 处理对战=True
             while self.判断对战中(处理对战):
                 TimeECHO(self.prefix+"尝试进入大厅:对战中,直接重启APP")
                 if self.debug:
@@ -1747,7 +1750,9 @@ class wzry_task:
                     self.Tool.touch同步文件(self.Tool.独立同步文件)
                     return
                 return self.进入大厅()
-            加速对战=self.标准触摸对战
+            加速对战=False
+            if self.标准触摸对战: 加速对战=True
+            if self.触摸对战: 加速对战=True
             if self.判断对战中(加速对战):
                 jixu=False
                 sleep(30)
@@ -2787,7 +2792,8 @@ class wzry_task:
             hour,minu=self.Tool.time_getHM()
             #当hour小于此数字时才是组队模式
             #这里的同步文件是怕有的进程跑的太快了，刚好错过这个时间点
-            if hour >=  self.限时组队时间 and not self.Tool.存在同步文件() and runstep > 0 and self.totalnode > 1:
+            #去掉条件and runstep > 0, 以后的第一次不再进行组队模拟,程序出问题的概率不大,真测试可以touch组队文件
+            if hour >=  self.限时组队时间 and not self.Tool.存在同步文件() and self.totalnode > 1:
                 TimeECHO(self.prefix+"限时进入单人模式")
                 self.totalnode=1
                 self.进入大厅()
@@ -2840,18 +2846,23 @@ class wzry_task:
             #
             #------------------------------------------------------------------------------
             #增加对战模式
-            self.标准触摸对战=False
-            if os.path.exists(self.触摸对战FILE):
-                TimeECHO(self.prefix+f"检测到{self.触摸对战FILE}")
-                self.标准触摸对战=True
-            #每天抽出几场用于完成系统检测
-            #暂时关闭祖组队时,还触摸对战的功能,因为作用不大,还降低胜率
-            #if jinristep % 4 == 0 and self.组队模式: self.标准触摸对战=True
-            if jinristep % 8 == 0 and not self.组队模式: self.标准触摸对战=True
+            self.触摸对战=os.path.exists(self.触摸对战FILE)
+            self.标准触摸对战=os.path.exists(self.标准模式触摸对战FILE)
+            #默认标准模式的触摸对战每天只启动一次,其余时间用户通过手动建文件启动
+            #经过对比发现,触摸对战,系统会判定没有挂机,给的金币更多, 所以这里提高5v5对战过程中触摸的几率
+            if jinristep % 3 != 0 and not self.组队模式: self.触摸对战=True
+            #在特定步数进行标准对战,频率很低
+            if jinristep % 15 == 0 and not self.组队模式: self.标准触摸对战=True
             #希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
-            if not self.青铜段位 and self.标准触摸对战:
-                TimeECHO(self.prefix+f"非青铜局不模拟人手触摸")
-                self.标准触摸对战=False
+            if not self.青铜段位:
+                if self.触摸对战:
+                    TimeECHO(self.prefix+f"非青铜局不模拟人手触摸")
+                    self.触摸对战=False
+                if self.标准触摸对战:
+                    TimeECHO(self.prefix+f"非青铜局不进行标准模式的人手触摸")
+                    self.标准触摸对战=False
+            if self.触摸对战:
+                TimeECHO(self.prefix+f"本局对战,模拟人手触摸")
             if self.标准触摸对战:
                 TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             #------------------------------------------------------------------------------
