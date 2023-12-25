@@ -2850,7 +2850,8 @@ class wzry_task:
             self.标准触摸对战=os.path.exists(self.标准模式触摸对战FILE)
             #默认标准模式的触摸对战每天只启动一次,其余时间用户通过手动建文件启动
             #经过对比发现,触摸对战,系统会判定没有挂机,给的金币更多, 所以这里提高5v5对战过程中触摸的几率
-            if jinristep % 3 != 0 and not self.组队模式: self.触摸对战=True
+            #每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
+            if jinristep % 2 == 0 and not self.组队模式: self.触摸对战=True
             #在特定步数进行标准对战,频率很低
             if jinristep % 15 == 0 and not self.组队模式: self.标准触摸对战=True
             #希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
