@@ -2492,6 +2492,8 @@ class wzry_task:
             self.Tool.existsTHENtouch(确定继续,"确定继续"); sleep(10)
             任意继续=Template(r"tpl1703483241120.png", record_pos=(-0.006, -0.255), resolution=(960, 540))
             self.Tool.existsTHENtouch(任意继续,"任意继续"); sleep(10)
+            黄色确定=Template(r"tpl1703207718965.png", record_pos=(-0.004, 0.164), resolution=(960, 540))
+            if self.Tool.existsTHENtouch(黄色确定,"段位提升黄色确定"): sleep(10)
             继续按钮=Template(r"tpl1703483264138.png", record_pos=(-0.002, 0.24), resolution=(960, 540))
             self.Tool.existsTHENtouch(继续按钮,"继续按钮"); sleep(10)
             if not exists(武道界面):
@@ -2766,6 +2768,8 @@ class wzry_task:
                 if self.Tool.存在同步文件(): return True
                 self.进行六国远征 = True
                 self.进行武道大会 = True
+                self.Tool.removefile(self.prefix+"六国远征.txt")
+                self.Tool.removefile(self.prefix+"武道大会.txt")
                 if self.王者营地礼包: self.每日礼包_王者营地()
                 #
                 if self.debug: break
@@ -2800,15 +2804,29 @@ class wzry_task:
             #仅在单人模式时进行六国远征
             if not self.组队模式:
                 if self.进行六国远征:
+                    if os.path.exists(self.prefix+"六国远征.txt"):
+                        TimeECHO(self.prefix+":检测到六国远征.txt,今日不再重复计算")
+                        self.进行六国远征=False
+                if self.进行武道大会:
+                    if os.path.exists(self.prefix+"武道大会.txt"):
+                        TimeECHO(self.prefix+":检测到武道大会.txt,今日不再重复计算")
+                        self.进行武道大会=False
+                if self.进行六国远征:
                     self.进行六国远征 = not self.六国远征()
                     self.进入大厅()
                     if self.进行六国远征:
                         TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
+                    else:
+                        TimeECHO(self.prefix+"今日六国远征探索完成")
+                        self.Tool.touchfile(self.prefix+"六国远征.txt")
                 if self.进行武道大会:
                     self.进行武道大会= not self.武道大会()
                     self.进入大厅()
                     if self.进行武道大会:
                         TimeECHO(self.prefix+"武道大会探索未结束,需要重复进行探索")
+                    else:
+                        TimeECHO(self.prefix+"今日武道大会探索完成")
+                        self.Tool.touchfile(self.prefix+"武道大会.txt")
             #
             if self.Tool.存在同步文件(): continue
             self.Tool.barriernode(self.mynode,self.totalnode,"准备进入战斗循环")
