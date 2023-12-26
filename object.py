@@ -1680,8 +1680,11 @@ class wzry_task:
                 exec_insert=self.Tool.readfile(self.重新设置英雄FILE)
                 for i_insert in exec_insert:
                     if '#' == i_insert[0]: continue
-                    TimeECHO(self.prefix+"run: "+i_insert[:-1])
-                    exec(i_insert)
+                    try:
+                        exec(i_insert)
+                        TimeECHO(self.prefix+"run: "+i_insert[:-1])
+                    except:
+                        TimeErr(self.prefix+"Error run: "+i_insert[:-1])
             else:
                 sleep(1)
                 self.Tool.existsTHENtouch(self.参战英雄线路,"参战英雄线路",savepos=True)
@@ -2771,7 +2774,7 @@ class wzry_task:
                 if not self.check_connect_status():
                     self.移动端.连接设备()
                     self.移动端.重启APP(30)
-                if self.Tool.存在同步文件(): return True
+                #
                 self.进行六国远征 = True
                 self.进行武道大会 = True
                 self.Tool.removefile(self.prefix+"六国远征.txt")
