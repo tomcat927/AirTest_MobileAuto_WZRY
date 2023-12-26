@@ -2775,22 +2775,22 @@ class wzry_task:
                     self.移动端.连接设备()
                     self.移动端.重启APP(30)
                 #
-                self.进行六国远征 = True
-                self.进行武道大会 = True
-                self.Tool.removefile(self.prefix+"六国远征.txt")
-                self.Tool.removefile(self.prefix+"武道大会.txt")
                 if self.王者营地礼包: self.每日礼包_王者营地()
                 #
                 if self.debug: break
                 hour,minu=self.Tool.time_getHM()
-                self.选择人机模式=True
-                self.青铜段位=False
-                self.Tool.removefile("青铜模式.txt")
-                jinristep=0
                 新的一天=True
             if 新的一天:
                 self.移动端.重启APP(10);
                 self.登录游戏()
+                jinristep=0
+                self.进行六国远征 = True
+                self.进行武道大会 = True
+                self.Tool.removefile(self.prefix+"六国远征.txt")
+                self.Tool.removefile(self.prefix+"武道大会.txt")
+                self.选择人机模式=True
+                self.青铜段位=False
+                self.Tool.removefile("青铜模式.txt")
             #
             hour,minu=self.Tool.time_getHM()
             #当hour小于此数字时才是组队模式
