@@ -2302,12 +2302,13 @@ class wzry_task:
         #正式开始探索,基本上10分钟才能完成一轮，所以这个时间就取50
         if times == 1: self.Tool.timelimit(timekey="六国远征_闯关计时",limit=60*50,init=True)
         #是因为容易卡住,所以设置这个上限,在一段时间内必须能检测到界面
-        self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*10,init=True)
+        self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
         times=times+1
         if times > 2:
             TimeErr(self.prefix+":六国_自动探索:次数太多,放弃")
             return False
         while True:
+            self.Tool.timelimit("六国远征战",limit=60*60,init=True)
             if self.健康系统(): return False
             if self.Tool.存在同步文件(): return False
             if self.Tool.timelimit(timekey="六国远征_闯关计时",limit=60*50,init=False):
@@ -2317,13 +2318,14 @@ class wzry_task:
                 return False
             #探索过程中检测界面
             if self.六国远征_界面判断():
-                self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
                 TimeECHO(self.prefix+":检测到远征界面")
                 for i in range(len(关卡)):
                     if exists(关卡[i]):
                         TimeECHO(self.prefix+f":存在关卡{i+1}")
                     else:
                         break
+                sleep(30)
+                if not self.六国远征_界面判断(): self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
             else:
                 self.Tool.existsTHENtouch(蓝色确定,"成就确定",savepos=False)
                 if self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=False):
@@ -2337,7 +2339,9 @@ class wzry_task:
                 还在对战=True
                 for i in range(30):
                     还在对战=self.判断对战中()
-                    if not 还在对战: break
+                    if not 还在对战:
+                        self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
+                        break
                     sleep(5)
                 if 还在对战:
                     TimeECHO(self.prefix+"还在对战,可能卡住,手动退出")
@@ -2353,8 +2357,8 @@ class wzry_task:
                     sleep(5)
                     self.Tool.existsTHENtouch(继续,"继续",savepos=False)
                     break
-            if self.Tool.existsTHENtouch(自动探索,"自动探索",savepos=False):
-                self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
+            #
+            self.Tool.existsTHENtouch(自动探索,"自动探索",savepos=False)
             #有时候会卡住,需要手动点击一下,而且容易卡多次
             if exists(挑战按钮):
                 TimeECHO(self.prefix+"检测到挑战按钮")
@@ -2367,6 +2371,7 @@ class wzry_task:
                        TimeErr(self.prefix+":仍有挑战按钮,大概率英雄已经死完了,准备重置次数")
                        if self.六国远征_重置次数():
                           TimeECHO(self.prefix+"成功重置,继续今日挑战")
+                          self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True)
                           continue
                        else:
                           TimeECHO(self.prefix+"无法重置,远征完成,结束今日挑战")
@@ -2381,6 +2386,7 @@ class wzry_task:
             if exists(任务完成0):#也可能是普通的一局结束
                 TimeECHO(self.prefix+":领取本局/轮奖励")
                 self.Tool.existsTHENtouch(蓝色确定,"蓝色确定",savepos=False)
+                if not exists(任务完成0):self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True) 
             #
             if exists(任务完成):
                 TimeECHO(self.prefix+":自动探索一轮完成.回到界面.准备重置")
@@ -2395,6 +2401,7 @@ class wzry_task:
                         continue
                 #
                 if self.六国远征_重置次数():
+                    self.Tool.timelimit(timekey="六国远征_卡顿计时",limit=60*20,init=True) 
                     continue
                 else:
                     TimeECHO(self.prefix+"无法重置,远征完成,不再继续探索")
@@ -2403,9 +2410,9 @@ class wzry_task:
     #六国远征获取的金币不受欢迎5v5对战上限限制,可以额外获得金币
     #当英雄太少,铭文不够时,进行六国模式,容易发生英雄死完了,一轮没通关
     def 六国远征(self):
-        if not self.Tool.timelimit("六国远征战",limit=60*60*2,init=False):
+        if not self.Tool.timelimit("六国远征战",limit=60*60,init=False):
             TimeECHO(self.prefix+"时间太短,暂时不六国远征战")
-            return
+            return False
         TimeECHO(self.prefix+":开始进行六国远征模式")
         self.check_connect_status()
         if self.Tool.存在同步文件(): return False
@@ -2416,7 +2423,7 @@ class wzry_task:
     #
     #懒得分写成好几个了
     def 武道大会(self):
-        if not self.Tool.timelimit("武道大会",limit=60*60*2,init=False):
+        if not self.Tool.timelimit("武道大会",limit=60*60,init=False):
             TimeECHO(self.prefix+"时间太短,暂时不武道大会")
             return False
         TimeECHO(self.prefix+":开始进行武道大会")
@@ -2450,6 +2457,7 @@ class wzry_task:
         #
         self.Tool.timelimit(timekey="武道大会_计时",limit=60*50,init=True)
         while True:
+            self.Tool.timelimit("武道大会",limit=60*60,init=True)
             #.............................................
             if not exists(武道界面):
                 TimeErr(self.prefix+":不在武道大会初始界面")
@@ -2485,6 +2493,8 @@ class wzry_task:
                 if self.判断对战中(): break #流程正常
                 TimeECHO(self.prefix+":sleep等待对战检测")
                 sleep(2)
+                if self.Tool.existsTHENtouch(挑战按钮2,"loop次挑战按钮",savepos=False) : sleep(1)
+                if self.Tool.existsTHENtouch(确定挑战,"loop确定挑战",savepos=False)    : sleep(1)#玩意没有确定成功
             #等待对战结束
             for i in range(10):
                 if self.判断对战中(): 
@@ -2854,6 +2864,7 @@ class wzry_task:
             #默认标准模式的触摸对战每天只启动一次,其余时间用户通过手动建文件启动
             #经过对比发现,触摸对战,系统会判定没有挂机,给的金币更多, 所以这里提高5v5对战过程中触摸的几率
             #每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
+            #触摸标准对战持续29min胜利,获得了170+金币. 触摸快速对战记录最大值35金币
             if jinristep % 2 == 0 and not self.组队模式: self.触摸对战=True
             #在特定步数进行标准对战,频率很低
             if jinristep % 15 == 0 and not self.组队模式: self.标准触摸对战=True
