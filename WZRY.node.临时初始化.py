@@ -9,3 +9,11 @@
 #self.武道大会()
 #self.六国远征()
 #self.Tool.removefile(self.临时初始化FILE)
+
+#临时调整对战模式
+#self.进入大厅()
+#self.对战模式="模拟战"
+#self.对战模式="5v5匹配"
+
+#特殊活动
+#王者营地的图标变化

@@ -913,11 +913,10 @@ class wzyd_libao:
         self.APPID = APPID
         self.prefix = prefix+"王者营地:"
         self.IOS = "smobagamehelper" in self.APPID
-        self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
-        self.战绩图标 = Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960), threshold=0.9)
-        if self.营地活动:
-            self.个人界面图标 = Template(r"tpl1703259800661.png", record_pos=(0.372, 0.728), resolution=(540, 960))
-            self.战绩图标 = Template(r"tpl1703259792669.png", record_pos=(0.176, 0.728), resolution=(540, 960))
+        self.个人界面图标_默认 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
+        self.战绩图标_默认 = Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960), threshold=0.9)
+        self.个人界面图标_活动 = Template(r"tpl1703259800661.png", record_pos=(0.372, 0.728), resolution=(540, 960))
+        self.战绩图标_活动 = Template(r"tpl1703259792669.png", record_pos=(0.176, 0.728), resolution=(540, 960))
         self.每日福利图标 = Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
@@ -927,6 +926,21 @@ class wzyd_libao:
         if not start_app(self.APPID):
             TimeECHO(self.prefix+"营地无法打开,返回")
             return False
+        #
+        if exists(self.个人界面图标_默认):
+            if not exists(self.个人界面图标_活动):
+                self.营地活动 = False
+            else:
+                TimeECHO(self.prefix+"没有检测到营地界面_默认版")
+                return False
+        else:
+            if exists(self.个人界面图标_活动):
+                self.营地活动 = True
+            else:
+                TimeECHO(self.prefix+"没有检测到营地界面_活动版")
+                return False
+        self.个人界面图标 = self.个人界面图标_活动 if self.营地活动 else self.个人界面图标_默认
+        self.战绩图标 = self.战绩图标_活动 if self.营地活动 else self.战绩图标_默认
         # 营地货币目前仅支持ios领取
         if not self.IOS:
             self.体验服礼物()
@@ -1112,7 +1126,7 @@ class wzry_task:
     # 需要传递中文时,由于精简后无法输入中文,在shell中建
     # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
 
-    def __init__(self, 移动端, 对战模式, shiftnode=0, debug=False, 限时组队时间=10):
+    def __init__(self, 移动端="android", 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=10):
         self.移动端 = 移动端
         self.mynode = self.移动端.mynode
         self.totalnode = self.移动端.totalnode
@@ -1794,7 +1808,7 @@ class wzry_task:
             #
             if "模拟战" in self.对战模式:
                 if 队友确认5v5匹配:
-                    TimeErr(self.prefix+":模拟战误入5v5,创建touch同步文件")
+                    TimeErr(self.prefix+":模拟战误入5v5?")
                     if self.组队模式:
                         self.Tool.touch同步文件()
                     return
@@ -2887,13 +2901,13 @@ class wzry_task:
         #
         #
         # 下面开始处理对战
-        self.Tool.LoopTouch(钱袋子, "钱袋子", loop=10)
-        self.Tool.LoopTouch(刷新金币, "刷新金币", loop=10)
+        self.Tool.LoopTouch(钱袋子, "初次钱袋子", loop=10)
+        self.Tool.LoopTouch(刷新金币, "初次刷新金币", loop=10)
         self.Tool.timelimit(timekey="endgame", limit=60*20, init=True)
         while self.判断对战中_模拟战(False):
             TimeECHO(self.prefix+"处理对战中")
-            self.Tool.LoopTouch(钱袋子, "钱袋子", loop=10)  # 点击结束后,应该变成X号
-            self.Tool.LoopTouch(刷新金币, "刷新金币", loop=10)
+            self.Tool.LoopTouch(钱袋子, "LOOP钱袋子", loop=10)  # 点击结束后,应该变成X号
+            self.Tool.LoopTouch(刷新金币, "LOOP刷新金币", loop=10)
             if not exists(关闭钱袋子) and not exists(钱袋子):
                 return False
             if self.Tool.timelimit(timekey="endgame", limit=60*20, init=False):
