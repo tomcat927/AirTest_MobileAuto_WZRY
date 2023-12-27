@@ -1173,6 +1173,7 @@ class wzry_task:
         self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
         self.临时组队FILE = "WZRY.组队.txt"
         self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
+        self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
@@ -1822,9 +1823,9 @@ class wzry_task:
                         continue
                     try:
                         exec(i_insert)
-                        TimeECHO(self.prefix+"run: "+i_insert[:-1])
+                        TimeECHO(self.prefix+".重新设置英雄.run: "+i_insert[:-1])
                     except:
-                        TimeErr(self.prefix+"Error run: "+i_insert[:-1])
+                        TimeErr(self.prefix+".重新设置英雄.Error run: "+i_insert[:-1])
             else:
                 sleep(1)
                 self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
@@ -3036,6 +3037,21 @@ class wzry_task:
             while os.path.exists(self.SLEEPFILE):
                 TimeECHO(self.prefix+f"检测到{self.SLEEPFILE}, sleep(5min)")
                 sleep(60*5)
+            # ------------------------------------------------------------------------------
+            if os.path.exists(self.临时初始化FILE):
+                TimeECHO(self.prefix+":重新设置英雄")
+                exec_insert = self.Tool.readfile(self.临时初始化FILE)
+                for i_insert in exec_insert:
+                    trim_insert = i_insert.strip()
+                    if len(trim_insert) < 1:
+                        continue
+                    if '#' == trim_insert[0]:
+                        continue
+                    try:
+                        exec(i_insert)
+                        TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
+                    except:
+                        TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             #

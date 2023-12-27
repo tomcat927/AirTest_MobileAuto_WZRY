@@ -19,3 +19,4 @@ self.Tool.existsTHENtouch(tmp_参战英雄线路,tag+"参战英雄线路",savepo
 sleep(1)
 self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像",savepos=savepos)
 sleep(1)
+#self.Tool.removefile(self.重新设置英雄FILE)
