@@ -1227,8 +1227,10 @@ class wzry_task:
         #
         # 刷新礼包的领取计时
         self.每日礼包()
-        self.进行六国远征 = not self.六国远征()
-        self.进行武道大会 = not self.武道大会()
+        self.武道大会()
+        self.六国远征()
+        self.进行六国远征 = os.path.exists(self.prefix+"六国远征.txt")
+        self.进行武道大会 = os.path.exists(self.prefix+"武道大会.txt")
         # 设置为0,可以保证下次必刷礼包
         self.Tool.timedict["领游戏礼包"] = 0
         self.Tool.timedict["领营地礼包"] = 0
@@ -1567,7 +1569,7 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
         sleep(2)
         # 暂时不修改 self.选择人机模式=False
-        self.青铜段位 = self.青铜段位 if self.青铜段位 else os.path.exists("青铜模式.txt")
+        self.青铜段位 = os.path.exists("青铜模式.txt")
         段位key = "青铜段位" if self.青铜段位 else "星耀段位"
         if self.选择人机模式:
             TimeECHO(self.prefix+"选择对战模式")
@@ -1813,7 +1815,7 @@ class wzry_task:
                 TimeECHO(self.prefix+":重新设置英雄")
                 exec_insert = self.Tool.readfile(self.重新设置英雄FILE)
                 for i_insert in exec_insert:
-                    trim_insert=i_insert.strip()
+                    trim_insert = i_insert.strip()
                     if len(trim_insert) < 1:
                         continue
                     if '#' == trim_insert[0]:
@@ -2091,13 +2093,14 @@ class wzry_task:
             # 20231223 玉镖夺魁 活动关闭
             # self.玉镖夺魁()
             TimeECHO(self.prefix+"钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
-            if self.Tool.存在同步文件(): return True
+            if self.Tool.存在同步文件():
+                return True
             self.进入大厅()
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
-        if self.王者营地礼包 and not self.组队模式: #组队时不打开王者营地,不同的节点进度不同
+        if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
-        
+
         self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
 
     def 战队礼包(self):
@@ -2433,9 +2436,10 @@ class wzry_task:
         return False
 
     def 六国远征_进入界面(self, times=1):
-        #成功返回True,各种失败返回False
+        # 成功返回True,各种失败返回False
         self.check_connect_status()
-        if self.Tool.存在同步文件(): return False
+        if self.Tool.存在同步文件():
+            return False
         if self.六国远征_界面判断():
             return True
         TimeECHO(self.prefix+":六国远征_进入界面")
@@ -2471,8 +2475,9 @@ class wzry_task:
             return self.六国远征_进入界面(times)
         return True
 
-    def 六国远征_重置次数(self):#成功返回True,各种失败返回False
-        if self.Tool.存在同步文件(): return False 
+    def 六国远征_重置次数(self):  # 成功返回True,各种失败返回False
+        if self.Tool.存在同步文件():
+            return False
         if not self.六国远征_进入界面():
             TimeECHO(self.prefix+":无法进行六国远征模式,重置次数失败")
             return False
@@ -2537,7 +2542,7 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 return False
             if self.Tool.timelimit(timekey="六国远征_闯关计时", limit=60*50, init=False):
-                TimeECHO(self.prefix+":探索时间达到上限")
+                TimeECHO(self.prefix+":六国远征探索时间达到上限")
                 # 这里其实还在探索关卡,直接return不行,程序还在探索
                 self.移动端.重启APP(10)
                 return False
@@ -2601,8 +2606,9 @@ class wzry_task:
                             continue
                         else:
                             TimeECHO(self.prefix+"重置失败,开始检测原因")
-                            if self.Tool.存在同步文件(): return False
-                            #唯一return True表示成功的入口
+                            if self.Tool.存在同步文件():
+                                return False
+                            # 唯一return True表示成功的入口
                             if exists(关卡[-1]):
                                 TimeECHO(self.prefix+"存在关卡-1,远征完成,结束今日挑战")
                                 return True
@@ -2703,7 +2709,7 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 return False
             if self.Tool.timelimit(timekey="武道大会_计时", limit=60*50, init=False):
-                TimeECHO(self.prefix+":武道大会达到上限")
+                TimeECHO(self.prefix+":武道大会达到时间上限")
                 # 这里其实还在探索关卡,直接return不行,程序还在探索
                 self.移动端.重启APP(10)
                 return False
@@ -3030,8 +3036,6 @@ class wzry_task:
             while os.path.exists(self.SLEEPFILE):
                 TimeECHO(self.prefix+f"检测到{self.SLEEPFILE}, sleep(5min)")
                 sleep(60*5)
-
-            # ------------------------------------------------------------------------------
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             #
@@ -3083,8 +3087,9 @@ class wzry_task:
                 jinristep = 0
                 self.进行六国远征 = True
                 self.进行武道大会 = True
-                self.Tool.removefile(self.prefix+"六国远征.txt")
-                self.Tool.removefile(self.prefix+"武道大会.txt")
+                # 存在该文件则进行六国远征
+                self.Tool.touchfile(self.prefix+"六国远征.txt")
+                self.Tool.touchfile(self.prefix+"武道大会.txt")
                 self.选择人机模式 = True
                 self.青铜段位 = False
                 self.Tool.removefile("青铜模式.txt")
@@ -3110,31 +3115,26 @@ class wzry_task:
             self.房主 = self.mynode == 0 or self.totalnode == 1
             #
             # 仅在单人模式时进行六国远征
-            if not self.组队模式:
+            self.进行六国远征 = not self.组队模式 and os.path.exists(self.prefix+"六国远征.txt")
+            self.进行武道大会 = not self.组队模式 and os.path.exists(self.prefix+"武道大会.txt")
+            if self.进行六国远征:
+                self.进行六国远征 = not self.六国远征()
+                self.进入大厅()
                 if self.进行六国远征:
-                    if os.path.exists(self.prefix+"六国远征.txt"):
-                        TimeECHO(self.prefix+":检测到六国远征.txt,今日不再重复计算")
-                        self.进行六国远征 = False
+                    TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
+                else:
+                    TimeECHO(self.prefix+"今日六国远征探索完成")
+                    self.Tool.removefile(self.prefix+"六国远征.txt")
+            if self.Tool.存在同步文件():
+                continue
+            if self.进行武道大会:
+                self.进行武道大会 = not self.武道大会()
+                self.进入大厅()
                 if self.进行武道大会:
-                    if os.path.exists(self.prefix+"武道大会.txt"):
-                        TimeECHO(self.prefix+":检测到武道大会.txt,今日不再重复计算")
-                        self.进行武道大会 = False
-                if self.进行六国远征:
-                    self.进行六国远征 = not self.六国远征()
-                    self.进入大厅()
-                    if self.进行六国远征:
-                        TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
-                    else:
-                        TimeECHO(self.prefix+"今日六国远征探索完成")
-                        self.Tool.touchfile(self.prefix+"六国远征.txt")
-                if self.进行武道大会:
-                    self.进行武道大会 = not self.武道大会()
-                    self.进入大厅()
-                    if self.进行武道大会:
-                        TimeECHO(self.prefix+"武道大会探索未结束,需要重复进行探索")
-                    else:
-                        TimeECHO(self.prefix+"今日武道大会探索完成")
-                        self.Tool.touchfile(self.prefix+"武道大会.txt")
+                    TimeECHO(self.prefix+"武道大会探索未结束,需要重复进行探索")
+                else:
+                    TimeECHO(self.prefix+"今日武道大会探索完成")
+                    self.Tool.removefile(self.prefix+"武道大会.txt")
             #
             if self.Tool.存在同步文件():
                 continue
@@ -3149,7 +3149,7 @@ class wzry_task:
             #
             # ------------------------------------------------------------------------------
             # 增加对战模式
-            self.青铜段位 = self.青铜段位 if self.青铜段位 else os.path.exists("青铜模式.txt")
+            self.青铜段位 = os.path.exists("青铜模式.txt")
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
             self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
             # 默认标准模式的触摸对战每天只启动一次,其余时间用户通过手动建文件启动
