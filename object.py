@@ -2771,6 +2771,8 @@ class wzry_task:
             if not exists(武道界面):
                 TimeECHO(self.prefix+"找不到武道界面了,重新进入界面")
                 sleep(30)
+                self.移动端.重启APP()
+                self.登录游戏()
                 self.进入大厅()
                 self.Tool.existsTHENtouch(万象天工, "万象天工")
                 self.Tool.existsTHENtouch(冒险玩法, "冒险玩法")
