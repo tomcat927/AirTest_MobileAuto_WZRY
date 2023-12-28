@@ -1939,6 +1939,8 @@ class wzry_task:
                 return
             if self.判断大厅中():
                 return
+            每日任务进展=Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
+            self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
             确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
             self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
             if exists(返回房间按钮):
