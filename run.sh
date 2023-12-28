@@ -1,2 +1,8 @@
 cat result >> result.bak.txt
-python3 -u object.py  2>&1 | tee result
+if [ $1 ]
+then
+para="$1 1"
+else
+para=""
+fi
+python3 -u object.py $para  2>&1 | tee result

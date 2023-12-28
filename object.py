@@ -1339,8 +1339,8 @@ class wzry_task:
             if self.触摸对战:
                 处理对战 = True
             while self.判断对战中(处理对战):
-                TimeECHO(self.prefix+"尝试进入大厅:对战中,直接重启APP")
                 if self.debug:
+                    TimeECHO(self.prefix+"尝试进入大厅:对战中,直接重启APP")
                     self.移动端.重启APP(30)
                     self.登录游戏()  # cndaqiang: debug专用
                 TimeECHO(self.prefix+"尝试进入大厅:对战sleep")
@@ -2993,7 +2993,7 @@ class wzry_task:
                         self.Tool.existsTHENtouch(移动, "移动按钮", savepos=True)
                         移动pos = exists(移动)
                         if not 移动pos and "移动按钮" in self.Tool.var_dict.keys():
-                                移动pos = self.Tool.var_dict["移动按钮"]
+                            移动pos = self.Tool.var_dict["移动按钮"]
                     else:
                         TimeECHO(self.prefix+"加速对战中:移动按钮")
                         for i in range(random.randint(1, 5)):
