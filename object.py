@@ -654,6 +654,14 @@ class DQWheel:
         sec = current_time.second
         return hour, minu, sec
 
+    def time_getYHMS(self):
+        current_time = datetime.now(eastern_eight_tz)
+        year = current_time.hour
+        hour = current_time.hour
+        minu = current_time.minute
+        sec = current_time.second
+        return year, hour, minu, sec
+
     def stoptask(self):
         TimeErr(self.prefix+f"停止Airtest控制,停止信息"+self.stopinfo)
         return
@@ -2260,10 +2268,15 @@ class wzry_task:
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
 
     def 每日礼包_每日任务(self, times=1):
+        #
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
-        #
+        # 新赛季更新,debug可以用体验服的账户，直接插入self.每日礼包_每日任务2024()
+        year, hour, minu, sec = self.Tool.time_getYHMS()
+        if year > 2024:
+            if not os.path.exists("2023赛季.txt"):
+                return self.每日礼包_每日任务2024(times)
         if times == 1:
             self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=True)
         else:
@@ -2277,7 +2290,7 @@ class wzry_task:
         self.进入大厅()
         #
         # 每日任务
-        TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
+        TimeECHO(self.prefix+f"领任务礼包2023:每日任务{times}")
         赛季任务界面 = Template(r"tpl1693294751097.png", record_pos=(-0.11, -0.001), resolution=(960, 540))
         任务 = Template(r"tpl1693192971740.png", record_pos=(0.204, 0.241), resolution=(960, 540), threshold=0.9)
         self.Tool.existsTHENtouch(任务, "任务按钮")
@@ -2314,8 +2327,72 @@ class wzry_task:
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
         return True
+    # 2024年新款赛季皮肤
+
+    def 每日礼包_每日任务2024(self, times=1, 战令领取=False):
+        self.check_connect_status()
+        if self.Tool.存在同步文件():
+            return True
         #
-        # 邮件礼包
+        if times == 1:
+            self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=False):
+                TimeErr(self.prefix+"领任务礼包超时")
+                return False
+        if times > 10:
+            return False
+        #
+        times = times+1
+        #
+        # 每日任务
+        TimeECHO(self.prefix+f"领任务礼包2024:每日任务{times}")
+        战令入口 = Template(r"tpl1703729166965.png", record_pos=(0.421, -0.013), resolution=(3200, 1440))
+        赛季任务界面 = Template(r"tpl1703729384362.png", record_pos=(0.332, -0.196), resolution=(3200, 1440))
+        任务 = Template(r"tpl1703729394309.png", record_pos=(-0.408, -0.019), resolution=(3200, 1440))
+        self.进入大厅()
+        self.Tool.existsTHENtouch(战令入口, "战令入口", savepos=True)
+        sleep(10)
+        if not exists(赛季任务界面):
+            TimeECHO(self.prefix+f"未检测到战令界面, 重新进入领任务礼包2024")
+            if not self.判断大厅中():
+                self.进入大厅()
+            if self.Tool.existsTHENtouch(战令入口, "战令入口", savepos=False):
+                sleep(10)
+            if not exists(赛季任务界面):
+                return self.每日礼包_每日任务(times)
+        else:
+            # 是可以在这里领取战令礼物,但是不领取了,战令可以随时领取,或者插入代码领取
+            if 战令领取:
+                战令领取 = Template(r"tpl1703729936500.png", record_pos=(0.356, 0.089), resolution=(3200, 1440))
+                if self.Tool.existsTHENtouch(战令领取, "战令领取", savepos=False):
+                    return self.每日礼包_每日任务2024(times=times-1, 战令领取=False)
+            else:
+                self.Tool.existsTHENtouch(任务, "任务按钮", savepos=True)
+        #
+        一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.367, 0.181), resolution=(960, 540))
+        今日活跃 = Template(r"tpl1693192993256.png", record_pos=(-0.238, 0.182), resolution=(960, 540))
+        本周活跃1 = Template(r"tpl1693359350755.png", record_pos=(-0.115, 0.182), resolution=(960, 540))
+        本周活跃2 = Template(r"tpl1693193026234.png", record_pos=(-0.063, 0.182), resolution=(960, 540))
+        确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
+            sleep(5)
+        if self.Tool.existsTHENtouch(今日活跃, "今日活跃 "):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
+            sleep(5)
+        if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1"):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
+            sleep(5)
+        if self.Tool.existsTHENtouch(本周活跃2, "本周活跃2"):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
+            sleep(5)
+        #
+        self.Tool.LoopTouch(确定按钮, "确定按钮")
+        self.Tool.LoopTouch(返回, "返回")
+        self.确定按钮()
+        return True
 
     def 每日礼包_邮件礼包(self, times=1):
         self.check_connect_status()
