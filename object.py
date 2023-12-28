@@ -730,7 +730,6 @@ class deviceOB:
         self.PID = -10  # Windows+Blustack专用,关闭特定虚拟机
         #
         self.连接设备()
-        self.prefix = f"({self.mynode})"
         # APPID
         self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.APPID = APPID if APPID else self.APPID
@@ -2274,7 +2273,7 @@ class wzry_task:
             return True
         # 新赛季更新,debug可以用体验服的账户，直接插入self.每日礼包_每日任务2024()
         year, hour, minu, sec = self.Tool.time_getYHMS()
-        if year > 2024:
+        if year > 2023:
             if not os.path.exists("2023赛季.txt"):
                 return self.每日礼包_每日任务2024(times)
         if times == 1:
@@ -2327,7 +2326,6 @@ class wzry_task:
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
         return True
-    # 2024年新款赛季皮肤
 
     def 每日礼包_每日任务2024(self, times=1, 战令领取=False):
         self.check_connect_status()
@@ -2347,6 +2345,7 @@ class wzry_task:
         #
         # 每日任务
         TimeECHO(self.prefix+f"领任务礼包2024:每日任务{times}")
+        # @todo, 用抢先服确定这里没有问题
         战令入口 = Template(r"tpl1703729166965.png", record_pos=(0.421, -0.013), resolution=(3200, 1440))
         赛季任务界面 = Template(r"tpl1703729384362.png", record_pos=(0.332, -0.196), resolution=(3200, 1440))
         任务 = Template(r"tpl1703729394309.png", record_pos=(-0.408, -0.019), resolution=(3200, 1440))

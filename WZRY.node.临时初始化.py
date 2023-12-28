@@ -17,3 +17,11 @@
 
 #特殊活动
 #王者营地的图标变化
+
+
+#修改虚拟机类型
+#self.移动端.LINK="127.0.0.1:5585"
+#self.LINKport = self.移动端.LINK.split(":")[-1]
+#self.LINKhead = self.移动端.LINK[:-len(self.移动端.LINKport)]
+#self.移动端.mynode=3
+#self.移动端.连接设备()
