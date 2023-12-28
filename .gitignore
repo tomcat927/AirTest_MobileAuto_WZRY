@@ -1,3 +1,6 @@
+#clean png
+.pngtmp/
+
 #macos
 .DS_Store
 result*
