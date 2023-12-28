@@ -2992,8 +2992,8 @@ class wzry_task:
                     if not 移动pos:
                         self.Tool.existsTHENtouch(移动, "移动按钮", savepos=True)
                         移动pos = exists(移动)
-                        if not 移动pos:
-                            移动pos = self.Tool.var_dict["移动按钮"]
+                        if not 移动pos and "移动按钮" in self.Tool.var_dict.keys():
+                                移动pos = self.Tool.var_dict["移动按钮"]
                     else:
                         TimeECHO(self.prefix+"加速对战中:移动按钮")
                         for i in range(random.randint(1, 5)):
