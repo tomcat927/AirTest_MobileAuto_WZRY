@@ -3406,14 +3406,14 @@ class auto_airtest:
             LINK_dict[0] = "Android:///"+"127.0.0.1:"+str(5555)
             LINK_dict[1] = "Android:///"+"127.0.0.1:"+str(5565)
             LINK_dict[2] = "Android:///"+"127.0.0.1:"+str(5575)
-            LINK_dict[3] = "Android:///"+"127.0.0.1:"+str(5555)
-            LINK_dict[4] = "Android:///"+"127.0.0.1:"+str(5555)
+            LINK_dict[3] = "Android:///"+"127.0.0.1:"+str(5585)
+            LINK_dict[4] = "Android:///"+"127.0.0.1:"+str(5595)
         else:
             LINK_dict[0] = "ios:///http://"+"192.168.12.130:8100"
-            LINK_dict[1] = "ios:///http://"+"192.168.12.130:8100"
-            LINK_dict[2] = "ios:///http://"+"192.168.12.130:8100"
-            LINK_dict[3] = "ios:///http://"+"192.168.12.130:8100"
-            LINK_dict[4] = "ios:///http://"+"192.168.12.130:8100"
+            LINK_dict[1] = "ios:///http://"+"192.168.12.130:8101"
+            LINK_dict[2] = "ios:///http://"+"192.168.12.130:8102"
+            LINK_dict[3] = "ios:///http://"+"192.168.12.130:8103"
+            LINK_dict[4] = "ios:///http://"+"192.168.12.130:8104"
         if self.debug:
             # 当在这里手动指定Link时,自动进行修正
             LINK_dict[0] = "Android:///"+"192.168.192.10:5555"
