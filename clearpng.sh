@@ -1,4 +1,5 @@
 mkdir -p .pngtmp
+rm .pngtmp/*
 for i in $(grep -Eo 'tpl[[:alnum:]_]*.png' object.py)
 do
 #cp ../WZRY_AirtestIDE_emulator/$i .
