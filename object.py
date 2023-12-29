@@ -1196,6 +1196,7 @@ class wzry_task:
         self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
         self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
         self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
+        self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
@@ -1475,15 +1476,15 @@ class wzry_task:
         # 这里需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
             TimeECHO(self.prefix+"需要重新登录")
-            hour, minu = self.Tool.time_getHM()
-            leftmin = max((23-hour)*60-minu, 30)
-            leftmin = min(leftmin, 60)
             if self.组队模式:
                 TimeErr(self.prefix+"需要重新登录:创建同步文件")
                 self.Tool.touch同步文件()
             else:
-                TimeECHO(self.prefix+"需要重新登录")
-                self.移动端.重启APP(60*leftmin)
+                TimeECHO(self.prefix+"需要重新登录:创建单节点同步")
+                self.Tool.file(self.重新登录FILE)
+                self.移动端.重启APP(10*60)
+                self.Tool.touch同步文件(self.Tool.独立同步文件)
+                return True
         #
         #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
@@ -1940,7 +1941,7 @@ class wzry_task:
                 return
             if self.判断大厅中():
                 return
-            每日任务进展=Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
+            每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
             self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
             确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
             self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
@@ -3290,6 +3291,11 @@ class wzry_task:
                 self.Tool.removefile("青铜模式.txt")
                 if self.totalnode_bak > 1:
                     self.Tool.touch同步文件()
+                continue
+            #
+            if os.path.exists(self.重新登录FILE):
+                TimeECHO(self.prefix+"存在重新登录文件,登录后删除")
+                sleep(60*10)
                 continue
             #
             hour, minu = self.Tool.time_getHM()
