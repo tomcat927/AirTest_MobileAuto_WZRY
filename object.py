@@ -1133,7 +1133,7 @@ class wzry_task:
     # 需要传递中文时,由于精简后无法输入中文,在shell中建
     # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
 
-    def __init__(self, 移动端="android", 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=10):
+    def __init__(self, 移动端="android", 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=9):
         self.移动端 = 移动端
         self.mynode = self.移动端.mynode
         self.totalnode = self.移动端.totalnode
@@ -1148,7 +1148,7 @@ class wzry_task:
         self.选择人机模式 = True
         self.青铜段位 = os.path.exists("青铜模式.txt")
         #
-        self.对战时间 = [5.1, 23]  # 单位hour,对战时间取4.5是为了让程序在4点时启动领取昨日没领完的礼包
+        self.对战时间 = [5.1, 23]  # 单位hour,对战时间取N.m是为了让程序在N点时启动领取昨日没领完的礼包
         # 当hour小于此数字时才是组队模式
         self.限时组队时间 = 限时组队时间
         self.totalnode_bak = self.totalnode
@@ -1195,6 +1195,7 @@ class wzry_task:
         self.临时组队FILE = "WZRY.组队.txt"
         self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
         self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
+        self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
@@ -3377,6 +3378,22 @@ class wzry_task:
             runstep = self.runinfo["runstep"]
             TimeECHO(self.prefix+f"运行次数{runstep}|今日步数{jinristep}")
             #
+            # ------------------------------------------------------------------------------
+            if os.path.exists(self.对战前插入FILE):
+                TimeECHO(self.prefix+":重新设置英雄")
+                exec_insert = self.Tool.readfile(self.对战前插入FILE)
+                for i_insert in exec_insert:
+                    trim_insert = i_insert.strip()
+                    if len(trim_insert) < 1:
+                        continue
+                    if '#' == trim_insert[0]:
+                        continue
+                    try:
+                        exec(i_insert)
+                        TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
+                    except:
+                        TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
+            # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
             if self.Tool.存在同步文件():
