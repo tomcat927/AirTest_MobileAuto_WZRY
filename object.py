@@ -3249,8 +3249,10 @@ class wzry_task:
                 # 计算休息时间
                 hour, minu = self.Tool.time_getHM()
                 leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
-                if leftmin > 23*60:
-                    leftmin = 2
+                if leftmin > 60:  # 考虑startclock=N.m sleep的时间容易变成22.9h, 这里直接用20判断
+                    if abs(hour-startclock) < 2:
+                        TimeECHO(self.prefix+"hour距离startclock过短,不该大于60min,set leftmin=2")
+                        leftmin = 2
                 if self.移动端.容器优化:
                     leftmin = leftmin+self.mynode*1  # 这里的单位是分钟,每个node别差别太大
                 TimeECHO(self.prefix+"预计等待%d min ~ %3.2f h" % (leftmin, leftmin/60.0))
