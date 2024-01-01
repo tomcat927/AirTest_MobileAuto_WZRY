@@ -2128,6 +2128,8 @@ class wzry_task:
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
+            else:
+                TimeECHO(self.prefix+"暂时不进行玉镖夺魁")
             TimeECHO(self.prefix+"钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
             if self.Tool.存在同步文件():
                 return True
