@@ -1216,6 +1216,7 @@ class wzry_task:
         if "ios" in self.移动端.LINK:
             self.王者营地礼包 = True
         TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
+        self.玉镖夺魁签到 = False
         #
         self.runinfo = {}
         self.runinfo["runstep"] = 0
@@ -2124,8 +2125,9 @@ class wzry_task:
             self.每日礼包_妲己礼物()
             self.战队礼包()
             self.友情礼包()
-            # 20231223 玉镖夺魁 活动关闭
-            # self.玉镖夺魁()
+            self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
+            if self.玉镖夺魁签到:
+                self.玉镖夺魁()
             TimeECHO(self.prefix+"钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
             if self.Tool.存在同步文件():
                 return True
@@ -2155,24 +2157,79 @@ class wzry_task:
         self.Tool.existsTHENtouch(Template(r"tpl1700403218837.png", record_pos=(0.098, 0.117), resolution=(960, 540)), "确定")
         sleep(10)
         return
+    # @todo,其他活动一键领取
 
-    def 玉镖夺魁(self):
+    def 玉镖夺魁(self, times=0):
         self.进入大厅()
         #
         # 玉镖夺魁
-        TimeECHO(self.prefix+f":玉镖夺魁")
+        TimeECHO(self.prefix+f":玉镖夺魁{times}")
         #
+        if times == 0:
+            self.Tool.timelimit(timekey="玉镖夺魁", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey="玉镖夺魁", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"玉镖夺魁{times}超时退出")
+                return False
+        if times > 10:
+            return False
+        #
+        times = times+1
+        #
+        # 开始寻找入口
         图标 = Template(r"tpl1700803051511.png", record_pos=(0.379, -0.172), resolution=(960, 540))
-        if not self.Tool.existsTHENtouch(图标, "玉镖夺魁"):
-            TimeECHO("找不到玉镖夺魁图标:活动结束或者大厅变幻图标")
+        if self.Tool.existsTHENtouch(图标, "玉镖夺魁"):
+            TimeECHO(self.prefix+"从大厅进入玉镖夺魁")
+        else:
             TimeECHO("找不到玉镖夺魁图标:尝试切换入口")
-            touch(Template(r"tpl1701428211463.png", record_pos=(0.463, -0.089), resolution=(960, 540)))
-            touch(Template(r"tpl1701428223494.png", record_pos=(-0.442, -0.101), resolution=(960, 540)))
-            touch(Template(r"tpl1701428233468.png", record_pos=(-0.354, 0.16), resolution=(960, 540)))
-            参与 = Template(r"tpl1701428241862.png", record_pos=(0.08, 0.216), resolution=(960, 540))
-            if not self.Tool.existsTHENtouch(参与, "参与夺魁图标"):
-                TimeECHO("找不到玉镖夺魁图标:切换入口失败")
-                return
+            活动图标 = Template(r"tpl1701428211463.png", record_pos=(0.463, -0.089), resolution=(960, 540))
+            礼包图标 = Template(r"tpl1701428223494.png", record_pos=(-0.442, -0.101), resolution=(960, 540))
+            夺镖活动 = Template(r"tpl1701428233468.png", record_pos=(-0.354, 0.16), resolution=(960, 540))
+            参与按钮 = Template(r"tpl1701428241862.png", record_pos=(0.08, 0.216), resolution=(960, 540))
+            if not self.Tool.existsTHENtouch(活动图标, "夺魁_活动图标"):
+                TimeECHO("找不到活动图标:重新夺魁")
+                return self.玉镖夺魁(times)
+            sleep(5)
+            if not self.Tool.existsTHENtouch(礼包图标, "夺魁_礼包图标"):
+                TimeECHO("找不到礼包图标:重新夺魁")
+                return self.玉镖夺魁(times)
+            sleep(5)
+            #
+            夺镖位置 = []
+            夺镖位置.append(Template(r"tpl1704087360602.png", record_pos=(-0.403, 0.116), resolution=(960, 540), target_pos=6))
+            夺镖位置.append(Template(r"tpl1704087510800.png", record_pos=(-0.4, -0.099), resolution=(960, 540), target_pos=6))
+            夺镖位置.append(Template(r"tpl1704087522398.png", record_pos=(-0.397, -0.024), resolution=(960, 540), target_pos=6))
+            pos = False
+            for 夺镖位置_i in range(len(夺镖位置)):
+                pos = exists(夺镖位置[夺镖位置_i])
+                if pos:
+                    TimeECHO(self.prefix+f"找到活动滑动按钮{夺镖位置_i}")
+                    break
+                else:
+                    TimeECHO(self.prefix+f"寻找活动滑动按钮中{夺镖位置_i}")
+            if not pos:
+                return self.玉镖夺魁(times)
+            参与位置 = False
+            for i in range(10):
+                sleep(1)
+                TimeECHO(self.prefix+f"寻找参与投镖按钮中{i}")
+                trypos = exists(参与按钮)
+                if self.Tool.existsTHENtouch(夺镖活动, "夺镖活动入口"):
+                    TimeECHO(self.prefix+f"找到夺镖活动页面,寻找投镖入口")
+                    参与位置 = exists(参与按钮)
+                if trypos:
+                    参与位置 = trypos
+                if 参与位置:
+                    break
+                TimeECHO(self.prefix+f"滑动页面寻找......")
+                swipe(pos, vector=[0.0, -0.5])
+            #
+            if not 参与位置:
+                TimeECHO(self.prefix+"没找到夺镖活动入口")
+                return self.玉镖夺魁(times)
+            else:
+                touch(参与位置)
+        TimeECHO(self.prefix+"开始签到夺标")
         #
         领取加号 = []
         领取加号.append(Template(r"tpl1700803174309.png", record_pos=(0.227, -0.21), resolution=(960, 540), target_pos=2))
