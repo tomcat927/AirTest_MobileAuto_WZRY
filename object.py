@@ -3272,7 +3272,7 @@ class wzry_task:
                 sleep(60*5)
             # ------------------------------------------------------------------------------
             if os.path.exists(self.临时初始化FILE):
-                TimeECHO(self.prefix+":重新设置英雄")
+                TimeECHO(self.prefix+f":注入临时初始化代码({self.临时初始化FILE})")
                 exec_insert = self.Tool.readfile(self.临时初始化FILE)
                 for i_insert in exec_insert:
                     trim_insert = i_insert.strip()
@@ -3447,7 +3447,7 @@ class wzry_task:
             #
             # ------------------------------------------------------------------------------
             if os.path.exists(self.对战前插入FILE):
-                TimeECHO(self.prefix+":重新设置英雄")
+                TimeECHO(self.prefix+f":对战前注入代码({self.对战前插入FILE})")
                 exec_insert = self.Tool.readfile(self.对战前插入FILE)
                 for i_insert in exec_insert:
                     trim_insert = i_insert.strip()
