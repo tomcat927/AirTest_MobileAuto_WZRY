@@ -817,14 +817,14 @@ class deviceOB:
             try:
                 exit_code = os.system(command)
                 if exit_code == 0:
-                    TimeECHO(self.prefix+f"启动成功")
+                    TimeECHO(self.prefix+f"关闭成功")
                     sleep(60)
                     return True
                 else:
-                    TimeECHO(self.prefix+f"启动失败")
+                    TimeECHO(self.prefix+f"关闭失败")
                     return False
             except:
-                TimeErr(self.prefix+f"启动失败")
+                TimeErr(self.prefix+f"关闭失败")
                 return False
         # android
         try:
@@ -844,13 +844,13 @@ class deviceOB:
             #
             exit_code = os.system(command)
             if exit_code == 0:
-                TimeECHO(self.prefix+f"启动成功")
+                TimeECHO(self.prefix+f"关闭成功")
                 return True
             else:
-                TimeECHO(self.prefix+f"启动失败")
+                TimeECHO(self.prefix+f"关闭失败")
                 return False
         except:
-            TimeErr(self.prefix+f"启动失败")
+            TimeErr(self.prefix+f"关闭失败")
             return False
     #
 
