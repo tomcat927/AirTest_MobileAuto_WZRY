@@ -1203,12 +1203,7 @@ class wzry_task:
         # self.Tool.removefile(self.临时组队FILE)
         self.触摸对战 = os.path.exists(self.触摸对战FILE)
         self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
-        # @todo 新赛季后直接删除
         self.赛季 = "2024"
-        if os.path.exists("2023赛季.txt"):
-            self.赛季 = "2023"
-        if os.path.exists("2024赛季.txt"):
-            self.赛季 = "2024"
         #
         self.王者营地礼包 = False
         if ":5555" in self.移动端.LINK:
@@ -2338,73 +2333,7 @@ class wzry_task:
         self.移动端.打开APP()
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
 
-    def 每日礼包_每日任务(self, times=1):
-        #
-        self.check_connect_status()
-        if self.Tool.存在同步文件():
-            return True
-        # @todo 新赛季删除之后内容
-        if "2024" in self.赛季:
-            return self.每日礼包_每日任务2024(times)
-        # 新赛季更新,debug可以用体验服的账户，直接插入self.每日礼包_每日任务2024()
-        year, hour, minu, sec = self.Tool.time_getYHMS()
-        # 下面的为临时的
-        if year > 2023:
-            if not os.path.exists("2023赛季.txt"):
-                self.赛季 = "2024"
-                return self.每日礼包_每日任务2024(times)
-        if times == 1:
-            self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=True)
-        else:
-            if self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=False):
-                TimeErr(self.prefix+"领任务礼包超时")
-                return False
-        if times > 10:
-            return False
-        #
-        times = times+1
-        self.进入大厅()
-        #
-        # 每日任务
-        TimeECHO(self.prefix+f"领任务礼包2023:每日任务{times}")
-        赛季任务界面 = Template(r"tpl1693294751097.png", record_pos=(-0.11, -0.001), resolution=(960, 540))
-        任务 = Template(r"tpl1693192971740.png", record_pos=(0.204, 0.241), resolution=(960, 540), threshold=0.9)
-        self.Tool.existsTHENtouch(任务, "任务按钮")
-        if not exists(赛季任务界面):
-            if not self.判断大厅中():
-                self.进入大厅()
-            if self.Tool.existsTHENtouch(任务, "任务按钮"):
-                sleep(10)
-                点击屏幕继续 = Template(r"tpl1693193459695.png", record_pos=(0.006, 0.223), resolution=(960, 540))
-                self.Tool.existsTHENtouch(点击屏幕继续, "点击屏幕继续")
-                sleep(5)
-            if not exists(赛季任务界面):
-                return self.每日礼包_每日任务(times)
-        #
-        一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.392, 0.227), resolution=(960, 540))
-        今日活跃 = Template(r"tpl1693192993256.png", record_pos=(0.228, -0.239), resolution=(960, 540))
-        本周活跃1 = Template(r"tpl1693359350755.png", record_pos=(0.401, -0.241), resolution=(960, 540))
-        本周活跃2 = Template(r"tpl1693193026234.png", record_pos=(0.463, -0.242), resolution=(960, 540))
-        确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
-        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
-        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(今日活跃, "今日活跃 "):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1"):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃2, "本周活跃2"):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        #
-        self.Tool.LoopTouch(返回, "返回")
-        self.确定按钮()
-        return True
-
-    def 每日礼包_每日任务2024(self, times=1, 战令领取=True):
+    def 每日礼包_每日任务(self, times=1, 战令领取=True):
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
@@ -2421,7 +2350,7 @@ class wzry_task:
         times = times+1
         #
         # 每日任务
-        TimeECHO(self.prefix+f"领任务礼包2024:每日任务{times}")
+        TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
         # @todo, 用抢先服确定这里没有问题
         战令入口 = Template(r"tpl1703756544792.png", record_pos=(0.461, -0.017), resolution=(960, 540))
         赛季任务界面 = []
@@ -2442,10 +2371,10 @@ class wzry_task:
                 break
             sleep(4)
         if not 进入战令界面:
-            TimeECHO(self.prefix+f"未检测到战令界面, 重新进入领任务礼包2024")
+            TimeECHO(self.prefix+f"未检测到战令界面, 重新进入领任务礼包")
             if "战令入口" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令入口"]
-            return self.每日礼包_每日任务2024(times=times-1, 战令领取=战令领取)
+            return self.每日礼包_每日任务(times=times-1, 战令领取=战令领取)
         #
         if 战令领取:
             TimeECHO(self.prefix+f"领取战令奖励测试中")
@@ -2477,10 +2406,10 @@ class wzry_task:
                 TimeErr(self.prefix+"领任务礼包超时")
                 return False
         if not 进入任务界面:
-            TimeECHO(self.prefix+f"未检测到任务界面, 重新进入领任务礼包2024")
+            TimeECHO(self.prefix+f"未检测到任务界面, 重新进入领任务礼包")
             if "战令的每日任务" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令的每日任务"]
-            return self.每日礼包_每日任务2024(times=times-1, 战令领取=战令领取)
+            return self.每日礼包_每日任务(times=times-1, 战令领取=战令领取)
         #
         # 开始正式领取
         if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
@@ -3338,10 +3267,6 @@ class wzry_task:
                 self.登录游戏()
                 jinristep = 0
                 self.赛季 = "2024"
-                if os.path.exists("2024赛季.txt"):
-                    self.赛季 = "2024"
-                if os.path.exists("2023赛季.txt"):
-                    self.赛季 = "2023"
                 self.进行六国远征 = False
                 self.进行武道大会 = False
                 if "2023" in self.赛季:
