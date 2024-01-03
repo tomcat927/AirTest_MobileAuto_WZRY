@@ -2121,15 +2121,16 @@ class wzry_task:
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             self.移动端.打开APP()
             self.每日礼包_每日任务()
-            self.每日礼包_邮件礼包()
-            self.每日礼包_妲己礼物()
-            self.战队礼包()
-            self.友情礼包()
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
             else:
                 TimeECHO(self.prefix+"暂时不进行玉镖夺魁")
+            #友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
+            self.每日礼包_邮件礼包()
+            self.每日礼包_妲己礼物()
+            self.友情礼包()
+            self.战队礼包()
             TimeECHO(self.prefix+"钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
             if self.Tool.存在同步文件():
                 return True
