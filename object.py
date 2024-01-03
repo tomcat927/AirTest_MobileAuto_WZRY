@@ -1133,7 +1133,7 @@ class wzry_task:
     # 需要传递中文时,由于精简后无法输入中文,在shell中建
     # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
 
-    def __init__(self, 移动端="android", 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=9):
+    def __init__(self, 移动端="android", 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=7):
         self.移动端 = 移动端
         self.mynode = self.移动端.mynode
         self.totalnode = self.移动端.totalnode
