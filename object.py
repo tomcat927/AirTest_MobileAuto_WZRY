@@ -934,7 +934,7 @@ class wzyd_libao:
             TimeECHO(self.prefix+"营地无法打开,返回")
             return False
         #
-        sleep(10) #等待营地打开
+        sleep(20) #等待营地打开
         if exists(self.个人界面图标_默认):
             if not exists(self.个人界面图标_活动):
                 self.营地活动 = False
@@ -970,8 +970,7 @@ class wzyd_libao:
             sleep(5)
         stop_app(self.APPID)
         start_app(self.APPID)
-        sleep(5)
-        sleep(5)
+        sleep(10)
         times = times+1
         if times > 10:
             return False
@@ -1047,8 +1046,7 @@ class wzyd_libao:
         if not stop_app(self.APPID):
             return
         start_app(self.APPID)
-        sleep(5)
-        sleep(5)
+        sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"个人界面")
         sleep(5)
         self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"每日福利")
@@ -1090,7 +1088,7 @@ class wzyd_libao:
         if not stop_app(self.APPID):
             return
         start_app(self.APPID)
-        sleep(5)
+        sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"个人界面")
         sleep(5)
         self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"每日福利")
@@ -3363,7 +3361,7 @@ class wzry_task:
             if jinristep % 2 == 0 and not self.组队模式:
                 self.触摸对战 = True
             # 在特定步数进行标准对战,频率很低
-            if jinristep % 15 == 0 and not self.组队模式:
+            if jinristep % 10 == 0 and not self.组队模式:
                 self.标准触摸对战 = True
             # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
             if not self.青铜段位:
@@ -3465,7 +3463,8 @@ class auto_airtest:
         #
         对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
         TASK = wzry_task(self.移动端, 对战模式, shiftnode=-4, debug=self.debug)
-        # return
+        TASK.每日礼包_王者营地()
+        return
         TASK.RUN()
         self.移动端.关闭APP()
         #
