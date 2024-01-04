@@ -1804,9 +1804,21 @@ class wzry_task:
         自己确定匹配 = False
         loop = 0
         while True:
-            房间中的开始按钮 = Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540))
+            #不同活动中,开始按钮的图标不同
+            #
+            房间中的开始按钮Group=[]
+            房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
+            房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540)))
+            找到开始按钮=False
+            房间中的开始按钮=房间中的开始按钮Group[0]
             if self.房主:
                 # if self.判断房间中():
+                if not 找到开始按钮:
+                    for i in range(len(房间中的开始按钮Group)):
+                        if exists(房间中的开始按钮Group[i]):
+                            房间中的开始按钮=房间中的开始按钮Group[i]
+                            找到开始按钮=True
+                            break
                 self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮")
                 # else:
                 #    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
