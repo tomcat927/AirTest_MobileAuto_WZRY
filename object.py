@@ -3417,38 +3417,39 @@ class wzry_task:
 
 
 class auto_airtest:
-    def __init__(self, mynode=0, totalnode=1, 设备类型="IOS"):
+    def __init__(self, mynode=0, totalnode=1, 设备类型="android", LINK_dict={}):
         self.mynode = mynode
         self.totalnode = totalnode
         self.设备类型 = 设备类型.lower()
         self.prefix = f"({self.mynode}/{self.totalnode})"
         self.debug = "darwin" in sys.platform.lower()
         # 设备信息
-        LINK_dict = {}
-        if "android" in self.设备类型:
-            LINK_dict[0] = "Android:///"+"127.0.0.1:"+str(5555)
-            LINK_dict[1] = "Android:///"+"127.0.0.1:"+str(5565)
-            LINK_dict[2] = "Android:///"+"127.0.0.1:"+str(5575)
-            LINK_dict[3] = "Android:///"+"127.0.0.1:"+str(5585)
-            LINK_dict[4] = "Android:///"+"127.0.0.1:"+str(5595)
-        else:
-            LINK_dict[0] = "ios:///http://"+"192.168.12.130:8100"
-            LINK_dict[1] = "ios:///http://"+"192.168.12.130:8101"
-            LINK_dict[2] = "ios:///http://"+"192.168.12.130:8102"
-            LINK_dict[3] = "ios:///http://"+"192.168.12.130:8103"
-            LINK_dict[4] = "ios:///http://"+"192.168.12.130:8104"
-        if self.debug:
-            # 当在这里手动指定Link时,自动进行修正
-            LINK_dict[0] = "Android:///"+"192.168.192.10:5555"
-            LINK_dict[1] = "Android:///"+"192.168.192.10:5565"
-            LINK_dict[2] = "Android:///"+"192.168.192.10:5575"
-            LINK_dict[3] = "Android:///"+"192.168.192.10:5585"
-            # 以后不再以IOS平台进行测试,这里暂时关闭IOS入口
-            # LINK_dict[2] = "ios:///http://127.0.0.1:8200"
-            # LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
-            # LINK_dict[totalnode-1]="ios:///http://169.254.83.56:8100"
-            # LINK_dict[2]="ios:///http://169.254.83.56:8100"
-            self.debug = False  # 仅用于设置ios连接,程序还是正常运行
+        if len(LINK_dict) == 0:
+            LINK_dict = {}
+            if "android" in self.设备类型:
+                LINK_dict[0] = "Android:///"+"127.0.0.1:"+str(5555)
+                LINK_dict[1] = "Android:///"+"127.0.0.1:"+str(5565)
+                LINK_dict[2] = "Android:///"+"127.0.0.1:"+str(5575)
+                LINK_dict[3] = "Android:///"+"127.0.0.1:"+str(5585)
+                LINK_dict[4] = "Android:///"+"127.0.0.1:"+str(5595)
+            else:
+                LINK_dict[0] = "ios:///http://"+"192.168.12.130:8100"
+                LINK_dict[1] = "ios:///http://"+"192.168.12.130:8101"
+                LINK_dict[2] = "ios:///http://"+"192.168.12.130:8102"
+                LINK_dict[3] = "ios:///http://"+"192.168.12.130:8103"
+                LINK_dict[4] = "ios:///http://"+"192.168.12.130:8104"
+            if self.debug:
+                # 当在这里手动指定Link时,自动进行修正
+                LINK_dict[0] = "Android:///"+"192.168.192.10:5555"
+                LINK_dict[1] = "Android:///"+"192.168.192.10:5565"
+                LINK_dict[2] = "Android:///"+"192.168.192.10:5575"
+                LINK_dict[3] = "Android:///"+"192.168.192.10:5585"
+                # 以后不再以IOS平台进行测试,这里暂时关闭IOS入口
+                # LINK_dict[2] = "ios:///http://127.0.0.1:8200"
+                # LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
+                # LINK_dict[totalnode-1]="ios:///http://169.254.83.56:8100"
+                # LINK_dict[2]="ios:///http://169.254.83.56:8100"
+                self.debug = False  # 仅用于设置ios连接,程序还是正常运行
         # 使用端口映射成8200后, usb接口老频繁失灵，怀疑与这个有关,还是采用默认的方式
         # if "ios" in LINK_dict[0]: os.system("tidevice wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner > tidevice.result.txt 2>&1 &")
         #
