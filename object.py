@@ -934,7 +934,7 @@ class wzyd_libao:
             TimeECHO(self.prefix+"营地无法打开,返回")
             return False
         #
-        sleep(20) #等待营地打开
+        sleep(20)  # 等待营地打开
         if exists(self.个人界面图标_默认):
             if not exists(self.个人界面图标_活动):
                 self.营地活动 = False
@@ -1803,22 +1803,22 @@ class wzry_task:
         自己确定匹配 = False
         loop = 0
         while True:
-            #不同活动中,开始按钮的图标不同
+            # 不同活动中,开始按钮的图标不同
             #
-            房间中的开始按钮Group=[]
+            房间中的开始按钮Group = []
             房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), rgb=True))
             房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540), rgb=True))
-            找到开始按钮=False
-            房间中的开始按钮=房间中的开始按钮Group[0]
+            找到开始按钮 = False
+            房间中的开始按钮 = 房间中的开始按钮Group[0]
             if self.房主:
                 # if self.判断房间中():
                 if not 找到开始按钮:
                     for i in range(len(房间中的开始按钮Group)):
                         if exists(房间中的开始按钮Group[i]):
-                            房间中的开始按钮=房间中的开始按钮Group[i]
-                            找到开始按钮=True
+                            房间中的开始按钮 = 房间中的开始按钮Group[i]
+                            找到开始按钮 = True
                             break
-                self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮",savepos=False)
+                self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮", savepos=False)
                 # else:
                 #    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
             if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
@@ -2132,7 +2132,7 @@ class wzry_task:
                 self.玉镖夺魁()
             else:
                 TimeECHO(self.prefix+"暂时不进行玉镖夺魁")
-            #友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
+            # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
             self.每日礼包_邮件礼包()
             self.每日礼包_妲己礼物()
             self.友情礼包()
@@ -3463,8 +3463,7 @@ class auto_airtest:
         #
         对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
         TASK = wzry_task(self.移动端, 对战模式, shiftnode=-4, debug=self.debug)
-        TASK.每日礼包_王者营地()
-        return
+        # return
         TASK.RUN()
         self.移动端.关闭APP()
         #
