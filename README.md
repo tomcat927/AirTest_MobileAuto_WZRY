@@ -134,6 +134,7 @@
 ## 运行方式
 
 * [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY)
+* 修改代码中客户端的ip地址`auto_airtest>LINK_dict[i]=`
 * [控制端、客户端配置](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/blob/master/howtorun.md)
 * [其他参考资料](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
 
