@@ -975,8 +975,8 @@ class wzyd_libao:
         times = times+1
         if times > 10:
             return False
-        #都保存位置,最后进不去再return
-        self.Tool.existsTHENtouch(self.游戏界面图标, self.prefix+"游戏界面图标",savepos=True)
+        # 都保存位置,最后进不去再return
+        self.Tool.existsTHENtouch(self.游戏界面图标, self.prefix+"游戏界面图标", savepos=True)
         sleep(5)
         # 判断是否在体验服框架
         # 这里需要提前手动把体验服加到选择界面
@@ -993,7 +993,7 @@ class wzyd_libao:
             return self.体验服礼物(times)
         #
         奖励兑换图标 = Template(r"tpl1704381904053.png", record_pos=(-0.209, -0.026), resolution=(540, 960))
-        self.Tool.existsTHENtouch(奖励兑换图标, self.prefix+"体验服奖励兑换图标",savepos=True)
+        self.Tool.existsTHENtouch(奖励兑换图标, self.prefix+"体验服奖励兑换图标", savepos=True)
         sleep(5)
         奖励兑换网页图标 = Template(r"tpl1704381965060.png", rgb=True, target_pos=7, record_pos=(0.243, -0.496), resolution=(540, 960))
         self.Tool.existsTHENtouch(奖励兑换网页图标, self.prefix+"奖励兑换网页图标", savepos=True)
@@ -1002,7 +1002,7 @@ class wzyd_libao:
         if self.Tool.existsTHENtouch(重新登录, self.prefix+"重新登录"):
             self.Tool.touchfile(self.prefix+"重新登录体验服.txt")
             return
-        奖励页面 = Template(r"tpl1699874011609.png", record_pos=(0.165, 0.48), resolution=(540, 960), threshold=0.9)
+        奖励页面 = Template(r"tpl1699874011609.png", record_pos=(0.165, 0.48), resolution=(540, 960), threshold=0.9, rgb=True)
         pos = False
         # 这里是等待刷新的过程,不用sleep那么久
         for i in range(10):
@@ -1050,9 +1050,9 @@ class wzyd_libao:
             return
         start_app(self.APPID)
         sleep(10)
-        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面",savepos=True)
+        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
         sleep(5)
-        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利",savepos=True)
+        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=True)
         sleep(5)
         self.Tool.existsTHENtouch(Template(r"tpl1699872241675.png", record_pos=(0.313, -0.372), resolution=(540, 960)), self.prefix+"立即签到")
         sleep(5)
@@ -1064,9 +1064,9 @@ class wzyd_libao:
         start_app(self.APPID)
         sleep(5)
         sleep(5)
-        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面",savepos=True)
+        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
         sleep(5)
-        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利",savepos=True)
+        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=True)
         sleep(5)
         self.Tool.existsTHENtouch(Template(r"tpl1699872273081.png", record_pos=(0.326, 0.046), resolution=(540, 960)), self.prefix+"领取")
         sleep(5)
@@ -3467,7 +3467,7 @@ class auto_airtest:
         #
         对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
         TASK = wzry_task(self.移动端, 对战模式, shiftnode=-4, debug=self.debug)
-        #以后的测试脚本写在WZRY.0.临时初始化.txt中,不再插入到object.py中
+        # 以后的测试脚本写在WZRY.0.临时初始化.txt中,不再插入到object.py中
         TASK.RUN()
         self.移动端.关闭APP()
         #
