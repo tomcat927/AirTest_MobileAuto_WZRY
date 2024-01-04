@@ -934,6 +934,7 @@ class wzyd_libao:
             TimeECHO(self.prefix+"营地无法打开,返回")
             return False
         #
+        sleep(10) #等待营地打开
         if exists(self.个人界面图标_默认):
             if not exists(self.个人界面图标_活动):
                 self.营地活动 = False
