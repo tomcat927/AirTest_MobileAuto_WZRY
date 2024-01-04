@@ -919,11 +919,11 @@ class wzyd_libao:
         self.营地活动 = True
         self.APPID = APPID
         self.prefix = prefix+"王者营地:"
+        self.营地初始化FILE = prefix+".营地初始化.txt"
         self.IOS = "smobagamehelper" in self.APPID
-        self.个人界面图标_默认 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
-        self.战绩图标_默认 = Template(r"tpl1699873801012.png", record_pos=(0.187, 0.726), resolution=(540, 960), threshold=0.9)
-        self.个人界面图标_活动 = Template(r"tpl1703259800661.png", record_pos=(0.372, 0.728), resolution=(540, 960))
-        self.战绩图标_活动 = Template(r"tpl1703259792669.png", record_pos=(0.176, 0.728), resolution=(540, 960))
+        # 这两个图标会根据活动变化,可以用下面的注入替换
+        self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
+        self.游戏界面图标 = Template(r"tpl1704381547456.png", record_pos=(0.187, 0.726), resolution=(540, 960))
         self.每日福利图标 = Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
@@ -935,21 +935,22 @@ class wzyd_libao:
             return False
         #
         sleep(20)  # 等待营地打开
-        if exists(self.个人界面图标_默认):
-            if not exists(self.个人界面图标_活动):
-                self.营地活动 = False
-            else:
-                TimeECHO(self.prefix+"没有检测到营地界面_默认版")
-                return False
-        else:
-            if exists(self.个人界面图标_活动):
-                self.营地活动 = True
-            else:
-                TimeECHO(self.prefix+"没有检测到营地界面_活动版")
-                return False
-        self.个人界面图标 = self.个人界面图标_活动 if self.营地活动 else self.个人界面图标_默认
-        self.战绩图标 = self.战绩图标_活动 if self.营地活动 else self.战绩图标_默认
-        # 营地货币目前仅支持ios领取
+        if os.path.exists(self.营地初始化FILE):
+            TimeECHO(self.prefix+f":注入营地初始化代码({self.营地初始化FILE})")
+            exec_insert = self.Tool.readfile(self.营地初始化FILE)
+            for i_insert in exec_insert:
+                trim_insert = i_insert.strip()
+                if len(trim_insert) < 1:
+                    continue
+                if '#' == trim_insert[0]:
+                    continue
+                try:
+                    exec(i_insert)
+                    TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
+                except:
+                    TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
+        #
+        # 体验服只有安卓客户端可以领取
         if not self.IOS:
             self.体验服礼物()
         self.营地币兑换碎片()
@@ -974,26 +975,28 @@ class wzyd_libao:
         times = times+1
         if times > 10:
             return False
-        if not self.Tool.existsTHENtouch(self.战绩图标, self.prefix+"战绩图标"):
-            return self.体验服礼物(times)
+        #都保存位置,最后进不去再return
+        self.Tool.existsTHENtouch(self.游戏界面图标, self.prefix+"游戏界面图标",savepos=True)
         sleep(5)
-        图标 = Template(r"tpl1699873841208.png", record_pos=(-0.441, -0.809), resolution=(540, 960), threshold=0.9)
-        if not self.Tool.existsTHENtouch(图标, self.prefix+"集合"):
+        # 判断是否在体验服框架
+        # 这里需要提前手动把体验服加到选择界面
+        体验服判断图标 = Template(r"tpl1704381586249.png", record_pos=(-0.293, -0.026), resolution=(540, 960))
+        体验服大头图标 = Template(r"tpl1704381887267.png", record_pos=(-0.42, -0.787), resolution=(540, 960))
+        体验服入口 = False
+        for i in range(5):
+            if exists(体验服判断图标):
+                体验服入口 = True
+                break
+            self.Tool.existsTHENtouch(体验服大头图标, "体验服大头图标", savepos=False)
+        if not 体验服入口:
+            TimeECHO(self.prefix+f"没有找到体验服入口,有可能营地有更新")
             return self.体验服礼物(times)
-        sleep(5)
         #
-        图标 = Template(r"tpl1699873913813.png", record_pos=(-0.374, -0.043), resolution=(540, 960), threshold=0.9)
-        if not self.Tool.existsTHENtouch(图标, self.prefix+"体验服"):
-            return self.体验服礼物(times)
+        奖励兑换图标 = Template(r"tpl1704381904053.png", record_pos=(-0.209, -0.026), resolution=(540, 960))
+        self.Tool.existsTHENtouch(奖励兑换图标, self.prefix+"体验服奖励兑换图标",savepos=True)
         sleep(5)
-        图标 = Template(r"tpl1699873941409.png", record_pos=(0.387, -0.128), resolution=(540, 960), threshold=0.9)
-        if not self.Tool.existsTHENtouch(图标, self.prefix+"进入体验服"):
-            return self.体验服礼物(times)
-        sleep(5)
-        图标 = Template(r"tpl1699873949811.png", record_pos=(-0.006, 0.176), resolution=(540, 960), threshold=0.9)
-        if not self.Tool.existsTHENtouch(图标, self.prefix+"奖励兑换"):
-            return self.体验服礼物(times)
-        sleep(5)
+        奖励兑换网页图标 = Template(r"tpl1704381965060.png", rgb=True, target_pos=7, record_pos=(0.243, -0.496), resolution=(540, 960))
+        self.Tool.existsTHENtouch(奖励兑换网页图标, self.prefix+"奖励兑换网页图标", savepos=True)
         # 有时候会让重新登录
         重新登录 = Template(r"tpl1702610976931.png", record_pos=(0.0, 0.033), resolution=(540, 960))
         if self.Tool.existsTHENtouch(重新登录, self.prefix+"重新登录"):
@@ -3464,7 +3467,7 @@ class auto_airtest:
         #
         对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
         TASK = wzry_task(self.移动端, 对战模式, shiftnode=-4, debug=self.debug)
-        # return
+        #以后的测试脚本写在WZRY.0.临时初始化.txt中,不再插入到object.py中
         TASK.RUN()
         self.移动端.关闭APP()
         #
