@@ -1807,8 +1807,8 @@ class wzry_task:
             #不同活动中,开始按钮的图标不同
             #
             房间中的开始按钮Group=[]
-            房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
-            房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540)))
+            房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), rgb=True))
+            房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540), rgb=True))
             找到开始按钮=False
             房间中的开始按钮=房间中的开始按钮Group[0]
             if self.房主:
@@ -1819,7 +1819,7 @@ class wzry_task:
                             房间中的开始按钮=房间中的开始按钮Group[i]
                             找到开始按钮=True
                             break
-                self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮")
+                self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮",savepos=False)
                 # else:
                 #    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
             if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
@@ -2817,7 +2817,7 @@ class wzry_task:
 
     def 六国远征(self):
         if "2023" not in self.赛季:
-            TimeECHO(self.prefix+"S35赛季彻底关闭远征商店与武道商店入口,暂时保留代码避免又增加该功能")
+            TimeECHO(self.prefix+"S34赛季彻底关闭远征商店与武道商店入口,暂时保留代码避免又增加该功能")
             return True
         if not self.Tool.timelimit("六国远征战", limit=60*60, init=False):
             TimeECHO(self.prefix+"时间太短,暂时不六国远征战")
@@ -2835,7 +2835,7 @@ class wzry_task:
 
     def 武道大会(self):
         if "2023" not in self.赛季:
-            TimeECHO(self.prefix+"S35赛季彻底关闭远征商店与武道商店入口,暂时保留代码避免又增加该功能")
+            TimeECHO(self.prefix+"S34赛季彻底关闭远征商店与武道商店入口,暂时保留代码避免又增加该功能")
             return True
         if not self.Tool.timelimit("武道大会", limit=60*60, init=False):
             TimeECHO(self.prefix+"时间太短,暂时不武道大会")
