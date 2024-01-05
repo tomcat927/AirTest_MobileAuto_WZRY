@@ -1194,6 +1194,7 @@ class wzry_task:
         self.标准触摸对战 = False
         self.赛季 = "2024"
         self.对战结束返回房间 = True
+        self.无法进行组队 = False
         # 对应的控制文件
         self.结束游戏FILE = "WZRY.ENDGAME.txt"
         self.SLEEPFILE = "WZRY.SLEEP.txt"
@@ -1206,6 +1207,7 @@ class wzry_task:
         self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
         self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
         self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
+        self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
@@ -1485,7 +1487,8 @@ class wzry_task:
                 self.Tool.touch同步文件()
             else:
                 TimeECHO(self.prefix+"需要重新登录:创建单节点同步")
-                self.Tool.file(self.重新登录FILE)
+                self.Tool.touchfile(self.重新登录FILE)
+                self.Tool.touchfile(self.无法进行组队FILE)
                 self.移动端.重启APP(10*60)
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
                 return True
@@ -1697,7 +1700,7 @@ class wzry_task:
             return
         TimeECHO(self.prefix+"进入组队匹配房间")
         # 组队时,使用青铜模式进行, 前面应该已经配置好了青铜段位,这里进一步加强青铜段位确定
-        if not "模拟战" in self.对战模式 and not self.青铜段位 and self.房主 :
+        if not "模拟战" in self.对战模式 and not self.青铜段位 and self.房主:
             TimeECHO(self.prefix+":组队模式只在青铜段位进行,房主应该使用青铜段位建房间,重建房间中")
             self.青铜段位 = True
             self.进入大厅()
@@ -2178,7 +2181,8 @@ class wzry_task:
         sleep(10)
         self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540)), "展开战队")
         sleep(10)
-        self.Tool.existsTHENtouch(Template(r"tpl1700403174640.png", record_pos=(0.079, 0.236), resolution=(960, 540)), "战队商店")
+        if not self.Tool.existsTHENtouch(Template(r"tpl1700403174640.png", record_pos=(0.079, 0.236), resolution=(960, 540)), "战队商店"):
+            TimeECHO(self.prefix+"找不到战队商店, 可能没有加战队, 返回")
         sleep(10)
         self.Tool.existsTHENtouch(Template(r"tpl1700403186636.png", record_pos=(0.158, -0.075), resolution=(960, 540), target_pos=8), "英雄碎片")
         sleep(10)
@@ -3333,6 +3337,13 @@ class wzry_task:
                         TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
                         self.totalnode = self.totalnode_bak
             self.组队模式 = self.totalnode > 1
+            #各种原因无法组队判定
+            self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
+            if self.组队模式 and self.无法进行组队:
+                TimeECHO(self.prefix+f"检测到{self.无法进行组队FILE}, 无法进行组队,关闭组队功能")
+                self.组队模式 = False
+                self.totalnode = 1
+            #
             if self.组队模式:
                 TimeECHO(self.prefix+"组队模式")
             self.房主 = self.mynode == 0 or self.totalnode == 1
