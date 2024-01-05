@@ -1402,17 +1402,18 @@ class wzry_task:
         #
         if self.健康系统():
             if self.组队模式:
-                TimeErr(self.prefix+"存在健康系统,所以touch同步文件")
+                TimeErr(self.prefix+"进入大厅遇到健康系统,所以touch同步文件")
                 self.Tool.touch同步文件()
                 sleep(30)
                 return True
             else:
                 times = 1
                 if self.王者营地礼包:
+                    self.Tool.timedict["领营地礼包"] = 0
                     self.每日礼包_王者营地()
-                    sleeptime = 60*2
+                    sleeptime = 10
                 else:
-                    sleeptime = 60*10
+                    sleeptime = 60*5
                 self.移动端.重启APP(sleeptime)
                 self.登录游戏()
                 return self.进入大厅(times)
@@ -1507,9 +1508,19 @@ class wzry_task:
         #
         if self.健康系统():
             if self.组队模式:
-                TimeErr(self.prefix+"存在健康系统,所以touch同步文件")
+                TimeErr(self.prefix+"登录游戏遇到健康系统,所以touch同步文件")
                 self.Tool.touch同步文件()
                 sleep(30)
+            else:
+                times = 1
+                if self.王者营地礼包:
+                    self.Tool.timedict["领营地礼包"] = 0
+                    self.每日礼包_王者营地()
+                    sleeptime = 10
+                else:
+                    sleeptime = 60*5
+                self.移动端.重启APP(sleeptime)
+                return self.登录游戏(times)
             return True
         # 动态下载资源提示
 
@@ -1967,10 +1978,11 @@ class wzry_task:
                 else:
                     times = 1
                     if self.王者营地礼包:
+                        self.Tool.timedict["领营地礼包"] = 0
                         self.每日礼包_王者营地()
-                        sleeptime = 60*2
+                        sleeptime = 10
                     else:
-                        sleeptime = 60*10
+                        sleeptime = 60*5
                     self.移动端.重启APP(sleeptime)
                     self.登录游戏()
                     return self.进入大厅(times)
