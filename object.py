@@ -1143,12 +1143,9 @@ class wzry_task:
         self.房主 = self.mynode == 0 or self.totalnode == 1
         self.prefix = f"({self.mynode})"
         #
-        self.对战结束返回房间 = True
         self.对战模式 = 对战模式  # "5v5匹配" or "王者模拟战"
         self.debug = debug  # 本地调试模式,加速,测试所有功能
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
-        self.选择人机模式 = True
-        self.青铜段位 = os.path.exists("青铜模式.txt")
         #
         self.对战时间 = [5.1, 23]  # 单位hour,对战时间取N.m是为了让程序在N点时启动领取昨日没领完的礼包
         # 当hour小于此数字时才是组队模式
@@ -1189,11 +1186,21 @@ class wzry_task:
                 return
 
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
-        # .
+        # 控制参数
+        self.选择人机模式 = True
+        self.青铜段位 = False
+        self.标准模式 = False
+        self.触摸对战 = False
+        self.标准触摸对战 = False
+        self.赛季 = "2024"
+        self.对战结束返回房间 = True
+        # 对应的控制文件
         self.结束游戏FILE = "WZRY.ENDGAME.txt"
         self.SLEEPFILE = "WZRY.SLEEP.txt"
         self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
         self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+        self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+        self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
         self.临时组队FILE = "WZRY.组队.txt"
         self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
         self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
@@ -1203,9 +1210,7 @@ class wzry_task:
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
-        self.触摸对战 = os.path.exists(self.触摸对战FILE)
-        self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
-        self.赛季 = "2024"
+
         #
         self.王者营地礼包 = False
         if ":5555" in self.移动端.LINK:
@@ -1610,7 +1615,7 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
         sleep(2)
         # 暂时不修改 self.选择人机模式=False
-        self.青铜段位 = os.path.exists("青铜模式.txt")
+        # 不在这里根据青铜段位文件判断,而是在上层调用之前设置self.青铜段位
         段位key = "青铜段位" if self.青铜段位 else "星耀段位"
         if self.选择人机模式:
             TimeECHO(self.prefix+"选择对战模式")
@@ -1618,6 +1623,8 @@ class wzry_task:
             匹配模式["标准模式"] = Template(r"tpl1702268393125.png", record_pos=(-0.35, -0.148), resolution=(960, 540))
             匹配模式["快速模式"] = Template(r"tpl1689666057241.png", record_pos=(-0.308, -0.024), resolution=(960, 540))
             key = "快速模式"
+            if self.标准模式:
+                key = "标准模式"
             if self.标准触摸对战:
                 key = "标准模式"
             if not self.Tool.existsTHENtouch(匹配模式[key], key):
@@ -1655,7 +1662,7 @@ class wzry_task:
                 段位key = "青铜段位"
                 self.Tool.existsTHENtouch(段位图标[段位key], "选择"+段位key, savepos=False)
                 self.Tool.existsTHENtouch(开始练习, "开始练习")
-                self.Tool.touchfile("青铜模式.txt")
+                self.Tool.touchfile(self.青铜段位FILE)
                 if self.组队模式:
                     TimeErr(self.prefix+"段位不合适,创建同步文件")
                     self.Tool.touch同步文件()
@@ -1689,16 +1696,15 @@ class wzry_task:
         if not self.组队模式:
             return
         TimeECHO(self.prefix+"进入组队匹配房间")
+        # 组队时,使用青铜模式进行, 前面应该已经配置好了青铜段位,这里进一步加强青铜段位确定
+        if not "模拟战" in self.对战模式 and not self.青铜段位 and self.房主 :
+            TimeECHO(self.prefix+":组队模式只在青铜段位进行,房主应该使用青铜段位建房间,重建房间中")
+            self.青铜段位 = True
+            self.进入大厅()
+            self.单人进入人机匹配房间()
         # ...............................................................
         # 当多人组队模式时，这里要暂时保证是房间中，因为邀请系统还没写好
         self.Tool.barriernode(self.mynode, self.totalnode, "组队进房间")
-        if not "模拟战" in self.对战模式 and not self.青铜段位:
-            if os.path.exists("青铜模式.txt"):
-                self.青铜段位 = True
-                TimeECHO(self.prefix+":有的节点有问题,只能进行青铜对战,重新设置对战模式"+"若组队则创建同步文件")
-                if self.组队模式:
-                    self.Tool.touch同步文件()
-                return
         if not self.房主:
             sleep(self.mynode*10)
         self.Tool.timelimit(timekey=f"组队模式进房间{self.mynode}", limit=60*5, init=True)
@@ -3301,7 +3307,7 @@ class wzry_task:
                     self.Tool.touchfile(self.prefix+"武道大会.txt")
                 self.选择人机模式 = True
                 self.青铜段位 = False
-                self.Tool.removefile("青铜模式.txt")
+                self.Tool.removefile(self.青铜段位FILE)
                 if self.totalnode_bak > 1:
                     self.Tool.touch同步文件()
                 continue
@@ -3366,9 +3372,13 @@ class wzry_task:
             #
             # ------------------------------------------------------------------------------
             # 增加对战模式
-            self.青铜段位 = os.path.exists("青铜模式.txt")
+            self.青铜段位 = os.path.exists(self.青铜段位FILE)
+            self.标准模式 = os.path.exists(self.标准模式FILE)
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
             self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
+            if self.组队模式 and not self.青铜段位:
+                TimeECHO(self.prefix+f"组队时采用青铜段位")
+                self.青铜段位 = True
             # 默认标准模式的触摸对战每天只启动一次,其余时间用户通过手动建文件启动
             # 经过对比发现,触摸对战,系统会判定没有挂机,给的金币更多, 所以这里提高5v5对战过程中触摸的几率
             # 每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
@@ -3389,6 +3399,7 @@ class wzry_task:
             if self.触摸对战:
                 TimeECHO(self.prefix+f"本局对战,模拟人手触摸")
             if self.标准触摸对战:
+                self.标准模式 = True
                 TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             # ------------------------------------------------------------------------------
             # 运行前统一变量
