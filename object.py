@@ -3434,9 +3434,9 @@ class wzry_task:
                         continue
                     try:
                         exec(i_insert)
-                        TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
+                        TimeECHO(self.prefix+".对战前注入.run: "+i_insert[:-1])
                     except:
-                        TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
+                        TimeErr(self.prefix+".对战前注入.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
