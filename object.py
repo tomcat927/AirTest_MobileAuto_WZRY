@@ -996,13 +996,16 @@ class wzyd_libao:
         self.Tool.existsTHENtouch(奖励兑换图标, self.prefix+"体验服奖励兑换图标", savepos=True)
         sleep(5)
         奖励兑换网页图标 = Template(r"tpl1704381965060.png", rgb=True, target_pos=7, record_pos=(0.243, -0.496), resolution=(540, 960))
-        self.Tool.existsTHENtouch(奖励兑换网页图标, self.prefix+"奖励兑换网页图标", savepos=True)
+        if not self.Tool.existsTHENtouch(奖励兑换网页图标, self.prefix+"奖励兑换网页图标", savepos=False):
+            sleep(20)
+            if not self.Tool.existsTHENtouch(奖励兑换网页图标, self.prefix+"奖励兑换网页图标", savepos=False):
+                return self.体验服礼物(times)
         # 有时候会让重新登录
         重新登录 = Template(r"tpl1702610976931.png", record_pos=(0.0, 0.033), resolution=(540, 960))
         if self.Tool.existsTHENtouch(重新登录, self.prefix+"重新登录"):
             self.Tool.touchfile(self.prefix+"重新登录体验服.txt")
             return
-        奖励页面 = Template(r"tpl1699874011609.png", record_pos=(0.165, 0.48), resolution=(540, 960), threshold=0.9, rgb=True)
+        奖励页面 = Template(r"tpl1704522893096.png", record_pos=(0.239, 0.317), resolution=(540, 960))
         pos = False
         # 这里是等待刷新的过程,不用sleep那么久
         for i in range(10):
@@ -3337,7 +3340,7 @@ class wzry_task:
                         TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
                         self.totalnode = self.totalnode_bak
             self.组队模式 = self.totalnode > 1
-            #各种原因无法组队判定
+            # 各种原因无法组队判定
             self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
             if self.组队模式 and self.无法进行组队:
                 TimeECHO(self.prefix+f"检测到{self.无法进行组队FILE}, 无法进行组队,关闭组队功能")
