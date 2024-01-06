@@ -2555,16 +2555,21 @@ class wzry_task:
             self.Tool.existsTHENtouch(系统快速领取, "系统快速领取", savepos=False)
             self.Tool.LoopTouch(系统礼物关闭, "系统礼物关闭", loop=5)
             self.Tool.LoopTouch(黄色礼物确定, "黄色礼物确定", loop=10)
+            self.Tool.existsTHENtouch(下次再选, "下次再选礼物")
+            self.Tool.LoopTouch(系统礼物关闭, "系统礼物关闭", loop=5)
             while self.Tool.existsTHENtouch(系统礼物确定, "系统礼物确定"):
                 if exists(解锁语音界面):
                     self.Tool.existsTHENtouch(我知道了, "我知道了")
                 self.Tool.LoopTouch(系统礼物关闭, "系统礼物关闭", loop=5)
                 self.Tool.LoopTouch(黄色礼物确定, "黄色礼物确定", loop=10)
+                self.Tool.existsTHENtouch(下次再选, "下次再选礼物")
                 self.Tool.existsTHENtouch(系统礼物关闭, "系统礼物关闭", savepos=False)
                 if self.Tool.timelimit(timekey="领邮件礼包", limit=60*5, init=False):
                     TimeECHO(self.prefix+"领邮件礼包超时.....")
                     return self.每日礼包_邮件礼包(times)
             self.Tool.LoopTouch(系统礼物确定, "系统礼物确定", loop=10)
+            下次再选 = Template(r"tpl1704542576626.png", record_pos=(-0.099, 0.182), resolution=(960, 540))
+
         self.Tool.LoopTouch(返回, "返回")
         return True
 
