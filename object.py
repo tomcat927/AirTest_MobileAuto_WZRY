@@ -2529,6 +2529,7 @@ class wzry_task:
         系统礼物确定 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         黄色礼物确定 = Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540))
         系统礼物关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
+        下次再选 = Template(r"tpl1704542576626.png", record_pos=(-0.099, 0.182), resolution=(960, 540))
 
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         self.Tool.existsTHENtouch(邮件图标)
@@ -2568,7 +2569,6 @@ class wzry_task:
                     TimeECHO(self.prefix+"领邮件礼包超时.....")
                     return self.每日礼包_邮件礼包(times)
             self.Tool.LoopTouch(系统礼物确定, "系统礼物确定", loop=10)
-            下次再选 = Template(r"tpl1704542576626.png", record_pos=(-0.099, 0.182), resolution=(960, 540))
 
         self.Tool.LoopTouch(返回, "返回")
         return True
