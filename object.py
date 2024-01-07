@@ -1074,6 +1074,20 @@ class wzyd_libao:
         self.Tool.existsTHENtouch(Template(r"tpl1699872273081.png", record_pos=(0.326, 0.046), resolution=(540, 960)), self.prefix+"领取")
         sleep(5)
         self.Tool.existsTHENtouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)), self.prefix+"确定")
+        # 一键领取
+        sleep(5)
+        if not stop_app(self.APPID):
+            return
+        start_app(self.APPID)
+        sleep(5)
+        sleep(5)
+        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
+        sleep(5)
+        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=True)
+        sleep(5)
+        self.Tool.existsTHENtouch(Template(r"tpl1704626580247.png", record_pos=(0.296, 0.044), resolution=(540, 960)), self.prefix+"一键领取")
+        sleep(5)
+        self.Tool.LoopTouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)), self.prefix+"确定")
         return
 
     def 营地币兑换碎片(self, times=0):
@@ -3569,3 +3583,4 @@ if __name__ == "__main__":
             out = p.map_async(multi_start, m_cpu).get()
             p.close()
             p.join()
+touch()
