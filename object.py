@@ -1972,16 +1972,16 @@ class wzry_task:
                 continue
             if self.判断房间中():
                 return
-            self.判断对战中(加速对战)
+            if 加速对战: self.判断对战中(加速对战)
             if self.判断大厅中():
                 return
-            self.判断对战中(加速对战)
+            if 加速对战: self.判断对战中(加速对战)
             每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
             self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
-            self.判断对战中(加速对战)
+            if 加速对战: self.判断对战中(加速对战)
             确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
             self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
-            self.判断对战中(加速对战)
+            if 加速对战: self.判断对战中(加速对战)
             if exists(返回房间按钮):
                 jixu = True
             if self.健康系统():
@@ -2008,6 +2008,7 @@ class wzry_task:
                 self.Tool.existsTHENtouch(Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540)))
             self.check_connect_status()
 
+            if 加速对战: self.判断对战中(加速对战)
             # 有时候会莫名进入分享界面
             if exists(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540))):
                 TimeECHO(self.prefix+"分享界面")
@@ -2049,6 +2050,7 @@ class wzry_task:
                 jixu = True
                 self.Tool.existsTHENtouch(Template(r"tpl1689669113076.png", record_pos=(-0.002, 0.179), resolution=(960, 540)))
                 sleep(2)
+            if 加速对战: self.判断对战中(加速对战)
 
             # todo, 暂时为空
             if self.Tool.existsTHENtouch(Template(r"tpl1689670032299.png", record_pos=(-0.098, 0.217), resolution=(960, 540))):
@@ -2063,6 +2065,7 @@ class wzry_task:
             self.check_connect_status()
             if self.Tool.存在同步文件():
                 return True
+            if 加速对战: self.判断对战中(加速对战)
             sleep(10)
             if not jixu:
                 if self.Tool.timelimit(timekey="结束人机匹配", limit=60*2, init=False):
