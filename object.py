@@ -1203,6 +1203,10 @@ class wzry_task:
                 return
 
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
+        #
+        self.runstep = 0
+        self.jinristep = 0
+
         # 控制参数
         self.选择人机模式 = True
         self.青铜段位 = False
@@ -1986,16 +1990,20 @@ class wzry_task:
                 continue
             if self.判断房间中():
                 return
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
             if self.判断大厅中():
                 return
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
             每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
             self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
             确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
             self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
             if exists(返回房间按钮):
                 jixu = True
             if self.健康系统():
@@ -2022,7 +2030,8 @@ class wzry_task:
                 self.Tool.existsTHENtouch(Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540)))
             self.check_connect_status()
 
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
             # 有时候会莫名进入分享界面
             if exists(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540))):
                 TimeECHO(self.prefix+"分享界面")
@@ -2064,7 +2073,8 @@ class wzry_task:
                 jixu = True
                 self.Tool.existsTHENtouch(Template(r"tpl1689669113076.png", record_pos=(-0.002, 0.179), resolution=(960, 540)))
                 sleep(2)
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
 
             # todo, 暂时为空
             if self.Tool.existsTHENtouch(Template(r"tpl1689670032299.png", record_pos=(-0.098, 0.217), resolution=(960, 540))):
@@ -2079,7 +2089,8 @@ class wzry_task:
             self.check_connect_status()
             if self.Tool.存在同步文件():
                 return True
-            if 加速对战: self.判断对战中(加速对战)
+            if 加速对战:
+                self.判断对战中(加速对战)
             sleep(10)
             if not jixu:
                 if self.Tool.timelimit(timekey="结束人机匹配", limit=60*2, init=False):
@@ -3213,9 +3224,6 @@ class wzry_task:
         #
 
     def RUN(self):  # 程序入口
-        runstep = 0
-        jinristep = 0
-        对战次数 = 0
         while True:
             # ------------------------------------------------------------------------------
             # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
@@ -3289,7 +3297,7 @@ class wzry_task:
             startclock = self.对战时间[0]
             endclock = self.对战时间[1]  # 服务器5点刷新礼包和信誉积分等
             # if self.移动端.实体终端 and self.totalnode_bak == 1: endclock=19
-            if runstep == 0:
+            if self.runstep == 0:
                 startclock = -1
                 endclock = 25
             hour, minu = self.Tool.time_getHM()
@@ -3330,7 +3338,7 @@ class wzry_task:
             if 新的一天:
                 self.移动端.重启APP(10)
                 self.登录游戏()
-                jinristep = 0
+                self.jinristep = 0
                 self.赛季 = "2024"
                 self.进行六国远征 = False
                 self.进行武道大会 = False
@@ -3353,7 +3361,7 @@ class wzry_task:
             hour, minu = self.Tool.time_getHM()
             # 当hour小于此数字时才是组队模式
             # 这里的同步文件是怕有的进程跑的太快了，刚好错过这个时间点
-            # 去掉条件and runstep > 0, 以后的第一次不再进行组队模拟,程序出问题的概率不大,真测试可以touch组队文件
+            # 去掉条件and self.runstep > 0, 以后的第一次不再进行组队模拟,程序出问题的概率不大,真测试可以touch组队文件
             if hour >= self.限时组队时间 and not self.Tool.存在同步文件() and self.totalnode > 1:
                 TimeECHO(self.prefix+"限时进入单人模式")
                 self.totalnode = 1
@@ -3407,8 +3415,8 @@ class wzry_task:
                 continue
             #
             # ------------------------------------------------------------------------------
-            runstep = runstep+1
-            jinristep = jinristep+1
+            self.runstep = self.runstep+1
+            self.jinristep = self.jinristep+1
             #
             # ------------------------------------------------------------------------------
             # 增加对战模式
@@ -3423,10 +3431,10 @@ class wzry_task:
             # 经过对比发现,触摸对战,系统会判定没有挂机,给的金币更多, 所以这里提高5v5对战过程中触摸的几率
             # 每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
             # 触摸标准对战持续29min胜利,获得了170+金币. 触摸快速对战记录最大值35金币
-            if jinristep % 2 == 0 and not self.组队模式:
+            if self.jinristep % 2 == 0 and not self.组队模式:
                 self.触摸对战 = True
             # 在特定步数进行标准对战,频率很低
-            if jinristep % 10 == 0 and not self.组队模式:
+            if self.jinristep % 10 == 0 and not self.组队模式:
                 self.标准触摸对战 = True
             # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
             if not self.青铜段位:
@@ -3443,10 +3451,10 @@ class wzry_task:
                 TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             # ------------------------------------------------------------------------------
             # 运行前统一变量
-            self.runinfo["runstep"] = runstep
+            self.runinfo["runstep"] = self.runstep
             self.runinfo = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runinfo, name="bcastruninfo")
-            runstep = self.runinfo["runstep"]
-            TimeECHO(self.prefix+f"运行次数{runstep}|今日步数{jinristep}")
+            self.runstep = self.runinfo["runstep"]
+            TimeECHO(self.prefix+f"运行次数{self.runstep}|今日步数{self.jinristep}")
             #
             # ------------------------------------------------------------------------------
             if os.path.exists(self.对战前插入FILE):
@@ -3471,7 +3479,7 @@ class wzry_task:
             if not connect_status():
                 continue
             # 礼包
-            if runstep % 5 == 0:  # 实际礼包还有1h间隔限制,这里取的runstep小没事
+            if self.runstep % 5 == 0:  # 实际礼包还有1h间隔限制,这里取的self.runstep小没事
                 if not connect_status():
                     continue
                 self.每日礼包()
