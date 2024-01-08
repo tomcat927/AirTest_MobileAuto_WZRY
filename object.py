@@ -3226,6 +3226,21 @@ class wzry_task:
     def RUN(self):  # 程序入口
         while True:
             # ------------------------------------------------------------------------------
+            if os.path.exists(self.临时初始化FILE):
+                TimeECHO(self.prefix+f":注入临时初始化代码({self.临时初始化FILE})")
+                exec_insert = self.Tool.readfile(self.临时初始化FILE)
+                for i_insert in exec_insert:
+                    trim_insert = i_insert.strip()
+                    if len(trim_insert) < 1:
+                        continue
+                    if '#' == trim_insert[0]:
+                        continue
+                    try:
+                        exec(i_insert)
+                        TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
+                    except:
+                        TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
+            # ------------------------------------------------------------------------------
             # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
             # 然后多节点进行同步后
             # 再统一退出
@@ -3273,21 +3288,6 @@ class wzry_task:
             while os.path.exists(self.SLEEPFILE):
                 TimeECHO(self.prefix+f"检测到{self.SLEEPFILE}, sleep(5min)")
                 sleep(60*5)
-            # ------------------------------------------------------------------------------
-            if os.path.exists(self.临时初始化FILE):
-                TimeECHO(self.prefix+f":注入临时初始化代码({self.临时初始化FILE})")
-                exec_insert = self.Tool.readfile(self.临时初始化FILE)
-                for i_insert in exec_insert:
-                    trim_insert = i_insert.strip()
-                    if len(trim_insert) < 1:
-                        continue
-                    if '#' == trim_insert[0]:
-                        continue
-                    try:
-                        exec(i_insert)
-                        TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
-                    except:
-                        TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             #
