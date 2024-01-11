@@ -1428,23 +1428,10 @@ class wzry_task:
         self.登录游戏()
         times = times+1
         #
-        if self.健康系统():
-            if self.组队模式:
-                TimeErr(self.prefix+"进入大厅遇到健康系统,所以touch同步文件")
-                self.Tool.touch同步文件()
-                sleep(30)
-                return True
-            else:
-                times = 1
-                if self.王者营地礼包:
-                    self.Tool.timedict["领营地礼包"] = 0
-                    self.每日礼包_王者营地()
-                    sleeptime = 10
-                else:
-                    sleeptime = 60*5
-                self.移动端.重启APP(sleeptime)
-                self.登录游戏()
-                return self.进入大厅(times)
+        if self.健康系统_常用命令():
+            if self.组队模式: return True
+            return self.进入大厅(times)
+
         # 次数上限
         if times < 15 and times % 4 == 0:
             self.移动端.重启APP(10)
@@ -1535,22 +1522,9 @@ class wzry_task:
         用户协议同意 = Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540), threshold=0.9)
         self.Tool.existsTHENtouch(用户协议同意, "用户协议同意")
         #
-        if self.健康系统():
-            if self.组队模式:
-                TimeErr(self.prefix+"登录游戏遇到健康系统,所以touch同步文件")
-                self.Tool.touch同步文件()
-                sleep(30)
-            else:
-                times = 1
-                if self.王者营地礼包:
-                    self.Tool.timedict["领营地礼包"] = 0
-                    self.每日礼包_王者营地()
-                    sleeptime = 10
-                else:
-                    sleeptime = 60*5
-                self.移动端.重启APP(sleeptime)
-                return self.登录游戏(times)
-            return True
+        if self.健康系统_常用命令():
+            if self.组队模式: return True
+            return self.进入大厅()
         # 动态下载资源提示
 
         回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
@@ -2006,24 +1980,10 @@ class wzry_task:
                 self.判断对战中(加速对战)
             if exists(返回房间按钮):
                 jixu = True
-            if self.健康系统():
-                TimeErr(self.prefix+"结束人机匹配:健康系统")
-                if self.组队模式:
-                    TimeErr(self.prefix+"存在健康系统,所以touch同步文件")
-                    self.Tool.touch同步文件()
-                    sleep(30)
-                    return True
-                else:
-                    times = 1
-                    if self.王者营地礼包:
-                        self.Tool.timedict["领营地礼包"] = 0
-                        self.每日礼包_王者营地()
-                        sleeptime = 10
-                    else:
-                        sleeptime = 60*5
-                    self.移动端.重启APP(sleeptime)
-                    self.登录游戏()
-                    return self.进入大厅(times)
+            #
+            if self.健康系统_常用命令():
+                if self.组队模式: return True
+                return self.进入大厅()
             #
             游戏结束了 = Template(r"tpl1694360304332.png", record_pos=(-0.011, -0.011), resolution=(960, 540))
             if exists(游戏结束了):
@@ -3146,14 +3106,28 @@ class wzry_task:
             TimeECHO(self.prefix+"您已禁赛")
             确定 = Template(r"tpl1701171103293.png", record_pos=(-0.004, 0.081), resolution=(1136, 640))
             self.Tool.existsTHENtouch(确定, self.prefix+"确定禁赛")
-            if self.组队模式:
-                TimeECHO(self.prefix+"您已禁赛 and 组队touch同步文件")
-                self.Tool.touch同步文件()
-            else:
-                self.移动端.重启APP(60*10)
             return True
         return False
-
+    def 健康系统_常用命令(self):
+        if self.健康系统():
+            if self.组队模式:
+                TimeErr(self.prefix+"组队情况检测到健康系统,所以touch同步文件")
+                self.Tool.touch同步文件()
+                sleep(30)
+            else:
+                TimeErr(self.prefix+"独立模式检测到健康系统,领取营地礼包等操作")
+                if self.王者营地礼包:
+                    self.Tool.timedict["领营地礼包"] = 0
+                    self.每日礼包_王者营地()
+                    sleeptime = 10
+                else:
+                    sleeptime = 60*5
+                TimeErr(self.prefix+f"独立模式检测到健康系统,sleep {sleeptime/60} min")
+                self.移动端.重启APP(sleeptime)
+                self.登录游戏()
+            return True
+        else:
+            return False
     def check_connect_status(self):
         #
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
