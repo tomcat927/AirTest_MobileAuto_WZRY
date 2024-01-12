@@ -1229,10 +1229,12 @@ class wzry_task:
         self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
         self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
         self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
+        self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
+        self.Tool.touchfile(self.免费商城礼包FILE)
 
         #
         self.王者营地礼包 = False
@@ -1858,7 +1860,7 @@ class wzry_task:
                     if self.组队模式:
                         self.Tool.touch同步文件()
                     return
-                队友确认匹配 = Fasle
+                队友确认匹配 = False
                 if 自己曾经确定过匹配:
                     队友确认匹配 = self.判断对战中()
                 if 队友确认匹配:
@@ -2152,6 +2154,10 @@ class wzry_task:
             return True
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             self.移动端.打开APP()
+            #
+            if os.path.exists(self.免费商城礼包FILE):
+                if self.商城免费礼包(): self.Tool.removefile(self.免费商城礼包FILE)
+            #
             self.每日礼包_每日任务()
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
             if self.玉镖夺魁签到:
@@ -2171,6 +2177,7 @@ class wzry_task:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
+
 
         self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
 
@@ -2194,6 +2201,75 @@ class wzry_task:
         sleep(10)
         return
     # @todo,其他活动一键领取
+
+    def 商城免费礼包(self, times=0):
+        self.check_connect_status()
+        if self.Tool.存在同步文件():
+            return True
+        #
+        if times == 1:
+            self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=False):
+                TimeErr(self.prefix+"领商城免费礼包超时")
+                return False
+        if times > 10:
+            return False
+        #
+        times = times+1
+        #
+        # 商城免费礼包
+        TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
+        #
+        TimeECHO(self.prefix+f":商城免费礼包")
+        商城入口 = Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540))
+        特惠入口 = Template(r"tpl1705069563125.png", record_pos=(-0.43, 0.14), resolution=(960, 540))
+        免费图标 = Template(r"tpl1705069610816.png", record_pos=(0.165, -0.159), resolution=(960, 540))
+        免费购买 = Template(r"tpl1705069621203.png", record_pos=(0.244, 0.244), resolution=(960, 540), rgb=True, threshold=0.95)
+        免费点券 = Template(r"tpl1705069633600.png", record_pos=(-0.004, 0.142), resolution=(960, 540))
+        确定购买 = Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540))
+        商城界面 = []
+        商城界面.append(Template(r"tpl1705070445445.png", record_pos=(0.464, -0.04), resolution=(960, 540)))
+        商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
+        商城界面.append(免费图标)
+        商城界面.append(免费购买)
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        #
+        self.进入大厅()
+        self.Tool.existsTHENtouch(商城入口, "商城入口", savepos=True)
+        sleep(30)
+        进入商城界面 = False
+        for i in range(len(商城界面)):
+            self.Tool.existsTHENtouch(特惠入口, f"特惠入口{i}", savepos=True)
+            if exists(商城界面[i]):
+                TimeECHO(self.prefix+f"检测到商城界面")
+                进入商城界面 = True
+                break
+            sleep(20)
+        if not 进入商城界面:
+            TimeECHO(self.prefix+f"未检测到商城界面, 重新进入商城")
+            if "商城入口" in self.Tool.var_dict.keys():
+                del self.Tool.var_dict["商城入口"]
+            if "特惠入口" in self.Tool.var_dict.keys():
+                del self.Tool.var_dict["特惠入口"]
+            return self.商城免费礼包(times=times)
+        #
+        if not self.Tool.existsTHENtouch(免费图标, "免费礼包的图标"):
+            TimeECHO(self.prefix+f"没检测到免费图标,可能领取过了")
+            return False
+
+        领取成功 = False
+        if self.Tool.existsTHENtouch(免费购买, "免费购买", savepos=False):
+            sleep(5)
+            领取成功 = self.Tool.existsTHENtouch(免费点券, "免费点券", savepos=False)
+            sleep(10)
+            self.Tool.LoopTouch(确定购买, "确定购买")
+            self.关闭按钮()
+            self.Tool.LoopTouch(返回, "返回")
+            self.确定按钮()
+        if not 领取成功:
+            TimeECHO(self.prefix+f"领取每日礼包失败")
+        return True
 
     def 玉镖夺魁(self, times=0):
         self.进入大厅()
@@ -3332,6 +3408,7 @@ class wzry_task:
                 self.选择人机模式 = True
                 self.青铜段位 = False
                 self.Tool.removefile(self.青铜段位FILE)
+                self.Tool.touchfile(self.免费商城礼包FILE)
                 if self.totalnode_bak > 1:
                     self.Tool.touch同步文件()
                 continue
@@ -3574,4 +3651,3 @@ if __name__ == "__main__":
             out = p.map_async(multi_start, m_cpu).get()
             p.close()
             p.join()
-touch()
