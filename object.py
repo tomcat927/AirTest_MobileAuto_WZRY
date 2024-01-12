@@ -2220,6 +2220,7 @@ class wzry_task:
         #
         # 商城免费礼包
         TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
+        if self.健康系统(): return False
         #
         TimeECHO(self.prefix+f":商城免费礼包")
         商城入口 = Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540))
@@ -2240,14 +2241,16 @@ class wzry_task:
         sleep(30)
         进入商城界面 = False
         for i in range(len(商城界面)):
-            self.Tool.existsTHENtouch(特惠入口, f"特惠入口{i}", savepos=True)
+            self.Tool.existsTHENtouch(特惠入口, f"点击特惠入口", savepos=True)
+            TimeECHO(self.prefix+f"检测到商城界面{i}")
             if exists(商城界面[i]):
-                TimeECHO(self.prefix+f"检测到商城界面")
                 进入商城界面 = True
                 break
             sleep(20)
+        if self.健康系统(): return False
         if not 进入商城界面:
             TimeECHO(self.prefix+f"未检测到商城界面, 重新进入商城")
+            self.Tool.LoopTouch(返回, "返回")
             if "商城入口" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["商城入口"]
             if "特惠入口" in self.Tool.var_dict.keys():
@@ -3365,6 +3368,7 @@ class wzry_task:
             while hour >= endclock or hour < startclock:
                 # 这里仅领礼包,不要插入六国远征等不稳定的任务
                 TimeECHO(self.prefix+"夜间停止刷游戏")
+                self.Tool.touchfile(self.免费商城礼包FILE)
                 self.每日礼包()
                 self.移动端.关闭APP()
                 # 计算休息时间
