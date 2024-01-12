@@ -1429,7 +1429,8 @@ class wzry_task:
         times = times+1
         #
         if self.健康系统_常用命令():
-            if self.组队模式: return True
+            if self.组队模式:
+                return True
             return self.进入大厅(times)
 
         # 次数上限
@@ -1523,7 +1524,8 @@ class wzry_task:
         self.Tool.existsTHENtouch(用户协议同意, "用户协议同意")
         #
         if self.健康系统_常用命令():
-            if self.组队模式: return True
+            if self.组队模式:
+                return True
             return self.进入大厅()
         # 动态下载资源提示
 
@@ -1820,6 +1822,7 @@ class wzry_task:
         #
         自己确定匹配 = False
         loop = 0
+        自己曾经确定过匹配 = False
         while True:
             # 不同活动中,开始按钮的图标不同
             #
@@ -1845,6 +1848,7 @@ class wzry_task:
                 TimeErr(self.prefix+"超时太久,退出匹配")
                 return False
             自己确定匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8), "确定匹配按钮")
+            自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
             # if 自己确定匹配: sleep(15) #自己确定匹配后给流出时间
             队友确认5v5匹配 = exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540), threshold=0.9))
             #
@@ -1854,7 +1858,9 @@ class wzry_task:
                     if self.组队模式:
                         self.Tool.touch同步文件()
                     return
-                队友确认匹配 = self.判断对战中()
+                队友确认匹配 = Fasle
+                if 自己曾经确定过匹配:
+                    队友确认匹配 = self.判断对战中()
                 if 队友确认匹配:
                     TimeECHO(self.prefix+":队友确认匹配")
                     return True  # 模拟战确定匹配后就结束了
@@ -1982,7 +1988,8 @@ class wzry_task:
                 jixu = True
             #
             if self.健康系统_常用命令():
-                if self.组队模式: return True
+                if self.组队模式:
+                    return True
                 return self.进入大厅()
             #
             游戏结束了 = Template(r"tpl1694360304332.png", record_pos=(-0.011, -0.011), resolution=(960, 540))
@@ -3108,6 +3115,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(确定, self.prefix+"确定禁赛")
             return True
         return False
+
     def 健康系统_常用命令(self):
         if self.健康系统():
             if self.组队模式:
@@ -3128,6 +3136,7 @@ class wzry_task:
             return True
         else:
             return False
+
     def check_connect_status(self):
         #
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
