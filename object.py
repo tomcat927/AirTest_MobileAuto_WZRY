@@ -2242,7 +2242,7 @@ class wzry_task:
         进入商城界面 = False
         for i in range(len(商城界面)):
             self.Tool.existsTHENtouch(特惠入口, f"点击特惠入口", savepos=True)
-            TimeECHO(self.prefix+f"检测到商城界面{i}")
+            TimeECHO(self.prefix+f"检测商城界面中...{i}")
             if exists(商城界面[i]):
                 进入商城界面 = True
                 break
@@ -2259,7 +2259,7 @@ class wzry_task:
         #
         if not self.Tool.existsTHENtouch(免费图标, "免费礼包的图标"):
             TimeECHO(self.prefix+f"没检测到免费图标,可能领取过了")
-            return False
+            return True
 
         领取成功 = False
         if self.Tool.existsTHENtouch(免费购买, "免费购买", savepos=False):
