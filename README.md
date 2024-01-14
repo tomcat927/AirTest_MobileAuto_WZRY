@@ -135,11 +135,15 @@
 * 模拟战等模式账户之前没有进行过/新赛季, 自己提前操作一下, 避免有变动
 
 ## 运行方式
-
+### 通用多账户版本(需要adb、python、终端基础)
 * [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY)
 * 修改代码中客户端的ip地址`auto_airtest>LINK_dict[i]=`
 * [控制端、客户端配置](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/blob/master/howtorun.md)
 * [其他参考资料](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+
+### 简易单账户版本(需要安卓adb基础)
+[图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
+[全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
 
 ## Star History
 
