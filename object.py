@@ -2231,10 +2231,10 @@ class wzry_task:
         免费点券 = Template(r"tpl1705069633600.png", record_pos=(-0.004, 0.142), resolution=(960, 540))
         确定购买 = Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540))
         商城界面 = []
-        商城界面.append(Template(r"tpl1705070445445.png", record_pos=(0.464, -0.04), resolution=(960, 540)))
-        商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
         商城界面.append(免费图标)
         商城界面.append(免费购买)
+        商城界面.append(Template(r"tpl1705070445445.png", record_pos=(0.464, -0.04), resolution=(960, 540)))
+        商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
         self.进入大厅()
@@ -2243,11 +2243,11 @@ class wzry_task:
         进入商城界面 = False
         for i in range(len(商城界面)):
             self.Tool.existsTHENtouch(特惠入口, f"点击特惠入口", savepos=True)
+            sleep(20)
             TimeECHO(self.prefix+f"检测商城界面中...{i}")
             if exists(商城界面[i]):
                 进入商城界面 = True
                 break
-            sleep(20)
         if self.健康系统(): return False
         if not 进入商城界面:
             TimeECHO(self.prefix+f"未检测到商城界面, 重新进入商城")
@@ -2260,6 +2260,7 @@ class wzry_task:
         #
         if not self.Tool.existsTHENtouch(免费图标, "免费礼包的图标"):
             TimeECHO(self.prefix+f"没检测到免费图标,可能领取过了")
+            self.Tool.LoopTouch(返回, "返回")
             return True
 
         领取成功 = False
