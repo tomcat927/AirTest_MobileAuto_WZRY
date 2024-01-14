@@ -2152,11 +2152,12 @@ class wzry_task:
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
+            #
+        if os.path.exists(self.免费商城礼包FILE):
+            if self.商城免费礼包(): self.Tool.removefile(self.免费商城礼包FILE)
+        #
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             self.移动端.打开APP()
-            #
-            if os.path.exists(self.免费商城礼包FILE):
-                if self.商城免费礼包(): self.Tool.removefile(self.免费商城礼包FILE)
             #
             self.每日礼包_每日任务()
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
