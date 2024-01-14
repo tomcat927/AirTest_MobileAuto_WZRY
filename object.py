@@ -1234,7 +1234,6 @@ class wzry_task:
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
-        self.Tool.touchfile(self.免费商城礼包FILE)
 
         #
         self.王者营地礼包 = False
@@ -1294,6 +1293,7 @@ class wzry_task:
         self.Tool.timedict["领营地礼包"] = 0
         self.Tool.timedict["六国远征战"] = 0
         self.Tool.timedict["武道大会"] = 0
+        self.Tool.touchfile(self.免费商城礼包FILE)
         # self.每日礼包()
         # self.每日礼包_每日任务()
         # self.每日礼包_邮件礼包()
@@ -1825,13 +1825,13 @@ class wzry_task:
         自己确定匹配 = False
         loop = 0
         自己曾经确定过匹配 = False
+        找到开始按钮 = False
         while True:
             # 不同活动中,开始按钮的图标不同
             #
             房间中的开始按钮Group = []
             房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), rgb=True))
             房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540), rgb=True))
-            找到开始按钮 = False
             房间中的开始按钮 = 房间中的开始按钮Group[0]
             if self.房主:
                 # if self.判断房间中():
@@ -1842,8 +1842,6 @@ class wzry_task:
                             找到开始按钮 = True
                             break
                 self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮", savepos=False)
-                # else:
-                #    TimeECHO(self.prefix+":不在房间中,无法点击匹配按钮")
             if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
                 TimeErr(self.prefix+"超时,队友未确认匹配或大概率程序卡死")
             if self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=False):
@@ -1852,7 +1850,9 @@ class wzry_task:
             自己确定匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8), "确定匹配按钮")
             自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
             # if 自己确定匹配: sleep(15) #自己确定匹配后给流出时间
-            队友确认5v5匹配 = exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540), threshold=0.9))
+            队友确认5v5匹配 = False
+            if 自己曾经确定过匹配: 队友确认5v5匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)), "展开英雄", savepos=False)
+            #exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540), threshold=0.9))
             #
             if "模拟战" in self.对战模式:
                 if 队友确认5v5匹配:
@@ -1875,7 +1875,7 @@ class wzry_task:
                 break
         #
         # 选择英雄
-        if self.选择英雄 and self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)), "展开英雄", savepos=False):
+        if self.选择英雄:
             if os.path.exists(self.重新设置英雄FILE):
                 TimeECHO(self.prefix+":重新设置英雄")
                 exec_insert = self.Tool.readfile(self.重新设置英雄FILE)
