@@ -946,7 +946,8 @@ class wzyd_libao:
                     continue
                 try:
                     exec(i_insert)
-                    TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
+                    if "TimeE" not in i_insert:
+                        TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
                 except:
                     TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
         #
@@ -1851,8 +1852,9 @@ class wzry_task:
             自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
             # if 自己确定匹配: sleep(15) #自己确定匹配后给流出时间
             队友确认5v5匹配 = False
-            if 自己曾经确定过匹配: 队友确认5v5匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)), "展开英雄", savepos=False)
-            #exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540), threshold=0.9))
+            if 自己曾经确定过匹配:
+                队友确认5v5匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)), "展开英雄", savepos=False)
+            # exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540), threshold=0.9))
             #
             if "模拟战" in self.对战模式:
                 if 队友确认5v5匹配:
@@ -1887,7 +1889,8 @@ class wzry_task:
                         continue
                     try:
                         exec(i_insert)
-                        TimeECHO(self.prefix+".重新设置英雄.run: "+i_insert[:-1])
+                        if "TimeE" not in i_insert:
+                            TimeECHO(self.prefix+".重新设置英雄.run: "+i_insert[:-1])
                     except:
                         TimeErr(self.prefix+".重新设置英雄.Error run: "+i_insert[:-1])
             else:
@@ -2154,7 +2157,8 @@ class wzry_task:
             return True
             #
         if os.path.exists(self.免费商城礼包FILE):
-            if self.商城免费礼包(): self.Tool.removefile(self.免费商城礼包FILE)
+            if self.商城免费礼包():
+                self.Tool.removefile(self.免费商城礼包FILE)
         #
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             self.移动端.打开APP()
@@ -2178,7 +2182,6 @@ class wzry_task:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
-
 
         self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
 
@@ -2221,7 +2224,8 @@ class wzry_task:
         #
         # 商城免费礼包
         TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
-        if self.健康系统(): return False
+        if self.健康系统():
+            return False
         #
         TimeECHO(self.prefix+f":商城免费礼包")
         商城入口 = Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540))
@@ -2248,7 +2252,8 @@ class wzry_task:
             if exists(商城界面[i]):
                 进入商城界面 = True
                 break
-        if self.健康系统(): return False
+        if self.健康系统():
+            return False
         if not 进入商城界面:
             TimeECHO(self.prefix+f"未检测到商城界面, 重新进入商城")
             self.Tool.LoopTouch(返回, "返回")
@@ -3301,7 +3306,8 @@ class wzry_task:
                         continue
                     try:
                         exec(i_insert)
-                        TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
+                        if "TimeE" not in i_insert:
+                            TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
                     except:
                         TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
@@ -3534,7 +3540,8 @@ class wzry_task:
                         continue
                     try:
                         exec(i_insert)
-                        TimeECHO(self.prefix+".对战前注入.run: "+i_insert[:-1])
+                        if "TimeE" not in i_insert:
+                            TimeECHO(self.prefix+".对战前注入.run: "+i_insert[:-1])
                     except:
                         TimeErr(self.prefix+".对战前注入.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
