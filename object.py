@@ -958,9 +958,9 @@ class wzyd_libao:
         self.每日签到任务()
         stop_app(self.APPID)
 
-    def 体验服礼物(self, times=0):
+    def 体验服礼物(self, times=1):
         #
-        if times == 0:
+        if times == 1:
             self.Tool.timelimit(timekey="体验服礼物", limit=60*5, init=True)
         else:
             if self.Tool.timelimit(timekey="体验服礼物", limit=60*5, init=False):
@@ -1045,7 +1045,7 @@ class wzyd_libao:
         return
         #
 
-    def 每日签到任务(self, times=0):
+    def 每日签到任务(self, times=1):
         if times > 0:
             sleep(5)
         TimeECHO(self.prefix+f"每日福利{times}")
@@ -1091,10 +1091,10 @@ class wzyd_libao:
         self.Tool.LoopTouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)), self.prefix+"确定")
         return
 
-    def 营地币兑换碎片(self, times=0):
+    def 营地币兑换碎片(self, times=1):
         TimeECHO(self.prefix+f"营地币兑换碎片{times}")
         #
-        if times == 0:
+        if times == 1:
             self.Tool.timelimit(timekey="营地币兑换碎片", limit=60*5, init=True)
         else:
             if self.Tool.timelimit(timekey="营地币兑换碎片", limit=60*5, init=False):
@@ -1450,8 +1450,8 @@ class wzry_task:
                 self.移动端.关闭APP()
                 return False
 
-    def 登录游戏(self, times=0):
-        if times == 0:
+    def 登录游戏(self, times=1):
+        if times == 1:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
         times = times+1
         if times > 5:
@@ -2206,19 +2206,21 @@ class wzry_task:
         return
     # @todo,其他活动一键领取
 
-    def 商城免费礼包(self, times=0):
+    def 商城免费礼包(self, times=1):
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
         #
+        if times > 10:
+            return False
+        #
+        self.进入大厅()
         if times == 1:
             self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=True)
         else:
             if self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=False):
                 TimeErr(self.prefix+"领商城免费礼包超时")
                 return False
-        if times > 10:
-            return False
         #
         times = times+1
         #
@@ -2241,7 +2243,6 @@ class wzry_task:
         商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
-        self.进入大厅()
         self.Tool.existsTHENtouch(商城入口, "商城入口", savepos=True)
         sleep(30)
         进入商城界面 = False
@@ -2281,20 +2282,21 @@ class wzry_task:
             TimeECHO(self.prefix+f"领取每日礼包失败")
         return True
 
-    def 玉镖夺魁(self, times=0):
+    def 玉镖夺魁(self, times=1):
         self.进入大厅()
         #
         # 玉镖夺魁
         TimeECHO(self.prefix+f":玉镖夺魁{times}")
         #
-        if times == 0:
+        if times > 10:
+            return False
+        #
+        if times == 1:
             self.Tool.timelimit(timekey="玉镖夺魁", limit=60*5, init=True)
         else:
             if self.Tool.timelimit(timekey="玉镖夺魁", limit=60*5, init=False):
                 TimeECHO(self.prefix+f"玉镖夺魁{times}超时退出")
                 return False
-        if times > 10:
-            return False
         #
         times = times+1
         #

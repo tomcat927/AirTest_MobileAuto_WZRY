@@ -142,8 +142,8 @@
 * [其他参考资料](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
 
 ### 简易单账户版本(需要安卓adb基础)
-[图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
-[全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
+* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
+* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
 
 ## Star History
 
