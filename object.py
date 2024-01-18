@@ -1233,6 +1233,7 @@ class wzry_task:
         self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
+        self.Tool.removefile(self.免费商城礼包FILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
 
@@ -1720,6 +1721,7 @@ class wzry_task:
             while not exists(取消准备):
                 if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=False):
                     TimeErr(self.prefix+"辅助进房超时退出")
+                    self.Tool.touch同步文件()
                     break
                 self.check_connect_status()
                 if self.Tool.存在同步文件():
@@ -1749,6 +1751,9 @@ class wzry_task:
                         进房间 = Template(r"tpl1699181937521.png", record_pos=(0.348, -0.194), resolution=(960, 540), threshold=0.9)
                     if self.Tool.existsTHENtouch(进房间):
                         TimeECHO(self.prefix+"尝试进入房间中")
+                        sleep(10)
+                        if not exists(取消准备):
+                            TimeECHO(self.prefix+"进入房间失败,可能是今日更新太频繁,版本不一致无法进房,需要重新登录更新")
                 else:
                     TimeECHO(self.prefix+"未找到组队房间,检测主节点登录状态")
 
