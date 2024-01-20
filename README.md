@@ -1,6 +1,6 @@
 # AirTest_MobileAuto_WZRY
 
-面向对象的AirTest多进程框架
+基于AirTest框架的面向对象的多进程移动APP控制
 
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)![GitHub forks](https://img.shields.io/github/forks/cndaqiang/AirTest_MobileAuto_WZRY?color=60c5ba&style=for-the-badge)[![GitHub release (by tag)](https://img.shields.io/github/downloads/cndaqiang/AirTest_MobileAuto_WZRY/latest)](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases/latest)
 
@@ -57,9 +57,23 @@
 * - 利用文件&字典进行存取图片坐标, 减少重复寻找元素坐标时间.<br>亦可用于选中特定位置(如王者荣耀英雄按熟练度排序选择熟练度最低的英雄的坐标)
 * - 存在则点击, 不断存在点击等
 
-### 开发实例: 王者荣耀脚本
 
-#### Features
+## 运行方式
+### 通用多账户版本(需要adb、python、终端基础)
+* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY)
+* 修改代码中客户端的ip地址`auto_airtest>LINK_dict[i]=`
+* [控制端、客户端配置](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/blob/master/howtorun.md)
+* [其他参考资料](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+
+### 简易单账户版本(需要安卓adb基础)
+* 重装了Windows系统,记录了全新安装python+雷电模拟器使用本脚本控制王者荣耀的详细过程[Windows全新安装python、依赖+雷电模拟器](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1901771876)
+* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
+* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
+
+
+## 开发实例: 王者荣耀脚本
+
+### Features
 
 * 全部自动化操作
 * - 自动开关机
@@ -73,7 +87,7 @@
 * - 永久/暂时替换对战英雄
 * - 直接插入代码运行
 
-#### 礼包
+### 礼包
 
 * 友情对战: 友情币领取、奖励兑换(积分夺宝券、皮肤碎片、英雄碎片、友情重燃皮肤礼包、铭文碎片)
 * 邮件礼包: 好友邮件、系统邮件
@@ -81,9 +95,10 @@
 * ~~日常任务礼包(2024赛年每日礼包转移至战令系统)~~
 * 战令礼包、战令任务礼包(2024赛年)
 * 战队商店自动领取英雄碎片
+* 商城每日免费钻石碎片随机礼包
 * 王者营地: 体验服兑换碎片礼包、每日签到、每日任务、营地币每周兑换英雄碎片
 
-#### 对战
+### 对战
 
 * 自动切换组队与单人模式、对战方式、对战模式等
 * 常规5v5人机匹配(优先星耀其次青铜), 适合完成每日任务和提高熟练度, 对战每次可以获取金币和王者等级经验
@@ -92,7 +107,7 @@
 * ~~冒险模式(2024赛年官方关闭入口/功能): 武道大会、六国远征. 额外的金币上限、商店兑换~~
 * `使用savepos=True`可以把英雄图像选为最后一个, 并把英雄按照熟练度排序, 即可不断提高最低英雄的熟练度
 
-#### 文件控制
+### 文件控制
 
 控制文件 `txt` 不参与仓库同步, 使用[实例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3)
 
@@ -122,7 +137,7 @@
 | `self.辅助同步文件 = "NeedRebarrier.txt"` | 同步工具, 单个进程出错创建所有进程重新初始化 | 程序自动生成/用户创建
 | `self.营地初始化FILE` | 王者营地领取礼物前注入代码, 适合临时活动修改图标情况, 已经改成save图标了, 应该之后用不到了 | 用户创建
 
-#### 备注
+### 备注
 
 * 双号组队每周金币获取上限约9105
 * - 5v5和模拟战共用金币上限(0/4100)
@@ -133,18 +148,6 @@
 * - 触摸形式的5v5人机耗时但是金币也远大于挂机
 * - 模拟战也出现过即使最后一名, 金币也很多的情况
 * 模拟战等模式账户之前没有进行过/新赛季, 自己提前操作一下, 避免有变动
-
-## 运行方式
-### 通用多账户版本(需要adb、python、终端基础)
-* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY)
-* 修改代码中客户端的ip地址`auto_airtest>LINK_dict[i]=`
-* [控制端、客户端配置](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/blob/master/howtorun.md)
-* [其他参考资料](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
-
-### 简易单账户版本(需要安卓adb基础)
-* 重装了Windows系统,记录了全新安装python+雷电模拟器使用本脚本控制王者荣耀的详细过程[Windows全新安装python、依赖+雷电模拟器](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1901771876)
-* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
-* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
 
 ## Star History
 
