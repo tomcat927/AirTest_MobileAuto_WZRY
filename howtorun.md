@@ -7,7 +7,8 @@
 #### 依赖
 
 ```
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  airtest,pathos
+python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  airtest
+python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  pathos
 ```
 
 Linux
