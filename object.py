@@ -2235,7 +2235,10 @@ class wzry_task:
             return False
         #
         TimeECHO(self.prefix+f":商城免费礼包")
-        商城入口 = Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540))
+        #做活动时，商城入口会变
+        商城入口 = []
+        商城入口.append(Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540)))
+        商城入口.append(Template(r"tpl1705718545013.png", target_pos=2, record_pos=(0.461, -0.115), resolution=(960, 540)))
         特惠入口 = Template(r"tpl1705069563125.png", record_pos=(-0.43, 0.14), resolution=(960, 540))
         免费图标 = Template(r"tpl1705069610816.png", record_pos=(0.165, -0.159), resolution=(960, 540))
         免费购买 = Template(r"tpl1705069621203.png", record_pos=(0.244, 0.244), resolution=(960, 540), rgb=True, threshold=0.95)
@@ -2248,7 +2251,14 @@ class wzry_task:
         商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
-        self.Tool.existsTHENtouch(商城入口, "商城入口", savepos=True)
+        找到商城入口=False
+        for i in range(len(商城入口)):
+            TimeECHO(self.prefix+f"寻找商城入口{i}")
+            找到商城入口 = self.Tool.existsTHENtouch(商城入口[i], "商城入口", savepos=True)
+            if 找到商城入口: break
+        if not 找到商城入口:
+            TimeECHO(self.prefix+f"无法找到商城入口")
+            return self.商城免费礼包(times=times)
         sleep(30)
         进入商城界面 = False
         for i in range(len(商城界面)):
@@ -3384,7 +3394,10 @@ class wzry_task:
                 # 这里仅领礼包,不要插入六国远征等不稳定的任务
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.Tool.touchfile(self.免费商城礼包FILE)
-                self.每日礼包()
+                if os.path.exists(self.重新登录FILE):
+                    TimeECHO(self.prefix+"存在重新登录文件,无法每日礼包")
+                else:
+                    self.每日礼包()
                 self.移动端.关闭APP()
                 # 计算休息时间
                 hour, minu = self.Tool.time_getHM()
