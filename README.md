@@ -1,16 +1,8 @@
 # AirTest_MobileAuto_WZRY
 
-基于AirTest框架的面向对象的多进程移动APP控制
+基于AirTest框架的面向对象的**多进程移动APP控制**
 
-![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)![GitHub forks](https://img.shields.io/github/forks/cndaqiang/AirTest_MobileAuto_WZRY?color=60c5ba&style=for-the-badge)[![GitHub release (by tag)](https://img.shields.io/github/downloads/cndaqiang/AirTest_MobileAuto_WZRY/latest)](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases/latest)
-
-## 致谢
-
-第一次尝试进行面向对象编程, 还有很多面向过程的影子.
-
-本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目, 是我学习AirTest脚本的主要参考.
-
-本脚本的历史版本[WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11), [WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
+![GitHub forks](https://img.shields.io/github/forks/cndaqiang/AirTest_MobileAuto_WZRY?color=60c5ba&style=for-the-badge)![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)
 
 ## 介绍
 
@@ -72,6 +64,7 @@
 
 
 ## 开发实例: 王者荣耀脚本
+![Alt text](image.png)
 
 ### Features
 
@@ -148,6 +141,14 @@
 * - 触摸形式的5v5人机耗时但是金币也远大于挂机
 * - 模拟战也出现过即使最后一名, 金币也很多的情况
 * 模拟战等模式账户之前没有进行过/新赛季, 自己提前操作一下, 避免有变动
+
+## 致谢
+
+
+本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目, 是我学习AirTest脚本的主要参考.
+
+本脚本的历史版本[WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11), [WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
+
 
 ## Star History
 
