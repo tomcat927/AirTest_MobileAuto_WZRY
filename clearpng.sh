@@ -6,6 +6,7 @@ do
 #cp ../IOS/$i .
 cp $i .pngtmp/
 done
-echo rm tpl*png
-echo cp .pngtmp/* .
- 
+#echo rm tpl*png
+rm tpl*png
+#echo cp .pngtmp/* .
+cp .pngtmp/* .

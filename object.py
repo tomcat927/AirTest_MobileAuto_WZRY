@@ -1771,40 +1771,38 @@ class wzry_task:
             return True
         TimeECHO(self.prefix+"大厅中.开始进入模拟战房间")
         万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
-        if not self.Tool.existsTHENtouch(万象天工, "万象天工"):
-            self.单人进入人机匹配房间_模拟战(times)
+        if self.Tool.LoopTouch(万象天工, "万象天工", loop=3, savepos=False):
+            sleep(30)
+            if self.判断大厅中():
+                TimeECHO(self.prefix+"模拟战: 进入万象天工失败, 重启设备")
+                self.移动端.重启APP()
+                self.登录游戏()
+                return self.单人进入人机匹配房间_模拟战(times)
         #
-
         王者模拟战图标 = Template(r"tpl1693660105012.png", record_pos=(-0.435, -0.134), resolution=(960, 540))
         任意位置继续 = Template(r"tpl1693660122898.png", record_pos=(0.001, 0.252), resolution=(960, 540))  # 多次
         任意位置继续2 = Template(r"tpl1693660165029.png", record_pos=(-0.001, 0.244), resolution=(960, 540))
         任意位置继续3 = Template(r"tpl1693660182958.png", record_pos=(-0.004, 0.25), resolution=(960, 540))
-        self.Tool.existsTHENtouch(王者模拟战图标, "王者模拟战图标")
+        if not self.Tool.existsTHENtouch(王者模拟战图标, "王者模拟战图标"):
+            return self.单人进入人机匹配房间_模拟战(times)
         while self.Tool.existsTHENtouch(任意位置继续, "任意位置继续"):
             sleep(5)
         while self.Tool.existsTHENtouch(任意位置继续2, "任意位置继续"):
             sleep(5)
         while self.Tool.existsTHENtouch(任意位置继续3, "任意位置继续"):
             sleep(5)
-        图标1 = Template(r"tpl1693660308858.png", record_pos=(0.0, -0.071), resolution=(960, 540))
-        图标2 = Template(r"tpl1693660322376.png", record_pos=(0.059, 0.161), resolution=(960, 540))
-        if self.Tool.existsTHENtouch(图标1, "图标1"):
-            sleep(5)
-        if self.Tool.existsTHENtouch(图标2, "图标2"):
-            sleep(5)
     # 新手要跳过教学局,自己先跳过
-        #
         #
         进入队列失败 = Template(r"tpl1693660615126.png", record_pos=(-0.19, -0.141), resolution=(960, 540))
         确定失败 = Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540))
         邀请好友 = Template(r"tpl1693660666527.png", record_pos=(0.408, 0.166), resolution=(960, 540))  # 就是进入房间
         self.Tool.LoopTouch(邀请好友, "邀请好友", loop=10)
-        while exists(进入队列失败):
+        for loop in range(30):
+            if not exists(进入队列失败):
+                break
             self.Tool.existsTHENtouch(确定失败)
             sleep(20)
             self.Tool.existsTHENtouch(邀请好友, "邀请好友")
-        if self.判断房间中():
-            return True
         #
         if self.判断房间中():
             return True
@@ -1946,7 +1944,7 @@ class wzry_task:
         #
 
     def 结束人机匹配(self):
-        TimeECHO(self.prefix+"开始结束人机匹配")
+        TimeECHO(self.prefix+f"开始结束人机匹配:{self.对战模式}")
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
@@ -2093,7 +2091,7 @@ class wzry_task:
     #
 
     def 结束人机匹配_模拟战(self):
-        TimeECHO(self.prefix+"准备结束本局")
+        TimeECHO(self.prefix+"准备结束本局模拟战")
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
@@ -2118,12 +2116,16 @@ class wzry_task:
                         break  # 虚拟机王者程序卡住了
                 # ++++++滴哦
                 for loop in range(30):  # 等待时间太长
+                    TimeECHO(self.prefix+"等待模拟战对战结束")
                     if exists(Template(r"tpl1690545494867.png", record_pos=(0.0, 0.179), resolution=(960, 540))):
                         TimeECHO(self.prefix+"正在退出")
-                        if self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540))):
+                        if self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540)), "选择退出对战"):
                             TimeECHO(self.prefix+"点击退出")
                             break
                     sleep(30)
+            if exists(Template(r"tpl1690545494867.png", record_pos=(0.0, 0.179), resolution=(960, 540))):
+                TimeECHO(self.prefix+"检测到:[退出+观战]界面")
+                self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540)), "选择退出对战")
             if self.判断房间中():
                 return
             if self.判断大厅中():
@@ -2235,7 +2237,7 @@ class wzry_task:
             return False
         #
         TimeECHO(self.prefix+f":商城免费礼包")
-        #做活动时，商城入口会变
+        # 做活动时，商城入口会变
         商城入口 = []
         商城入口.append(Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540)))
         商城入口.append(Template(r"tpl1705718545013.png", target_pos=2, record_pos=(0.461, -0.115), resolution=(960, 540)))
@@ -2251,11 +2253,12 @@ class wzry_task:
         商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
-        找到商城入口=False
+        找到商城入口 = False
         for i in range(len(商城入口)):
             TimeECHO(self.prefix+f"寻找商城入口{i}")
             找到商城入口 = self.Tool.existsTHENtouch(商城入口[i], "商城入口", savepos=True)
-            if 找到商城入口: break
+            if 找到商城入口:
+                break
         if not 找到商城入口:
             TimeECHO(self.prefix+f"无法找到商城入口")
             return self.商城免费礼包(times=times)
