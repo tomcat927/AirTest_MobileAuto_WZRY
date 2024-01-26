@@ -1834,14 +1834,16 @@ class wzry_task:
             # 不同活动中,开始按钮的图标不同
             #
             房间中的开始按钮Group = []
-            房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), rgb=True))
-            房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540), rgb=True))
+            房间中的开始按钮Group.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
+            房间中的开始按钮Group.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540)))
             房间中的开始按钮 = 房间中的开始按钮Group[0]
             if self.房主:
                 # if self.判断房间中():
                 if not 找到开始按钮:
+                    TimeECHO(self.prefix+f":正在寻找开始匹配按钮")
                     for i in range(len(房间中的开始按钮Group)):
                         if exists(房间中的开始按钮Group[i]):
+                            TimeECHO(self.prefix+f":找到开始匹配按钮{i}")
                             房间中的开始按钮 = 房间中的开始按钮Group[i]
                             找到开始按钮 = True
                             break
@@ -2243,7 +2245,7 @@ class wzry_task:
         商城入口.append(Template(r"tpl1705718545013.png", target_pos=2, record_pos=(0.461, -0.115), resolution=(960, 540)))
         特惠入口 = Template(r"tpl1705069563125.png", record_pos=(-0.43, 0.14), resolution=(960, 540))
         免费图标 = Template(r"tpl1705069610816.png", record_pos=(0.165, -0.159), resolution=(960, 540))
-        免费购买 = Template(r"tpl1705069621203.png", record_pos=(0.244, 0.244), resolution=(960, 540), rgb=True, threshold=0.95)
+        免费购买 = Template(r"tpl1705069621203.png", record_pos=(0.244, 0.244), resolution=(960, 540), threshold=0.95)
         免费点券 = Template(r"tpl1705069633600.png", record_pos=(-0.004, 0.142), resolution=(960, 540))
         确定购买 = Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540))
         商城界面 = []
