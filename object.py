@@ -918,6 +918,9 @@ class wzyd_libao:
         self.体验币成功 = False
         self.营地活动 = True
         self.APPID = APPID
+        #使用输入的prefix,才可以用一套同步文件
+        self.Tool = DQWheel(prefix=prefix)
+        #这里prefix+,是用于输出到屏幕
         self.prefix = prefix+"王者营地:"
         self.营地初始化FILE = prefix+".营地初始化.txt"
         self.IOS = "smobagamehelper" in self.APPID
@@ -925,9 +928,9 @@ class wzyd_libao:
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
         self.游戏界面图标 = Template(r"tpl1704381547456.png", record_pos=(0.187, 0.726), resolution=(540, 960))
         self.每日福利图标 = Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
+        self.一键领取按钮=Template(r"tpl1706338731419.png", record_pos=(0.328, -0.365), resolution=(540, 960))
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
-        self.Tool = DQWheel(prefix=self.prefix)
 
     def RUN(self):
         if not start_app(self.APPID):
@@ -954,8 +957,8 @@ class wzyd_libao:
         # 体验服只有安卓客户端可以领取
         if not self.IOS:
             self.体验服礼物()
-        self.营地币兑换碎片()
         self.每日签到任务()
+        self.营地币兑换碎片()
         stop_app(self.APPID)
 
     def 体验服礼物(self, times=1):
@@ -1046,9 +1049,22 @@ class wzyd_libao:
         #
 
     def 每日签到任务(self, times=1):
+        TimeECHO(self.prefix+f"营地每日签到{times}")
+        #
+        if times == 1:
+            self.Tool.timelimit(timekey="营地每日签到", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey="营地每日签到", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"营地每日签到{times}超时退出")
+                return False
+        #
         if times > 0:
             sleep(5)
-        TimeECHO(self.prefix+f"每日福利{times}")
+        times = times+1
+        if times > 5:
+            return False
+        if times > 0:
+            sleep(5)
         # 每日签到
         if not stop_app(self.APPID):
             return
@@ -1056,40 +1072,21 @@ class wzyd_libao:
         sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
         sleep(5)
-        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=True)
+        if not self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=False):
+            return self.每日签到任务(times)
         sleep(5)
-        self.Tool.existsTHENtouch(Template(r"tpl1699872241675.png", record_pos=(0.313, -0.372), resolution=(540, 960)), self.prefix+"立即签到")
-        sleep(5)
-        self.Tool.existsTHENtouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)), self.prefix+"确定")
-        # 每日任务
-        sleep(5)
-        if not stop_app(self.APPID):
-            return
-        start_app(self.APPID)
-        sleep(5)
-        sleep(5)
-        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
-        sleep(5)
-        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=True)
-        sleep(5)
-        self.Tool.existsTHENtouch(Template(r"tpl1699872273081.png", record_pos=(0.326, 0.046), resolution=(540, 960)), self.prefix+"领取")
-        sleep(5)
-        self.Tool.existsTHENtouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)), self.prefix+"确定")
-        # 一键领取
-        sleep(5)
-        if not stop_app(self.APPID):
-            return
-        start_app(self.APPID)
-        sleep(5)
-        sleep(5)
-        self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
-        sleep(5)
-        self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=True)
-        sleep(5)
-        self.Tool.existsTHENtouch(Template(r"tpl1704626580247.png", record_pos=(0.296, 0.044), resolution=(540, 960)), self.prefix+"一键领取")
-        sleep(5)
-        self.Tool.LoopTouch(Template(r"tpl1699872252481.png", record_pos=(0.146, 0.446), resolution=(540, 960)), self.prefix+"确定")
-        return
+        self.Tool.existsTHENtouch(self.一键领取按钮,"一键领取按钮")
+        #新款签到入口
+        #
+        签到入口=Template(r"tpl1706339365291.png", target_pos=6, record_pos=(-0.011, -0.185), resolution=(540, 960))
+        签到按钮=Template(r"tpl1706339420536.png", record_pos=(0.106, -0.128), resolution=(540, 960))
+        if self.Tool.existsTHENtouch(签到入口,"营地签到入口"):
+            sleep(10)
+            if self.Tool.existsTHENtouch(签到按钮,"营地签到按钮"): return self.每日签到任务(times)
+            #签到后也有礼物,在后面的营地币兑换碎片可以领到
+        #
+        return True
+
 
     def 营地币兑换碎片(self, times=1):
         TimeECHO(self.prefix+f"营地币兑换碎片{times}")
@@ -1114,7 +1111,10 @@ class wzyd_libao:
         sleep(5)
         self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"每日福利")
         sleep(5)
-        if not self.Tool.existsTHENtouch(Template(r"tpl1699872561488.png", record_pos=(-0.317, 0.331), resolution=(540, 960)), self.prefix+"营地币兑换"):
+        self.Tool.existsTHENtouch(self.一键领取按钮,"一键领取按钮")
+        #老款营地币兑换
+        #if not self.Tool.existsTHENtouch(Template(r"tpl1699872561488.png", record_pos=(-0.317, 0.331), resolution=(540, 960)), self.prefix+"营地币兑换"):
+        if not self.Tool.existsTHENtouch(Template(r"tpl1706338003287.png", record_pos=(0.389, 0.524), resolution=(540, 960)), self.prefix+"营地币兑换"):
             return self.营地币兑换碎片(times)
         兑换页面 = Template(r"tpl1699873075417.png", record_pos=(0.437, 0.167), resolution=(540, 960))
         pos = False
@@ -3690,3 +3690,4 @@ if __name__ == "__main__":
             out = p.map_async(multi_start, m_cpu).get()
             p.close()
             p.join()
+
