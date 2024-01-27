@@ -1,8 +1,8 @@
-#tmp_参战英雄线路=Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540)) 
-#tmp_参战英雄线路=Template(r"tpl1689665455905.png", record_pos=(-0.066, -0.256), resolution=(960, 540))
-#tmp_参战英雄线路=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
-#tmp_参战英雄线路=Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
-#tmp_参战英雄线路=Template(r"tpl1686048521443.png", record_pos=(0.06, -0.259), resolution=(960, 540))
+#tmp_参战英雄线路=Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540)) #对抗路
+#tmp_参战英雄线路=Template(r"tpl1689665455905.png", record_pos=(-0.066, -0.256), resolution=(960, 540)) #中路
+#tmp_参战英雄线路=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))   #发育路
+#tmp_参战英雄线路=Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))   #游走
+#tmp_参战英雄线路=Template(r"tpl1686048521443.png", record_pos=(0.06, -0.259), resolution=(960, 540))   #打野
 
 
 tmp_参战英雄线路=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
