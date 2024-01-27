@@ -1650,6 +1650,7 @@ class wzry_task:
         禁赛提示 = Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
         if exists(禁赛提示):
             TimeECHO(self.prefix+"禁赛提示无法进行匹配")
+            self.移动端.重启APP(10)
             if self.组队模式:
                 self.Tool.touch同步文件()
                 return True
