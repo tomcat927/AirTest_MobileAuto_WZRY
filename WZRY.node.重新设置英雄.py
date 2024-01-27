@@ -9,7 +9,7 @@ tmp_参战英雄线路=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.25
 tmp_参战英雄头像=Template(r"tpl1703514353667.png", record_pos=(0.191, -0.074), resolution=(960, 540))
 
 
-savepos=True #是否更新原始字典文件
+savepos=False #是否更新原始字典文件
 tag="tmp"
 if savepos: tag=""
 if tag+"参战英雄线路" in self.Tool.var_dict.keys(): del self.Tool.var_dict[tag+"参战英雄线路"]
@@ -17,7 +17,8 @@ if tag+"参战英雄头像" in self.Tool.var_dict.keys(): del self.Tool.var_dict
 #
 #
 self.Tool.existsTHENtouch(tmp_参战英雄线路,tag+"参战英雄线路",savepos=savepos)
-sleep(1)
-self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像",savepos=savepos)
+if not self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像",savepos=savepos): sleep(2)
+if not self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像",savepos=savepos): sleep(2)
+if not self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像",savepos=savepos): sleep(2)
 sleep(1)
 #self.Tool.removefile(self.重新设置英雄FILE)
