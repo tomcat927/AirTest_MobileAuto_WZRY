@@ -5,8 +5,14 @@
 #tmp_参战英雄线路=Template(r"tpl1686048521443.png", record_pos=(0.06, -0.259), resolution=(960, 540))   #打野
 
 
-tmp_参战英雄线路=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
-tmp_参战英雄头像=Template(r"tpl1703514353667.png", record_pos=(0.191, -0.074), resolution=(960, 540))
+#多个英雄参与的活动
+myrandom=random.randint(1, 2)
+#kai
+if myrandom==1: tmp_参战英雄线路=Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540))
+if myrandom==1: tmp_参战英雄头像=Template(r"tpl1689665521942.png", record_pos=(0.108, -0.086), resolution=(960, 540))
+#jia
+if myrandom==2: tmp_参战英雄线路=Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
+if myrandom==2: tmp_参战英雄头像=Template(r"tpl1706323221604.png", record_pos=(0.015, -0.189), resolution=(960, 540))
 
 
 savepos=False #是否更新原始字典文件
