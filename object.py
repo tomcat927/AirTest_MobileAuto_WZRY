@@ -1501,7 +1501,7 @@ class wzry_task:
             else:
                 TimeECHO(self.prefix+"需要重新登录:创建单节点同步")
                 self.Tool.touchfile(self.重新登录FILE)
-                self.Tool.touchfile(self.无法进行组队FILE)
+                if self.totalnode_bak > 1: self.Tool.touchfile(self.无法进行组队FILE)
                 self.移动端.重启APP(10*60)
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
                 return True
@@ -3236,9 +3236,9 @@ class wzry_task:
                 if self.王者营地礼包:
                     self.Tool.timedict["领营地礼包"] = 0
                     self.每日礼包_王者营地()
-                    sleeptime = 10
+                    sleeptime = 6.0
                 else:
-                    sleeptime = 60*5
+                    sleeptime = 60*5.0
                 TimeErr(self.prefix+f"独立模式检测到健康系统,sleep {sleeptime/60} min")
                 self.移动端.重启APP(sleeptime)
                 self.登录游戏()
