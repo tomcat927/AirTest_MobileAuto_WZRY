@@ -2504,6 +2504,9 @@ class wzry_task:
         赛季任务界面.append(Template(r"tpl1703756264588.png", record_pos=(-0.407, -0.255), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1703756272809.png", record_pos=(0.373, 0.11), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1703755615130.png", record_pos=(-0.453, -0.058), resolution=(960, 540)))
+        赛季任务界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
+        赛季任务界面.append(Template(r"tpl1706543217077.png", record_pos=(-0.255, 0.174), resolution=(960, 540)))
+        赛季任务界面.append(Template(r"tpl1706543240746.png", record_pos=(0.352, 0.183), resolution=(960, 540)))
         任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
         任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
         确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
@@ -2517,11 +2520,14 @@ class wzry_task:
                 进入战令界面 = True
                 break
             sleep(4)
+        if not 进入战令界面 and times > 2:
+            进入战令界面 = not self.判断大厅中()
+
         if not 进入战令界面:
             TimeECHO(self.prefix+f"未检测到战令界面, 重新进入领任务礼包")
             if "战令入口" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令入口"]
-            return self.每日礼包_每日任务(times=times-1, 战令领取=战令领取)
+            return self.每日礼包_每日任务(times=times, 战令领取=战令领取)
         #
         if 战令领取:
             TimeECHO(self.prefix+f"领取战令奖励测试中")
