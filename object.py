@@ -918,11 +918,12 @@ class wzyd_libao:
         self.体验币成功 = False
         self.营地活动 = True
         self.APPID = APPID
-        # 使用输入的prefix,才可以用一套同步文件
-        self.Tool = DQWheel(prefix=prefix)
         # 这里prefix+,是用于输出到屏幕
-        self.prefix = prefix+"王者营地:"
+        # 输入的prefix是mynode
+        self.prefix = f"({prefix})王者营地:"
         self.营地初始化FILE = prefix+".营地初始化.txt"
+        # 使用输入的prefix,才可以用一套同步文件
+        self.Tool = DQWheel(prefix=self.prefix)
         self.IOS = "smobagamehelper" in self.APPID
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
@@ -2486,7 +2487,7 @@ class wzry_task:
         else:
             TimeErr(self.prefix+":无法判断设备类型")
             return
-        王者营地 = wzyd_libao(prefix=self.prefix, APPID=APPID)
+        王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID)
         try:
             王者营地.RUN()
             TimeECHO(self.prefix+"王者营地礼包领取成功")
