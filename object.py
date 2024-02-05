@@ -918,9 +918,9 @@ class wzyd_libao:
         self.体验币成功 = False
         self.营地活动 = True
         self.APPID = APPID
-        #使用输入的prefix,才可以用一套同步文件
+        # 使用输入的prefix,才可以用一套同步文件
         self.Tool = DQWheel(prefix=prefix)
-        #这里prefix+,是用于输出到屏幕
+        # 这里prefix+,是用于输出到屏幕
         self.prefix = prefix+"王者营地:"
         self.营地初始化FILE = prefix+".营地初始化.txt"
         self.IOS = "smobagamehelper" in self.APPID
@@ -928,7 +928,7 @@ class wzyd_libao:
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
         self.游戏界面图标 = Template(r"tpl1704381547456.png", record_pos=(0.187, 0.726), resolution=(540, 960))
         self.每日福利图标 = Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
-        self.一键领取按钮=Template(r"tpl1706338731419.png", record_pos=(0.328, -0.365), resolution=(540, 960))
+        self.一键领取按钮 = Template(r"tpl1706338731419.png", record_pos=(0.328, -0.365), resolution=(540, 960))
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
 
@@ -1075,18 +1075,18 @@ class wzyd_libao:
         if not self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"王者营地每日福利", savepos=False):
             return self.每日签到任务(times)
         sleep(5)
-        self.Tool.existsTHENtouch(self.一键领取按钮,"一键领取按钮")
-        #新款签到入口
+        self.Tool.existsTHENtouch(self.一键领取按钮, "一键领取按钮")
+        # 新款签到入口
         #
-        签到入口=Template(r"tpl1706339365291.png", target_pos=6, record_pos=(-0.011, -0.185), resolution=(540, 960))
-        签到按钮=Template(r"tpl1706339420536.png", record_pos=(0.106, -0.128), resolution=(540, 960))
-        if self.Tool.existsTHENtouch(签到入口,"营地签到入口"):
+        签到入口 = Template(r"tpl1706339365291.png", target_pos=6, record_pos=(-0.011, -0.185), resolution=(540, 960))
+        签到按钮 = Template(r"tpl1706339420536.png", record_pos=(0.106, -0.128), resolution=(540, 960))
+        if self.Tool.existsTHENtouch(签到入口, "营地签到入口"):
             sleep(10)
-            if self.Tool.existsTHENtouch(签到按钮,"营地签到按钮"): return self.每日签到任务(times)
-            #签到后也有礼物,在后面的营地币兑换碎片可以领到
+            if self.Tool.existsTHENtouch(签到按钮, "营地签到按钮"):
+                return self.每日签到任务(times)
+            # 签到后也有礼物,在后面的营地币兑换碎片可以领到
         #
         return True
-
 
     def 营地币兑换碎片(self, times=1):
         TimeECHO(self.prefix+f"营地币兑换碎片{times}")
@@ -1111,9 +1111,9 @@ class wzyd_libao:
         sleep(5)
         self.Tool.existsTHENtouch(self.每日福利图标, self.prefix+"每日福利")
         sleep(5)
-        self.Tool.existsTHENtouch(self.一键领取按钮,"一键领取按钮")
-        #老款营地币兑换
-        #if not self.Tool.existsTHENtouch(Template(r"tpl1699872561488.png", record_pos=(-0.317, 0.331), resolution=(540, 960)), self.prefix+"营地币兑换"):
+        self.Tool.existsTHENtouch(self.一键领取按钮, "一键领取按钮")
+        # 老款营地币兑换
+        # if not self.Tool.existsTHENtouch(Template(r"tpl1699872561488.png", record_pos=(-0.317, 0.331), resolution=(540, 960)), self.prefix+"营地币兑换"):
         if not self.Tool.existsTHENtouch(Template(r"tpl1706338003287.png", record_pos=(0.389, 0.524), resolution=(540, 960)), self.prefix+"营地币兑换"):
             return self.营地币兑换碎片(times)
         兑换页面 = Template(r"tpl1699873075417.png", record_pos=(0.437, 0.167), resolution=(540, 960))
@@ -1331,6 +1331,21 @@ class wzry_task:
             self.Tool.LoopTouch(i, f"关闭按钮{i}", loop=3, savepos=False)
         #
 
+    def 进入大厅时遇到的复杂的关闭按钮(self):
+        self.关闭按钮()
+        if self.判断大厅中():
+            return True
+        TimeECHO(self.prefix+": 未能进入大厅,有可能有新的关闭按钮,继续尝试关闭中")
+        for key, value in self.Tool.var_dict.items():
+            if "王者登陆关闭按钮" not in value:
+                continue
+            TimeECHO(self.prefix+":尝试关闭按钮"+key)
+            exists(value)
+            if self.判断大厅中():
+                return True
+        return False
+        #
+
     def 判断战绩页面(self):
         战绩页面 = []
         战绩页面.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
@@ -1501,7 +1516,8 @@ class wzry_task:
             else:
                 TimeECHO(self.prefix+"需要重新登录:创建单节点同步")
                 self.Tool.touchfile(self.重新登录FILE)
-                if self.totalnode_bak > 1: self.Tool.touchfile(self.无法进行组队FILE)
+                if self.totalnode_bak > 1:
+                    self.Tool.touchfile(self.无法进行组队FILE)
                 self.移动端.重启APP(10*60)
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
                 return True
@@ -1556,7 +1572,7 @@ class wzry_task:
             return True
         self.Tool.existsTHENtouch(取消, "取消按钮")
         # 活动界面
-        self.关闭按钮()
+        self.进入大厅时遇到的复杂的关闭按钮()
         self.Tool.existsTHENtouch(取消, "取消按钮")
         if self.判断大厅中():
             return True
@@ -1565,7 +1581,7 @@ class wzry_task:
         if exists(今日不再弹出):  # 当活动海报太大时，容易识别关闭图标错误，此时采用历史的关闭图标位置
             TimeECHO(self.prefix+"今日不再弹出仍在")
             self.Tool.existsTHENtouch(取消, "取消按钮")
-            self.关闭按钮()
+            self.进入大厅时遇到的复杂的关闭按钮()
             self.网络优化()
             self.Tool.existsTHENtouch(开始游戏, "登录界面.开始游戏", savepos=False)
             if self.判断大厅中():
@@ -3696,4 +3712,3 @@ if __name__ == "__main__":
             out = p.map_async(multi_start, m_cpu).get()
             p.close()
             p.join()
-
