@@ -1252,17 +1252,17 @@ class wzry_task:
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
-        self.大厅万象天工= Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
+        self.大厅万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
         self.房间中的开始按钮图标.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540)))
-        #新年活动结束时,替换一个常规的取消准备按钮
-        self.房间中的取消准备按钮 =  []
-        #self.房间中的取消准备按钮 .append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
-        self.大厅元素=[]
+        # 新年活动结束时,替换一个常规的取消准备按钮
+        self.房间中的取消准备按钮 = []
+        # self.房间中的取消准备按钮 .append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
+        self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅万象天工)
-        self.房间元素=[]
+        self.房间元素 = []
         self.房间元素.extend(self.房间中的开始按钮图标)
         self.房间元素.extend(self.房间中的取消准备按钮)
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
@@ -1270,7 +1270,7 @@ class wzry_task:
         self.房间元素.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
         #
-        # 
+        #
         # 头像数据
         英雄_诸葛 = Template(r"tpl1701436812155.png", record_pos=(-0.454, 0.134), resolution=(1136, 640))
         英雄_妲己 = Template(r"tpl1691818492021.png", record_pos=(-0.278, 0.029), resolution=(960, 540))
@@ -1548,7 +1548,7 @@ class wzry_task:
             touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
             sleep(5)
         # 现在打开可能会放一段视频，怎么跳过呢？使用0.1的精度测试一下.利用历史记录了
-        随意点击 = self.登录界面开始游戏图标 
+        随意点击 = self.登录界面开始游戏图标
         self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
         self.Tool.existsTHENtouch(取消, "取消按钮")
         self.关闭按钮()
