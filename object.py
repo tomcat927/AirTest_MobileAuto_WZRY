@@ -171,6 +171,19 @@ def TimeErr(info="None"):
     TimeECHO("NNNN:"+info)
 
 
+def uniq_array_order(arr):
+    if not arr:  # 如果输入的列表为空
+        return []
+    #
+    seen = set()
+    unique_elements = []
+    for item in arr:
+        if item not in seen:
+            unique_elements.append(item)
+            seen.add(item)
+    return unique_elements
+
+
 class DQWheel:
     def __init__(self, var_dict_file='var_dict_file.txt', prefix="", mynode=-10, totalnode=-10, 容器优化=False):
         self.timedict = {}
@@ -411,6 +424,20 @@ class DQWheel:
         for key in var:
             var[key] = var_new[key]
         return var
+
+    def 存在任一张图(self, array, strinfo=""):
+        array = uniq_array_order(array)
+        判断元素集合 = array
+        strinfo = strinfo if len(strinfo) > 0 else "图片"
+        for idx, i in enumerate(判断元素集合):
+            TimeECHO(self.prefix+f"判断{strinfo}:{i}")
+            if exists(i):
+                TimeECHO(self.prefix+f"找到{strinfo}:{i}")
+                # 交换元素位置
+                判断元素集合[0], 判断元素集合[idx] = 判断元素集合[idx], 判断元素集合[0]
+                return True, 判断元素集合
+        TimeECHO(self.prefix+"不在房间中")
+        return False, 判断元素集合
 
     def existsTHENtouch(self, png=Template(r"1.png"), keystr="", savepos=False):
         savepos = savepos and len(keystr) > 0 and self.savepos
@@ -922,6 +949,7 @@ class wzyd_libao:
         # 输入的prefix是mynode
         self.prefix = f"({prefix})王者营地:"
         self.营地初始化FILE = prefix+".营地初始化.txt"
+        self.营地需要登录FILE = prefix+".营地需要登录.txt"
         # 使用输入的prefix,才可以用一套同步文件
         self.Tool = DQWheel(prefix=self.prefix)
         self.IOS = "smobagamehelper" in self.APPID
@@ -932,6 +960,18 @@ class wzyd_libao:
         self.一键领取按钮 = Template(r"tpl1706338731419.png", record_pos=(0.328, -0.365), resolution=(540, 960))
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
+        self.营地大厅元素 = []
+        self.营地大厅元素.append(self.个人界面图标)
+        self.营地大厅元素.append(self.游戏界面图标)
+        self.营地大厅元素.append(self.每日福利图标)
+    #
+
+    def 判断营地大厅中(self):
+        self.营地大厅元素.append(self.个人界面图标)
+        self.营地大厅元素.append(self.游戏界面图标)
+        self.营地大厅元素.append(self.每日福利图标)
+        存在, self.营地大厅元素 = self.Tool.存在任一张图(self.营地大厅元素, "营地大厅元素")
+        return 存在
 
     def RUN(self):
         if not start_app(self.APPID):
@@ -954,6 +994,15 @@ class wzyd_libao:
                         TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
                 except:
                     TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
+        #
+        # 判断营地是否登录的界面
+        if os.path.exists(self.营地需要登录FILE):
+            TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
+            return False
+        if not self.判断营地大厅中():
+            self.Tool.touchfile(self.营地需要登录FILE)
+            TimeECHO(self.prefix+"营地没有登录,不领取礼包")
+            return False
         #
         # 体验服只有安卓客户端可以领取
         if not self.IOS:
@@ -1257,19 +1306,38 @@ class wzry_task:
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
         self.房间中的开始按钮图标.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540)))
         # 新年活动结束时,替换一个常规的取消准备按钮
-        self.房间中的取消准备按钮 = []
-        # self.房间中的取消准备按钮 .append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
+        self.房间中的取消按钮图标 = []
+        self.房间中的取消按钮图标.append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
+        self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅万象天工)
         self.房间元素 = []
         self.房间元素.extend(self.房间中的开始按钮图标)
-        self.房间元素.extend(self.房间中的取消准备按钮)
+        self.房间元素.extend(self.房间中的取消按钮图标)
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
+        # 登录关闭按钮
+        self.王者登录关闭按钮 = []
+        self.王者登录关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
+        self.王者登录关闭按钮.append(Template(r"tpl1699616162254.png", record_pos=(0.38, -0.237), resolution=(960, 540), threshold=0.9))
+        self.王者登录关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
+        self.王者登录关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
+        self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
+        self.王者登录关闭按钮.append(Template(r"tpl1700918628072.png", record_pos=(-0.059, 0.211), resolution=(960, 540)))
+        self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
         #
+        self.战绩页面元素 = []
+        self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699677835926.png", record_pos=(0.011, -0.134), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699677870739.png", record_pos=(-0.369, 0.085), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
         #
         # 头像数据
         英雄_诸葛 = Template(r"tpl1701436812155.png", record_pos=(-0.454, 0.134), resolution=(1136, 640))
@@ -1340,17 +1408,21 @@ class wzry_task:
             self.Tool.existsTHENtouch(i, f"确定{i}", savepos=False)
 
     def 关闭按钮(self):
-        关闭按钮 = []
-        关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
-        关闭按钮.append(Template(r"tpl1699616162254.png", record_pos=(0.38, -0.237), resolution=(960, 540), threshold=0.9))
-        关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
-        关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
-        关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
-        关闭按钮.append(Template(r"tpl1700918628072.png", record_pos=(-0.059, 0.211), resolution=(960, 540)))
-
-        for i in 关闭按钮:
+        # 这个循环仅作为识别关闭按钮位置的循环
+        # 主要用于: self.进入大厅时遇到的复杂的关闭按钮()
+        self.王者登录关闭按钮 = uniq_array_order(self.王者登录关闭按钮)
+        for i in self.王者登录关闭按钮:
+            keyindex = f"王者登陆关闭按钮{i}"
+            # if keyindex in self.Tool.var_dict.keys(): continue
+            pos = exists(i)
+            if pos:
+                self.Tool.var_dict[keyindex] = pos
+                self.Tool.existsTHENtouch(i, keyindex, savepos=True)
+            else:
+                TimeECHO(self.prefix+"未识别到"+keyindex)
+        for i in self.王者登录关闭按钮:
             self.Tool.LoopTouch(i, f"关闭按钮{i}", loop=3, savepos=False)
-        #
+    #
 
     def 进入大厅时遇到的复杂的关闭按钮(self):
         self.关闭按钮()
@@ -1358,32 +1430,18 @@ class wzry_task:
             return True
         TimeECHO(self.prefix+": 未能进入大厅,有可能有新的关闭按钮,继续尝试关闭中")
         for key, value in self.Tool.var_dict.items():
-            if "王者登陆关闭按钮" not in value:
+            if "王者登陆关闭按钮" not in key:
                 continue
-            TimeECHO(self.prefix+":尝试关闭按钮"+key)
-            exists(value)
+            TimeECHO(self.prefix+":尝试touch:"+key)
+            touch(value)
             if self.判断大厅中():
                 return True
         return False
         #
 
     def 判断战绩页面(self):
-        战绩页面 = []
-        战绩页面.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1699677835926.png", record_pos=(0.011, -0.134), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1699677870739.png", record_pos=(-0.369, 0.085), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
-        战绩页面.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
-        战绩页面中 = False
-        for i in 战绩页面:
-            if exists(i):
-                战绩页面中 = True
-                TimeECHO(self.prefix+"当前处在战绩页面")
-                return True
-        return False
+        存在, self.战绩页面元素 = self.Tool.存在任一张图(self.战绩页面元素, "战绩页面元素")
+        return 存在
 
     def 进入大厅(self, times=1):
         TimeECHO(self.prefix+f"尝试进入大厅{times}")
@@ -1751,10 +1809,10 @@ class wzry_task:
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
-        取消准备 = Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9)
         if not self.房主:
+            找到取消按钮, self.房间中的取消按钮图标 = self.Tool.存在任一张图(self.房间中的取消按钮图标, "房间中的取消准备按钮")
             self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=True)
-            while not exists(取消准备):
+            while not 找到取消按钮:
                 if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=False):
                     TimeErr(self.prefix+"辅助进房超时退出")
                     self.Tool.touch同步文件()
@@ -1788,7 +1846,8 @@ class wzry_task:
                     if self.Tool.existsTHENtouch(进房间):
                         TimeECHO(self.prefix+"尝试进入房间中")
                         sleep(10)
-                        if not exists(取消准备):
+                        找到取消按钮, self.房间中的取消按钮图标 = self.Tool.存在任一张图(self.房间中的取消按钮图标, "房间中的取消准备按钮")
+                        if not 找到取消按钮:
                             TimeECHO(self.prefix+"进入房间失败,可能是今日更新太频繁,版本不一致无法进房,需要重新登录更新")
                 else:
                     TimeECHO(self.prefix+"未找到组队房间,检测主节点登录状态")
@@ -1851,10 +1910,6 @@ class wzry_task:
         if times == 1:
             self.Tool.timelimit(timekey="进行人机匹配", limit=60*10, init=True)
         times = times+1
-        if not self.判断房间中():
-            TimeErr(self.prefix+":不在房间中,无法进行匹配,创建同步文件")
-            if self.组队模式:
-                self.Tool.touch同步文件()
         # 这里需要barrier一下,不然下面主节点如果提前点击领匹配,这里可能无法判断
         self.Tool.barriernode(self.mynode, self.totalnode, "人机匹配预判断房间")
         #
@@ -1865,22 +1920,30 @@ class wzry_task:
         loop = 0
         自己曾经确定过匹配 = False
         找到开始按钮 = False
+        找到取消按钮 = False
+        # 不同活动中,开始按钮的图标不同,这里进行排序寻找
+        if self.房主:
+            找到开始按钮, self.房间中的开始按钮图标 = self.Tool.存在任一张图(self.房间中的开始按钮图标, "开始匹配")
+            房间中的开始按钮 = self.房间中的开始按钮图标[0]
+            # 记录历史上有的匹配按钮位置,历史上就执行一次
+            if "房间中的开始匹配按钮" not in self.Tool.var_dict.keys():
+                pos = exists(房间中的开始按钮)
+                if pos:
+                    self.Tool.var_dict["房间中的开始匹配按钮"] = pos
+            if not 找到开始按钮:
+                TimeECHO(self.prefix+f":没找到开始按钮,使用历史位置")
+            self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=not 找到开始按钮)
+        else:
+            找到取消按钮, self.房间中的取消按钮图标 = self.Tool.存在任一张图(self.房间中的取消按钮图标, "房间中的取消准备按钮")
+            房间中的取消按钮 = self.房间中的取消按钮图标[0]
+
         while True:
-            # 不同活动中,开始按钮的图标不同
+            # 如果没找到就再找一次
+            if self.房主 and not 找到开始按钮:
+                找到开始按钮, self.房间中的开始按钮图标 = self.Tool.存在任一张图(self.房间中的开始按钮图标, "开始匹配")
+                房间中的开始按钮 = self.房间中的开始按钮图标[0]
+                self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=False)
             #
-            房间中的开始按钮Group = self.房间中的开始按钮图标
-            房间中的开始按钮 = 房间中的开始按钮Group[0]
-            if self.房主:
-                # if self.判断房间中():
-                if not 找到开始按钮:
-                    TimeECHO(self.prefix+f":正在寻找开始匹配按钮")
-                    for i in range(len(房间中的开始按钮Group)):
-                        if exists(房间中的开始按钮Group[i]):
-                            TimeECHO(self.prefix+f":找到开始匹配按钮{i}")
-                            房间中的开始按钮 = 房间中的开始按钮Group[i]
-                            找到开始按钮 = True
-                            break
-                self.Tool.existsTHENtouch(房间中的开始按钮, "开始匹配按钮", savepos=False)
             if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
                 TimeErr(self.prefix+"超时,队友未确认匹配或大概率程序卡死")
             if self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=False):
@@ -3131,25 +3194,12 @@ class wzry_task:
 # 状态判断
 
     def 判断大厅中(self):
-        大厅判断 = self.大厅元素
-        for i in 大厅判断:
-            TimeECHO(self.prefix+f"判断大厅:{i}")
-            if exists(i):
-                TimeECHO(self.prefix+f"正在大厅中:{i}")
-                return True
-        TimeECHO(self.prefix+"不在大厅中")
-        return False
+        存在, self.大厅元素 = self.Tool.存在任一张图(self.大厅元素, "大厅元素")
+        return 存在
 
     def 判断房间中(self):
-        # 长平之战等满人状态时
-        房间判断 = self.房间元素
-        for i in 房间判断:
-            TimeECHO(self.prefix+f"判断房间:{i}")
-            if exists(i):
-                TimeECHO(self.prefix+f"正在房间中:{i}")
-                return True
-        TimeECHO(self.prefix+"不在房间中")
-        return False
+        存在, self.房间元素 = self.Tool.存在任一张图(self.房间元素, "房间元素")
+        return 存在
 
     def 判断对战中(self, 处理=False):
         if "模拟战" in self.对战模式:
