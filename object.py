@@ -2530,6 +2530,9 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
+        #########################
+        # 下面的宝箱和碎片性价比不高,由于我的账户友情币已经非常多了,可以兑换,用于换铭文和钻石
+        # return
         # 铭文
         if self.Tool.existsTHENtouch(Template(r"tpl1700455034567.png", record_pos=(-0.123, 0.155), resolution=(960, 540)), "铭文碎片兑换"):
             sleep(5)
@@ -2539,7 +2542,8 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
-        # 包箱
+        返回图标 = Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540))
+        # 皮肤宝箱
         if self.Tool.existsTHENtouch(Template(r"tpl1700454970340.png", record_pos=(-0.12, -0.154), resolution=(960, 540)), "友情皮肤礼包兑换"):
             sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454978914.png", record_pos=(0.32, 0.228), resolution=(960, 540)), "友情币兑换"):
@@ -2548,6 +2552,27 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
+            self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
+        # 回城宝箱
+        if self.Tool.existsTHENtouch(Template(r"tpl1707301299599.png", record_pos=(0.035, -0.15), resolution=(960, 540)), "友情皮肤礼包兑换"):
+            sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1707301267168.png", record_pos=(0.32, 0.228), resolution=(960, 540)), "友情币兑换"):
+                sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)), "金色确定兑换"):
+                sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)), "蓝色确定兑换"):
+                sleep(5)
+            self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
+        # 击败宝箱
+        if self.Tool.existsTHENtouch(Template(r"tpl1707301309821.png", record_pos=(-0.279, 0.005), resolution=(960, 540)), "友情皮肤礼包兑换"):
+            sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1707301267168.png", record_pos=(0.32, 0.228), resolution=(960, 540)), "友情币兑换"):
+                sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)), "金色确定兑换"):
+                sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)), "蓝色确定兑换"):
+                sleep(5)
+            self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
     def 每日礼包_王者营地(self):
         TimeECHO(self.prefix+"王者营地礼包开始")
