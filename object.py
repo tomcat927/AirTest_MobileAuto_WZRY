@@ -1287,6 +1287,7 @@ class wzry_task:
         self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
         self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
         self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
+        self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         self.Tool.removefile(self.免费商城礼包FILE)
@@ -2256,7 +2257,7 @@ class wzry_task:
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
-            #
+        #
         if os.path.exists(self.免费商城礼包FILE):
             if self.商城免费礼包():
                 self.Tool.removefile(self.免费商城礼包FILE)
@@ -2279,6 +2280,14 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 return True
             self.进入大厅()
+            #
+            if os.path.exists(self.KPL每日观赛FILE):
+                TimeECHO(self.prefix+"进行KPL观赛")
+                try:
+                    观赛时长 = int(self.Tool.readfile(self.KPL每日观赛FILE)[0])
+                except:
+                    观赛时长 = 60*15
+                self.KPL每日观赛(times=1, 观赛时长=观赛时长)
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
@@ -2596,6 +2605,61 @@ class wzry_task:
         self.移动端.打开APP()
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
 
+    def KPL每日观赛(self, times=1, 观赛时长=20*60):
+        self.check_connect_status()
+        if self.Tool.存在同步文件():
+            return True
+        #
+        if times == 1:
+            TimeECHO(self.prefix+f":本次KPL观赛时长{int(观赛时长/60)}min")
+            self.Tool.timelimit(timekey="KPL每日观赛", limit=观赛时长, init=True)
+        else:
+            if self.Tool.timelimit(timekey="KPL每日观赛", limit=观赛时长, init=False):
+                TimeErr(self.prefix+"KPL每日观赛超时")
+                return False
+        if times > 100:
+            return False
+        times = times+1
+        KPL观赛入口 = Template(r"tpl1707396642681.png", record_pos=(0.463, 0.126), resolution=(960, 540))
+        KPL战令入口 = Template(r"tpl1707398684588.png", record_pos=(0.231, -0.231), resolution=(960, 540))
+        KPL观赛界面 = []
+        KPL观赛界面.append(Template(r"tpl1707396755590.png", record_pos=(-0.354, -0.264), resolution=(960, 540)))
+        KPL观赛界面.append(Template(r"tpl1707398710560.png", record_pos=(-0.3, -0.269), resolution=(960, 540)))
+        KPL观赛界面.append(KPL战令入口)
+        进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
+        if not 进入观赛界面:
+            TimeECHO(self.prefix+"准备进入KPL观赛入口")
+            self.进入大厅()
+            # 第一次识别失败时
+            if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
+                return self.KPL每日观赛(times, 观赛时长)
+            sleep(30)
+            for i in range(15):
+                进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
+                if 进入观赛界面:
+                    break
+                sleep(5)
+        if not 进入观赛界面:
+            TimeECHO(self.prefix+":没能进入KPL观赛入口,重新进入")
+            return self.KPL每日观赛(times, 观赛时长)
+        looptimes = 0
+        while not self.Tool.timelimit(timekey="KPL每日观赛", limit=观赛时长, init=False):
+            TimeECHO(self.prefix+f":KPL观影中{looptimes*30.0/60}/{观赛时长/60}")
+            sleep(30)
+            looptimes = looptimes+1
+        # 开始领战令礼包
+        if not self.Tool.existsTHENtouch(KPL战令入口, "KPL战令入口", savepos=True):
+            return
+        KPL战令任务 = Template(r"tpl1707398869726.png", record_pos=(-0.441, -0.158), resolution=(960, 540))
+        if not self.Tool.existsTHENtouch(KPL战令任务, "KPL战令任务", savepos=True):
+            return
+        KPL领取奖励 = Template(r"tpl1707398884057.png", record_pos=(0.359, -0.176), resolution=(960, 540))
+        self.Tool.LoopTouch(KPL领取奖励, "KPL领取奖励", savepos=False)
+        KPL战令返回 = Template(r"tpl1707399262936.png", record_pos=(-0.478, -0.267), resolution=(960, 540))
+        self.Tool.LoopTouch(KPL战令返回, "KPL战令返回", savepos=False)
+        return True
+
+        #
     def 每日礼包_每日任务(self, times=1, 战令领取=True):
         self.check_connect_status()
         if self.Tool.存在同步文件():
@@ -2628,17 +2692,13 @@ class wzry_task:
         确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
         self.进入大厅()
         self.Tool.existsTHENtouch(战令入口, "战令入口", savepos=True)
-        sleep(10)
+        sleep(15)
         进入战令界面 = False
-        for i in range(len(赛季任务界面)):
-            if exists(赛季任务界面[i]):
-                TimeECHO(self.prefix+f"检测到战令界面")
-                进入战令界面 = True
-                break
-            sleep(4)
+        进入战令界面, 赛季任务界面 = self.Tool.存在任一张图(赛季任务界面, "赛季任务界面")
+        #
         if not 进入战令界面 and times > 2:
             进入战令界面 = not self.判断大厅中()
-
+        #
         if not 进入战令界面:
             TimeECHO(self.prefix+f"未检测到战令界面, 重新进入领任务礼包")
             if "战令入口" in self.Tool.var_dict.keys():
