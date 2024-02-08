@@ -436,7 +436,6 @@ class DQWheel:
                 # 交换元素位置
                 判断元素集合[0], 判断元素集合[idx] = 判断元素集合[idx], 判断元素集合[0]
                 return True, 判断元素集合
-        TimeECHO(self.prefix+"不在房间中")
         return False, 判断元素集合
 
     def existsTHENtouch(self, png=Template(r"1.png"), keystr="", savepos=False):
@@ -1305,10 +1304,8 @@ class wzry_task:
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
-        self.房间中的开始按钮图标.append(Template(r"tpl1704331759027.png", record_pos=(0.105, 0.235), resolution=(960, 540)))
         # 新年活动结束时,替换一个常规的取消准备按钮
         self.房间中的取消按钮图标 = []
-        self.房间中的取消按钮图标.append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
@@ -1325,7 +1322,6 @@ class wzry_task:
         self.王者登录关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
         self.王者登录关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
         self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
-        self.王者登录关闭按钮.append(Template(r"tpl1700918628072.png", record_pos=(-0.059, 0.211), resolution=(960, 540)))
         self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
         #
         self.战绩页面元素 = []
@@ -1339,19 +1335,12 @@ class wzry_task:
         self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
         #
         # 头像数据
-        英雄_诸葛 = Template(r"tpl1701436812155.png", record_pos=(-0.454, 0.134), resolution=(1136, 640))
-        英雄_妲己 = Template(r"tpl1691818492021.png", record_pos=(-0.278, 0.029), resolution=(960, 540))
         英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
         英雄_牙 = Template(r"tpl1701436836229.png", record_pos=(0.107, -0.085), resolution=(1136, 640))
-        英雄_孙尚香 = Template(r"tpl1690442530784.png", record_pos=(0.11, -0.083), resolution=(960, 540))
-        英雄_烈 = Template(r"tpl1701436844556.png", record_pos=(0.203, 0.025), resolution=(1136, 640))
-        英雄_桑启 = Template(r"tpl1701750374410.png", record_pos=(0.202, 0.024), resolution=(1136, 640))
         英雄_太乙 = Template(r"tpl1690442560069.png", record_pos=(0.11, 0.025), resolution=(960, 540))
         英雄_鬼谷子 = Template(r"tpl1701759712161.png", record_pos=(0.203, 0.026), resolution=(1136, 640))
         英雄_云中 = Template(r"tpl1701750390892.png", record_pos=(-0.172, 0.24), resolution=(1136, 640))
-        英雄_凯 = Template(r"tpl1689665521942.png", record_pos=(0.108, -0.086), resolution=(960, 540))
         英雄_八戒 = Template(r"tpl1701573854122.png", record_pos=(0.297, 0.135), resolution=(1136, 640))
-        英雄_亚瑟 = Template(r"tpl1685515357752.png", record_pos=(-0.359, 0.129), resolution=(960, 540))
         # 一些数据
         参战英雄线路_dict = {}
         参战英雄头像_dict = {}
@@ -1384,12 +1373,6 @@ class wzry_task:
         self.Tool.timedict["六国远征战"] = 0
         self.Tool.timedict["武道大会"] = 0
         self.Tool.touchfile(self.免费商城礼包FILE)
-        # self.每日礼包()
-        # self.每日礼包_每日任务()
-        # self.每日礼包_邮件礼包()
-        # self.每日礼包_妲己礼物()
-        # self.每日礼包_王者营地()
-        # self.六国远征()
 
     # 网络优化提示
     def 网络优化(self):
@@ -1514,6 +1497,11 @@ class wzry_task:
         if exists(Template(r"tpl1692951548745.png", record_pos=(0.005, 0.084), resolution=(960, 540))):
             关闭邀请 = Template(r"tpl1692951558377.png", record_pos=(0.253, -0.147), resolution=(960, 540), threshold=0.9)
             self.Tool.LoopTouch(关闭邀请, "关闭邀请", loop=5, savepos=False)
+        # 老账号的友情提示
+        if exists(Template(r"tpl1707377651759.png", record_pos=(-0.282, -0.032), resolution=(960, 540))):
+            关闭邀请 = Template(r"tpl1707377671958.png", record_pos=(0.453, -0.205), resolution=(960, 540))
+            self.Tool.LoopTouch(关闭邀请, "关闭友情对战推荐", loop=5, savepos=False)
+        # 
         if self.判断大厅中():
             return True
         self.check_connect_status()
@@ -2032,6 +2020,7 @@ class wzry_task:
                     break
                 TimeECHO(self.prefix+"加载时间过长.....重启APP")
                 self.移动端.重启APP(10)
+                self.登录游戏()
                 return False
         #
         关闭技能介绍1 = Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540))
@@ -2978,6 +2967,7 @@ class wzry_task:
                 TimeECHO(self.prefix+":六国远征探索时间达到上限")
                 # 这里其实还在探索关卡,直接return不行,程序还在探索
                 self.移动端.重启APP(10)
+                self.登录游戏()
                 return False
             # 探索过程中检测界面
             if self.六国远征_界面判断():
@@ -2996,6 +2986,7 @@ class wzry_task:
                     TimeECHO(self.prefix+":10分钟内未检测到远征界面")
                     TimeECHO(self.prefix+":有概率界面卡住,重启APP")
                     self.移动端.重启APP(10)
+                    self.登录游戏()
                     return self.六国远征_自动探索(times)
             # 对战中判断,这句话没有什么用,就是单纯跑一下
             # windows的虚拟机,容易对战结束后卡在对战界面，如果联系60s都是对战界面,建议点击右上角退出游戏
@@ -3468,6 +3459,7 @@ class wzry_task:
                 self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode,
                                    同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
                 self.移动端.重启APP(sleeptime=self.mynode*10+60)
+                self.登录游戏()
             # ------------------------------------------------------------------------------
             # 现在所有进程都在这里了,开始判断单个节点的问题,以及是否退出
             # 检查本节点是否需要独立同步(重置连接)

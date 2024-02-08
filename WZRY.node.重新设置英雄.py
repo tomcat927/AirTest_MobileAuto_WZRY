@@ -28,4 +28,3 @@ if not self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像"
 if not self.Tool.existsTHENtouch(tmp_参战英雄头像,tag+"参战英雄头像",savepos=savepos): sleep(2)
 sleep(1)
 #self.Tool.removefile(self.重新设置英雄FILE)
-
