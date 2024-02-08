@@ -52,7 +52,4 @@ self.登录界面开始游戏图标=Template(r"tpl1707180169881.png", record_pos
 self.大厅对战图标 = Template(r"tpl1707180221045.png", record_pos=(-0.106, 0.141), resolution=(960, 540))
 self.大厅元素.append(self.大厅对战图标)
 self.房间中的开始按钮图标.append(Template(r"tpl1707180283040.png", record_pos=(0.102, 0.235), resolution=(960, 540)))
-self.房间中的取消准备按钮 .append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
-self.房间元素.extend(self.房间中的开始按钮图标)
-self.房间元素.extend(self.房间中的取消准备按钮)
-self.房间元素.append(Template(r"tpl1707180444046.png", record_pos=(-0.424, -0.029), resolution=(960, 540)))
+self.房间中的取消按钮图标.append(Template(r"tpl1707180405239.png", record_pos=(0.104, 0.235), resolution=(960, 540)))
