@@ -200,6 +200,8 @@ class DQWheel:
         self.var_dict_file = var_dict_file
         self.var_dict = self.read_dict(self.var_dict_file)
         self.savepos = True
+        # 子程序运行次数
+        self.calltimes_dict = {}
         #
         self.stopnow = False
         self.stopfile = ".tmp.barrier.EXIT.txt"
@@ -429,6 +431,11 @@ class DQWheel:
         array = uniq_array_order(array)
         判断元素集合 = array
         strinfo = strinfo if len(strinfo) > 0 else "图片"
+        if strinfo in self.calltimes_dict.keys():
+            self.calltimes_dict[strinfo] = self.calltimes_dict[strinfo]+1
+        else:
+            self.calltimes_dict[strinfo] = 1
+        strinfo = strinfo+f"[{self.calltimes_dict[strinfo]}]"
         for idx, i in enumerate(判断元素集合):
             TimeECHO(self.prefix+f"判断{strinfo}:{i}")
             if exists(i):
@@ -1501,7 +1508,7 @@ class wzry_task:
         if exists(Template(r"tpl1707377651759.png", record_pos=(-0.282, -0.032), resolution=(960, 540))):
             关闭邀请 = Template(r"tpl1707377671958.png", record_pos=(0.453, -0.205), resolution=(960, 540))
             self.Tool.LoopTouch(关闭邀请, "关闭友情对战推荐", loop=5, savepos=False)
-        # 
+        #
         if self.判断大厅中():
             return True
         self.check_connect_status()
@@ -1679,6 +1686,7 @@ class wzry_task:
         else:
             if self.判断房间中():
                 return True
+        # 如果在房间中上面就会返回了,不然就按照下面的从大厅开始
         self.进入大厅()
         self.check_connect_status()
         if self.Tool.存在同步文件():
@@ -2563,7 +2571,6 @@ class wzry_task:
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
     def 每日礼包_王者营地(self):
-        TimeECHO(self.prefix+"王者营地礼包开始")
         if not self.check_connect_status():
             TimeErr(self.prefix+"无法连接设备.暂时不领取营地礼包")
             return
@@ -2571,6 +2578,7 @@ class wzry_task:
             TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
             return
         self.移动端.关闭APP()
+        TimeECHO(self.prefix+"王者营地礼包开始")
         if "ios" in self.移动端.设备类型:
             APPID = "com.tencent.smobagamehelper"
         elif "android" in self.移动端.设备类型:
