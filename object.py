@@ -171,19 +171,6 @@ def TimeErr(info="None"):
     TimeECHO("NNNN:"+info)
 
 
-def uniq_array_order(arr):
-    if not arr:  # 如果输入的列表为空
-        return []
-    #
-    seen = set()
-    unique_elements = []
-    for item in arr:
-        if item not in seen:
-            unique_elements.append(item)
-            seen.add(item)
-    return unique_elements
-
-
 class DQWheel:
     def __init__(self, var_dict_file='var_dict_file.txt', prefix="", mynode=-10, totalnode=-10, 容器优化=False):
         self.timedict = {}
@@ -427,8 +414,20 @@ class DQWheel:
             var[key] = var_new[key]
         return var
 
+    def uniq_Template_array(self, arr):
+        if not arr:  # 如果输入的列表为空
+            return []
+        #
+        seen = set()
+        unique_elements = []
+        for item in arr:
+            if item.filepath not in seen:
+                unique_elements.append(item)
+                seen.add(item.filepath)
+        return unique_elements
+
     def 存在任一张图(self, array, strinfo=""):
-        array = uniq_array_order(array)
+        array = self.uniq_Template_array(array)
         判断元素集合 = array
         strinfo = strinfo if len(strinfo) > 0 else "图片"
         if strinfo in self.calltimes_dict.keys():
@@ -1342,6 +1341,11 @@ class wzry_task:
         self.战绩页面元素.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
         #
+        self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
+        self.五排皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
+        self.我知道了限免 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
+
+        #
         # 头像数据
         英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
         英雄_牙 = Template(r"tpl1701436836229.png", record_pos=(0.107, -0.085), resolution=(1136, 640))
@@ -1400,7 +1404,7 @@ class wzry_task:
     def 关闭按钮(self):
         # 这个循环仅作为识别关闭按钮位置的循环
         # 主要用于: self.进入大厅时遇到的复杂的关闭按钮()
-        self.王者登录关闭按钮 = uniq_array_order(self.王者登录关闭按钮)
+        self.王者登录关闭按钮 = self.Tool.uniq_Template_array(self.王者登录关闭按钮)
         for i in self.王者登录关闭按钮:
             keyindex = f"王者登陆关闭按钮{i}"
             # if keyindex in self.Tool.var_dict.keys(): continue
@@ -1626,6 +1630,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
         回归挑战 = Template(r"tpl1699680234401.png", record_pos=(0.314, 0.12), resolution=(1136, 640))
         self.Tool.existsTHENtouch(回归挑战, "不进行回归挑战")
+        self.关闭按钮()
         if self.判断大厅中():
             return True
         #
@@ -2047,7 +2052,7 @@ class wzry_task:
             return self.结束人机匹配_模拟战()
         self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=True)
         jixu = False
-        返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
+
         while True:
             self.check_connect_status()
             if self.Tool.存在同步文件():
@@ -2087,7 +2092,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
             if 加速对战:
                 self.判断对战中(加速对战)
-            if exists(返回房间按钮):
+            if exists(self.返回房间按钮):
                 jixu = True
             #
             if self.健康系统_常用命令():
@@ -2171,9 +2176,10 @@ class wzry_task:
             # 返回大厅
             # 因为不能保证返回辅助账户返回房间，所以返回大厅更稳妥
             if self.对战结束返回房间 and not self.标准触摸对战:
-                if self.Tool.existsTHENtouch(返回房间按钮, "返回房间"):
+                if self.Tool.existsTHENtouch(self.返回房间按钮, "返回房间"):
                     sleep(10)
                 self.网络优化()
+                #
                 if self.判断房间中():
                     return
             else:
@@ -2242,7 +2248,7 @@ class wzry_task:
             # 因为不能保证返回辅助账户返回房间，所以返回大厅更稳妥
             if exists(Template(r"tpl1690545925867.png", record_pos=(-0.001, 0.241), resolution=(960, 540))):
                 if self.对战结束返回房间:
-                    if self.Tool.existsTHENtouch(Template(r"tpl1690545951270.png", record_pos=(0.075, 0.239), resolution=(960, 540)), "返回房间", savepos=True):
+                    if self.Tool.existsTHENtouch(self.返回房间按钮, "返回房间", savepos=True):
                         sleep(10)
     # @todo ,添加barrier
                         if self.判断房间中():
@@ -3281,6 +3287,11 @@ class wzry_task:
         return 存在
 
     def 判断房间中(self):
+        # 活动界面
+        # 五排皮肤限免
+        if exists(self.五排皮肤限免):
+            self.Tool.existsTHENtouch(self.我知道了限免, "限免.我知道了", savepos=False)
+        #
         存在, self.房间元素 = self.Tool.存在任一张图(self.房间元素, "房间元素")
         return 存在
 
