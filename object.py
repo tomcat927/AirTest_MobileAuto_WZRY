@@ -15,6 +15,7 @@ import logging
 import sys
 import os
 import numpy as np
+import copy
 import random
 import traceback
 # 重写函数#
@@ -1202,6 +1203,42 @@ class wzyd_libao:
         self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
 
 
+class wzry_runinfo:
+    # 备注
+    # 运行参数信息
+    # 主要用于保存上一步的运行信息,对本步进行调整
+    def __init__(self):
+        self.组队模式 = False
+        self.房主 = True
+        self.对战模式 = "5v5匹配"
+        self.限时组队时间 = 7
+        self.runstep = -1
+        self.jinristep = -1
+        self.青铜段位 = False
+        self.标准模式 = False
+        self.触摸对战 = False
+        self.标准触摸对战 = False
+        self.prefix = ""
+
+    def compate(self, other):
+        if self.组队模式 != other.组队模式:
+            TimeECHO(self.prefix+f"RUNINFO:组队模式变化")
+            return False
+        if self.对战模式 != other.对战模式:
+            TimeECHO(self.prefix+f"RUNINFO:对战模式变化{other.对战模式}")
+            return False
+        if "模拟战" in self.对战模式:
+            return True
+        if "5v5匹配" in self.对战模式:
+            if self.青铜段位 == other.青铜段位:
+                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化")
+                if self.标准模式 == other.标准模式:
+                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化")
+                    return True
+        TimeECHO(self.prefix+f"RUNINFO:对战参数有所变化")
+        return False
+
+
 class wzry_task:
     # 备注
     # 新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
@@ -1224,6 +1261,9 @@ class wzry_task:
         # 当hour小于此数字时才是组队模式
         self.限时组队时间 = 限时组队时间
         self.totalnode_bak = self.totalnode
+        #
+        self.本循环参数 = wzry_runinfo()
+        self.上循环参数 = wzry_runinfo()
 
         # <难度3蓝色,4紫色,5红色
         self.选择英雄 = True
@@ -1587,17 +1627,19 @@ class wzry_task:
         # 这里需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
             TimeECHO(self.prefix+"需要重新登录")
+            #
+            self.Tool.touchfile(self.重新登录FILE)
+            if self.totalnode_bak > 1:
+                self.Tool.touchfile(self.无法进行组队FILE)
+            #
             if self.组队模式:
                 TimeErr(self.prefix+"需要重新登录:创建同步文件")
                 self.Tool.touch同步文件()
             else:
                 TimeECHO(self.prefix+"需要重新登录:创建单节点同步")
-                self.Tool.touchfile(self.重新登录FILE)
-                if self.totalnode_bak > 1:
-                    self.Tool.touchfile(self.无法进行组队FILE)
                 self.移动端.重启APP(10*60)
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
-                return True
+            return True
         #
         #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
@@ -1686,13 +1728,9 @@ class wzry_task:
         TimeECHO(self.prefix+f"首先进入人机匹配房间{times}")
         if self.判断对战中():
             self.结束人机匹配()
-        if self.标准触摸对战:
-            TimeECHO(self.prefix+f"标准触摸对战:先进入大厅再重新进入房间")
-            self.进入大厅()
-        else:
-            if self.判断房间中():
-                return True
-        # 如果在房间中上面就会返回了,不然就按照下面的从大厅开始
+        if self.判断房间中():
+            return True
+        #
         self.进入大厅()
         self.check_connect_status()
         if self.Tool.存在同步文件():
@@ -2173,9 +2211,8 @@ class wzry_task:
                 TimeECHO(self.prefix+"未监测到继续,sleep...")
                 sleep(20)
                 continue
-            # 返回大厅
-            # 因为不能保证返回辅助账户返回房间，所以返回大厅更稳妥
-            if self.对战结束返回房间 and not self.标准触摸对战:
+            # 返回房间/大厅
+            if self.对战结束返回房间:
                 if self.Tool.existsTHENtouch(self.返回房间按钮, "返回房间"):
                     sleep(10)
                 self.网络优化()
@@ -3620,6 +3657,8 @@ class wzry_task:
                 self.赛季 = "2024"
                 self.进行六国远征 = False
                 self.进行武道大会 = False
+                self.本循环参数 = wzry_runinfo()
+                self.上循环参数 = wzry_runinfo()
                 if "2023" in self.赛季:
                     # 存在该文件则进行六国远征
                     self.Tool.touchfile(self.prefix+"六国远征.txt")
@@ -3752,8 +3791,30 @@ class wzry_task:
                     except:
                         TimeErr(self.prefix+".对战前注入.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
+            if self.标准触摸对战:
+                self.标准模式 = True
+                self.触摸对战 = True
+            # ------------------------------------------------------------------------------
+            # 此处开始记录本步的计算参数
+            self.本循环参数.组队模式 = self.组队模式
+            self.本循环参数.房主 = self.房主
+            self.本循环参数.对战模式 = self.对战模式
+            self.本循环参数.限时组队时间 = self.限时组队时间
+            self.本循环参数.runstep = self.runstep
+            self.本循环参数.jinristep = self.jinristep
+            self.本循环参数.青铜段位 = self.青铜段位
+            self.本循环参数.标准模式 = self.标准模式
+            self.本循环参数.触摸对战 = self.触摸对战
+            self.本循环参数.标准触摸对战 = self.标准触摸对战
+            self.本循环参数.prefix = self.prefix
+            # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
+            if not self.本循环参数.compate(self.上循环参数):
+                TimeECHO(self.prefix+f"上步计算参数不同同,回到大厅重新初始化")
+            # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
+            # ------------------------------------------------------------------------------
+            self.上循环参数 = copy.copy(self.本循环参数)
             if self.Tool.存在同步文件():
                 continue
             if not connect_status():
