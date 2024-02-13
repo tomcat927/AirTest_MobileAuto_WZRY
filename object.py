@@ -1226,16 +1226,18 @@ class wzry_runinfo:
             TimeECHO(self.prefix+f"RUNINFO:组队模式变化{str(other.组队模式)}")
             return False
         if self.对战模式 != other.对战模式:
-            TimeECHO(self.prefix+f"RUNINFO:对战模式变化{other.对战模式}")
+            TimeECHO(self.prefix+f"RUNINFO:对战模式变化{str(other.对战模式)}")
             return False
         if "模拟战" in self.对战模式:
             return True
         if "5v5匹配" in self.对战模式:
             if self.青铜段位 == other.青铜段位:
-                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化{str(other.青铜段位)}")
                 if self.标准模式 == other.标准模式:
-                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化{str(other.标准模式)}")
                     return True
+                else:
+                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化{str(other.标准模式)}")
+            else:
+                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化{str(other.青铜段位)}")
         TimeECHO(self.prefix+f"RUNINFO:对战参数有所变化")
         return False
 
@@ -1482,6 +1484,24 @@ class wzry_task:
 
     def 进入大厅(self, times=1):
         TimeECHO(self.prefix+f"尝试进入大厅{times}")
+        if times == 1:
+            self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=True)
+        else:
+            if self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=False):
+                TimeECHO(self.prefix+f"进入大厅超时退出")
+                TimeErr(self.prefix+"进入大厅超时退出,创建同步文件")
+                if self.组队模式:
+                    self.Tool.touch同步文件()
+                else:
+                    self.Tool.touch同步文件(self.Tool.独立同步文件)
+                self.移动端.重启APP(10)
+                return False
+        # 次数上限
+        if times % 4 == 0:
+            self.移动端.重启APP(10)
+            self.登录游戏()
+        times = times+1
+        #
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
@@ -1565,26 +1585,10 @@ class wzry_task:
         #
         self.移动端.重启APP()
         self.登录游戏()
-        times = times+1
         #
+        # 健康系统直接重新同步
         if self.健康系统_常用命令():
-            if self.组队模式:
-                return True
-            return self.进入大厅(times)
-
-        # 次数上限
-        if times < 15 and times % 4 == 0:
-            self.移动端.重启APP(10)
-            self.登录游戏()
-        if times > 15:
-            if self.组队模式:
-                TimeErr(self.prefix+"进入大厅times太多,创建同步文件")
-                self.Tool.touch同步文件()
-                return True
-            else:
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
-                self.移动端.关闭APP()
-                return False
+            return True
 
     def 登录游戏(self, times=1):
         if times == 1:
@@ -1661,11 +1665,9 @@ class wzry_task:
         #
         用户协议同意 = Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540), threshold=0.9)
         self.Tool.existsTHENtouch(用户协议同意, "用户协议同意")
-        #
+        # 健康系统直接重新同步
         if self.健康系统_常用命令():
-            if self.组队模式:
-                return True
-            return self.登录游戏(times)
+            return True
         # 动态下载资源提示
 
         回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
@@ -2134,10 +2136,9 @@ class wzry_task:
             if exists(self.返回房间按钮):
                 jixu = True
             #
+            # 健康系统直接重新同步
             if self.健康系统_常用命令():
-                if self.组队模式:
-                    return True
-                return self.进入大厅()
+                return True
             #
             游戏结束了 = Template(r"tpl1694360304332.png", record_pos=(-0.011, -0.011), resolution=(960, 540))
             if exists(游戏结束了):
@@ -3324,16 +3325,17 @@ class wzry_task:
         存在, self.大厅元素 = self.Tool.存在任一张图(self.大厅元素, "大厅元素")
         return 存在
 
-    def 判断房间中(self):
+    def 判断房间中(self, 处理=True):
         # 活动界面
-        if exists(self.房间皮肤限免):
-            self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
-        if exists(self.房间临时好友):
-            self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间临时好友", savepos=False)
-        if exists(self.房间五黑车队):
-            活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
-            self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
-            self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间五黑车队", savepos=False)
+        if 处理:
+            if exists(self.房间皮肤限免):
+                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
+            if exists(self.房间临时好友):
+                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间临时好友", savepos=False)
+            if exists(self.房间五黑车队):
+                活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
+                self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
+                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间五黑车队", savepos=False)
         #
         存在, self.房间元素 = self.Tool.存在任一张图(self.房间元素, "房间元素")
         return 存在
@@ -3450,21 +3452,14 @@ class wzry_task:
 
     def 健康系统_常用命令(self):
         if self.健康系统():
+            self.移动端.关闭APP()
             if self.组队模式:
                 TimeErr(self.prefix+"组队情况检测到健康系统,所以touch同步文件")
                 self.Tool.touch同步文件()
-                sleep(30)
             else:
-                TimeErr(self.prefix+"独立模式检测到健康系统,领取营地礼包等操作")
-                if self.王者营地礼包:
-                    self.Tool.timedict["领营地礼包"] = 0
-                    self.每日礼包_王者营地()
-                    sleeptime = 6.0
-                else:
-                    sleeptime = 60*5.0
-                TimeErr(self.prefix+f"独立模式检测到健康系统,sleep {sleeptime/60} min")
-                self.移动端.重启APP(sleeptime)
-                self.登录游戏()
+                TimeErr(self.prefix+"组队情况检测到健康系统,所以touch独立同步文件")
+                self.Tool.touch同步文件(self.Tool.独立同步文件)
+                self.移动端.重启APP(60*5)
             return True
         else:
             return False
@@ -3557,6 +3552,7 @@ class wzry_task:
                     except:
                         TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
+            # 健康系统连接失败等原因
             # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
             # 然后多节点进行同步后
             # 再统一退出
@@ -3564,6 +3560,11 @@ class wzry_task:
                 self.移动端.连接设备()
                 if connect_status():
                     self.Tool.removefile(self.Tool.独立同步文件)
+                    if self.王者营地礼包:
+                        self.Tool.timedict["领营地礼包"] = 0
+                        self.每日礼包_王者营地()
+                    self.移动端.重启APP(60)
+                    self.登录游戏()
                 else:
                     TimeErr(self.prefix+"连接不上设备. 待同步后退出")
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
