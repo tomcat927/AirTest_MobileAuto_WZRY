@@ -980,6 +980,11 @@ class wzyd_libao:
         return 存在
 
     def RUN(self):
+        # 判断营地是否登录的界面
+        if os.path.exists(self.营地需要登录FILE):
+            TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
+            return False
+        #
         if not start_app(self.APPID):
             TimeECHO(self.prefix+"营地无法打开,返回")
             return False
@@ -1001,10 +1006,6 @@ class wzyd_libao:
                 except:
                     TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
         #
-        # 判断营地是否登录的界面
-        if os.path.exists(self.营地需要登录FILE):
-            TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
-            return False
         if not self.判断营地大厅中():
             self.Tool.touchfile(self.营地需要登录FILE)
             TimeECHO(self.prefix+"营地没有登录,不领取礼包")
@@ -1222,7 +1223,7 @@ class wzry_runinfo:
 
     def compate(self, other):
         if self.组队模式 != other.组队模式:
-            TimeECHO(self.prefix+f"RUNINFO:组队模式变化")
+            TimeECHO(self.prefix+f"RUNINFO:组队模式变化{str(other.组队模式)}")
             return False
         if self.对战模式 != other.对战模式:
             TimeECHO(self.prefix+f"RUNINFO:对战模式变化{other.对战模式}")
@@ -1231,9 +1232,9 @@ class wzry_runinfo:
             return True
         if "5v5匹配" in self.对战模式:
             if self.青铜段位 == other.青铜段位:
-                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化")
+                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化{str(other.青铜段位)}")
                 if self.标准模式 == other.标准模式:
-                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化")
+                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化{str(other.标准模式)}")
                     return True
         TimeECHO(self.prefix+f"RUNINFO:对战参数有所变化")
         return False
@@ -1382,8 +1383,10 @@ class wzry_task:
         self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
         #
         self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
-        self.五排皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
-        self.我知道了限免 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
+        self.房间皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
+        self.房间临时好友 = Template(r"tpl1707784321085.png", record_pos=(-0.004, -0.219), resolution=(960, 540))
+        self.房间五黑车队 = Template(r"tpl1707787106337.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
+        self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
 
         #
         # 头像数据
@@ -1617,8 +1620,6 @@ class wzry_task:
                 if exists(Template(r"tpl1692952266315.png", record_pos=(-0.411, 0.266), resolution=(960, 540), threshold=0.9)):
                     TimeECHO(self.prefix+"正在下载资源包")
                 sleep(60)
-        if self.判断大厅中():
-            return True
         if exists(Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)):
             TimeECHO(self.prefix+"同意游戏")
             touch(Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9))
@@ -1664,7 +1665,7 @@ class wzry_task:
         if self.健康系统_常用命令():
             if self.组队模式:
                 return True
-            return self.进入大厅()
+            return self.登录游戏(times)
         # 动态下载资源提示
 
         回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
@@ -3325,9 +3326,14 @@ class wzry_task:
 
     def 判断房间中(self):
         # 活动界面
-        # 五排皮肤限免
-        if exists(self.五排皮肤限免):
-            self.Tool.existsTHENtouch(self.我知道了限免, "限免.我知道了", savepos=False)
+        if exists(self.房间皮肤限免):
+            self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
+        if exists(self.房间临时好友):
+            self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间临时好友", savepos=False)
+        if exists(self.房间五黑车队):
+            活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
+            self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
+            self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间五黑车队", savepos=False)
         #
         存在, self.房间元素 = self.Tool.存在任一张图(self.房间元素, "房间元素")
         return 存在
