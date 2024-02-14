@@ -379,6 +379,7 @@ class DQWheel:
         self.touch同步文件()
         return False
     # 读取变量
+    # read_dict 不仅适合保存字典,而且适合任意的变量类型
 
     def read_dict(self, var_dict_file="position_dict.txt"):
         global 辅助
@@ -391,6 +392,7 @@ class DQWheel:
                 var_dict = pickle.load(f)
         return var_dict
         # 保存变量
+    # save_dict 不仅适合保存字典,而且适合任意的变量类型
 
     def save_dict(self, var_dict, var_dict_file="position_dict.txt"):
         global 辅助
@@ -398,7 +400,8 @@ class DQWheel:
         import pickle
         f = open(var_dict_file, "wb")
         pickle.dump(var_dict, f)
-        f.close
+        f.close()
+    # bcastvar 不仅适合保存字典,而且适合任意的变量类型
 
     def bcastvar(self, mynode, totalnode, var, name="bcastvar"):
         if totalnode < 2:
@@ -406,14 +409,13 @@ class DQWheel:
         dict_file = name+".txt"
         if mynode == 0:
             self.save_dict(var, dict_file)
-        self.barriernode(mynode, totalnode, name)
+        self.barriernode(mynode, totalnode, "bcastvar:"+name)
         if self.存在同步文件():
             return var
         #
         var_new = self.read_dict(dict_file)
-        for key in var:
-            var[key] = var_new[key]
-        return var
+        #
+        return var_new
 
     def uniq_Template_array(self, arr):
         if not arr:  # 如果输入的列表为空
@@ -1300,8 +1302,16 @@ class wzry_task:
             if not connect_status():
                 TimeErr(self.prefix+"连接不上设备. 退出")
                 return
-
+        #
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
+        #
+        # 统一本次运行的PID, 避免两个脚本同时运行出现控制冲突的情况
+        self.WZRYPIDFILE = f"WZRY.{self.mynode}.PID.txt"
+        hour, minu, sec = self.Tool.time_getHMS()
+        self.myPID = f"{self.totalnode_bak}.{hour}{minu}{sec}"
+        self.myPID = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.myPID, name="self.myPID")
+        self.Tool.touchfile(self.WZRYPIDFILE, content=self.myPID)
+        TimeECHO(self.prefix+f": 本次运行PID:[{self.myPID}]")
         #
         self.runstep = 0
         self.jinristep = 0
@@ -1335,7 +1345,6 @@ class wzry_task:
         self.Tool.removefile(self.免费商城礼包FILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
-
         #
         self.王者营地礼包 = False
         if ":5555" in self.移动端.LINK:
@@ -1345,8 +1354,6 @@ class wzry_task:
         TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
         self.玉镖夺魁签到 = False
         #
-        self.runinfo = {}
-        self.runinfo["runstep"] = 0
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
@@ -1590,12 +1597,14 @@ class wzry_task:
         if self.健康系统_常用命令():
             return True
 
-    def 登录游戏(self, times=1):
+    def 登录游戏(self, times=1, 检测到登录界面=False):
         if times == 1:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
         times = times+1
+        if times > 2 and not 检测到登录界面:
+            TimeErr(self.prefix+f"登录游戏:{times}次没有检测到登录界面,返回")
         if times > 5:
-            TimeErr(self.prefix+"登录游戏次数太多,返回")
+            TimeErr(self.prefix+f"登录游戏:{times}次登录成功,返回")
             return False
         TimeECHO(self.prefix+f"登录游戏{times}")
         if self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=False):
@@ -1607,6 +1616,7 @@ class wzry_task:
             return True
         更新公告 = Template(r"tpl1692946575591.png", record_pos=(0.103, -0.235), resolution=(960, 540), threshold=0.9)
         if exists(更新公告):
+            检测到登录界面 = True
             for igengxin in np.arange(30):
                 TimeECHO(self.prefix+"更新中%d" % (igengxin))
                 关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
@@ -1625,12 +1635,18 @@ class wzry_task:
                     TimeECHO(self.prefix+"正在下载资源包")
                 sleep(60)
         if exists(Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)):
+            检测到登录界面 = True
             TimeECHO(self.prefix+"同意游戏")
             touch(Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9))
         if self.判断大厅中():
             return True
+        #
+        用户协议同意 = Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540), threshold=0.9)
+        if self.Tool.existsTHENtouch(用户协议同意, "用户协议同意"):
+            检测到登录界面 = True
         # 这里需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
+            检测到登录界面 = True
             TimeECHO(self.prefix+"需要重新登录")
             #
             self.Tool.touchfile(self.重新登录FILE)
@@ -1646,8 +1662,8 @@ class wzry_task:
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
             return True
         #
-        #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
+            检测到登录界面 = True
             TimeECHO(self.prefix+"关闭家长莫模式")
             touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
             sleep(5)
@@ -1663,8 +1679,6 @@ class wzry_task:
         if self.Tool.existsTHENtouch(self.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             sleep(10)
         #
-        用户协议同意 = Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540), threshold=0.9)
-        self.Tool.existsTHENtouch(用户协议同意, "用户协议同意")
         # 健康系统直接重新同步
         if self.健康系统_常用命令():
             return True
@@ -1713,7 +1727,7 @@ class wzry_task:
         #
         if self.判断大厅中():
             return True
-        return self.登录游戏(times)
+        return self.登录游戏(times, 检测到登录界面)
 
     def 单人进入人机匹配房间(self, times=1):
         self.check_connect_status()
@@ -1951,9 +1965,9 @@ class wzry_task:
             return True
         if times == 1:
             self.Tool.timelimit(timekey="进行人机匹配", limit=60*10, init=True)
+            # 这里需要barrier一下,不然下面主节点如果提前点击领匹配,这里可能无法判断
+            self.Tool.barriernode(self.mynode, self.totalnode, "人机匹配预判断房间")
         times = times+1
-        # 这里需要barrier一下,不然下面主节点如果提前点击领匹配,这里可能无法判断
-        self.Tool.barriernode(self.mynode, self.totalnode, "人机匹配预判断房间")
         #
         self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
@@ -3536,6 +3550,14 @@ class wzry_task:
     def RUN(self):  # 程序入口
         while True:
             # ------------------------------------------------------------------------------
+            # 检测是否出现控制冲突,双脚本情况
+            if self.myPID != self.Tool.readfile(self.WZRYPIDFILE)[0].strip():
+                TimeErr(self.prefix+f": 本次运行PID[{self.myPID}]不同于[{self.WZRYPIDFILE}],退出中.....")
+                if self.totalnode_bak > 1:  # 让其他节点抓紧结束
+                    self.Tool.touch同步文件()
+                return True
+            #
+            # ------------------------------------------------------------------------------
             if os.path.exists(self.临时初始化FILE):
                 TimeECHO(self.prefix+f":注入临时初始化代码({self.临时初始化FILE})")
                 exec_insert = self.Tool.readfile(self.临时初始化FILE)
@@ -3622,6 +3644,13 @@ class wzry_task:
             #
             新的一天 = False
             while hour >= endclock or hour < startclock:
+                #
+                if self.myPID != self.Tool.readfile(self.WZRYPIDFILE)[0].strip():
+                    TimeErr(self.prefix+f": 本次运行PID[{self.myPID}]不同于[{self.WZRYPIDFILE}],退出中.....")
+                    if self.totalnode_bak > 1:  # 让其他节点抓紧结束
+                        self.Tool.touch同步文件()
+                    return True
+                #
                 # 这里仅领礼包,不要插入六国远征等不稳定的任务
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.Tool.touchfile(self.免费商城礼包FILE)
@@ -3776,9 +3805,8 @@ class wzry_task:
                 TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             # ------------------------------------------------------------------------------
             # 运行前统一变量
-            self.runinfo["runstep"] = self.runstep
-            self.runinfo = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runinfo, name="bcastruninfo")
-            self.runstep = self.runinfo["runstep"]
+            self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
+            self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="runstep")
             TimeECHO(self.prefix+f"运行次数{self.runstep}|今日步数{self.jinristep}")
             #
             # ------------------------------------------------------------------------------
