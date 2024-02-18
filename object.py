@@ -3651,6 +3651,8 @@ class wzry_task:
                         self.Tool.touch同步文件()
                     return True
                 #
+                if self.Tool.存在同步文件():
+                    break
                 # 这里仅领礼包,不要插入六国远征等不稳定的任务
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 self.Tool.touchfile(self.免费商城礼包FILE)
