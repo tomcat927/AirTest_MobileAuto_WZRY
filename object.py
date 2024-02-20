@@ -179,6 +179,7 @@ class DQWheel:
         self.辅助同步文件 = "NeedRebarrier.txt"
         self.mynode = mynode
         self.totalnode = totalnode
+        self.totalnode_bak = totalnode
         self.prefix = prefix
         if self.mynode >= 0:
             self.prefix = f"({mynode})"+self.prefix
@@ -310,8 +311,8 @@ class DQWheel:
                 return True
             else:
                 return False
-        #
-        if os.path.exists(self.辅助同步文件):
+        # 只要是总结点数大于1,无论当前是否组队都判断辅助同步文件
+        if self.totalnode_bak > 1 and os.path.exists(self.辅助同步文件):
             TimeECHO(self.prefix+f"存在辅助同步文件[{self.辅助同步文件}]")
             return True
         # 每个进程的独立文件不同,不同节点不会误判
@@ -976,7 +977,7 @@ class wzyd_libao:
         self.营地登录元素 = []
         self.营地登录元素.append(Template(r"tpl1708393355383.png", record_pos=(-0.004, 0.524), resolution=(540, 960)))
         self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
-    #
+        #
 
     def 判断营地大厅中(self):
         self.营地大厅元素.append(self.个人界面图标)
@@ -984,25 +985,31 @@ class wzyd_libao:
         self.营地大厅元素.append(self.每日福利图标)
         存在, self.营地大厅元素 = self.Tool.存在任一张图(self.营地大厅元素, "营地大厅元素")
         return 存在
+    #
 
     def 判断营地登录中(self):
         存在, self.营地登录元素 = self.Tool.存在任一张图(self.营地登录元素, "营地登录元素")
         return 存在
+    #
+    #
+    # 用于更新上层调用参数,是不是领取礼包
 
-    def RUN(self):
-        # 判断营地是否登录的界面
-        if os.path.exists(self.营地需要登录FILE):
+    def 营地初始化(self, 礼包初始化=False):
+        #
+        if 礼包初始化 and os.path.exists(self.营地需要登录FILE):
             TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
             return False
-        #
+        # 判断网络情况
+        if not connect_status():
+            TimeECHO(self.prefix+"营地暂时无法触摸,返回")
+            if 礼包初始化:
+                return False
+            return True
+        # 打开APP
         if not start_app(self.APPID):
             TimeECHO(self.prefix+"营地无法打开,返回")
+            stop_app(self.APPID)
             return False
-        #
-        if not connect_status():
-            TimeECHO(self.prefix+"营地无法触摸,返回")
-            return False
-        #
         sleep(20)  # 等待营地打开
         if os.path.exists(self.营地初始化FILE):
             TimeECHO(self.prefix+f":注入营地初始化代码({self.营地初始化FILE})")
@@ -1019,17 +1026,30 @@ class wzyd_libao:
                         TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
                 except:
                     TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
-
         #
+        # 判断营地是否登录的界面
         if self.判断营地登录中():
             TimeECHO(self.prefix+"检测到营地登录界面,不领取礼包")
             self.Tool.touchfile(self.营地需要登录FILE)
+            stop_app(self.APPID)
             return False
         #
         if not self.判断营地大厅中():
             TimeECHO(self.prefix+"营地未知原因没能进入大厅,不领取礼包")
+            stop_app(self.APPID)
             return False
         #
+        if not 礼包初始化:
+            stop_app(self.APPID)
+        #
+        return True
+
+    def RUN(self):
+        #
+        if not self.营地初始化(礼包初始化=True):
+            TimeECHO(self.prefix+"营地初始化失败")
+            stop_app(self.APPID)
+            return False
         # 体验服只有安卓客户端可以领取
         if not self.IOS:
             self.体验服礼物()
@@ -1363,12 +1383,10 @@ class wzry_task:
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
         #
-        self.王者营地礼包 = False
-        if ":5555" in self.移动端.LINK:
-            self.王者营地礼包 = True
-        if "ios" in self.移动端.LINK:
-            self.王者营地礼包 = True
+        # 默认开启self.王者营地礼包,后面如果无法领取会自动将self.王者营地礼包=False
+        self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
         TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
+        #
         self.玉镖夺魁签到 = False
         #
         # 一些图库, 后期使用图片更新
@@ -2366,6 +2384,8 @@ class wzry_task:
                 self.KPL每日观赛(times=1, 观赛时长=观赛时长)
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
+        if self.Tool.timelimit("王者营地初始化判定", limit=60*60*6, init=False):
+            self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
 
@@ -2655,29 +2675,38 @@ class wzry_task:
                 sleep(5)
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
-    def 每日礼包_王者营地(self):
+    def 每日礼包_王者营地(self, 初始化=False):
         if not self.check_connect_status():
             TimeErr(self.prefix+"无法连接设备.暂时不领取营地礼包")
-            return
-        if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
+            if 初始化:
+                return True
+            return False
+        if not 初始化 and not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
             TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
-            return
-        self.移动端.关闭APP()
-        TimeECHO(self.prefix+"王者营地礼包开始")
+            return False
         if "ios" in self.移动端.设备类型:
             APPID = "com.tencent.smobagamehelper"
         elif "android" in self.移动端.设备类型:
             APPID = "com.tencent.gamehelper.smoba"
         else:
             TimeErr(self.prefix+":无法判断设备类型")
-            return
+            return False
         王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID)
+        if 初始化:
+            初始化成功 = 王者营地.营地初始化()
+            stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
+            return 初始化成功
+        #
+        self.移动端.关闭APP()
+        #
+        TimeECHO(self.prefix+"王者营地礼包开始")
         try:
             王者营地.RUN()
             TimeECHO(self.prefix+"王者营地礼包领取成功")
         except:
             TimeErr(self.prefix+"王者营地礼包领取失败")
         stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
+        #
         self.移动端.打开APP()
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
 
@@ -3507,9 +3536,6 @@ class wzry_task:
             self.移动端.连接设备(times=1, timesMax=2)
             if connect_status():
                 return True
-            else:
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
-
             # 单人模式创建同步文件后等待,组队模式则让全体返回
             self.Tool.touch同步文件(self.Tool.独立同步文件)
             if self.组队模式:
@@ -3714,6 +3740,7 @@ class wzry_task:
                 self.进行武道大会 = False
                 self.本循环参数 = wzry_runinfo()
                 self.上循环参数 = wzry_runinfo()
+                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                 if "2023" in self.赛季:
                     # 存在该文件则进行六国远征
                     self.Tool.touchfile(self.prefix+"六国远征.txt")
@@ -3769,8 +3796,9 @@ class wzry_task:
                 else:
                     TimeECHO(self.prefix+"今日六国远征探索完成")
                     self.Tool.removefile(self.prefix+"六国远征.txt")
-            if self.Tool.存在同步文件():
-                continue
+                if self.Tool.存在同步文件():
+                    continue
+            #
             if self.进行武道大会:
                 self.进行武道大会 = not self.武道大会()
                 self.进入大厅()
@@ -3779,12 +3807,12 @@ class wzry_task:
                 else:
                     TimeECHO(self.prefix+"今日武道大会探索完成")
                     self.Tool.removefile(self.prefix+"武道大会.txt")
-            #
-            if self.Tool.存在同步文件():
-                continue
+                if self.Tool.存在同步文件():
+                    continue
             self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
             #
             if self.Tool.存在同步文件():
+                TimeECHO(self.prefix+"准备进入战斗循环中遇到同步文件返回")
                 continue
             #
             # ------------------------------------------------------------------------------
@@ -3870,6 +3898,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             self.上循环参数 = copy.copy(self.本循环参数)
             if self.Tool.存在同步文件():
+                TimeECHO(self.prefix+"战斗结束中遇到同步文件返回")
                 continue
             if not connect_status():
                 continue
