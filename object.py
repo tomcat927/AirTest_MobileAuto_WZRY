@@ -950,7 +950,7 @@ class deviceOB:
 
 
 class wzyd_libao:
-    def __init__(self, prefix="", APPID="com.tencent.gamehelper.smoba"):
+    def __init__(self, prefix="", APPID="com.tencent.gamehelper.smoba", 初始化检查=False):
         self.体验币成功 = False
         self.营地活动 = True
         self.APPID = APPID
@@ -978,6 +978,9 @@ class wzyd_libao:
         self.营地登录元素.append(Template(r"tpl1708393355383.png", record_pos=(-0.004, 0.524), resolution=(540, 960)))
         self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
         #
+        self.初始化成功 = False
+        if 初始化检查:
+            self.初始化成功 = self.营地初始化(初始化检查=初始化检查)
 
     def 判断营地大厅中(self):
         self.营地大厅元素.append(self.个人界面图标)
@@ -994,17 +997,13 @@ class wzyd_libao:
     #
     # 用于更新上层调用参数,是不是领取礼包
 
-    def 营地初始化(self, 礼包初始化=False):
-        #
-        if 礼包初始化 and os.path.exists(self.营地需要登录FILE):
-            TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
-            return False
+    def 营地初始化(self, 初始化检查=False):
         # 判断网络情况
         if not connect_status():
             TimeECHO(self.prefix+"营地暂时无法触摸,返回")
-            if 礼包初始化:
-                return False
-            return True
+            if 初始化检查:
+                return True
+            return False
         # 打开APP
         if not start_app(self.APPID):
             TimeECHO(self.prefix+"营地无法打开,返回")
@@ -1036,17 +1035,24 @@ class wzyd_libao:
         #
         if not self.判断营地大厅中():
             TimeECHO(self.prefix+"营地未知原因没能进入大厅,不领取礼包")
+            self.Tool.touchfile(self.营地需要登录FILE)
             stop_app(self.APPID)
             return False
-        #
-        if not 礼包初始化:
+        # 前面的都通过了,判断成功
+        if 初始化检查:
+            self.Tool.removefile(self.营地需要登录FILE)
             stop_app(self.APPID)
         #
         return True
 
     def RUN(self):
         #
-        if not self.营地初始化(礼包初始化=True):
+        if os.path.exists(self.营地需要登录FILE):
+            TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
+            return False
+        #
+        self.初始化成功 = self.营地初始化(初始化检查=False)
+        if not self.初始化成功:
             TimeECHO(self.prefix+"营地初始化失败")
             stop_app(self.APPID)
             return False
@@ -2384,8 +2390,7 @@ class wzry_task:
                 self.KPL每日观赛(times=1, 观赛时长=观赛时长)
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
-        if self.Tool.timelimit("王者营地初始化判定", limit=60*60*6, init=False):
-            self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
+        #
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
 
@@ -2677,13 +2682,11 @@ class wzry_task:
 
     def 每日礼包_王者营地(self, 初始化=False):
         if not self.check_connect_status():
-            TimeErr(self.prefix+"无法连接设备.暂时不领取营地礼包")
+            TimeErr(self.prefix+"每日礼包_王者营地:无法连接设备.")
             if 初始化:
                 return True
             return False
-        if not 初始化 and not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
-            TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
-            return False
+        #
         if "ios" in self.移动端.设备类型:
             APPID = "com.tencent.smobagamehelper"
         elif "android" in self.移动端.设备类型:
@@ -2691,12 +2694,16 @@ class wzry_task:
         else:
             TimeErr(self.prefix+":无法判断设备类型")
             return False
-        王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID)
         if 初始化:
-            初始化成功 = 王者营地.营地初始化()
+            王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, 初始化检查=True)
             stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
-            return 初始化成功
+            return 王者营地.初始化成功
         #
+        if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
+            TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
+            return False
+        #
+        王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID)
         self.移动端.关闭APP()
         #
         TimeECHO(self.prefix+"王者营地礼包开始")
@@ -3625,6 +3632,7 @@ class wzry_task:
                 self.移动端.连接设备()
                 if connect_status():
                     self.Tool.removefile(self.Tool.独立同步文件)
+                    self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                     if self.王者营地礼包:
                         self.Tool.timedict["领营地礼包"] = 0
                         self.每日礼包_王者营地()
@@ -3642,6 +3650,7 @@ class wzry_task:
             if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):  # 单进程各种原因出错时,多进程无法同步时
                 TimeECHO(self.prefix+"存在同步文件,需要同步程序")
                 self.移动端.关闭APP()
+                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                 if self.王者营地礼包 and not connect_status():
                     self.每日礼包_王者营地()
                 self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode,
@@ -3724,6 +3733,7 @@ class wzry_task:
                     self.移动端.连接设备()
                     self.移动端.重启APP(30)
                 #
+                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                 if self.王者营地礼包:
                     self.每日礼包_王者营地()
                 #
@@ -3740,7 +3750,6 @@ class wzry_task:
                 self.进行武道大会 = False
                 self.本循环参数 = wzry_runinfo()
                 self.上循环参数 = wzry_runinfo()
-                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                 if "2023" in self.赛季:
                     # 存在该文件则进行六国远征
                     self.Tool.touchfile(self.prefix+"六国远征.txt")
