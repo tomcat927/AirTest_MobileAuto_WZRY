@@ -975,6 +975,7 @@ class wzyd_libao:
         self.营地大厅元素.append(self.每日福利图标)
         self.营地登录元素 = []
         self.营地登录元素.append(Template(r"tpl1708393355383.png", record_pos=(-0.004, 0.524), resolution=(540, 960)))
+        self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
     #
 
     def 判断营地大厅中(self):
