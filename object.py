@@ -1389,12 +1389,6 @@ class wzry_task:
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
         #
-        # 默认开启self.王者营地礼包,后面如果无法领取会自动将self.王者营地礼包=False
-        self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-        TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
-        #
-        self.玉镖夺魁签到 = False
-        #
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
@@ -1466,6 +1460,10 @@ class wzry_task:
         self.备战英雄线路 = 参战英雄线路_dict[(self.mynode+3) % 6]
         self.备战英雄头像 = 参战英雄头像_dict[(self.mynode+3) % 6]
         #
+        # 礼包设置
+        self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
+        TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
+        self.玉镖夺魁签到 = False
         # 刷新礼包的领取计时
         self.每日礼包()
         self.武道大会()
@@ -2697,6 +2695,8 @@ class wzry_task:
         if 初始化:
             王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, 初始化检查=True)
             stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
+            #直接关闭会导致分辨率变差，这里重新打开王者荣耀,回复分辨率
+            self.移动端.打开APP()
             return 王者营地.初始化成功
         #
         if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
