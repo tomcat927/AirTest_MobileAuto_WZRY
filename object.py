@@ -969,9 +969,12 @@ class wzyd_libao:
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
         self.营地大厅元素 = []
+        self.营地大厅元素.append(Template(r"tpl1708393295383.png", record_pos=(0.011, -0.8), resolution=(540, 960)))
         self.营地大厅元素.append(self.个人界面图标)
         self.营地大厅元素.append(self.游戏界面图标)
         self.营地大厅元素.append(self.每日福利图标)
+        self.营地登录元素 = []
+        self.营地登录元素.append(Template(r"tpl1708393355383.png", record_pos=(-0.004, 0.524), resolution=(540, 960)))
     #
 
     def 判断营地大厅中(self):
@@ -979,6 +982,10 @@ class wzyd_libao:
         self.营地大厅元素.append(self.游戏界面图标)
         self.营地大厅元素.append(self.每日福利图标)
         存在, self.营地大厅元素 = self.Tool.存在任一张图(self.营地大厅元素, "营地大厅元素")
+        return 存在
+
+    def 判断营地登录中(self):
+        存在, self.营地登录元素 = self.Tool.存在任一张图(self.营地登录元素, "营地登录元素")
         return 存在
 
     def RUN(self):
@@ -989,6 +996,10 @@ class wzyd_libao:
         #
         if not start_app(self.APPID):
             TimeECHO(self.prefix+"营地无法打开,返回")
+            return False
+        #
+        if not connect_status():
+            TimeECHO(self.prefix+"营地无法触摸,返回")
             return False
         #
         sleep(20)  # 等待营地打开
@@ -1007,10 +1018,15 @@ class wzyd_libao:
                         TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
                 except:
                     TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
+
+        #
+        if self.判断营地登录中():
+            TimeECHO(self.prefix+"检测到营地登录界面,不领取礼包")
+            self.Tool.touchfile(self.营地需要登录FILE)
+            return False
         #
         if not self.判断营地大厅中():
-            self.Tool.touchfile(self.营地需要登录FILE)
-            TimeECHO(self.prefix+"营地没有登录,不领取礼包")
+            TimeECHO(self.prefix+"营地未知原因没能进入大厅,不领取礼包")
             return False
         #
         # 体验服只有安卓客户端可以领取
