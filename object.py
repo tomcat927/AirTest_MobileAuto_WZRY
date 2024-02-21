@@ -1048,6 +1048,12 @@ class wzyd_libao:
     def RUN(self):
         #
         if os.path.exists(self.营地需要登录FILE):
+            if self.Tool.timelimit(timekey="检测营地登录", limit=60*60*8, init=False):
+                TimeECHO(self.prefix+f"存在[{self.营地需要登录FILE}],重新检测登录状态")
+                self.Tool.removefile(self.营地需要登录FILE)
+                self.营地初始化(初始化检查=False)
+        #
+        if os.path.exists(self.营地需要登录FILE):
             TimeECHO(self.prefix+f"检测到{self.营地需要登录FILE}, 不领取礼包")
             return False
         #
@@ -3761,6 +3767,15 @@ class wzry_task:
                 if self.totalnode_bak > 1:
                     self.Tool.touch同步文件()
                 continue
+            #
+            if os.path.exists(self.重新登录FILE):
+                if self.Tool.timelimit(timekey="检测王者登录", limit=60*60*4, init=False):
+                    TimeECHO(self.prefix+f"存在[{self.重新登录FILE}],重新检测登录状态")
+                    self.Tool.removefile(self.重新登录FILE)
+                    if self.Tool.totalnode_bak > 1:
+                        self.Tool.removefile(self.无法进行组队FILE)
+                    self.移动端.重启APP()
+                    self.登录游戏()
             #
             if os.path.exists(self.重新登录FILE):
                 TimeECHO(self.prefix+"存在重新登录文件,登录后删除")
