@@ -2701,7 +2701,7 @@ class wzry_task:
         if 初始化:
             王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, 初始化检查=True)
             stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
-            #直接关闭会导致分辨率变差，这里重新打开王者荣耀,回复分辨率
+            # 直接关闭会导致分辨率变差，这里重新打开王者荣耀,回复分辨率
             self.移动端.打开APP()
             return 王者营地.初始化成功
         #
@@ -3779,6 +3779,8 @@ class wzry_task:
             #
             if os.path.exists(self.重新登录FILE):
                 TimeECHO(self.prefix+"存在重新登录文件,登录后删除")
+                if self.Tool.totalnode_bak > 1 and not os.path.exists(self.无法进行组队FILE):
+                    self.Tool.touchfile(self.无法进行组队FILE)
                 sleep(60*10)
                 continue
             #
