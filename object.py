@@ -1436,7 +1436,11 @@ class wzry_task:
         self.房间皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
         self.房间临时好友 = Template(r"tpl1707784321085.png", record_pos=(-0.004, -0.219), resolution=(960, 540))
         self.房间五黑车队 = Template(r"tpl1707787106337.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
+        self.社交体验优化 = Template(r"tpl1708654174076.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
         self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
+        self.房间翻页活动元素 = []
+        self.房间翻页活动元素.append(self.社交体验优化)
+        self.房间翻页活动元素.append(self.房间五黑车队)
 
         #
         # 头像数据
@@ -3405,10 +3409,11 @@ class wzry_task:
                 self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
             if exists(self.房间临时好友):
                 self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间临时好友", savepos=False)
-            if exists(self.房间五黑车队):
+            存在翻页活动, self.房间翻页活动元素 = self.Tool.存在任一张图(self.房间翻页活动元素, "房间翻页活动元素")
+            if 存在翻页活动:
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
-                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间五黑车队", savepos=False)
+                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:翻页活动", savepos=False)
         #
         存在, self.房间元素 = self.Tool.存在任一张图(self.房间元素, "房间元素")
         return 存在
