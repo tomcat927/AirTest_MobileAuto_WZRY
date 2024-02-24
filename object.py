@@ -37,6 +37,7 @@ def connect_status(times=10):
             exists_o(png)
             return True
         except:
+            traceback.print_exc()
             print(f"cndaqiang: 无法连接设备,重试中{i}")
             sleep(1)
             continue
@@ -68,9 +69,9 @@ def touch(*args, **kwargs):
         print("cndaqiang: touch失败")
         sleep(1)
         try:
-            traceback.print_exc()
             result = touch_o(*args, **kwargs)
         except:
+            traceback.print_exc()
             print("cndaqiang: 再次尝试仍失败")
             result = False
     return result
@@ -291,6 +292,7 @@ class DQWheel:
             TimeECHO(self.prefix+"Read["+filename+"]成功")
             return content
         except:
+            traceback.print_exc()
             TimeECHO(self.prefix+"Read["+filename+"]失败")
             return [""]
 
@@ -786,6 +788,7 @@ class deviceOB:
                 TimeECHO(self.prefix+f"{self.LINK}:链接成功")
                 return True
         except:
+            traceback.print_exc()
             TimeErr(self.prefix+f"{self.LINK}:链接失败")
             if "ios" in self.设备类型:
                 TimeECHO(self.prefix+"重新插拔数据线")
@@ -814,6 +817,7 @@ class deviceOB:
                     TimeErr(self.prefix+": tidevice list 无法找到设备, IOS重启失败")
                     #
             except:
+                traceback.print_exc()
                 TimeECHO(self.prefix+f"IOS重启失败")
             sleep(20)
             return True
@@ -838,6 +842,7 @@ class deviceOB:
                 TimeErr(self.prefix+f"启动失败")
                 return False
         except:
+            traceback.print_exc()
             TimeErr(self.prefix+f"启动失败")
             return False
 
@@ -860,6 +865,7 @@ class deviceOB:
                     TimeECHO(self.prefix+f"关闭失败")
                     return False
             except:
+                traceback.print_exc()
                 TimeErr(self.prefix+f"关闭失败")
                 return False
         # android
@@ -886,6 +892,7 @@ class deviceOB:
                 TimeECHO(self.prefix+f"关闭失败")
                 return False
         except:
+            traceback.print_exc()
             TimeErr(self.prefix+f"关闭失败")
             return False
     #
@@ -927,6 +934,7 @@ class deviceOB:
         try:
             self.关闭APP()
         except:
+            traceback.print_exc()
             TimeErr(self.prefix+f"关闭APP失败")
         sleep(10)
         sleeptime = max(10, sleeptime)  # 这里的单位是s
@@ -1024,6 +1032,7 @@ class wzyd_libao:
                     if "TimeE" not in i_insert:
                         TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
                 except:
+                    traceback.print_exc()
                     TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
         #
         # 判断营地是否登录的界面
@@ -2107,6 +2116,7 @@ class wzry_task:
                         if "TimeE" not in i_insert:
                             TimeECHO(self.prefix+".重新设置英雄.run: "+i_insert[:-1])
                     except:
+                        traceback.print_exc()
                         TimeErr(self.prefix+".重新设置英雄.Error run: "+i_insert[:-1])
             else:
                 sleep(1)
@@ -2403,6 +2413,7 @@ class wzry_task:
                 try:
                     观赛时长 = int(self.Tool.readfile(self.KPL每日观赛FILE)[0])
                 except:
+                    traceback.print_exc()
                     观赛时长 = 60*15
                 self.KPL每日观赛(times=1, 观赛时长=观赛时长)
         else:
@@ -2730,6 +2741,7 @@ class wzry_task:
             王者营地.RUN()
             TimeECHO(self.prefix+"王者营地礼包领取成功")
         except:
+            traceback.print_exc()
             TimeErr(self.prefix+"王者营地礼包领取失败")
         stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
         #
@@ -3642,6 +3654,7 @@ class wzry_task:
                         if "TimeE" not in i_insert:
                             TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
                     except:
+                        traceback.print_exc()
                         TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
             # 健康系统连接失败等原因
@@ -3913,6 +3926,7 @@ class wzry_task:
                         if "TimeE" not in i_insert:
                             TimeECHO(self.prefix+".对战前注入.run: "+i_insert[:-1])
                     except:
+                        traceback.print_exc()
                         TimeErr(self.prefix+".对战前注入.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
             if self.标准触摸对战:
