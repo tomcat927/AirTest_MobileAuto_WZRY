@@ -3788,37 +3788,45 @@ class wzry_task:
                     self.Tool.touchfile(self.无法进行组队FILE)
                 sleep(60*10)
                 continue
-            #
-            hour, minu = self.Tool.time_getHM()
-            # 当hour小于此数字时才是组队模式
-            # 这里的同步文件是怕有的进程跑的太快了，刚好错过这个时间点
-            # 去掉条件and self.runstep > 0, 以后的第一次不再进行组队模拟,程序出问题的概率不大,真测试可以touch组队文件
-            if hour >= self.限时组队时间 and not self.Tool.存在同步文件() and self.totalnode > 1:
-                TimeECHO(self.prefix+"限时进入单人模式")
-                self.totalnode = 1
-                self.进入大厅()
-            if hour < self.限时组队时间:
-                self.totalnode = self.totalnode_bak
-            else:
-                if self.totalnode_bak > 1 and self.totalnode == 1:
-                    if os.path.exists(self.临时组队FILE):
-                        TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
-                        self.totalnode = self.totalnode_bak
-            self.组队模式 = self.totalnode > 1
             # 各种原因无法组队判定
             self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
             if self.组队模式 and self.无法进行组队:
                 TimeECHO(self.prefix+f"检测到{self.无法进行组队FILE}, 无法进行组队,关闭组队功能")
                 self.组队模式 = False
                 self.totalnode = 1
+            # 组队的时间判断
+            if not self.无法进行组队:
+                hour, minu = self.Tool.time_getHM()
+                if hour >= self.限时组队时间 and not self.Tool.存在同步文件() and self.totalnode > 1:
+                    TimeECHO(self.prefix+"限时进入单人模式")
+                    self.totalnode = 1
+                # 正常组队情况
+                if hour < self.限时组队时间:
+                    self.totalnode = self.totalnode_bak
+                else:
+                    if self.totalnode_bak > 1 and self.totalnode == 1:
+                        if os.path.exists(self.临时组队FILE):
+                            TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
+                            self.totalnode = self.totalnode_bak
             #
+            # ------------------------------------------------------------------------------
+            # 运行前统一变量
+            self.组队模式 = self.totalnode > 1
             if self.组队模式:
+                self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
+                self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="jinristep")
+                # 广播一些变量，这样就不用在每个文件中都写初始化参数了
+                self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
+                self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
+                # @todo, 把图片放到一个大类里,适合广播更新
+                #
                 TimeECHO(self.prefix+"组队模式")
             self.房主 = self.mynode == 0 or self.totalnode == 1
+            TimeECHO(self.prefix+f"运行次数{self.runstep}|今日步数{self.jinristep}")
             #
             # 仅在单人模式时进行六国远征
-            self.进行六国远征 = not self.组队模式 and os.path.exists(self.prefix+"六国远征.txt")
-            self.进行武道大会 = not self.组队模式 and os.path.exists(self.prefix+"武道大会.txt")
+            self.进行六国远征 = False  # not self.组队模式 and os.path.exists(self.prefix+"六国远征.txt")
+            self.进行武道大会 = False  # not self.组队模式 and os.path.exists(self.prefix+"武道大会.txt")
             if self.进行六国远征:
                 self.进行六国远征 = not self.六国远征()
                 self.进入大厅()
@@ -3881,12 +3889,6 @@ class wzry_task:
             if self.标准触摸对战:
                 self.标准模式 = True
                 TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
-            # ------------------------------------------------------------------------------
-            # 运行前统一变量
-            self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
-            self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="runstep")
-            TimeECHO(self.prefix+f"运行次数{self.runstep}|今日步数{self.jinristep}")
-            #
             # ------------------------------------------------------------------------------
             if os.path.exists(self.对战前插入FILE):
                 TimeECHO(self.prefix+f":对战前注入代码({self.对战前插入FILE})")
