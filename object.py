@@ -1293,6 +1293,81 @@ class wzry_runinfo:
         return False
 
 
+class wzry_figure:
+    # 图片元素信息,
+    # 方便更新,
+    # 以及用于统一更新图片传递给所有进程
+    def __init__(self):
+        # 一些图库, 后期使用图片更新
+        self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
+        self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
+        self.大厅万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
+        # 开始图标和登录图标等很接近, 不要用于房间判断
+        self.房间中的开始按钮图标 = []
+        self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
+        # 新年活动结束时,替换一个常规的取消准备按钮
+        self.房间中的取消按钮图标 = []
+        self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
+        self.大厅元素 = []
+        self.大厅元素.append(self.大厅对战图标)
+        self.大厅元素.append(self.大厅万象天工)
+        self.房间元素 = []
+        self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
+        self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
+        self.房间元素.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
+        self.房间元素.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
+        # 登录关闭按钮
+        self.王者登录关闭按钮 = []
+        self.王者登录关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
+        self.王者登录关闭按钮.append(Template(r"tpl1699616162254.png", record_pos=(0.38, -0.237), resolution=(960, 540), threshold=0.9))
+        self.王者登录关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
+        self.王者登录关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
+        self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
+        self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
+        #
+        self.战绩页面元素 = []
+        self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699677835926.png", record_pos=(0.011, -0.134), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1699677870739.png", record_pos=(-0.369, 0.085), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
+        #
+        self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
+        self.房间皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
+        self.房间临时好友 = Template(r"tpl1707784321085.png", record_pos=(-0.004, -0.219), resolution=(960, 540))
+        self.房间五黑车队 = Template(r"tpl1707787106337.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
+        self.社交体验优化 = Template(r"tpl1708654174076.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
+        self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
+        self.房间翻页活动元素 = []
+        self.房间翻页活动元素.append(self.社交体验优化)
+        self.房间翻页活动元素.append(self.房间五黑车队)
+        #
+        # 头像数据
+        self.英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
+        self.英雄_牙 = Template(r"tpl1701436836229.png", record_pos=(0.107, -0.085), resolution=(1136, 640))
+        self.英雄_太乙 = Template(r"tpl1690442560069.png", record_pos=(0.11, 0.025), resolution=(960, 540))
+        self.英雄_鬼谷子 = Template(r"tpl1701759712161.png", record_pos=(0.203, 0.026), resolution=(1136, 640))
+        self.英雄_云中 = Template(r"tpl1701750390892.png", record_pos=(-0.172, 0.24), resolution=(1136, 640))
+        self.英雄_八戒 = Template(r"tpl1701573854122.png", record_pos=(0.297, 0.135), resolution=(1136, 640))
+        self.参战英雄线路_dict = {}
+        self.参战英雄头像_dict = {}
+        self.参战英雄线路_dict[0] = Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540))
+        self.参战英雄头像_dict[0] = self.英雄_八戒
+        self.参战英雄线路_dict[1] = Template(r"tpl1689665455905.png", record_pos=(-0.066, -0.256), resolution=(960, 540))
+        self.参战英雄头像_dict[1] = self.英雄_海诺
+        self.参战英雄线路_dict[2] = Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
+        self.参战英雄头像_dict[2] = self.英雄_牙
+        self.参战英雄线路_dict[3] = Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
+        self.参战英雄头像_dict[3] = self.英雄_鬼谷子
+        self.参战英雄线路_dict[4] = Template(r"tpl1686048521443.png", record_pos=(0.06, -0.259), resolution=(960, 540))
+        self.参战英雄头像_dict[4] = self.英雄_云中
+        self.参战英雄线路_dict[5] = Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
+        self.参战英雄头像_dict[5] = self.英雄_太乙
+
+
 class wzry_task:
     # 备注
     # 新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
@@ -1394,81 +1469,14 @@ class wzry_task:
         self.Tool.removefile(self.免费商城礼包FILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
-        #
-        # 一些图库, 后期使用图片更新
-        self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
-        self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
-        self.大厅万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
-        # 开始图标和登录图标等很接近, 不要用于房间判断
-        self.房间中的开始按钮图标 = []
-        self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
-        # 新年活动结束时,替换一个常规的取消准备按钮
-        self.房间中的取消按钮图标 = []
-        self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
-        self.大厅元素 = []
-        self.大厅元素.append(self.大厅对战图标)
-        self.大厅元素.append(self.大厅万象天工)
-        self.房间元素 = []
-        self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
-        self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
-        self.房间元素.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
-        self.房间元素.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
-        # 登录关闭按钮
-        self.王者登录关闭按钮 = []
-        self.王者登录关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
-        self.王者登录关闭按钮.append(Template(r"tpl1699616162254.png", record_pos=(0.38, -0.237), resolution=(960, 540), threshold=0.9))
-        self.王者登录关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
-        self.王者登录关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
-        self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
-        self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
-        #
-        self.战绩页面元素 = []
-        self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699677835926.png", record_pos=(0.011, -0.134), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699677870739.png", record_pos=(-0.369, 0.085), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
-        #
-        self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
-        self.房间皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
-        self.房间临时好友 = Template(r"tpl1707784321085.png", record_pos=(-0.004, -0.219), resolution=(960, 540))
-        self.房间五黑车队 = Template(r"tpl1707787106337.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
-        self.社交体验优化 = Template(r"tpl1708654174076.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
-        self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
-        self.房间翻页活动元素 = []
-        self.房间翻页活动元素.append(self.社交体验优化)
-        self.房间翻页活动元素.append(self.房间五黑车队)
-
-        #
-        # 头像数据
-        英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
-        英雄_牙 = Template(r"tpl1701436836229.png", record_pos=(0.107, -0.085), resolution=(1136, 640))
-        英雄_太乙 = Template(r"tpl1690442560069.png", record_pos=(0.11, 0.025), resolution=(960, 540))
-        英雄_鬼谷子 = Template(r"tpl1701759712161.png", record_pos=(0.203, 0.026), resolution=(1136, 640))
-        英雄_云中 = Template(r"tpl1701750390892.png", record_pos=(-0.172, 0.24), resolution=(1136, 640))
-        英雄_八戒 = Template(r"tpl1701573854122.png", record_pos=(0.297, 0.135), resolution=(1136, 640))
-        # 一些数据
-        参战英雄线路_dict = {}
-        参战英雄头像_dict = {}
-        参战英雄线路_dict[(shiftnode+0) % 6] = Template(r"tpl1689665490071.png", record_pos=(-0.315, -0.257), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+0) % 6] = 英雄_八戒
-        参战英雄线路_dict[(shiftnode+1) % 6] = Template(r"tpl1689665455905.png", record_pos=(-0.066, -0.256), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+1) % 6] = 英雄_海诺
-        参战英雄线路_dict[(shiftnode+2) % 6] = Template(r"tpl1689665540773.png", record_pos=(0.06, -0.259), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+2) % 6] = 英雄_牙
-        参战英雄线路_dict[(shiftnode+3) % 6] = Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+3) % 6] = 英雄_鬼谷子
-        参战英雄线路_dict[(shiftnode+4) % 6] = Template(r"tpl1686048521443.png", record_pos=(0.06, -0.259), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+4) % 6] = 英雄_云中
-        参战英雄线路_dict[(shiftnode+5) % 6] = Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
-        参战英雄头像_dict[(shiftnode+5) % 6] = 英雄_太乙
-        self.参战英雄线路 = 参战英雄线路_dict[self.mynode % 6]
-        self.参战英雄头像 = 参战英雄头像_dict[self.mynode % 6]
-        self.备战英雄线路 = 参战英雄线路_dict[(self.mynode+3) % 6]
-        self.备战英雄头像 = 参战英雄头像_dict[(self.mynode+3) % 6]
+        # 这里的图片主要是一些图片列表，例如所有的大厅元素
+        # 以及一些核心，公共的图片
+        self.图片 = wzry_figure()
+        分路长度 = len(self.图片.参战英雄线路_dict)
+        self.参战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+0+shiftnode) % 分路长度]
+        self.参战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+0+shiftnode) % 分路长度]
+        self.备战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+3+shiftnode) % 分路长度]
+        self.备战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+3+shiftnode) % 分路长度]
         #
         # 礼包设置
         self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
@@ -1505,8 +1513,8 @@ class wzry_task:
     def 关闭按钮(self):
         # 这个循环仅作为识别关闭按钮位置的循环
         # 主要用于: self.进入大厅时遇到的复杂的关闭按钮()
-        self.王者登录关闭按钮 = self.Tool.uniq_Template_array(self.王者登录关闭按钮)
-        for i in self.王者登录关闭按钮:
+        self.图片.王者登录关闭按钮 = self.Tool.uniq_Template_array(self.图片.王者登录关闭按钮)
+        for i in self.图片.王者登录关闭按钮:
             keyindex = f"王者登陆关闭按钮{i}"
             # if keyindex in self.Tool.var_dict.keys(): continue
             pos = exists(i)
@@ -1515,7 +1523,7 @@ class wzry_task:
                 self.Tool.existsTHENtouch(i, keyindex, savepos=True)
             else:
                 TimeECHO(self.prefix+"未识别到"+keyindex)
-        for i in self.王者登录关闭按钮:
+        for i in self.图片.王者登录关闭按钮:
             self.Tool.LoopTouch(i, f"关闭按钮{i}", loop=3, savepos=False)
     #
 
@@ -1535,7 +1543,7 @@ class wzry_task:
         #
 
     def 判断战绩页面(self):
-        存在, self.战绩页面元素 = self.Tool.存在任一张图(self.战绩页面元素, "战绩页面元素")
+        存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
         return 存在
 
     def 进入大厅(self, times=1):
@@ -1590,7 +1598,7 @@ class wzry_task:
         if self.判断战绩页面():
             self.结束人机匹配()
         #
-        if exists(self.登录界面开始游戏图标):
+        if exists(self.图片.登录界面开始游戏图标):
             self.登录游戏()
         self.网络优化()
         # 各种异常，异常图标,比如网速不佳、画面设置、
@@ -1717,7 +1725,7 @@ class wzry_task:
             touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
             sleep(5)
         # 现在打开可能会放一段视频，怎么跳过呢？使用0.1的精度测试一下.利用历史记录了
-        随意点击 = self.登录界面开始游戏图标
+        随意点击 = self.图片.登录界面开始游戏图标
         self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
         self.Tool.existsTHENtouch(取消, "取消按钮")
         self.关闭按钮()
@@ -1725,7 +1733,7 @@ class wzry_task:
         if self.判断大厅中():
             return True
         #
-        if self.Tool.existsTHENtouch(self.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
+        if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             sleep(10)
         #
         # 健康系统直接重新同步
@@ -1768,7 +1776,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(取消, "取消按钮")
             self.进入大厅时遇到的复杂的关闭按钮()
             self.网络优化()
-            self.Tool.existsTHENtouch(self.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False)
+            self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False)
             if self.判断大厅中():
                 return True
             else:
@@ -1806,7 +1814,7 @@ class wzry_task:
             self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=True)
         #
         times = times+1
-        if not self.Tool.existsTHENtouch(self.大厅对战图标, "大厅对战", savepos=False):
+        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=False):
             TimeErr(self.prefix+"找不到大厅对战图标")
             return self.单人进入人机匹配房间(times)
         #
@@ -1915,7 +1923,7 @@ class wzry_task:
         if self.Tool.存在同步文件():
             return True
         if not self.房主:
-            找到取消按钮, self.房间中的取消按钮图标 = self.Tool.存在任一张图(self.房间中的取消按钮图标, "房间中的取消准备按钮")
+            找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
             self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=True)
             while not 找到取消按钮:
                 if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=False):
@@ -1951,7 +1959,7 @@ class wzry_task:
                     if self.Tool.existsTHENtouch(进房间):
                         TimeECHO(self.prefix+"尝试进入房间中")
                         sleep(10)
-                        找到取消按钮, self.房间中的取消按钮图标 = self.Tool.存在任一张图(self.房间中的取消按钮图标, "房间中的取消准备按钮")
+                        找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
                         if not 找到取消按钮:
                             TimeECHO(self.prefix+"进入房间失败,可能是今日更新太频繁,版本不一致无法进房,需要重新登录更新")
                 else:
@@ -1970,7 +1978,7 @@ class wzry_task:
         if self.Tool.存在同步文件():
             return True
         TimeECHO(self.prefix+"大厅中.开始进入模拟战房间")
-        if self.Tool.LoopTouch(self.大厅万象天工, "万象天工", loop=3, savepos=False):
+        if self.Tool.LoopTouch(self.图片.大厅万象天工, "万象天工", loop=3, savepos=False):
             sleep(30)
             if self.判断大厅中():
                 TimeECHO(self.prefix+"模拟战: 进入万象天工失败, 重启设备")
@@ -2028,8 +2036,8 @@ class wzry_task:
         找到取消按钮 = False
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         if self.房主:
-            找到开始按钮, self.房间中的开始按钮图标 = self.Tool.存在任一张图(self.房间中的开始按钮图标, "开始匹配")
-            房间中的开始按钮 = self.房间中的开始按钮图标[0]
+            找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
+            房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
             # 记录历史上有的匹配按钮位置,历史上就执行一次
             if "房间中的开始匹配按钮" not in self.Tool.var_dict.keys():
                 pos = exists(房间中的开始按钮)
@@ -2039,14 +2047,16 @@ class wzry_task:
                 TimeECHO(self.prefix+f":没找到开始按钮,使用历史位置")
             self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=not 找到开始按钮)
         else:
-            找到取消按钮, self.房间中的取消按钮图标 = self.Tool.存在任一张图(self.房间中的取消按钮图标, "房间中的取消准备按钮")
-            房间中的取消按钮 = self.房间中的取消按钮图标[0]
+            找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
+            房间中的取消按钮 = self.图片.房间中的取消按钮图标[0]
 
         while True:
+            if self.Tool.存在同步文件():
+                return True
             # 如果没找到就再找一次
             if self.房主 and not 找到开始按钮:
-                找到开始按钮, self.房间中的开始按钮图标 = self.Tool.存在任一张图(self.房间中的开始按钮图标, "开始匹配")
-                房间中的开始按钮 = self.房间中的开始按钮图标[0]
+                找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
+                房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
                 self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=False)
             #
             if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
@@ -2061,7 +2071,6 @@ class wzry_task:
             if 自己曾经确定过匹配:
                 队友确认5v5匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)), "展开英雄", savepos=False)
             # exists(Template(r"tpl1689666311144.png", record_pos=(-0.394, -0.257), resolution=(960, 540), threshold=0.9))
-            #
             if "模拟战" in self.对战模式:
                 if 队友确认5v5匹配:
                     TimeErr(self.prefix+":模拟战误入5v5?")
@@ -2196,7 +2205,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
             if 加速对战:
                 self.判断对战中(加速对战)
-            if exists(self.返回房间按钮):
+            if exists(self.图片.返回房间按钮):
                 jixu = True
             #
             # 健康系统直接重新同步
@@ -2278,7 +2287,7 @@ class wzry_task:
                 continue
             # 返回房间/大厅
             if self.对战结束返回房间:
-                if self.Tool.existsTHENtouch(self.返回房间按钮, "返回房间"):
+                if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
                     sleep(10)
                 self.网络优化()
                 #
@@ -2350,7 +2359,7 @@ class wzry_task:
             # 因为不能保证返回辅助账户返回房间，所以返回大厅更稳妥
             if exists(Template(r"tpl1690545925867.png", record_pos=(-0.001, 0.241), resolution=(960, 540))):
                 if self.对战结束返回房间:
-                    if self.Tool.existsTHENtouch(self.返回房间按钮, "返回房间", savepos=True):
+                    if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间", savepos=True):
                         sleep(10)
     # @todo ,添加barrier
                         if self.判断房间中():
@@ -3399,23 +3408,23 @@ class wzry_task:
 # 状态判断
 
     def 判断大厅中(self):
-        存在, self.大厅元素 = self.Tool.存在任一张图(self.大厅元素, "大厅元素")
+        存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
         return 存在
 
     def 判断房间中(self, 处理=True):
         # 活动界面
         if 处理:
-            if exists(self.房间皮肤限免):
-                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
-            if exists(self.房间临时好友):
-                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:房间临时好友", savepos=False)
-            存在翻页活动, self.房间翻页活动元素 = self.Tool.存在任一张图(self.房间翻页活动元素, "房间翻页活动元素")
+            if exists(self.图片.房间皮肤限免):
+                self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
+            if exists(self.图片.房间临时好友):
+                self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:房间临时好友", savepos=False)
+            存在翻页活动, self.图片.房间翻页活动元素 = self.Tool.存在任一张图(self.图片.房间翻页活动元素, "房间翻页活动元素")
             if 存在翻页活动:
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
-                self.Tool.existsTHENtouch(self.房间我知道了, "我知道了:翻页活动", savepos=False)
+                self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
         #
-        存在, self.房间元素 = self.Tool.存在任一张图(self.房间元素, "房间元素")
+        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         return 存在
 
     def 判断对战中(self, 处理=False):
@@ -3817,8 +3826,8 @@ class wzry_task:
                 self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="jinristep")
                 # 广播一些变量，这样就不用在每个文件中都写初始化参数了
                 self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
-                self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
-                # @todo, 把图片放到一个大类里,适合广播更新
+                # 把图片放到一个大类里,适合广播更新
+                self.图片 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.图片, name="公共图片")
                 #
                 TimeECHO(self.prefix+"组队模式")
             self.房主 = self.mynode == 0 or self.totalnode == 1
