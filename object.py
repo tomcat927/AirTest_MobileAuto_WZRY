@@ -3423,9 +3423,10 @@ class wzry_task:
         存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
         return 存在
 
-    def 判断房间中(self, 处理=True):
+    def 判断房间中(self, 处理=False):
         # 活动界面
-        if 处理:
+        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
+        if 存在 and 处理:
             if exists(self.图片.房间皮肤限免):
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
             if exists(self.图片.房间临时好友):
@@ -3435,6 +3436,8 @@ class wzry_task:
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
+        else:
+            return 存在
         #
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         return 存在
@@ -3689,6 +3692,8 @@ class wzry_task:
                 self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode,
                                    同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
                 self.移动端.重启APP(sleeptime=self.mynode*10+60)
+                self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.限时组队时间, name="限时组队时间")
+                self.图片 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.图片, name="公共图片")
                 self.登录游戏()
             # ------------------------------------------------------------------------------
             # 现在所有进程都在这里了,开始判断单个节点的问题,以及是否退出
