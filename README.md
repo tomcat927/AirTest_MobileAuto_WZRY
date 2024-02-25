@@ -119,7 +119,7 @@
 | `self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"` | 仅适用于并行组队模式, 如果某个账户被顶掉, 则关闭组队功能| 程序自动生成删除/用户创建删除|
 | `self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"` | 存在则进行青铜人机, 不存在则进行星耀人机|程序自动生成/用户创建
 | `self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"` | 存在则进行标准人机, 不存在则进行快速人机|用户创建
-| `self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"` | 仅适用于王者荣耀循环对战的开头插入任意自己想添加的代码, 比如新春活动时开始游戏和匹配的图标都会变, 这里可以按照[图标更新](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3)进行图片更新,如`self.图片.登录界面开始游戏图标=Template(r"tpl1707180169881.png", record_pos=(0.002, 0.16), resolution=(960, 540))`. 亦可在这里强制进行一些计算| 用户创建|
+| `self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"` | 仅适用于王者荣耀循环对战的开头插入任意自己想添加的代码, 例如更新图片的定义如`self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)`. 亦可在这里强制进行一些计算| 用户创建|
 | `self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"` | 在对战循环前再次修改配置, 初始化和对战前还是会自动计算相关参数, 这里强制覆盖提高自由度| 用户创建|
 | `self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"` |不修改代码和重启程序, 修改对战过程中使用的英雄, 内容见 `WZRY.node.重新设置英雄.py` , 通过控制 `savepos` 来决定是否更新字典  |用户创建 |
 | `sself.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"` |因为各种原因账户退出后, 程序自动创建, 若存在该文件则等待10min, 直到用户删除 |程序自动生成删除/用户创建删除 |
@@ -132,11 +132,12 @@
 | `NeedRebarrier.txt` |多进程运行时, 强制跳过当前所有任务, 进行统一的barrier. 即使多进程模式已经处于独立组队模式，这一文件也强制让所有进程进行一次barrier|程序出错自动生成/用户创建|
 | `self.prefix+"NeedRebarrier.txt"` |本进程跳过所有任务, 回到循环开头, 重新初始化 |  程序出错自动生成/用户创建 |
 | `self.WZRYPIDFILE = f"WZRY.{self.mynode}.PID.txt"` |给本次运行的进程定义一个ID, 如果有新的进程也操纵这个设备, 则结束本进程 |程序自动生成|
-| `self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成, 用户删除|
 | `self.独立同步文件 = self.prefix+"NeedRebarrier.txt"` | 同步工具, 单个进程出错重新初始化 | 程序自动生成/用户创建
+|`self.图片更新FILE = "WZRY.图片更新.txt"`| 王者特殊活动时,大厅、对战、开始游戏等按钮会发生变化,用此文件更新，示例[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059) | 用户创建|
 | `self.辅助同步文件 = "NeedRebarrier.txt"` | 同步工具, 单个进程出错创建所有进程重新初始化 | 程序自动生成/用户创建
 | `self.营地初始化FILE=prefix+".营地初始化.txt"=mynode.营地初始化.txt` | 王者营地领取礼物前注入代码, 适合临时活动[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059)| 用户创建
 | `self.营地需要登录FILE = prefix+".营地需要登录.txt"` | 营地账户推出后生成, 存在次文件不领取营地礼包 | 程序自动生成删除/用户创建删除
+| `self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成, 用户删除|
 
 ### 备注
 

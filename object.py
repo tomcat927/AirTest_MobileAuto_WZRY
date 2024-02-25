@@ -440,11 +440,12 @@ class DQWheel:
             self.calltimes_dict[strinfo] = self.calltimes_dict[strinfo]+1
         else:
             self.calltimes_dict[strinfo] = 1
-        strinfo = strinfo+f"[{self.calltimes_dict[strinfo]}]"
+        strinfo = f"第[{self.calltimes_dict[strinfo]}]次寻找{strinfo}"
+        length = len(判断元素集合)
         for idx, i in enumerate(判断元素集合):
-            TimeECHO(self.prefix+f"判断{strinfo}:{i}")
+            TimeECHO(self.prefix+f"{strinfo}({idx+1}/{length}):{i}")
             if exists(i):
-                TimeECHO(self.prefix+f"找到{strinfo}:{i}")
+                TimeECHO(self.prefix+f"{strinfo}成功:{i}")
                 # 交换元素位置
                 判断元素集合[0], 判断元素集合[idx] = 判断元素集合[idx], 判断元素集合[0]
                 return True, 判断元素集合
@@ -991,6 +992,7 @@ class wzyd_libao:
             self.初始化成功 = self.营地初始化(初始化检查=初始化检查)
 
     def 判断营地大厅中(self):
+        #
         self.营地大厅元素.append(self.个人界面图标)
         self.营地大厅元素.append(self.游戏界面图标)
         self.营地大厅元素.append(self.每日福利图标)
@@ -1306,7 +1308,9 @@ class wzry_figure:
     # 图片元素信息,
     # 方便更新,
     # 以及用于统一更新图片传递给所有进程
-    def __init__(self):
+    def __init__(self, prefix="图片库", Tool=None):
+        self.prefix = prefix
+        self.Tool = Tool
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
@@ -1345,14 +1349,16 @@ class wzry_figure:
         self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
         #
         self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
-        self.房间皮肤限免 = Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540))
-        self.房间临时好友 = Template(r"tpl1707784321085.png", record_pos=(-0.004, -0.219), resolution=(960, 540))
-        self.房间五黑车队 = Template(r"tpl1707787106337.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
-        self.社交体验优化 = Template(r"tpl1708654174076.png", record_pos=(-0.001, -0.22), resolution=(960, 540))
         self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
+        # 这些活动翻页元素一般只显示一次，新的账户每次进入房间都会提示
         self.房间翻页活动元素 = []
-        self.房间翻页活动元素.append(self.社交体验优化)
-        self.房间翻页活动元素.append(self.房间五黑车队)
+        self.房间翻页活动元素.append(Template(r"tpl1707519278270.png", record_pos=(0.014, -0.191), resolution=(960, 540)))
+        self.房间翻页活动元素.append(Template(r"tpl1707784321085.png", record_pos=(-0.004, -0.219), resolution=(960, 540)))
+        self.房间翻页活动元素.append(Template(r"tpl1707787106337.png", record_pos=(-0.001, -0.22), resolution=(960, 540)))
+        self.房间翻页活动元素.append(Template(r"tpl1708654174076.png", record_pos=(-0.001, -0.22), resolution=(960, 540)))
+        self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
+        self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
+        self.房间翻页活动元素.append(Template(r"tpl1708829601719.png", record_pos=(0.001, -0.22), resolution=(960, 540)))
         #
         # 头像数据
         self.英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
@@ -1375,6 +1381,25 @@ class wzry_figure:
         self.参战英雄头像_dict[4] = self.英雄_云中
         self.参战英雄线路_dict[5] = Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
         self.参战英雄头像_dict[5] = self.英雄_太乙
+        #
+        # ------------------------------------------------------------------------------
+        self.图片更新FILE = "WZRY.图片更新.txt"
+        if os.path.exists(self.图片更新FILE) and self.Tool != None:
+            TimeECHO(self.prefix+f":注入图片更新FILE代码({self.图片更新FILE})")
+            exec_insert = self.Tool.readfile(self.图片更新FILE)
+            for i_insert in exec_insert:
+                trim_insert = i_insert.strip()
+                if len(trim_insert) < 1:
+                    continue
+                if '#' == trim_insert[0]:
+                    continue
+                try:
+                    exec(i_insert)
+                    if "TimeE" not in i_insert:
+                        TimeECHO(self.prefix+".图片更新FILE.run: "+i_insert[:-1])
+                except:
+                    traceback.print_exc()
+                    TimeErr(self.prefix+".图片更新FILE.Error run: "+i_insert[:-1])
 
 
 class wzry_task:
@@ -1448,6 +1473,9 @@ class wzry_task:
         #
         self.runstep = 0
         self.jinristep = 0
+        # 如果已经判断在房间中了,短时间内执行相关函数，不再进行判断
+        self.当前界面 = "未知"
+        self.Tool.timelimit(timekey="当前界面", init=True)
 
         # 控制参数
         self.选择人机模式 = True
@@ -1480,7 +1508,7 @@ class wzry_task:
         # self.Tool.removefile(self.临时组队FILE)
         # 这里的图片主要是一些图片列表，例如所有的大厅元素
         # 以及一些核心，公共的图片
-        self.图片 = wzry_figure()
+        self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
         分路长度 = len(self.图片.参战英雄线路_dict)
         self.参战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+0+shiftnode) % 分路长度]
         self.参战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+0+shiftnode) % 分路长度]
@@ -1488,8 +1516,7 @@ class wzry_task:
         self.备战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+3+shiftnode) % 分路长度]
         #
         # 礼包设置
-        self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-        TimeECHO(self.prefix+f"本节点领取营地礼包:{self.王者营地礼包}")
+        self.王者营地礼包 = True
         self.玉镖夺魁签到 = False
         # 刷新礼包的领取计时
         self.每日礼包()
@@ -1561,7 +1588,8 @@ class wzry_task:
             self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=True)
         else:
             if self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=False):
-                TimeECHO(self.prefix+f"进入大厅超时退出")
+                TimeECHO(self.prefix+f"进入大厅超时退出,更新图片资源库")
+                self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
                 TimeErr(self.prefix+"进入大厅超时退出,创建同步文件")
                 if self.组队模式:
                     self.Tool.touch同步文件()
@@ -1674,7 +1702,9 @@ class wzry_task:
             return False
         TimeECHO(self.prefix+f"登录游戏{times}")
         if self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=False):
-            TimeErr(self.prefix+"登录游戏超时,返回")
+            TimeErr(self.prefix+"登录游戏超时返回,更新图片资源库")
+            self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
+
         取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
         # 更新公告
         self.check_connect_status()
@@ -2406,18 +2436,22 @@ class wzry_task:
             TimeECHO(self.prefix+"钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
             if self.Tool.存在同步文件():
                 return True
-            self.进入大厅()
             #
             if os.path.exists(self.KPL每日观赛FILE):
                 TimeECHO(self.prefix+"进行KPL观赛")
+                self.进入大厅()
                 try:
                     观赛时长 = int(self.Tool.readfile(self.KPL每日观赛FILE)[0])
                 except:
                     traceback.print_exc()
                     观赛时长 = 60*15
                 self.KPL每日观赛(times=1, 观赛时长=观赛时长)
+                if not self.王者营地礼包:
+                    self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
+        #
+
         #
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
@@ -3420,26 +3454,63 @@ class wzry_task:
 # 状态判断
 
     def 判断大厅中(self):
+        #
+        if self.当前界面 == "大厅中":
+            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                self.当前界面 == "未知"
+            else:
+                TimeECHO(self.prefix+f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                return True
+
         存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
+        #
+        if 存在:
+            self.当前界面 = "大厅中"
+            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
+            del self.图片.大厅元素[1:]
+            self.Tool.timelimit(timekey="当前界面", init=True)
+        else:
+            self.当前界面 = "未知"
+        #
         return 存在
 
-    def 判断房间中(self, 处理=False):
-        # 活动界面
+    def 判断房间中(self, 处理=True):
+        #
+        if self.当前界面 == "房间中":
+            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                self.当前界面 == "未知"
+            else:
+                TimeECHO(self.prefix+f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                return True
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
+        if 存在:
+            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
+            del self.图片.房间元素[1:]
+        # 活动界面
         if 存在 and 处理:
-            if exists(self.图片.房间皮肤限免):
-                self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:房间皮肤限免", savepos=False)
-            if exists(self.图片.房间临时好友):
-                self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:房间临时好友", savepos=False)
+            # 这些活动翻页元素一般只显示一次，新的账户每次进入房间都会提示
             存在翻页活动, self.图片.房间翻页活动元素 = self.Tool.存在任一张图(self.图片.房间翻页活动元素, "房间翻页活动元素")
             if 存在翻页活动:
+                # 存在之后，这个活动只出现一次,可以删除这个变量了
+                del self.图片.房间翻页活动元素[0]
+                # 每天生成新的图片对象时会重新恢复原始图片的
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
-        else:
-            return 存在
+            else:
+                # 如果不存的话,也可以适当删除一些self.图片.房间翻页活动元素
+                if len(self.图片.房间翻页活动元素) > 0:
+                    if not exists(self.图片.房间翻页活动元素[-1]):
+                        del self.图片.房间翻页活动元素[-1]
+            #
+            存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         #
-        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
+        if 存在:
+            self.当前界面 = "房间中"
+            self.Tool.timelimit(timekey="当前界面", init=True)
+        else:
+            self.当前界面 = "未知"
+        #
         return 存在
 
     def 判断对战中(self, 处理=False):
@@ -3660,6 +3731,8 @@ class wzry_task:
                         traceback.print_exc()
                         TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
             # ------------------------------------------------------------------------------
+            if self.Tool.存在同步文件():
+                self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
             # 健康系统连接失败等原因
             # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
             # 然后多节点进行同步后
@@ -3693,7 +3766,6 @@ class wzry_task:
                                    同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
                 self.移动端.重启APP(sleeptime=self.mynode*10+60)
                 self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.限时组队时间, name="限时组队时间")
-                self.图片 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.图片, name="公共图片")
                 self.登录游戏()
             # ------------------------------------------------------------------------------
             # 现在所有进程都在这里了,开始判断单个节点的问题,以及是否退出
@@ -3798,6 +3870,8 @@ class wzry_task:
                 self.Tool.touchfile(self.免费商城礼包FILE)
                 if self.totalnode_bak > 1:
                     self.Tool.touch同步文件()
+                # 更新图片
+                self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
                 continue
             #
             if os.path.exists(self.重新登录FILE):
@@ -3844,8 +3918,6 @@ class wzry_task:
                 self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="jinristep")
                 # 广播一些变量，这样就不用在每个文件中都写初始化参数了
                 self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
-                # 把图片放到一个大类里,适合广播更新
-                self.图片 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.图片, name="公共图片")
                 #
                 TimeECHO(self.prefix+"组队模式")
             self.房主 = self.mynode == 0 or self.totalnode == 1
