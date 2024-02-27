@@ -699,6 +699,14 @@ class DQWheel:
         sec = current_time.second
         return year, hour, minu, sec
 
+    def hour_in_span(self, hour, startclock, endclock):
+        # 不跨越午夜的情况
+        if startclock <= endclock:
+            return startclock <= hour <= endclock
+        # 跨越午夜的情况
+        else:
+            return hour >= startclock or hour <= endclock
+
     def stoptask(self):
         TimeErr(self.prefix+f"停止Airtest控制,停止信息"+self.stopinfo)
         return
@@ -3803,7 +3811,8 @@ class wzry_task:
             hour, minu = self.Tool.time_getHM()
             #
             新的一天 = False
-            while hour >= endclock or hour < startclock:
+            # 这里做一个循环的判断
+            while not self.Tool.hour_in_span(hour, startclock, endclock):
                 #
                 if self.myPID != self.Tool.readfile(self.WZRYPIDFILE)[0].strip():
                     TimeErr(self.prefix+f": 本次运行PID[{self.myPID}]不同于[{self.WZRYPIDFILE}],退出中.....")
@@ -3896,11 +3905,11 @@ class wzry_task:
             # 组队的时间判断
             if not self.无法进行组队:
                 hour, minu = self.Tool.time_getHM()
-                if hour >= self.限时组队时间 and not self.Tool.存在同步文件() and self.totalnode > 1:
+                if not self.Tool.hour_in_span(hour, startclock, self.限时组队时间) and not self.Tool.存在同步文件() and self.totalnode > 1:
                     TimeECHO(self.prefix+"限时进入单人模式")
                     self.totalnode = 1
                 # 正常组队情况
-                if hour < self.限时组队时间:
+                if self.Tool.hour_in_span(hour, startclock, self.限时组队时间):
                     self.totalnode = self.totalnode_bak
                 else:
                     if self.totalnode_bak > 1 and self.totalnode == 1:
@@ -3981,11 +3990,6 @@ class wzry_task:
                 if self.标准触摸对战:
                     TimeECHO(self.prefix+f"非青铜局不进行标准模式的人手触摸")
                     self.标准触摸对战 = False
-            if self.触摸对战:
-                TimeECHO(self.prefix+f"本局对战,模拟人手触摸")
-            if self.标准触摸对战:
-                self.标准模式 = True
-                TimeECHO(self.prefix+f"使用标准模式对战,并且模拟人手触摸")
             # ------------------------------------------------------------------------------
             if os.path.exists(self.对战前插入FILE):
                 TimeECHO(self.prefix+f":对战前注入代码({self.对战前插入FILE})")
@@ -4007,6 +4011,10 @@ class wzry_task:
             if self.标准触摸对战:
                 self.标准模式 = True
                 self.触摸对战 = True
+            if self.触摸对战:
+                TimeECHO(self.prefix+f"本局对战:模拟人手触摸")
+            if self.标准模式:
+                TimeECHO(self.prefix+f"本局对战:使用标准模式")
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数
             self.本循环参数.组队模式 = self.组队模式
