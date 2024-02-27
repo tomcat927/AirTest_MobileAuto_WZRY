@@ -221,8 +221,6 @@ class DQWheel:
     #
 
     def timelimit(self, timekey="", limit=0, init=True):
-        if self.容器优化:
-            limit = limit+120  # 容器中比较卡,多反应一会
         if len(timekey) == 0:
             timekey = "none"
         if not timekey in self.timedict.keys():
@@ -1614,7 +1612,6 @@ class wzry_task:
         if self.判断大厅中():
             return True
         if self.判断对战中():
-            self.Tool.timelimit(timekey="结束对战", limit=60*15)
             处理对战 = "模拟战" in self.对战模式
             if self.debug:
                 处理对战 = True
@@ -2210,7 +2207,8 @@ class wzry_task:
             self.check_connect_status()
             if self.Tool.存在同步文件():
                 return True
-            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=False):
+            addtime = 60*15 if self.本循环参数.标准模式 else 0
+            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*15 + addtime, init=False):
                 TimeErr(self.prefix+"结束人机匹配时间超时")
                 if self.组队模式:
                     TimeErr(self.prefix+"结束人机匹配时间超时 and 组队touch同步文件")
@@ -2347,9 +2345,9 @@ class wzry_task:
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
-        self.Tool.timelimit(timekey="结束人机匹配", limit=60*20, init=True)
+        self.Tool.timelimit(timekey="结束模拟战", limit=60*20, init=True)
         while True:
-            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*30, init=False) or self.健康系统() or self.判断大厅中():
+            if self.Tool.timelimit(timekey="结束模拟战", limit=60*30, init=False) or self.健康系统() or self.判断大厅中():
                 TimeErr(self.prefix+"结束游戏时间过长 OR 健康系统 OR 大厅中")
                 return self.进入大厅()
             if self.判断房间中():
