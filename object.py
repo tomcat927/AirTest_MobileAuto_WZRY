@@ -3529,6 +3529,7 @@ class wzry_task:
             return self.判断对战中_模拟战(处理)
         对战 = Template(r"tpl1689666416575.png", record_pos=(0.362, 0.2), resolution=(960, 540), threshold=0.9)
         移动 = Template(r"tpl1702267006237.png", record_pos=(-0.327, 0.16), resolution=(960, 540))
+        装备 = Template(r"tpl1709220117102.png", record_pos=(0.401, -0.198), resolution=(960, 540))
         TimeECHO(self.prefix+"判断对战中")
         if exists(对战):
             TimeECHO(self.prefix+"正在对战中")
@@ -3536,6 +3537,7 @@ class wzry_task:
                 TimeECHO(self.prefix+"加速对战中:建议把自动买装备和自动技能加点打开,更真实一些")
                 self.Tool.timelimit(timekey="endgame", limit=60*30, init=True)
                 移动pos = False
+                装备pos = False
                 self.Tool.timelimit(timekey="check_connect_status", limit=60, init=True)
                 while self.Tool.existsTHENtouch(对战):
                     TimeECHO(self.prefix+"加速对战中:对战按钮")
@@ -3543,6 +3545,14 @@ class wzry_task:
                         self.check_connect_status()
                     if self.Tool.存在同步文件():
                         return True
+                    if not 装备pos:
+                        装备poskey = "装备pos"+self.prefix
+                        self.Tool.existsTHENtouch(装备, 装备poskey, savepos=True)
+                        装备pos = exists(装备)
+                        if not 装备pos and "装备pos" in self.Tool.var_dict.keys():
+                            装备pos = self.Tool.var_dict[装备poskey]
+                    else:
+                        self.Tool.existsTHENtouch(装备, "装备pos", savepos=True)
                     if not 移动pos:
                         self.Tool.existsTHENtouch(移动, "移动按钮", savepos=True)
                         移动pos = exists(移动)
