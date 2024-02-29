@@ -181,9 +181,7 @@ class DQWheel:
         self.mynode = mynode
         self.totalnode = totalnode
         self.totalnode_bak = totalnode
-        self.prefix = prefix
-        if self.mynode >= 0:
-            self.prefix = f"({mynode})"+self.prefix
+        self.prefix = (f"({mynode})" if mynode >= 0 else "(DQWheel)")+prefix
         #
         self.barrierlimit = 60*20  # 同步最大时长
         self.filelist = []  # 建立的所有文件，用于后期clear
@@ -965,7 +963,7 @@ class deviceOB:
 
 
 class wzyd_libao:
-    def __init__(self, prefix="", APPID="com.tencent.gamehelper.smoba", 初始化检查=False):
+    def __init__(self, prefix="wzyd", APPID="com.tencent.gamehelper.smoba", Tool=None, 初始化检查=False):
         self.体验币成功 = False
         self.营地活动 = True
         self.APPID = APPID
@@ -975,7 +973,7 @@ class wzyd_libao:
         self.营地初始化FILE = prefix+".营地初始化.txt"
         self.营地需要登录FILE = prefix+".营地需要登录.txt"
         # 使用输入的prefix,才可以用一套同步文件
-        self.Tool = DQWheel(prefix=self.prefix)
+        self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
         self.IOS = "smobagamehelper" in self.APPID
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
@@ -1088,6 +1086,9 @@ class wzyd_libao:
 
     def 体验服礼物(self, times=1):
         #
+        if self.Tool.存在同步文件():
+            return True
+        #
         if times == 1:
             self.Tool.timelimit(timekey="体验服礼物", limit=60*5, init=True)
         else:
@@ -1176,6 +1177,9 @@ class wzyd_libao:
     def 每日签到任务(self, times=1):
         TimeECHO(self.prefix+f"营地每日签到{times}")
         #
+        if self.Tool.存在同步文件():
+            return True
+        #
         if times == 1:
             self.Tool.timelimit(timekey="营地每日签到", limit=60*5, init=True)
         else:
@@ -1215,6 +1219,9 @@ class wzyd_libao:
 
     def 营地币兑换碎片(self, times=1):
         TimeECHO(self.prefix+f"营地币兑换碎片{times}")
+        #
+        if self.Tool.存在同步文件():
+            return True
         #
         if times == 1:
             self.Tool.timelimit(timekey="营地币兑换碎片", limit=60*5, init=True)
@@ -1316,7 +1323,7 @@ class wzry_figure:
     # 以及用于统一更新图片传递给所有进程
     def __init__(self, prefix="图片库", Tool=None):
         self.prefix = prefix
-        self.Tool = Tool
+        self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
@@ -1622,8 +1629,6 @@ class wzry_task:
         if self.判断对战中():
             处理对战 = "模拟战" in self.对战模式
             if self.debug:
-                处理对战 = True
-            if self.标准触摸对战:
                 处理对战 = True
             if self.触摸对战:
                 处理对战 = True
@@ -2763,7 +2768,7 @@ class wzry_task:
             TimeErr(self.prefix+":无法判断设备类型")
             return False
         if 初始化:
-            王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, 初始化检查=True)
+            王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, Tool=self.Tool, 初始化检查=True)
             stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
             # 直接关闭会导致分辨率变差，这里重新打开王者荣耀,回复分辨率
             self.移动端.打开APP()
@@ -2773,7 +2778,7 @@ class wzry_task:
             TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
             return False
         #
-        王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID)
+        王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, Tool=self.Tool, )
         self.移动端.关闭APP()
         #
         TimeECHO(self.prefix+"王者营地礼包开始")
@@ -3743,35 +3748,47 @@ class wzry_task:
             # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
             # 然后多节点进行同步后
             # 再统一退出
-            if not connect_status() or self.Tool.存在同步文件(self.Tool.独立同步文件):
+            if not connect_status() or self.Tool.存在同步文件():
+                TimeECHO(self.prefix+"存在同步文件,重新开始设置")
                 self.移动端.连接设备()
                 if connect_status():
-                    self.Tool.removefile(self.Tool.独立同步文件)
-                    self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-                    if self.王者营地礼包:
-                        self.Tool.timedict["领营地礼包"] = 0
-                        self.每日礼包_王者营地()
-                    self.移动端.重启APP(60)
-                    self.登录游戏()
+                    self.移动端.关闭APP()
                 else:
                     TimeErr(self.prefix+"连接不上设备. 待同步后退出")
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                         self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
-                        self.Tool.touch同步文件()
-            # ------------------------------------------------------------------------------
-            # 强制同步
-            # 这里是能正常点击,但是可能进入了异常的界面/禁赛等原因导致的重置部分
-            # 这里的同步是只有本程序的并行,不依赖于airtest等库,因此一定可以执行的
-            if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):  # 单进程各种原因出错时,多进程无法同步时
-                TimeECHO(self.prefix+"存在同步文件,需要同步程序")
-                self.移动端.关闭APP()
-                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-                if self.王者营地礼包 and not connect_status():
-                    self.每日礼包_王者营地()
-                self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode,
-                                   同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
+                        # 这里会创建全局同步文件self.Tool.辅助同步文件
+                        self.Tool.touchfile(self.无法进行组队FILE)
+                    else:
+                        TimeErr(self.prefix+"连接不上设备. 退出")
+                        return True
+                # 多进程账户同步
+                # 状态判断
+                self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
+                if self.无法进行组队:
+                    TimeECHO(self.prefix+f"检测到{self.无法进行组队FILE}, 同步阶段关闭组队必选死循环")
+                    self.组队模式 = False
+                    self.totalnode = 1
+                    # 当某个节点出现问题时，全局不再进行同步
+                    self.Tool.removefile(self.Tool.辅助同步文件)
+                # 无论发生何种情况，一定要进行同步
+                if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):
+                    TimeECHO(self.prefix+f"存在{self.Tool.辅助同步文件},需要同步不同进程")
+                    self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode,
+                                       同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
+                    self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.限时组队时间, name="限时组队时间")
+                else:
+                    TimeECHO(self.prefix+f"单账户进行同步，即重新打开APP")
+                #
+                if not connect_status():
+                    sleep(60)
+                    continue
+                if not self.组队模式:
+                    self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
+                    if self.王者营地礼包:
+                        self.每日礼包_王者营地()
                 self.移动端.重启APP(sleeptime=self.mynode*10+60)
-                self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.限时组队时间, name="限时组队时间")
+                # 因为self.登录游戏()会根据组队情况与否创建self.Tool.辅助同步文件，导致这里无线循环，所以提前设定self.组队模式
                 self.登录游戏()
             # ------------------------------------------------------------------------------
             # 现在所有进程都在这里了,开始判断单个节点的问题,以及是否退出
@@ -3874,6 +3891,8 @@ class wzry_task:
                 self.选择人机模式 = True
                 self.青铜段位 = False
                 self.Tool.removefile(self.青铜段位FILE)
+                self.Tool.removefile(self.重新登录FILE)
+                self.Tool.removefile(self.无法进行组队FILE)
                 self.Tool.touchfile(self.免费商城礼包FILE)
                 if self.totalnode_bak > 1:
                     self.Tool.touch同步文件()
@@ -3894,7 +3913,10 @@ class wzry_task:
                 TimeECHO(self.prefix+"存在重新登录文件,登录后删除")
                 if self.Tool.totalnode_bak > 1 and not os.path.exists(self.无法进行组队FILE):
                     self.Tool.touchfile(self.无法进行组队FILE)
-                sleep(60*10)
+                for i in range(10):
+                    sleep(60)
+                    if self.Tool.存在同步文件():
+                        break
                 continue
             # 各种原因无法组队判定
             self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
@@ -3965,7 +3987,15 @@ class wzry_task:
             self.jinristep = self.jinristep+1
             #
             # ------------------------------------------------------------------------------
-            # 增加对战模式
+            # 默认标准模式的触摸对战每天会启动几次,其余时间用户通过手动建文件启动
+            # 经过对比发现,触摸对战,系统会判定没有挂机,按照对战时长发送金币
+            # 每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
+            if self.jinristep % 2 == 0 and not self.组队模式:
+                self.触摸对战 = True
+            # 在特定步数进行标准对战,频率很低
+            if self.jinristep % 10 == 0 and not self.组队模式:
+                self.标准触摸对战 = True
+            #
             self.青铜段位 = os.path.exists(self.青铜段位FILE)
             self.标准模式 = os.path.exists(self.标准模式FILE)
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
@@ -3973,15 +4003,6 @@ class wzry_task:
             if self.组队模式 and not self.青铜段位:
                 TimeECHO(self.prefix+f"组队时采用青铜段位")
                 self.青铜段位 = True
-            # 默认标准模式的触摸对战每天只启动一次,其余时间用户通过手动建文件启动
-            # 经过对比发现,触摸对战,系统会判定没有挂机,给的金币更多, 所以这里提高5v5对战过程中触摸的几率
-            # 每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
-            # 触摸标准对战持续29min胜利,获得了170+金币. 触摸快速对战记录最大值35金币
-            if self.jinristep % 2 == 0 and not self.组队模式:
-                self.触摸对战 = True
-            # 在特定步数进行标准对战,频率很低
-            if self.jinristep % 10 == 0 and not self.组队模式:
-                self.标准触摸对战 = True
             # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
             if not self.青铜段位:
                 if self.触摸对战:
@@ -4031,6 +4052,7 @@ class wzry_task:
             # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
             if not self.本循环参数.compate(self.上循环参数):
                 TimeECHO(self.prefix+f"上步计算参数不同同,回到大厅重新初始化")
+                self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
