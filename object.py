@@ -1304,6 +1304,7 @@ class wzry_runinfo:
             TimeECHO(self.prefix+f"RUNINFO:对战模式变化{str(other.对战模式)}")
             return False
         if "模拟战" in self.对战模式:
+            TimeECHO(self.prefix+f"RUNINFO:对战模式模拟战则认为计算信息变化，以重新进入大厅初始化")
             return True
         if "5v5匹配" in self.对战模式:
             if self.青铜段位 == other.青铜段位:
@@ -3847,6 +3848,7 @@ class wzry_task:
                         self.Tool.touch同步文件()
                     return True
                 #
+                新的一天 = True
                 if self.Tool.存在同步文件():
                     break
                 # 这里仅领礼包,不要插入六国远征等不稳定的任务
@@ -3884,7 +3886,6 @@ class wzry_task:
                 if self.debug:
                     break
                 hour, minu = self.Tool.time_getHM()
-                新的一天 = True
             if 新的一天:
                 self.移动端.重启APP(10)
                 self.登录游戏()
@@ -3905,6 +3906,7 @@ class wzry_task:
                 self.Tool.removefile(self.无法进行组队FILE)
                 self.Tool.touchfile(self.免费商城礼包FILE)
                 if self.totalnode_bak > 1:
+                    TimeECHO(self.prefix+":新的一天创建同步文件进行初次校准")
                     self.Tool.touch同步文件()
                 # 更新图片
                 self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
@@ -4061,7 +4063,7 @@ class wzry_task:
             self.本循环参数.prefix = self.prefix
             # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
             if not self.本循环参数.compate(self.上循环参数):
-                TimeECHO(self.prefix+f"上步计算参数不同同,回到大厅重新初始化")
+                TimeECHO(self.prefix+f"上步计算参数不同,回到大厅重新初始化")
                 self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
