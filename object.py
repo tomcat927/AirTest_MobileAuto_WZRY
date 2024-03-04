@@ -3550,7 +3550,7 @@ class wzry_task:
                         装备poskey = "装备pos"+self.prefix
                         self.Tool.existsTHENtouch(装备, 装备poskey, savepos=True)
                         装备pos = exists(装备)
-                        if not 装备pos and "装备pos" in self.Tool.var_dict.keys():
+                        if not 装备pos and 装备poskey in self.Tool.var_dict.keys():
                             装备pos = self.Tool.var_dict[装备poskey]
                     else:
                         self.Tool.existsTHENtouch(装备, "装备pos", savepos=True)
