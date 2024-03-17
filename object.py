@@ -2934,13 +2934,14 @@ class wzry_task:
             self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
         # 这几个活跃，暂时没有找到位置，不确定是没发光的原因，还是图标变化
-        if self.Tool.existsTHENtouch(今日活跃, "今日活跃 "):
+        # 这是使用savepos，下次换了新的领取位置记得清除这些dict
+        if self.Tool.existsTHENtouch(今日活跃, "今日活跃 ", savepos=True):
             self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1"):
+        if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1", savepos=True):
             self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃2, "本周活跃2"):
+        if self.Tool.existsTHENtouch(本周活跃2, "本周活跃2", savepos=True):
             self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
         #
