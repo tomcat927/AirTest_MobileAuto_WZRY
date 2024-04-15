@@ -3569,7 +3569,7 @@ class wzry_task:
                             if len(inputxy) > 1:
                                 try:
                                     x=float(inputxy[0])
-                                    y=float(inputxy[0])
+                                    y=float(inputxy[1])
                                     TimeECHO(self.prefix+": x=%5.3f, y=%5.3f"%(x,y))
                                 except:
                                     traceback.print_exc()
