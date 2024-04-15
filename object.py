@@ -3565,6 +3565,15 @@ class wzry_task:
                         for i in range(random.randint(1, 5)):
                             x = 0.2+random.random()/5
                             y = -0.2+random.random()/5
+                            inputxy=self.Tool.readfile(self.触摸对战FILE)
+                            if len(inputxy) > 1:
+                                try:
+                                    x=float(inputxy[0])
+                                    y=float(inputxy[0])
+                                    TimeECHO(self.prefix+": x=%5.3f, y=%5.3f"%(x,y))
+                                except:
+                                    traceback.print_exc()
+                                    TimeErr(self.prefix+".error set x,y=inputxy")
                             swipe(移动pos, vector=[x, y])
                             self.Tool.existsTHENtouch(对战, "对战按钮", savepos=True)
                     #
