@@ -1327,8 +1327,8 @@ class wzry_figure:
         self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
-        self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540))
-        self.大厅万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
+        self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540), threshold=0.9)
+        self.大厅万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540), threshold=0.9)
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
@@ -2386,7 +2386,7 @@ class wzry_task:
                         if self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540)), "选择退出对战"):
                             TimeECHO(self.prefix+"点击退出")
                             break
-                    sleep(30)
+                    sleep(1)
             if exists(Template(r"tpl1690545494867.png", record_pos=(0.0, 0.179), resolution=(960, 540))):
                 TimeECHO(self.prefix+"检测到:[退出+观战]界面")
                 self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540)), "选择退出对战")
@@ -2394,7 +2394,15 @@ class wzry_task:
                 return
             if self.判断大厅中():
                 return
-
+            # 为了避免识别错误，加一个强制点击的命令
+            keystr = "任意点击_monizhan"
+            if keystr not in self.Tool.var_dict.keys():
+                if "随意点击k" in self.Tool.var_dict.keys():
+                    self.Tool.var_dict[keystr] = self.Tool.var_dict["随意点击k"]
+            if keystr in self.Tool.var_dict.keys():
+                任意点击_monizhan = Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))
+                self.Tool.existsTHENtouch(任意点击_monizhan, "任意点击_monizhan", savepos=True)
+            #
             if self.Tool.existsTHENtouch(Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))):
                 TimeECHO(self.prefix+"继续1")
                 jixu = True
@@ -3565,12 +3573,12 @@ class wzry_task:
                         for i in range(random.randint(1, 5)):
                             x = 0.2+random.random()/5
                             y = -0.2+random.random()/5
-                            inputxy=self.Tool.readfile(self.触摸对战FILE)
+                            inputxy = self.Tool.readfile(self.触摸对战FILE)
                             if len(inputxy) > 1:
                                 try:
-                                    x=float(inputxy[0])
-                                    y=float(inputxy[1])
-                                    TimeECHO(self.prefix+": x=%5.3f, y=%5.3f"%(x,y))
+                                    x = float(inputxy[0])
+                                    y = float(inputxy[1])
+                                    TimeECHO(self.prefix+": x=%5.3f, y=%5.3f" % (x, y))
                                 except:
                                     traceback.print_exc()
                                     TimeErr(self.prefix+".error set x,y=inputxy")
