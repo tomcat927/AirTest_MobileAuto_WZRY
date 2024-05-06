@@ -1373,6 +1373,7 @@ class wzry_figure:
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708829601719.png", record_pos=(0.001, -0.22), resolution=(960, 540)))
+        self.房主头像 = Template(r"tpl1714917935714.png", record_pos=(0.354, -0.163), resolution=(960, 540), target_pos=9)
         #
         # 头像数据
         self.英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
@@ -1990,7 +1991,7 @@ class wzry_task:
                 if not self.判断房间中():
                     self.单人进入人机匹配房间()
                 # 这里给的是特殊账户的头像
-                进房 = Template(r"tpl1700284839745.png", record_pos=(0.357, -0.17), resolution=(1136, 640), target_pos=9)
+                进房 = self.图片.房主头像
                 if not exists(进房):
                     进房 = Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540), threshold=0.9)
                 if self.Tool.existsTHENtouch(进房):
