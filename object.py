@@ -697,6 +697,10 @@ class DQWheel:
         sec = current_time.second
         return year, hour, minu, sec
 
+    def time_getweek(self):
+        return datetime.now(eastern_eight_tz).weekday()
+    # return 0 - 6
+
     def hour_in_span(self, hour, startclock, endclock):
         # 不跨越午夜的情况
         if startclock <= endclock:
@@ -1082,7 +1086,63 @@ class wzyd_libao:
             self.体验服礼物()
         self.每日签到任务()
         self.营地币兑换碎片()
+        self.营地战令经验()
         stop_app(self.APPID)
+
+    def 营地战令经验(self, times=1):
+        #
+        # 第一次，需要手动点击一下，开启战令
+        if self.Tool.存在同步文件():
+            return True
+        #
+        if times == 1:
+            self.Tool.timelimit(timekey="营地战令经验", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey="营地战令经验", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"营地战令经验{times}超时退出")
+                return False
+        #
+        TimeECHO(self.prefix+f"营地战令经验{times}")
+        if times > 0:
+            sleep(5)
+        stop_app(self.APPID)
+        start_app(self.APPID)
+        sleep(10)
+        times = times+1
+        if times > 10:
+            return False
+        # 都保存位置,最后进不去再return
+        self.Tool.existsTHENtouch(self.游戏界面图标, self.prefix+"游戏界面图标", savepos=True)
+        sleep(5)
+        #
+        正式服判断图标 = Template(r"tpl1715609808723.png", record_pos=(-0.217, -0.044), resolution=(540, 960))
+        正式服大头图标 = Template(r"tpl1715610763289.png", record_pos=(-0.281, -0.8), resolution=(540, 960))
+        正式服入口 = False
+        for i in range(5):
+            if exists(正式服判断图标):
+                正式服入口 = True
+                break
+            # 不同的账号，显示的数目不一样多，没办法savepos
+            self.Tool.existsTHENtouch(正式服大头图标, "正式服大头图标", savepos=False)
+        if not 正式服入口:
+            TimeECHO(self.prefix+f"没有找到正式服入口,有可能营地有更新")
+            return self.营地战令经验(times)
+        # 点开工具箱
+        self.Tool.existsTHENtouch(正式服判断图标, self.prefix+"正式服工具图标", savepos=True)
+        sleep(5)
+        战令入口 = Template(r"tpl1715609828196.png", record_pos=(0.209, -0.004), resolution=(540, 960))
+        self.Tool.existsTHENtouch(战令入口, self.prefix+"战令入口", savepos=True)
+        #
+        战令页面图标 = Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960))
+        if not exists(战令页面图标):
+            sleep(20)
+            if not exists(战令页面图标):
+                TimeECHO(self.prefix+f"没找到战令页面")
+                return self.体验服礼物(times)
+        战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
+        self.Tool.existsTHENtouch(战令任务, self.prefix+"战令任务", savepos=True)
+        一键领取 = Template(r"tpl1715610610922.png", record_pos=(0.337, -0.18), resolution=(540, 960))
+        self.Tool.existsTHENtouch(一键领取, self.prefix+"一键领取战令经验", savepos=True)
 
     def 体验服礼物(self, times=1):
         #
@@ -1117,6 +1177,7 @@ class wzyd_libao:
             if exists(体验服判断图标):
                 体验服入口 = True
                 break
+            # 不同的账号，显示的数目不一样多，没办法savepos
             self.Tool.existsTHENtouch(体验服大头图标, "体验服大头图标", savepos=False)
         if not 体验服入口:
             TimeECHO(self.prefix+f"没有找到体验服入口,有可能营地有更新")
@@ -2957,6 +3018,14 @@ class wzry_task:
         self.Tool.LoopTouch(确定按钮, "确定按钮")
         self.关闭按钮()
         self.确定按钮()
+        #
+        # 由于王者营地也可以领战令经验, 如果在这里把战令经验领到上限，营地的经验就不能领了,所以周5之后再领取
+        weekday = self.Tool.time_getweek()
+        if weekday < 5:
+            TimeECHO(self.prefix+f"周六统一领取战令经验,先领取营地的经验")
+            self.Tool.LoopTouch(返回, "返回")
+            self.确定按钮()
+            return True
         #
         # 新赛季增加的领取入口
         本周任务 = Template(r"tpl1703755716888.png", record_pos=(-0.175, -0.192), resolution=(960, 540))
