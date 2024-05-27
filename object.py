@@ -1133,10 +1133,17 @@ class wzyd_libao:
         战令入口 = Template(r"tpl1715609828196.png", record_pos=(0.209, -0.004), resolution=(540, 960))
         self.Tool.existsTHENtouch(战令入口, self.prefix+"战令入口", savepos=True)
         #
-        战令页面图标 = Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960))
-        if not exists(战令页面图标):
+        战令页面元素 = []
+        战令页面元素.append(Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960)))
+        战令页面元素.append(Template(r"tpl1716804327622.png", record_pos=(0.0, 0.156), resolution=(540, 960)))
+        战令页面元素.append(Template(r"tpl1716804333697.png", record_pos=(0.352, 0.739), resolution=(540, 960)))
+        战令页面元素.append(Template(r"tpl1716804348346.png", record_pos=(-0.281, -0.7), resolution=(540, 960)))
+        战令页面元素.append(Template(r"tpl1716804366593.png", record_pos=(-0.083, 0.543), resolution=(540, 960)))
+        存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
+        if not exists(存在):
             sleep(20)
-            if not exists(战令页面图标):
+            存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
+            if not exists(存在):
                 TimeECHO(self.prefix+f"没找到战令页面")
                 return self.体验服礼物(times)
         战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
