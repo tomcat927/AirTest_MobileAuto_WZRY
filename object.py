@@ -1140,10 +1140,10 @@ class wzyd_libao:
         战令页面元素.append(Template(r"tpl1716804348346.png", record_pos=(-0.281, -0.7), resolution=(540, 960)))
         战令页面元素.append(Template(r"tpl1716804366593.png", record_pos=(-0.083, 0.543), resolution=(540, 960)))
         存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
-        if not exists(存在):
+        if not 存在:
             sleep(20)
             存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
-            if not exists(存在):
+            if not 存在:
                 TimeECHO(self.prefix+f"没找到战令页面")
                 return self.体验服礼物(times)
         战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
