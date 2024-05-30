@@ -1586,7 +1586,6 @@ class wzry_task:
         self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
-        self.Tool.removefile(self.免费商城礼包FILE)
         # self.Tool.removefile(self.触摸对战FILE)
         # self.Tool.removefile(self.临时组队FILE)
         # 这里的图片主要是一些图片列表，例如所有的大厅元素
@@ -2499,10 +2498,14 @@ class wzry_task:
                 return
     #
 
-    def 每日礼包(self):
+    def 每日礼包(self, 强制领取=False):
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
+        #
+        if 强制领取:
+            self.Tool.timedict["领游戏礼包"] = 0
+            self.Tool.timedict["领营地礼包"] = 0
         #
         if os.path.exists(self.免费商城礼包FILE):
             if self.商城免费礼包():
@@ -3952,7 +3955,9 @@ class wzry_task:
                 if os.path.exists(self.重新登录FILE):
                     TimeECHO(self.prefix+"存在重新登录文件,无法每日礼包")
                 else:
-                    self.每日礼包()
+                    self.每日礼包(强制领取=True)
+                #
+                # 关闭APP并SLEEP等待下一个时间周期
                 self.移动端.关闭APP()
                 # 计算休息时间
                 hour, minu = self.Tool.time_getHM()
@@ -3974,14 +3979,11 @@ class wzry_task:
                     self.移动端.连接设备()
                     self.移动端.重启APP(30)
                 #
-                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-                if self.王者营地礼包:
-                    self.每日礼包_王者营地()
-                #
                 if self.debug:
                     break
                 hour, minu = self.Tool.time_getHM()
             if 新的一天:
+                TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 self.移动端.重启APP(10)
                 self.登录游戏()
                 self.jinristep = 0
@@ -3996,10 +3998,10 @@ class wzry_task:
                     self.Tool.touchfile(self.prefix+"武道大会.txt")
                 self.选择人机模式 = True
                 self.青铜段位 = False
+                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                 self.Tool.removefile(self.青铜段位FILE)
                 self.Tool.removefile(self.重新登录FILE)
                 self.Tool.removefile(self.无法进行组队FILE)
-                self.Tool.touchfile(self.免费商城礼包FILE)
                 if self.totalnode_bak > 1:
                     TimeECHO(self.prefix+":新的一天创建同步文件进行初次校准")
                     self.Tool.touch同步文件()
