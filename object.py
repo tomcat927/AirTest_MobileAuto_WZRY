@@ -405,7 +405,7 @@ class DQWheel:
     def bcastvar(self, mynode, totalnode, var, name="bcastvar"):
         if totalnode < 2:
             return var
-        dict_file = name+".txt"
+        dict_file = ".tmp."+name+".txt"
         if mynode == 0:
             self.save_dict(var, dict_file)
         self.barriernode(mynode, totalnode, "bcastvar:"+name)
@@ -1547,7 +1547,7 @@ class wzry_task:
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
         #
         # 统一本次运行的PID, 避免两个脚本同时运行出现控制冲突的情况
-        self.WZRYPIDFILE = f"WZRY.{self.mynode}.PID.txt"
+        self.WZRYPIDFILE = f".tmp.WZRY.{self.mynode}.PID.txt"
         hour, minu, sec = self.Tool.time_getHMS()
         self.myPID = f"{self.totalnode_bak}.{hour}{minu}{sec}"
         self.myPID = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.myPID, name="self.myPID")
