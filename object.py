@@ -4346,7 +4346,7 @@ class auto_airtest:
         self.设备类型 = 设备类型.lower()
         self.prefix = f"({self.mynode}/{self.totalnode})"
         self.debug = "darwin" in sys.platform.lower()
-        self.debug = True
+
         # 设备信息
         if len(LINK_dict) == 0:
             LINK_dict = {}
