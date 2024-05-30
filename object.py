@@ -1263,9 +1263,10 @@ class wzyd_libao:
             return self.营地战令经验(times)
         # 点开工具箱
         self.Tool.existsTHENtouch(正式服判断图标, self.prefix+"正式服工具图标", savepos=True)
-        sleep(5)
+        sleep(10)
         战令入口 = Template(r"tpl1715609828196.png", record_pos=(0.209, -0.004), resolution=(540, 960))
         self.Tool.existsTHENtouch(战令入口, self.prefix+"战令入口", savepos=True)
+        sleep(10)
         #
         战令页面元素 = []
         战令页面元素.append(Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960)))
