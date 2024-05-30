@@ -1089,6 +1089,13 @@ class wzyd_libao:
         self.营地战令经验()
         stop_app(self.APPID)
 
+    def 营地任务_观看赛事(self, times=1):
+        return
+    def 营地任务_圈子签到(self, times=1):
+        return
+    def 营地任务_浏览资讯(self, times=1):
+        return
+
     def 营地战令经验(self, times=1):
         #
         # 第一次，需要手动点击一下，开启战令
@@ -2507,12 +2514,31 @@ class wzry_task:
             self.Tool.timedict["领游戏礼包"] = 0
             self.Tool.timedict["领营地礼包"] = 0
         #
-        if os.path.exists(self.免费商城礼包FILE):
-            if self.商城免费礼包():
-                self.Tool.removefile(self.免费商城礼包FILE)
+        # 王者APP礼包
+        self.王者礼包()
         #
+        # 营地礼包
+        if not self.王者营地礼包:
+            self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
+        if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
+            self.每日礼包_王者营地()
+        #
+
+    def 王者礼包(self):
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             self.移动端.打开APP()
+            self.进入大厅()
+            #
+            if self.Tool.存在同步文件():
+                TimeECHO(self.prefix+"领礼包时发现同步文件, 停止领取")
+                return True
+            if os.path.exists(self.重新登录FILE):
+                TimeECHO(self.prefix+f"领礼包时发现{self.重新登录FILE}, 停止领取")
+                return
+            #
+            if os.path.exists(self.免费商城礼包FILE):
+                if self.商城免费礼包():
+                    self.Tool.removefile(self.免费商城礼包FILE)
             #
             self.每日礼包_每日任务()
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
@@ -2538,16 +2564,9 @@ class wzry_task:
                     traceback.print_exc()
                     观赛时长 = 60*15
                 self.KPL每日观赛(times=1, 观赛时长=观赛时长)
-                if not self.王者营地礼包:
-                    self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
         else:
             TimeECHO(self.prefix+"时间太短,暂时不领取游戏礼包")
         #
-
-        #
-        if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
-            self.每日礼包_王者营地()
-
         self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
 
     def 战队礼包(self):
@@ -3949,13 +3968,19 @@ class wzry_task:
                 新的一天 = True
                 if self.Tool.存在同步文件():
                     break
-                # 这里仅领礼包,不要插入六国远征等不稳定的任务
+                #
+                # 还有多久开始，太短则直接跳过等待了
+                hour, minu = self.Tool.time_getHM()
+                leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
+                if leftmin < 10:
+                    TimeECHO(self.prefix+f"剩余{leftmin}分钟进入新的一天")
+                    sleep(leftmin*60)
+                    continue
+                #
                 TimeECHO(self.prefix+"夜间停止刷游戏")
-                self.Tool.touchfile(self.免费商城礼包FILE)
-                if os.path.exists(self.重新登录FILE):
-                    TimeECHO(self.prefix+"存在重新登录文件,无法每日礼包")
-                else:
-                    self.每日礼包(强制领取=True)
+                #
+                # 这里仅领礼包,不要插入六国远征等不稳定的任务
+                self.每日礼包(强制领取=True)
                 #
                 # 关闭APP并SLEEP等待下一个时间周期
                 self.移动端.关闭APP()
@@ -3998,6 +4023,9 @@ class wzry_task:
                     self.Tool.touchfile(self.prefix+"武道大会.txt")
                 self.选择人机模式 = True
                 self.青铜段位 = False
+                # 因为免费商城礼包每天只领取一次
+                self.Tool.touchfile(self.免费商城礼包FILE)
+                # 营地礼包初始化
                 self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                 self.Tool.removefile(self.青铜段位FILE)
                 self.Tool.removefile(self.重新登录FILE)
