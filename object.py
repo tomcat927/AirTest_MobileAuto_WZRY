@@ -31,7 +31,7 @@ from airtest.core.api import stop_app as stop_app_o
 
 
 def connect_status(times=10):
-    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540))
+    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
     for i in np.arange(times):
         try:
             exists_o(png)
@@ -259,7 +259,7 @@ class DQWheel:
         content = str(content)
         if len(content) > 0:
             self.removefile(filename)
-        f = open(filename, 'w')
+        f = open(filename, 'w', encoding='utf-8')
         f.write(content)
         f.close()
         end = ""
@@ -282,7 +282,7 @@ class DQWheel:
 
     def readfile(self, filename):
         try:
-            f = open(filename, 'r')
+            f = open(filename, 'r', encoding='utf-8')
             content = f.readlines()
             f.close()
             TimeECHO(self.prefix+"Read["+filename+"]成功")
@@ -982,8 +982,11 @@ class wzyd_libao:
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
         self.游戏界面图标 = Template(r"tpl1704381547456.png", record_pos=(0.187, 0.726), resolution=(540, 960))
+        self.社区界面图标 = Template(r"tpl1717046076553.png", record_pos=(-0.007, 0.759), resolution=(540, 960))
         self.每日福利图标 = Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
         self.一键领取按钮 = Template(r"tpl1706338731419.png", record_pos=(0.328, -0.365), resolution=(540, 960))
+        self.赛事入口 = Template(r"tpl1717046009399.png", record_pos=(-0.269, -0.804), resolution=(540, 960), target_pos=6)
+        self.资讯入口 = Template(r"tpl1717046009399.png", record_pos=(-0.269, -0.804), resolution=(540, 960))
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
         self.营地大厅元素 = []
@@ -1081,6 +1084,11 @@ class wzyd_libao:
             TimeECHO(self.prefix+"营地初始化失败")
             stop_app(self.APPID)
             return False
+        #
+        self.营地任务_浏览资讯()
+        self.营地任务_观看赛事()
+        self.营地任务_圈子签到()
+        #
         # 体验服只有安卓客户端可以领取
         if not self.IOS:
             self.体验服礼物()
@@ -1090,10 +1098,129 @@ class wzyd_libao:
         stop_app(self.APPID)
 
     def 营地任务_观看赛事(self, times=1):
-        return
+        #
+        if self.Tool.存在同步文件():
+            return True
+        #
+        keystr = "营地任务_观看赛事"
+        if times == 1:
+            self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"{keystr}{times}超时退出")
+                return False
+        #
+        TimeECHO(self.prefix+f"{keystr}{times}")
+        if times > 0:
+            sleep(5)
+        stop_app(self.APPID)
+        start_app(self.APPID)
+        sleep(10)
+        times = times+1
+        if times > 10:
+            return False
+        # 都保存位置,最后进不去再return
+        self.Tool.existsTHENtouch(self.赛事入口, self.prefix+"赛事入口", savepos=True)
+        去直播间 = Template(r"tpl1717046024359.png", record_pos=(0.033, 0.119), resolution=(540, 960))
+        for i in range(5):
+            if self.Tool.existsTHENtouch(去直播间, self.prefix+"去直播间图标"):
+                sleep(50)
+                return True
+        TimeECHO(self.prefix+f"没进入直播间")
+        return self.营地任务_观看赛事(times)
+
     def 营地任务_圈子签到(self, times=1):
-        return
+        #
+        if self.Tool.存在同步文件():
+            return True
+        #
+        keystr = "营地任务_圈子签到"
+        if times == 1:
+            self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"{keystr}{times}超时退出")
+                return False
+        #
+        TimeECHO(self.prefix+f"{keystr}{times}")
+        if times > 0:
+            sleep(5)
+        stop_app(self.APPID)
+        start_app(self.APPID)
+        sleep(10)
+        times = times+1
+        if times > 10:
+            return False
+        # 都保存位置,最后进不去再return
+        self.Tool.existsTHENtouch(self.社区界面图标, self.prefix+"社区界面图标", savepos=True)
+        sleep(10)
+        #
+        圈子图标 = Template(r"tpl1717047527808.png", record_pos=(-0.254, -0.809), resolution=(540, 960))
+        if not self.Tool.existsTHENtouch(圈子图标, self.prefix+"圈子图标", savepos=True):
+            TimeECHO(self.prefix+f"找不到圈子图标")
+            return self.营地任务_圈子签到(times)
+        #
+        # 需要提前自己峡谷互助小组圈子
+        峡谷互助小组圈子 = Template(r"tpl1717046264179.png", record_pos=(-0.178, -0.511), resolution=(540, 960))
+        进入小组 = False
+        for i in range(5):
+            if self.Tool.existsTHENtouch(峡谷互助小组圈子, self.prefix+"峡谷互助小组圈子"):
+                sleep(6)
+                进入小组 = True
+        if not 进入小组:
+            TimeECHO(self.prefix+f"找不到互助小组圈子")
+            return self.营地任务_圈子签到(times)
+        圈子签到图标 = Template(r"tpl1717046286604.png", record_pos=(0.393, -0.3), resolution=(540, 960))
+        签到成功图标 = Template(r"tpl1717047898461.png", record_pos=(-0.004, 0.237), resolution=(540, 960))
+        if self.Tool.existsTHENtouch(圈子签到图标, "圈子签到图标"):
+            if self.Tool.existsTHENtouch(签到成功图标, "签到成功图标"):
+                TimeECHO(self.prefix+f"签到成功")
+        else:
+            TimeECHO(self.prefix+f"可能签到过了")
+        return True
+
     def 营地任务_浏览资讯(self, times=1):
+        #
+        if self.Tool.存在同步文件():
+            return True
+        #
+        keystr = "营地任务_浏览资讯"
+        if times == 1:
+            self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"{keystr}{times}超时退出")
+                return False
+        #
+        TimeECHO(self.prefix+f"{keystr}{times}")
+        if times > 0:
+            sleep(5)
+        stop_app(self.APPID)
+        start_app(self.APPID)
+        sleep(10)
+        times = times+1
+        if times > 10:
+            return False
+        #
+        self.Tool.existsTHENtouch(self.资讯入口, self.prefix+"资讯入口.推荐", savepos=True)
+        资讯入口图标 = Template(r"tpl1717046344191.png", record_pos=(-0.422, -0.37), resolution=(540, 960))
+        if not self.Tool.existsTHENtouch(资讯入口图标, self.prefix+"资讯入口图标", savepos=True):
+            TimeECHO(self.prefix+f"找不到资讯入口图标")
+            return self.营地任务_浏览资讯(times)
+        点赞图标 = Template(r"tpl1717046512030.png", record_pos=(0.424, 0.02), resolution=(540, 960))
+        pos = self.Tool.var_dict[self.prefix+"资讯入口图标"]
+        # 开始滑动点赞
+        for i in range(100):
+            sleep(1)
+            if self.Tool.existsTHENtouch(点赞图标, self.prefix+"点赞图标", savepos=False):
+                sleep(0.5)
+            else:
+                sleep(1)
+            TimeECHO(self.prefix+f"浏览资讯中{i}")
+            swipe(pos, vector=[0.0, -0.5])
+            if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
+                TimeECHO(self.prefix+f"浏览资讯时间到")
+                return
         return
 
     def 营地战令经验(self, times=1):
@@ -4219,6 +4346,7 @@ class auto_airtest:
         self.设备类型 = 设备类型.lower()
         self.prefix = f"({self.mynode}/{self.totalnode})"
         self.debug = "darwin" in sys.platform.lower()
+        self.debug = True
         # 设备信息
         if len(LINK_dict) == 0:
             LINK_dict = {}

@@ -107,7 +107,8 @@
 
 ### 文件控制
 
-控制文件 `txt` 不参与仓库同步, 使用[实例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3)
+- 控制文件 `txt` 不参与仓库同步, 使用[实例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3)
+- **注：所有文件都默认采用UTF8格式编码**
 
 | 文件  | 功能  | 备注  |
 | :------------: | :------------: | :------------: |
