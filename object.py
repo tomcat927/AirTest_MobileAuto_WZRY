@@ -1280,7 +1280,7 @@ class wzyd_libao:
             存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
             if not 存在:
                 TimeECHO(self.prefix+f"没找到战令页面")
-                return self.体验服礼物(times)
+                return self.营地战令经验(times)
         战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
         self.Tool.existsTHENtouch(战令任务, self.prefix+"战令任务", savepos=True)
         一键领取 = Template(r"tpl1715610610922.png", record_pos=(0.337, -0.18), resolution=(540, 960))
