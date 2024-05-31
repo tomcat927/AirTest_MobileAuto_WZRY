@@ -1577,6 +1577,7 @@ class wzry_figure:
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708829601719.png", record_pos=(0.001, -0.22), resolution=(960, 540)))
         self.房主头像 = Template(r"tpl1714917935714.png", record_pos=(0.354, -0.163), resolution=(960, 540), target_pos=9)
+        self.房主房间 = Template(r"tpl1700284856473.png", record_pos=(0.312, -0.17), resolution=(1136, 640), target_pos=2)
         #
         # 头像数据
         self.英雄_海诺 = Template(r"tpl1701750143194.png", record_pos=(-0.36, 0.135), resolution=(960, 540))
@@ -2194,9 +2195,12 @@ class wzry_task:
                     self.单人进入人机匹配房间()
                 # 这里给的是特殊账户的头像
                 进房 = self.图片.房主头像
+                self.Tool.timedict["当前界面"] = 0
+                TimeECHO(self.prefix+"准备进入组队房间")
                 if not exists(进房):
+                    TimeECHO(self.prefix+"没找到房主头像, 采用通用房主头像")
                     进房 = Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540), threshold=0.9)
-                if self.Tool.existsTHENtouch(进房):
+                if self.Tool.existsTHENtouch(进房, "房主头像按钮", savepos=False):
                     取消确定 = Template(r"tpl1699712554213.png", record_pos=(0.003, 0.113), resolution=(960, 540))
                     取消 = Template(r"tpl1699712559021.png", record_pos=(-0.096, 0.115), resolution=(960, 540))
                     if exists(取消确定):
@@ -2204,12 +2208,12 @@ class wzry_task:
                         self.Tool.existsTHENtouch(取消, "取消错误房间")
                         continue
                     self.Tool.existsTHENtouch(取消, "取消错误房间")
-                    TimeECHO(self.prefix+"找到房间")
                     # 这里给的是特殊账户的头像
-                    进房间 = Template(r"tpl1700284856473.png", record_pos=(0.312, -0.17), resolution=(1136, 640), target_pos=2)
+                    进房间 = self.图片.房主房间
                     if not exists(进房间):
+                        TimeECHO(self.prefix+"没找到进房间按钮, 采用通用进房间按钮")
                         进房间 = Template(r"tpl1699181937521.png", record_pos=(0.348, -0.194), resolution=(960, 540), threshold=0.9)
-                    if self.Tool.existsTHENtouch(进房间):
+                    if self.Tool.existsTHENtouch(进房间, "进房间按钮", savepos=False):
                         TimeECHO(self.prefix+"尝试进入房间中")
                         sleep(10)
                         找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
