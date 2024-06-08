@@ -30,114 +30,7 @@ from airtest.core.api import stop_app as stop_app_o
 # from airtest.core.api import exists as exists
 
 
-def connect_status(times=10):
-    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
-    for i in np.arange(times):
-        try:
-            exists_o(png)
-            return True
-        except:
-            traceback.print_exc()
-            print(f"cndaqiang: 无法连接设备,重试中{i}")
-            sleep(1)
-            continue
-    print("cndaqiang: 设备失去联系")
-    return False
-
-
-def exists(*args, **kwargs):
-    try:
-        result = exists_o(*args, **kwargs)
-    except:
-        traceback.print_exc()
-        print("cndaqiang: exists失败")
-        sleep(1)
-        try:
-            result = exists_o(*args, **kwargs)
-        except:
-            traceback.print_exc()
-            print("cndaqiang: 再次尝试仍失败")
-            result = False
-    return result
-
-
-def touch(*args, **kwargs):
-    try:
-        result = touch_o(*args, **kwargs)
-    except:
-        traceback.print_exc()
-        print("cndaqiang: touch失败")
-        sleep(1)
-        try:
-            result = touch_o(*args, **kwargs)
-        except:
-            traceback.print_exc()
-            print("cndaqiang: 再次尝试仍失败")
-            result = False
-    return result
-
-
-def swipe(*args, **kwargs):
-    try:
-        result = swipe_o(*args, **kwargs)
-    except:
-        traceback.print_exc()
-        print("cndaqiang: swipe失败")
-        sleep(1)
-        try:
-            result = swipe_o(*args, **kwargs)
-        except:
-            traceback.print_exc()
-            print("cndaqiang: 再次尝试仍失败")
-            result = False
-    return result
-
-
-def start_app(*args, **kwargs):
-    try:
-        result = True
-        start_app_o(*args, **kwargs)
-    except:
-        traceback.print_exc()
-        print("cndaqiang: start_app失败")
-        sleep(1)
-        try:
-            result = True
-            start_app_o(*args, **kwargs)
-        except:
-            traceback.print_exc()
-            print("cndaqiang: 再次尝试仍失败")
-            result = False
-        if not connect_status():
-            TimeErr("start_app:"+"连接不上设备")
-            return False
-    return result
-
-
-def stop_app(*args, **kwargs):
-    try:
-        result = True
-        stop_app_o(*args, **kwargs)
-    except:
-        traceback.print_exc()
-        print("cndaqiang: stop_app失败")
-        sleep(1)
-        try:
-            result = True
-            stop_app_o(*args, **kwargs)
-        except:
-            traceback.print_exc()
-            print("cndaqiang: 再次尝试仍失败")
-            result = False
-        if not connect_status():
-            TimeErr("start_app:"+"连接不上设备")
-            return False
-    return result
-
-
 # ........................
-logger = logging.getLogger("airtest")
-logger.setLevel(logging.WARNING)
 # python -m pip install --upgrade --no-deps --force-reinstall airtest
 ST.OPDELAY = 1
 # 全局阈值的范围为[0, 1]
@@ -151,12 +44,23 @@ ST.THRESHOLD = 0.8  # 其他语句的默认阈值
 eastern_eight_offset = timedelta(hours=8)
 # 创建一个时区对象
 eastern_eight_tz = timezone(eastern_eight_offset)
-# 这个设置可以极低的降低airtest输出到屏幕的信息
+#? 设置,虚拟机,android docker, iphone, etc,主要进行设备的连接和重启
 
-# 设置,虚拟机,android docker, iphone, etc,主要进行设备的连接和重启
+# 获取当前的运行信息, 有的客户端有bug
+AirtestIDE = "AirtestIDE" in sys.executable
 
 
+# 控制屏幕输出
+## 这个设置可以极低的降低airtest输出到屏幕的信息
+logger = logging.getLogger("airtest")
+logger.setLevel(logging.WARNING)
+
+## 替代基础的print函数
 def TimeECHO(info="None", end=""):
+    # 由于AirTest客户端的解释器不会输出print的命令
+    if AirtestIDE:
+        logger.warning(info)
+        return
     # 获取当前日期和时间
     current_datetime = datetime.now(eastern_eight_tz)
     # 格式化为字符串（月、日、小时、分钟、秒）
@@ -166,12 +70,120 @@ def TimeECHO(info="None", end=""):
         print(modified_args, end=end)
     else:
         print(modified_args)
-    # 如果airtest客户端报错,python命令行不报错.就制定airtest的oython路径为anaconda的python
-
 
 def TimeErr(info="None"):
     TimeECHO("NNNN:"+info)
 
+# ........................
+def connect_status(times=10):
+    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
+    for i in np.arange(times):
+        try:
+            exists_o(png)
+            return True
+        except:
+            traceback.print_exc()
+            TimeECHO(f"cndaqiang: 无法连接设备,重试中{i}")
+            sleep(1)
+            continue
+    TimeECHO("cndaqiang: 设备失去联系")
+    return False
+
+
+def exists(*args, **kwargs):
+    try:
+        result = exists_o(*args, **kwargs)
+    except:
+        traceback.print_exc()
+        TimeECHO("cndaqiang: exists失败")
+        sleep(1)
+        try:
+            result = exists_o(*args, **kwargs)
+        except:
+            traceback.print_exc()
+            TimeECHO("cndaqiang: 再次尝试仍失败")
+            result = False
+    return result
+
+
+def touch(*args, **kwargs):
+    try:
+        result = touch_o(*args, **kwargs)
+    except:
+        traceback.print_exc()
+        TimeECHO("cndaqiang: touch失败")
+        sleep(1)
+        try:
+            result = touch_o(*args, **kwargs)
+        except:
+            traceback.print_exc()
+            TimeECHO("cndaqiang: 再次尝试仍失败")
+            result = False
+    return result
+
+
+def swipe(*args, **kwargs):
+    try:
+        result = swipe_o(*args, **kwargs)
+    except:
+        traceback.print_exc()
+        TimeECHO("cndaqiang: swipe失败")
+        sleep(1)
+        try:
+            result = swipe_o(*args, **kwargs)
+        except:
+            traceback.print_exc()
+            TimeECHO("cndaqiang: 再次尝试仍失败")
+            result = False
+    return result
+
+
+def start_app(*args, **kwargs):
+    try:
+        result = True
+        start_app_o(*args, **kwargs)
+    except:
+        traceback.print_exc()
+        TimeECHO("cndaqiang: start_app失败")
+        sleep(1)
+        try:
+            result = True
+            start_app_o(*args, **kwargs)
+        except:
+            traceback.print_exc()
+            TimeECHO("cndaqiang: 再次尝试仍失败")
+            result = False
+        if not connect_status():
+            TimeErr("start_app:"+"连接不上设备")
+            result = False
+    if not result:
+        TimeECHO("cndaqiang: 如果持续失败, 原因(1) 没有安装APP, "+str(args))
+        TimeECHO("cndaqiang: 如果持续失败, 原因(2) 请修改`airtest/core/android/adb.py`文件")
+        sleep(5)
+        TimeECHO("cndaqiang: 具体修改参考 https://cndaqiang.github.io/2023/11/10/MobileAuto/")
+        sleep(5)
+    return result
+
+
+def stop_app(*args, **kwargs):
+    try:
+        result = True
+        stop_app_o(*args, **kwargs)
+    except:
+        traceback.print_exc()
+        TimeECHO("cndaqiang: stop_app失败")
+        sleep(1)
+        try:
+            result = True
+            stop_app_o(*args, **kwargs)
+        except:
+            traceback.print_exc()
+            TimeECHO("cndaqiang: 再次尝试仍失败")
+            result = False
+        if not connect_status():
+            TimeErr("start_app: 连接不上设备")
+            return False
+    return result
 
 class DQWheel:
     def __init__(self, var_dict_file='var_dict_file.txt', prefix="", mynode=-10, totalnode=-10, 容器优化=False):
@@ -951,7 +963,7 @@ class deviceOB:
         if sleeptime > 60*60:  # >1h
             self.重启设备(sleeptime)
         else:
-            print("sleep %d min" % (sleeptime/60))
+            TimeECHO("sleep %d min" % (sleeptime/60))
             nstep = int(sleeptime/printtime)
             for i in np.arange(nstep):
                 TimeECHO(self.prefix+f"...taskkill_sleep: {i}/{nstep}", end='\r')
