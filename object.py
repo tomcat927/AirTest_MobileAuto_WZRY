@@ -1761,6 +1761,23 @@ class wzry_task:
         self.Tool.timedict["武道大会"] = 0
         self.Tool.touchfile(self.免费商城礼包FILE)
 
+    # 保存运行信息
+    def 构建循环参数(self, runinfo=None):
+        if runinfo == None:
+            runinfo = wzry_runinfo()
+        runinfo.组队模式 = self.组队模式
+        runinfo.房主 = self.房主
+        runinfo.对战模式 = self.对战模式
+        runinfo.限时组队时间 = self.限时组队时间
+        runinfo.runstep = self.runstep
+        runinfo.jinristep = self.jinristep
+        runinfo.青铜段位 = self.青铜段位
+        runinfo.标准模式 = self.标准模式
+        runinfo.触摸对战 = self.触摸对战
+        runinfo.标准触摸对战 = self.标准触摸对战
+        runinfo.prefix = self.prefix
+        return  runinfo
+
     # 网络优化提示
     def 网络优化(self):
         if exists(Template(r"tpl1693669091002.png", record_pos=(-0.003, -0.015), resolution=(960, 540))):
@@ -2452,8 +2469,6 @@ class wzry_task:
                     return
                 return self.进入大厅()
             加速对战 = False
-            if self.标准触摸对战:
-                加速对战 = True
             if self.触摸对战:
                 加速对战 = True
             if self.判断对战中(加速对战):
@@ -4264,19 +4279,9 @@ class wzry_task:
                 continue
             #
             # ------------------------------------------------------------------------------
+            # 计算参数设置
             self.runstep = self.runstep+1
             self.jinristep = self.jinristep+1
-            #
-            # ------------------------------------------------------------------------------
-            # 默认标准模式的触摸对战每天会启动几次,其余时间用户通过手动建文件启动
-            # 经过对比发现,触摸对战,系统会判定没有挂机,按照对战时长发送金币
-            # 每日的任务也需要击杀足够数量,获得金牌等,此时不触摸才能完成任务. 所以这里对半分挂机与否
-            if self.jinristep % 2 == 0 and not self.组队模式:
-                self.触摸对战 = True
-            # 在特定步数进行标准对战,频率很低
-            if self.jinristep % 10 == 0 and not self.组队模式:
-                self.标准触摸对战 = True
-            #
             self.青铜段位 = os.path.exists(self.青铜段位FILE)
             self.标准模式 = os.path.exists(self.标准模式FILE)
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
@@ -4293,6 +4298,9 @@ class wzry_task:
                     TimeECHO(self.prefix+f"非青铜局不进行标准模式的人手触摸")
                     self.标准触摸对战 = False
             # ------------------------------------------------------------------------------
+            # 若希望进行自动调整分路和设置触摸对战等参数，
+            # 可以将相关指令添加到"self.对战前插入FILE",
+            # 示例代码：WZRY.node.对战前插入.py
             if os.path.exists(self.对战前插入FILE):
                 TimeECHO(self.prefix+f":对战前注入代码({self.对战前插入FILE})")
                 exec_insert = self.Tool.readfile(self.对战前插入FILE)
@@ -4317,19 +4325,11 @@ class wzry_task:
                 TimeECHO(self.prefix+f"本局对战:模拟人手触摸")
             if self.标准模式:
                 TimeECHO(self.prefix+f"本局对战:使用标准模式")
+            #
             # ------------------------------------------------------------------------------
-            # 此处开始记录本步的计算参数
-            self.本循环参数.组队模式 = self.组队模式
-            self.本循环参数.房主 = self.房主
-            self.本循环参数.对战模式 = self.对战模式
-            self.本循环参数.限时组队时间 = self.限时组队时间
-            self.本循环参数.runstep = self.runstep
-            self.本循环参数.jinristep = self.jinristep
-            self.本循环参数.青铜段位 = self.青铜段位
-            self.本循环参数.标准模式 = self.标准模式
-            self.本循环参数.触摸对战 = self.触摸对战
-            self.本循环参数.标准触摸对战 = self.标准触摸对战
-            self.本循环参数.prefix = self.prefix
+            # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
+            # 后续程序的控制，仍采用 self.触摸对战等参数
+            self.本循环参数 = self.构建循环参数(self.本循环参数)
             # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
             if not self.本循环参数.compate(self.上循环参数):
                 TimeECHO(self.prefix+f"上步计算参数不同,回到大厅重新初始化")
@@ -4338,7 +4338,10 @@ class wzry_task:
             # 开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------
-            self.上循环参数 = copy.copy(self.本循环参数)
+            # 如果计算过程中对参数进行了更改，这里可以记录最新的参数
+            self.上循环参数 = self.构建循环参数(self.本循环参数)
+            # ------------------------------------------------------------------------------
+            #
             if self.Tool.存在同步文件():
                 TimeECHO(self.prefix+"战斗结束中遇到同步文件返回")
                 continue
