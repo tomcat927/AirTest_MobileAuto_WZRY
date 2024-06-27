@@ -3567,8 +3567,12 @@ class wzry_task:
         对战 = Template(r"tpl1689666416575.png", record_pos=(0.362, 0.2), resolution=(960, 540), threshold=0.9)
         移动 = Template(r"tpl1702267006237.png", record_pos=(-0.327, 0.16), resolution=(960, 540))
         装备 = Template(r"tpl1709220117102.png", record_pos=(0.401, -0.198), resolution=(960, 540))
+        钱袋 = Template(r"tpl1719485696322.png", record_pos=(-0.469, -0.059), resolution=(960, 540), threshold=0.9)
         TimeECHO(self.prefix+"判断对战中")
-        if exists(对战):
+        对战图片元素 = [对战, 移动, 装备, 钱袋]
+        找到对战按钮, 对战图片元素 = self.Tool.存在任一张图(对战图片元素, "对战图片元素")
+        # 元流之子的对战按钮好几个，对战按钮无法判断
+        if 找到对战按钮:
             TimeECHO(self.prefix+"正在对战中")
             if 处理:
                 TimeECHO(self.prefix+"加速对战中:建议把自动买装备和自动技能加点打开,更真实一些")
