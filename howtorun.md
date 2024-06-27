@@ -31,24 +31,15 @@ chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/an
 ```
 
 #### 代码修改
+使用start_app启动安卓软件的各种坑
+- 方式1(monkey). `start_app(package_name)`, 需要修改Airtest的代码添加`--pct-syskeys 0`
+- 方式2(am start). `start_app(package_name, activity)`<br>
+获得Activity的方法`adb -s 127.0.0.1:5565 shell dumpsys package com.tencent.tmgp.sgame`有一个Activity Resolver Table
+<br> Airtest代码中是 `adb -s 127.0.0.1:5565  shell am start -n package_name/package_name.activity`
+<br>可并不是所有的app的启动都遵循这一原则,所以如果相同方式2，还是要修改Airtest的代码，变为`package_name/activity`
 
-mac/linux都会报错 airtest使用monkey控制安卓的命令 `monkey -p com.tencent.tmgp.sgame -c android.intent.category.LAUNCHER 1` , #会报错
-
-```
-** SYS_KEYS has no physical keys but with factor 2.0%.
-airtest.core.error.AdbError: stdout[b'  bash arg: -p\n  bash arg: com.tencent.tmgp.sgame\n  bash arg: -c\n  bash arg: android.intent.category.LAUNCHER\n  bash arg: 1\n'] stderr[b'args: [-p, com.tencent.tmgp.sgame, -c, android.intent.category.LAUNCHER, 1]\n arg: "-p"\n arg: "com.tencent.tmgp.sgame"\n arg: "-c"\n arg: "android.intent.category.LAUNCHER"\n arg: "1"\ndata="com.tencent.tmgp.sgame"\ndata="android.intent.category.LAUNCHER"\n** SYS_KEYS has no physical keys but with factor 2.0%.\n']
-```
-
-添加 `--pct-syskeys 0`
-
-修改 `/home/cndaqiang/.local/lib/python3.10/site-packages/airtest/core/android/adb.py`
-
-```
-1387         if not activity:
-1388             self.shell(['monkey --pct-syskeys 0', '-p', package, '-c', 'android.intent.category.LAUNCHER', '1'])
-1389         else:
-1390             self.shell(['am', 'start', '-n', '%s/%s.%s' % (package, package, activity)])
-```
+* ~~本脚本已针对WZRY和WZYD，使用`start_app("com.tencent.gamehelper.smoba","","SGameActivity")`的方式打开程序，不会报错~~
+* **综合上述原因，采取方式1**, 按照[https://cndaqiang.github.io/2023/11/10/MobileAuto/](https://cndaqiang.github.io/2023/11/10/MobileAuto/), 添加`--pct-syskeys 0`
 
 #### 执行
 

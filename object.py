@@ -44,18 +44,20 @@ ST.THRESHOLD = 0.8  # 其他语句的默认阈值
 eastern_eight_offset = timedelta(hours=8)
 # 创建一个时区对象
 eastern_eight_tz = timezone(eastern_eight_offset)
-#? 设置,虚拟机,android docker, iphone, etc,主要进行设备的连接和重启
+# ? 设置,虚拟机,android docker, iphone, etc,主要进行设备的连接和重启
 
 # 获取当前的运行信息, 有的客户端有bug
 AirtestIDE = "AirtestIDE" in sys.executable
 
 
 # 控制屏幕输出
-## 这个设置可以极低的降低airtest输出到屏幕的信息
+# 这个设置可以极低的降低airtest输出到屏幕的信息
 logger = logging.getLogger("airtest")
 logger.setLevel(logging.WARNING)
 
-## 替代基础的print函数
+# 替代基础的print函数
+
+
 def TimeECHO(info="None", end=""):
     # 由于AirTest客户端的解释器不会输出print的命令
     if AirtestIDE:
@@ -71,10 +73,13 @@ def TimeECHO(info="None", end=""):
     else:
         print(modified_args)
 
+
 def TimeErr(info="None"):
     TimeECHO("NNNN:"+info)
 
 # ........................
+
+
 def connect_status(times=10):
     png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
     for i in np.arange(times):
@@ -184,6 +189,7 @@ def stop_app(*args, **kwargs):
             TimeErr("start_app: 连接不上设备")
             return False
     return result
+
 
 class DQWheel:
     def __init__(self, var_dict_file='var_dict_file.txt', prefix="", mynode=-10, totalnode=-10, 容器优化=False):
@@ -772,7 +778,7 @@ class DQWheel:
 
 
 class deviceOB:
-    def __init__(self, 设备类型="IOS", mynode=0, totalnode=1, LINK="ios:///http://192.168.12.130:8100", APPID=None):
+    def __init__(self, 设备类型="IOS", mynode=0, totalnode=1, LINK="Android:///"+"127.0.0.1:"+str(5555)):
         self.LINK = LINK
         self.LINKport = self.LINK.split(":")[-1]
         self.LINKhead = self.LINK[:-len(self.LINKport)]
@@ -789,10 +795,6 @@ class deviceOB:
         self.PID = -10  # Windows+Blustack专用,关闭特定虚拟机
         #
         self.连接设备()
-        # APPID
-        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
-        self.APPID = APPID if APPID else self.APPID
-        # start_app(self.APPID);sleep(5)
         #
         self.实体终端 = False
         self.实体终端 = "mac" in self.控制端 or "ios" in self.设备类型
@@ -930,24 +932,42 @@ class deviceOB:
         self.启动设备()
         self.连接设备()
 
+
+class appOB:
+    def __init__(self, prefix="", APPID="", big=False, device=None):
+        self.prefix = prefix
+        self.APPID = APPID
+        self.Activity = None if "/" not in self.APPID else self.APPID.split("/")[1]
+        self.APPID = self.APPID.split("/")[0]
+        self.device = device
+        self.big = big  # 是不是大型的程序, 容易卡顿，要多等待一会
     #
-    def 关闭APP(self):
-        TimeECHO(self.prefix+f"关闭APP[{self.APPID}]中")
-        if not stop_app(self.APPID):
-            TimeErr(self.prefix+"关闭失败,可能失联")
-            return False
-        else:
-            return True
 
     def 打开APP(self):
-        TimeECHO(self.prefix+f"打开APP[{self.APPID}]中")
-        if not start_app(self.APPID):
+        # 使用start_app启动安卓软件的各种坑
+        # 方式1(monkey). start_app(package_name), 需要修改Airtest的代码添加`--pct-syskeys 0`(https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+        # 方式2(am start). start_app(package_name, activity)
+        # 获得Activity的方法`adb -s 127.0.0.1:5565 shell dumpsys package com.tencent.tmgp.sgame`有一个Activity Resolver Table
+        # Airtest代码中是 adb -s 127.0.0.1:5565  shell am start -n package_name/package_name.activity
+        # 可并不是所有的app的启动都遵循这一原则,如
+        # "com.tencent.tmgp.sgame/SGameActivity",
+        # "com.tencent.gamehelper.smoba/com.tencent.gamehelper.biz.launcher.ui.SplashActivit
+        # 所以如果相同方式2，还是要修改Airtest的代码，变为package_name/activity
+        # 综合上述原因，还是采取方式1, 添加`--pct-syskeys 0`
+        # 虽然start_app(self.APPID)也能启动, 但是要修改代码airtest/core/android/adb.py,
+        # 即
+        # 使用start_app(self.APPID,Activity)就不用修改代码了
+        if self.Activity:
+            TimeECHO(self.prefix+f"打开APP[{self.APPID}/{self.Activity}]中")
+            启动成功 = start_app(self.APPID, self.Activity)
+        else:
+            TimeECHO(self.prefix+f"打开APP[{self.APPID}]中")
+            启动成功 = start_app(self.APPID)
+        if not 启动成功:
             TimeErr(self.prefix+"打开失败,可能失联")
             return False
         else:
             sleep(20)
-        if "com.tencent.tmgp.sgame" in self.APPID:  # IOS
-            sleep(30)  # ipSE的打开APP是在是太慢了
         return True
 
     def 重启APP(self, sleeptime=0):
@@ -960,8 +980,8 @@ class deviceOB:
         sleep(10)
         sleeptime = max(10, sleeptime)  # 这里的单位是s
         printtime = max(30, sleeptime/10)
-        if sleeptime > 60*60:  # >1h
-            self.重启设备(sleeptime)
+        if sleeptime > 60*60 and self.device:  # >1h
+            self.device.重启设备(sleeptime)
         else:
             TimeECHO("sleep %d min" % (sleeptime/60))
             nstep = int(sleeptime/printtime)
@@ -970,27 +990,42 @@ class deviceOB:
                 sleep(printtime)
         TimeECHO(self.prefix+f"打开程序")
         if self.打开APP():
-            TimeECHO(self.prefix+f"打开程序成功,sleep60*2")
-            sleep(60*2)
+            if self.big:
+                TimeECHO(self.prefix+f"打开程序成功,sleep60*2")
+                sleep(60*2)
             return True
         else:
             TimeECHO(self.prefix+f"打开程序失败")
             return False
+    #
+
+    def 关闭APP(self):
+        TimeECHO(self.prefix+f"关闭APP[{self.APPID}]中")
+        if not stop_app(self.APPID):
+            TimeErr(self.prefix+"关闭失败,可能失联")
+            return False
+        else:
+            sleep(5)
+            return True
 
 
 class wzyd_libao:
-    def __init__(self, prefix="wzyd", APPID="com.tencent.gamehelper.smoba", Tool=None, 初始化检查=False):
+    def __init__(self, prefix="wzyd", 设备类型="android", Tool=None, 初始化检查=False):
         self.体验币成功 = False
         self.营地活动 = True
-        self.APPID = APPID
+        self.设备类型 = 设备类型
         # 这里prefix+,是用于输出到屏幕
         # 输入的prefix是mynode
         self.prefix = f"({prefix})王者营地:"
+        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.gamehelper.smoba"
+        # com.tencent.gamehelper.smoba/com.tencent.gamehelper.biz.launcher.ui.SplashActivity
+        self.APPOB = appOB(prefix=self.prefix, APPID=self.APPID)
+        self.IOS = "ios" in self.设备类型
+        #
         self.营地初始化FILE = prefix+".营地初始化.txt"
         self.营地需要登录FILE = prefix+".营地需要登录.txt"
         # 使用输入的prefix,才可以用一套同步文件
         self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
-        self.IOS = "smobagamehelper" in self.APPID
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
         self.游戏界面图标 = Template(r"tpl1704381547456.png", record_pos=(0.187, 0.726), resolution=(540, 960))
@@ -1013,6 +1048,8 @@ class wzyd_libao:
         self.初始化成功 = False
         if 初始化检查:
             self.初始化成功 = self.营地初始化(初始化检查=初始化检查)
+            if 初始化检查:
+                self.APPOB.关闭APP()
 
     def 判断营地大厅中(self):
         #
@@ -1038,9 +1075,9 @@ class wzyd_libao:
                 return True
             return False
         # 打开APP
-        if not start_app(self.APPID):
+        if not self.APPOB.打开APP():
             TimeECHO(self.prefix+"营地无法打开,返回")
-            stop_app(self.APPID)
+            self.APPOB.关闭APP()
             return False
         sleep(20)  # 等待营地打开
         if os.path.exists(self.营地初始化FILE):
@@ -1064,20 +1101,23 @@ class wzyd_libao:
         if self.判断营地登录中():
             TimeECHO(self.prefix+"检测到营地登录界面,不领取礼包")
             self.Tool.touchfile(self.营地需要登录FILE)
-            stop_app(self.APPID)
+            self.APPOB.关闭APP()
             return False
         #
         if not self.判断营地大厅中():
             TimeECHO(self.prefix+"营地未知原因没能进入大厅,不领取礼包")
             self.Tool.touchfile(self.营地需要登录FILE)
-            stop_app(self.APPID)
+            self.APPOB.关闭APP()
             return False
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
-            stop_app(self.APPID)
         #
         return True
+
+    def STOP(self):
+        self.APPOB.关闭APP()
+    #
 
     def RUN(self):
         #
@@ -1094,7 +1134,7 @@ class wzyd_libao:
         self.初始化成功 = self.营地初始化(初始化检查=False)
         if not self.初始化成功:
             TimeECHO(self.prefix+"营地初始化失败")
-            stop_app(self.APPID)
+            self.APPOB.关闭APP()
             return False
         #
         self.营地任务_浏览资讯()
@@ -1107,7 +1147,7 @@ class wzyd_libao:
         self.每日签到任务()
         self.营地币兑换碎片()
         self.营地战令经验()
-        stop_app(self.APPID)
+        self.APPOB.关闭APP()
 
     def 营地任务_观看赛事(self, times=1):
         #
@@ -1125,8 +1165,7 @@ class wzyd_libao:
         TimeECHO(self.prefix+f"{keystr}{times}")
         if times > 0:
             sleep(5)
-        stop_app(self.APPID)
-        start_app(self.APPID)
+        self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
         if times > 10:
@@ -1157,8 +1196,8 @@ class wzyd_libao:
         TimeECHO(self.prefix+f"{keystr}{times}")
         if times > 0:
             sleep(5)
-        stop_app(self.APPID)
-        start_app(self.APPID)
+        self.APPOB.关闭APP()
+        self.APPOB.打开APP()
         sleep(10)
         times = times+1
         if times > 10:
@@ -1207,8 +1246,7 @@ class wzyd_libao:
         TimeECHO(self.prefix+f"{keystr}{times}")
         if times > 0:
             sleep(5)
-        stop_app(self.APPID)
-        start_app(self.APPID)
+        self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
         if times > 10:
@@ -1251,8 +1289,7 @@ class wzyd_libao:
         TimeECHO(self.prefix+f"营地战令经验{times}")
         if times > 0:
             sleep(5)
-        stop_app(self.APPID)
-        start_app(self.APPID)
+        self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
         if times > 10:
@@ -1313,8 +1350,7 @@ class wzyd_libao:
         TimeECHO(self.prefix+f"体验币{times}")
         if times > 0:
             sleep(5)
-        stop_app(self.APPID)
-        start_app(self.APPID)
+        self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
         if times > 10:
@@ -1410,9 +1446,7 @@ class wzyd_libao:
         if times > 0:
             sleep(5)
         # 每日签到
-        if not stop_app(self.APPID):
-            return
-        start_app(self.APPID)
+        self.APPOB.重启APP(10)
         sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"王者营地个人界面", savepos=True)
         sleep(5)
@@ -1450,9 +1484,7 @@ class wzyd_libao:
         times = times+1
         if times > 10:
             return False
-        if not stop_app(self.APPID):
-            return
-        start_app(self.APPID)
+        self.APPOB.重启APP(10)
         sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, self.prefix+"个人界面")
         sleep(5)
@@ -1542,8 +1574,10 @@ class wzry_figure:
         self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
         # 一些图库, 后期使用图片更新
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
-        self.大厅对战图标 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540), threshold=0.9)
-        self.大厅万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540), threshold=0.9)
+        self.大厅对战图标 = Template(r"tpl1719454669981.png", record_pos=(-0.242, 0.145), resolution=(960, 540))
+        self.大厅对战图标2 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540), threshold=0.9)
+        self.大厅万象天工 = Template(r"tpl1719454683770.png", record_pos=(0.232, 0.144), resolution=(960, 540))
+        self.大厅万象天工2 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540), threshold=0.9)
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
@@ -1553,6 +1587,8 @@ class wzry_figure:
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅万象天工)
+        self.大厅元素.append(self.大厅对战图标2)
+        self.大厅元素.append(self.大厅万象天工2)
         self.房间元素 = []
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
@@ -1639,7 +1675,7 @@ class wzry_task:
     # 需要传递中文时,由于精简后无法输入中文,在shell中建
     # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
 
-    def __init__(self, 移动端="android", 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=7):
+    def __init__(self, 移动端=None, 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=7):
         self.移动端 = 移动端
         self.mynode = self.移动端.mynode
         self.totalnode = self.移动端.totalnode
@@ -1647,7 +1683,13 @@ class wzry_task:
         self.房主 = self.mynode == 0 or self.totalnode == 1
         self.prefix = f"({self.mynode})"
         #
+        self.设备类型 = self.移动端.设备类型
+        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
+        # "com.tencent.tmgp.sgame/SGameActivity"
+        self.APPOB = appOB(prefix=self.prefix, APPID=self.APPID, big=True)
+        #
         self.对战模式 = 对战模式  # "5v5匹配" or "王者模拟战"
+        # 对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
         self.debug = debug  # 本地调试模式,加速,测试所有功能
         TimeECHO(self.prefix+f"对战模式:{self.对战模式}")
         #
@@ -1714,7 +1756,7 @@ class wzry_task:
         self.标准模式 = False
         self.触摸对战 = False
         self.标准触摸对战 = False
-        self.赛季 = "2024"
+        self.WZ新功能 = True
         self.对战结束返回房间 = True
         self.无法进行组队 = False
         # 对应的控制文件
@@ -1750,15 +1792,9 @@ class wzry_task:
         self.玉镖夺魁签到 = False
         # 刷新礼包的领取计时
         self.每日礼包()
-        self.武道大会()
-        self.六国远征()
-        self.进行六国远征 = os.path.exists(self.prefix+"六国远征.txt")
-        self.进行武道大会 = os.path.exists(self.prefix+"武道大会.txt")
         # 设置为0,可以保证下次必刷礼包
         self.Tool.timedict["领游戏礼包"] = 0
         self.Tool.timedict["领营地礼包"] = 0
-        self.Tool.timedict["六国远征战"] = 0
-        self.Tool.timedict["武道大会"] = 0
         self.Tool.touchfile(self.免费商城礼包FILE)
 
     # 保存运行信息
@@ -1776,7 +1812,7 @@ class wzry_task:
         runinfo.触摸对战 = self.触摸对战
         runinfo.标准触摸对战 = self.标准触摸对战
         runinfo.prefix = self.prefix
-        return  runinfo
+        return runinfo
 
     # 网络优化提示
     def 网络优化(self):
@@ -1842,11 +1878,11 @@ class wzry_task:
                     self.Tool.touch同步文件()
                 else:
                     self.Tool.touch同步文件(self.Tool.独立同步文件)
-                self.移动端.重启APP(10)
+                self.APPOB.重启APP(10)
                 return False
         # 次数上限
         if times % 4 == 0:
-            self.移动端.重启APP(10)
+            self.APPOB.重启APP(10)
             self.登录游戏()
         times = times+1
         #
@@ -1869,7 +1905,7 @@ class wzry_task:
             while self.判断对战中(处理对战):
                 if self.debug:
                     TimeECHO(self.prefix+"尝试进入大厅:对战中,直接重启APP")
-                    self.移动端.重启APP(30)
+                    self.APPOB.重启APP(30)
                     self.登录游戏()  # cndaqiang: debug专用
                 TimeECHO(self.prefix+"尝试进入大厅:对战sleep")
                 sleep(15)  # sleep太久容易死
@@ -1928,7 +1964,7 @@ class wzry_task:
         if self.Tool.存在同步文件():
             return True
         #
-        self.移动端.重启APP()
+        self.APPOB.重启APP()
         self.登录游戏()
         #
         # 健康系统直接重新同步
@@ -1998,7 +2034,7 @@ class wzry_task:
                 self.Tool.touch同步文件()
             else:
                 TimeECHO(self.prefix+"需要重新登录:创建单节点同步")
-                self.移动端.重启APP(10*60)
+                self.APPOB.重启APP(10*60)
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
             return True
         #
@@ -2089,6 +2125,18 @@ class wzry_task:
             return True
         #
         self.进入大厅()
+        #
+        #目前灰度测试稷下学院, 主页的图标不同, 这里做一下判断
+        if self.图片.大厅万象天工 != self.图片.大厅万象天工2:
+            if exists(self.图片.大厅对战图标2):
+                self.WZ新功能 = False
+                TimeECHO(self.prefix+"本账号未开放稷下学院入口")
+                self.图片.大厅对战图标 = self.图片.大厅对战图标2
+                self.图片.大厅万象天工 = self.图片.大厅万象天工2
+            elif exists(self.图片.大厅对战图标): 
+                self.图片.大厅对战图标2 = self.图片.大厅对战图标
+                self.图片.大厅万象天工2 = self.图片.大厅万象天工
+        #
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
@@ -2139,7 +2187,7 @@ class wzry_task:
         禁赛提示 = Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
         if exists(禁赛提示):
             TimeECHO(self.prefix+"禁赛提示无法进行匹配")
-            self.移动端.重启APP(10)
+            self.APPOB.重启APP(10)
             if self.组队模式:
                 self.Tool.touch同步文件()
                 return True
@@ -2268,7 +2316,7 @@ class wzry_task:
             sleep(30)
             if self.判断大厅中():
                 TimeECHO(self.prefix+"模拟战: 进入万象天工失败, 重启设备")
-                self.移动端.重启APP()
+                self.APPOB.重启APP()
                 self.登录游戏()
                 return self.单人进入人机匹配房间_模拟战(times)
         #
@@ -2433,7 +2481,7 @@ class wzry_task:
                 if self.Tool.容器优化:
                     break
                 TimeECHO(self.prefix+"加载时间过长.....重启APP")
-                self.移动端.重启APP(10)
+                self.APPOB.重启APP(10)
                 self.登录游戏()
                 return False
         #
@@ -2685,7 +2733,7 @@ class wzry_task:
 
     def 王者礼包(self):
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
-            self.移动端.打开APP()
+            self.APPOB.打开APP()
             self.进入大厅()
             #
             if self.Tool.存在同步文件():
@@ -2750,6 +2798,98 @@ class wzry_task:
     # @todo,其他活动一键领取
 
     def 商城免费礼包(self, times=1):
+        # 新界面的领取方式
+        if not self.WZ新功能: return self.商城免费礼包_old(times)
+        #
+        self.check_connect_status()
+        if self.Tool.存在同步文件():
+            return True
+        #
+        if times > 10:
+            return False
+        #
+        self.进入大厅()
+        if times == 1:
+            self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=True)
+        else:
+            if self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=False):
+                TimeErr(self.prefix+"领商城免费礼包超时")
+                return False
+        #
+        times = times+1
+        #
+        # 商城免费礼包
+        TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
+        if self.健康系统():
+            return False
+        #
+        TimeECHO(self.prefix+f":商城免费礼包")
+        # 做活动时，商城入口会变
+        商城入口 = []
+        商城入口.append(Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540)))
+        商城入口.append(Template(r"tpl1705718545013.png", target_pos=2, record_pos=(0.461, -0.115), resolution=(960, 540)))
+        # 因为默认的商城进入后是特效很多的皮肤，影响了界面的识别，所以切到干净的促销入口进行识别
+        促销入口 = Template(r"tpl1719455432184.png", record_pos=(-0.436, 0.075), resolution=(960, 540))
+        免费图标 = Template(r"tpl1719455279197.png", record_pos=(-0.122, -0.252), resolution=(960, 540))
+        免费领取 = Template(r"tpl1719455299372.png", record_pos=(0.035, 0.055), resolution=(960, 540), target_pos=8)
+        确定购买 = Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540))
+        商城界面 = []
+        商城界面.append(促销入口)
+        商城界面.append(免费图标)
+        商城界面.append(Template(r"tpl1719455683640.png", record_pos=(-0.368, -0.25), resolution=(960, 540)))
+        商城界面.append(Template(r"tpl1719455836014.png", record_pos=(-0.458, 0.19), resolution=(960, 540)))
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        #
+        找到商城入口 = False
+        for i in range(len(商城入口)):
+            TimeECHO(self.prefix+f"寻找商城入口{i}")
+            找到商城入口 = self.Tool.existsTHENtouch(商城入口[i], "商城入口", savepos=True)
+            if 找到商城入口:
+                break
+        if not 找到商城入口:
+            TimeECHO(self.prefix+f"无法找到商城入口")
+            return self.商城免费礼包(times=times)
+        sleep(30)
+        进入商城界面 = False
+        # 注：如果实在无法识别，这里手动点击到促销界面，让程序savepos记住促销的位置
+        for i in range(len(商城界面)):
+            self.Tool.existsTHENtouch(促销入口, f"新促销入口", savepos=True)
+            sleep(20)
+            TimeECHO(self.prefix+f"检测商城界面中...{i}")
+            if exists(商城界面[i]):
+                进入商城界面 = True
+                break
+        if self.健康系统():
+            return False
+        if not 进入商城界面:
+            TimeECHO(self.prefix+f"未检测到商城界面, 重新进入商城")
+            self.Tool.LoopTouch(返回, "返回")
+            if "商城入口" in self.Tool.var_dict.keys():
+                del self.Tool.var_dict["商城入口"]
+            TimeECHO("如果实在无法识别，手动点击到促销界面，让程序savepos记住促销的位置")
+            # 如果识别错了，可以用下面的命令删除
+            # if "促销入口" in self.Tool.var_dict.keys():
+            #    del self.Tool.var_dict["促销入口"]
+            return self.商城免费礼包(times=times)
+        #
+        领取成功 = False
+        if self.Tool.existsTHENtouch(免费图标, "免费图标", savepos=False):
+            sleep(5)
+            领取成功 = self.Tool.existsTHENtouch(免费领取, "免费领取", savepos=False)
+            sleep(10)
+            self.Tool.LoopTouch(确定购买, "确定购买")
+            self.关闭按钮()
+            self.Tool.LoopTouch(返回, "返回")
+            self.确定按钮()
+        else:
+            TimeECHO(self.prefix+f"没检测到免费图标,可能领取过了")
+            self.Tool.LoopTouch(返回, "返回")
+            return True
+        if not 领取成功:
+            TimeECHO(self.prefix+f"领取每日礼包失败")
+        return True
+
+    def 商城免费礼包_old(self, times=1):
         self.check_connect_status()
         if self.Tool.存在同步文件():
             return True
@@ -3019,26 +3159,18 @@ class wzry_task:
                 return True
             return False
         #
-        if "ios" in self.移动端.设备类型:
-            APPID = "com.tencent.smobagamehelper"
-        elif "android" in self.移动端.设备类型:
-            APPID = "com.tencent.gamehelper.smoba"
-        else:
-            TimeErr(self.prefix+":无法判断设备类型")
-            return False
         if 初始化:
-            王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, Tool=self.Tool, 初始化检查=True)
-            stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
-            # 直接关闭会导致分辨率变差，这里重新打开王者荣耀,回复分辨率
-            self.移动端.打开APP()
+            王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, Tool=self.Tool, 初始化检查=True)
+            # 重新打开王者荣耀,恢复屏幕分辨率
+            self.APPOB.打开APP()
             return 王者营地.初始化成功
         #
         if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
             TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
             return False
-        #
-        王者营地 = wzyd_libao(prefix=str(self.mynode), APPID=APPID, Tool=self.Tool, )
-        self.移动端.关闭APP()
+        # 关闭王者节省内存
+        self.APPOB.关闭APP()
+        王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, Tool=self.Tool)
         #
         TimeECHO(self.prefix+"王者营地礼包开始")
         try:
@@ -3047,10 +3179,10 @@ class wzry_task:
         except:
             traceback.print_exc()
             TimeErr(self.prefix+"王者营地礼包领取失败")
-        stop_app(APPID)  # 杀掉后台,提高王者、WDA活性
-        #
-        self.移动端.打开APP()
+        王者营地.STOP()  # 杀掉后台,提高王者、WDA活性
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
+        #
+        self.APPOB.打开APP()
 
     def KPL每日观赛(self, times=1, 观赛时长=20*60):
         self.check_connect_status()
@@ -3367,369 +3499,6 @@ class wzry_task:
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
         return True
-    #
-
-    def 六国远征_界面判断(self):
-        六国界面图 = Template(r"tpl1703206627245.png", record_pos=(-0.379, -0.255), resolution=(960, 540))
-        六国商店入口 = Template(r"tpl1703207698623.png", record_pos=(-0.287, 0.219), resolution=(960, 540))
-        平台1 = Template(r"tpl1703206581622.png", record_pos=(-0.298, -0.131), resolution=(960, 540))
-        if exists(六国界面图):
-            return True
-        if exists(六国商店入口):
-            return True
-        if exists(平台1):
-            return True
-        return False
-
-    def 六国远征_进入界面(self, times=1):
-        # 成功返回True,各种失败返回False
-        self.check_connect_status()
-        if self.Tool.存在同步文件():
-            return False
-        if self.六国远征_界面判断():
-            return True
-        TimeECHO(self.prefix+":六国远征_进入界面")
-        #
-        if times == 1:
-            self.Tool.timelimit(timekey="六国远征_进入界面", limit=60*5, init=True)
-        else:
-            if self.Tool.timelimit(timekey="六国远征_进入界面", limit=60*5, init=False):
-                TimeErr(self.prefix+"六国远征_进入界面超时")
-                return False
-        if times > 10:
-            return False
-        #
-        times = times+1
-        TimeECHO(self.prefix+":六国远征_准备从大厅重新进入六国界面")
-        self.进入大厅()
-        万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
-        if not self.Tool.existsTHENtouch(万象天工, "万象天工"):
-            TimeErr(self.prefix+":六国:找不到万象天工")
-            self.六国远征_进入界面(times)
-        sleep(2)
-        冒险玩法 = Template(r"tpl1703206553221.png", record_pos=(-0.433, -0.132), resolution=(960, 540))
-        六国远征入口 = Template(r"tpl1703206565024.png", record_pos=(0.152, -0.027), resolution=(960, 540))
-        if not self.Tool.existsTHENtouch(冒险玩法, "冒险玩法"):
-            TimeErr(self.prefix+":六国:找不到冒险玩法")
-            self.六国远征_进入界面(times)
-        sleep(2)
-        if not self.Tool.existsTHENtouch(六国远征入口, "六国远征入口"):
-            TimeErr(self.prefix+":六国:找不到六国远征界面")
-            self.六国远征_进入界面(times)
-        sleep(2)
-        if not self.六国远征_界面判断():
-            return self.六国远征_进入界面(times)
-        return True
-
-    def 六国远征_重置次数(self):  # 成功返回True,各种失败返回False
-        if self.Tool.存在同步文件():
-            return False
-        if not self.六国远征_进入界面():
-            TimeECHO(self.prefix+":无法进行六国远征模式,重置次数失败")
-            return False
-        #
-        重置次数 = Template(r"tpl1703207708968.png", record_pos=(0.001, 0.22), resolution=(960, 540))
-        黄色确定 = Template(r"tpl1703207718965.png", record_pos=(0.095, 0.117), resolution=(960, 540))
-        关卡 = []
-        关卡.append(Template(r"tpl1703208015389.png", record_pos=(0.191, -0.163), resolution=(960, 540), threshold=0.9))
-        #
-        TimeECHO(self.prefix+":六国远征.准备重置次数")
-        if self.Tool.existsTHENtouch(重置次数, "重置次数", savepos=False):
-            sleep(5)
-            self.Tool.existsTHENtouch(黄色确定, "确定重置", savepos=False)
-            sleep(5)
-            if not exists(关卡[-1]):
-                TimeECHO(self.prefix+":重置成功")
-                return True
-            else:
-                TimeECHO(self.prefix+f":找到{关卡[-1]},重置失败")
-                return False
-        else:
-            TimeECHO(self.prefix+":找不到重置按钮")
-            return False
-
-    # 进入界面后再Call,这里默认已经进入界面了,不再进行重复检测
-    def 六国远征_自动探索(self, times=1):
-        if self.Tool.存在同步文件():
-            return False
-        自动探索 = Template(r"tpl1703206610423.png", record_pos=(0.284, 0.22), resolution=(960, 540), threshold=0.9)
-        任务完成 = Template(r"tpl1703207598362.png", record_pos=(0.083, -0.176), resolution=(960, 540), threshold=0.9)
-        任务完成0 = Template(r"tpl1703207566167.png", record_pos=(-0.014, -0.156), resolution=(960, 540))
-        蓝色确定 = Template(r"tpl1703207573159.png", record_pos=(-0.002, 0.163), resolution=(960, 540))
-        黄色确定 = Template(r"tpl1703207718965.png", record_pos=(0.095, 0.117), resolution=(960, 540))
-        挑战按钮 = Template(r"tpl1703343022624.png", record_pos=(0.221, 0.201), resolution=(960, 540))
-        # 每日首通的图标,只显示一次
-        关卡 = []
-        关卡.append(Template(r"tpl1703206581622.png", record_pos=(-0.298, -0.131), resolution=(960, 540), threshold=0.9))
-        关卡.append(Template(r"tpl1703206592623.png", record_pos=(-0.056, -0.212), resolution=(960, 540), threshold=0.9))
-        关卡.append(Template(r"tpl1703207999598.png", record_pos=(-0.111, 0.027), resolution=(960, 540), threshold=0.9))
-        关卡.append(Template(r"tpl1703208004794.png", record_pos=(0.077, -0.032), resolution=(960, 540), threshold=0.9))
-        关卡.append(Template(r"tpl1703208010005.png", record_pos=(0.306, 0.032), resolution=(960, 540), threshold=0.9))
-        关卡.append(Template(r"tpl1703208015389.png", record_pos=(0.191, -0.163), resolution=(960, 540), threshold=0.9))
-        #
-        if not self.六国远征_界面判断():
-            TimeErr(self.prefix+":六国_自动探索:找不到六国远征界面")
-            return False
-        #
-        #
-        # 正式开始探索,基本上10分钟才能完成一轮，所以这个时间就取50
-        if times == 1:
-            self.Tool.timelimit(timekey="六国远征_闯关计时", limit=60*50, init=True)
-        # 是因为容易卡住,所以设置这个上限,在一段时间内必须能检测到界面
-        self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-        times = times+1
-        if times > 2:
-            TimeErr(self.prefix+":六国_自动探索:次数太多,放弃")
-            return False
-        while True:
-            self.Tool.timelimit("六国远征战", limit=60*60, init=True)
-            if self.健康系统():
-                return False
-            if self.Tool.存在同步文件():
-                return False
-            if self.Tool.timelimit(timekey="六国远征_闯关计时", limit=60*50, init=False):
-                TimeECHO(self.prefix+":六国远征探索时间达到上限")
-                # 这里其实还在探索关卡,直接return不行,程序还在探索
-                self.移动端.重启APP(10)
-                self.登录游戏()
-                return False
-            # 探索过程中检测界面
-            if self.六国远征_界面判断():
-                TimeECHO(self.prefix+":检测到远征界面")
-                for i in range(len(关卡)):
-                    if exists(关卡[i]):
-                        TimeECHO(self.prefix+f":存在关卡{i+1}")
-                    else:
-                        break
-                sleep(30)
-                if not self.六国远征_界面判断():
-                    self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-            else:
-                self.Tool.existsTHENtouch(蓝色确定, "成就确定", savepos=False)
-                if self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=False):
-                    TimeECHO(self.prefix+":10分钟内未检测到远征界面")
-                    TimeECHO(self.prefix+":有概率界面卡住,重启APP")
-                    self.移动端.重启APP(10)
-                    self.登录游戏()
-                    return self.六国远征_自动探索(times)
-            # 对战中判断,这句话没有什么用,就是单纯跑一下
-            # windows的虚拟机,容易对战结束后卡在对战界面，如果联系60s都是对战界面,建议点击右上角退出游戏
-            if self.判断对战中():
-                还在对战 = True
-                for i in range(30):
-                    还在对战 = self.判断对战中()
-                    if not 还在对战:
-                        self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-                        break
-                    sleep(5)
-                if 还在对战:
-                    TimeECHO(self.prefix+"还在对战,可能卡住,手动退出")
-                    设置按钮 = Template(r"tpl1703433283847.png", record_pos=(0.47, -0.258), resolution=(960, 540))
-                    退出本局 = Template(r"tpl1703433372804.png", record_pos=(-0.01, 0.218), resolution=(960, 540))
-                    继续 = Template(r"tpl1703433396250.png", record_pos=(0.0, 0.241), resolution=(960, 540))
-                    self.Tool.existsTHENtouch(设置按钮, "设置按钮", savepos=True)
-                    sleep(5)
-                    self.Tool.existsTHENtouch(退出本局, "退出本局", savepos=True)
-                    sleep(5)
-                    # 退出两次时怕有点击屏幕继续
-                    self.Tool.existsTHENtouch(退出本局, "退出本局", savepos=True)
-                    sleep(5)
-                    self.Tool.existsTHENtouch(继续, "继续", savepos=False)
-                    break
-            #
-            self.Tool.existsTHENtouch(自动探索, "自动探索", savepos=False)
-            # 有时候会卡住,需要手动点击一下,而且容易卡多次
-            if exists(挑战按钮):
-                TimeECHO(self.prefix+"检测到挑战按钮")
-                sleep(10)
-                if self.Tool.existsTHENtouch(挑战按钮, "挑战按钮", savepos=False):
-                    TimeECHO(self.prefix+":卡在挑战按钮,点击跳过")
-                    sleep(10)
-                    self.Tool.LoopTouch(挑战按钮, "挑战按钮", loop=10, savepos=False)
-                    if exists(挑战按钮):
-                        TimeErr(self.prefix+":仍有挑战按钮,大概率英雄已经死完了,准备重置次数")
-                        if self.六国远征_重置次数():
-                            TimeECHO(self.prefix+"成功重置,继续今日挑战")
-                            self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-                            continue
-                        else:
-                            TimeECHO(self.prefix+"重置失败,开始检测原因")
-                            if self.Tool.存在同步文件():
-                                return False
-                            # 唯一return True表示成功的入口
-                            if exists(关卡[-1]):
-                                TimeECHO(self.prefix+"存在关卡-1,远征完成,结束今日挑战")
-                                return True
-                    else:
-                        TimeECHO(self.prefix+":挑战按钮消失,跳过成功")
-                        self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-                        continue
-            #
-            # 达成六国的各种成就
-
-            if exists(任务完成0):  # 也可能是普通的一局结束
-                TimeECHO(self.prefix+":领取本局/轮奖励")
-                self.Tool.existsTHENtouch(蓝色确定, "蓝色确定", savepos=False)
-                if not exists(任务完成0):
-                    self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-            #
-            if exists(任务完成):
-                TimeECHO(self.prefix+":自动探索一轮完成.回到界面.准备重置")
-                # 多加几个判断
-                if not exists(关卡[0]):
-                    TimeECHO(self.prefix+":不存在关卡1,不该重置,返回")
-                    continue
-                else:
-                    TimeECHO(self.prefix+":存在关卡1")
-                    if not exists(关卡[-1]):
-                        TimeECHO(self.prefix+":不存在关卡-1,不该重置,返回")
-                        continue
-                #
-                if self.六国远征_重置次数():
-                    self.Tool.timelimit(timekey="六国远征_卡顿计时", limit=60*20, init=True)
-                    continue
-                else:
-                    TimeECHO(self.prefix+"无法重置,远征完成,不再继续探索")
-                    return True
-            sleep(30)
-    # 六国远征获取的金币不受欢迎5v5对战上限限制,可以额外获得金币
-    # 当英雄太少,铭文不够时,进行六国模式,容易发生英雄死完了,一轮没通关
-
-    def 六国远征(self):
-        if "2023" not in self.赛季:
-            TimeECHO(self.prefix+"S34赛季彻底关闭远征商店与武道商店入口,暂时保留代码避免又增加该功能")
-            return True
-        if not self.Tool.timelimit("六国远征战", limit=60*60, init=False):
-            TimeECHO(self.prefix+"时间太短,暂时不六国远征战")
-            return False
-        TimeECHO(self.prefix+":开始进行六国远征模式")
-        self.check_connect_status()
-        if self.Tool.存在同步文件():
-            return False
-        if not self.六国远征_进入界面():
-            TimeECHO(self.prefix+":无法进行六国远征模式")
-            return False
-        return self.六国远征_自动探索()
-    #
-    # 懒得分写成好几个了
-
-    def 武道大会(self):
-        if "2023" not in self.赛季:
-            TimeECHO(self.prefix+"S34赛季彻底关闭远征商店与武道商店入口,暂时保留代码避免又增加该功能")
-            return True
-        if not self.Tool.timelimit("武道大会", limit=60*60, init=False):
-            TimeECHO(self.prefix+"时间太短,暂时不武道大会")
-            return False
-        TimeECHO(self.prefix+":开始进行武道大会")
-        self.check_connect_status()
-        if self.Tool.存在同步文件():
-            return False
-        # 进入对战
-        武道界面 = Template(r"tpl1703483575207.png", record_pos=(-0.357, -0.25), resolution=(960, 540))
-        if not exists(武道界面):
-            self.进入大厅()
-            万象天工 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540))
-            if not self.Tool.existsTHENtouch(万象天工, "万象天工"):
-                TimeErr(self.prefix+":找不到万象天工")
-                self.进入大厅()
-                if not self.Tool.existsTHENtouch(万象天工, "万象天工"):
-                    TimeErr(self.prefix+":第二次无法找不到万象天工,武道大会失败")
-                    return False
-            sleep(2)
-            #
-            冒险玩法 = Template(r"tpl1703206553221.png", record_pos=(-0.433, -0.132), resolution=(960, 540))
-            武道大会入口 = Template(r"tpl1703482944918.png", record_pos=(-0.158, -0.028), resolution=(960, 540))
-            if not self.Tool.existsTHENtouch(冒险玩法, "冒险玩法"):
-                TimeErr(self.prefix+":武道:找不到冒险玩法")
-            sleep(2)
-            if not self.Tool.existsTHENtouch(武道大会入口, "武道大会入口"):
-                TimeErr(self.prefix+":找不到武道大会入口")
-            sleep(2)
-        #
-        if not exists(武道界面):
-            TimeErr(self.prefix+":最后也没有找到武道大会")
-            return False
-        #
-        self.Tool.timelimit(timekey="武道大会_计时", limit=60*50, init=True)
-        while True:
-            self.Tool.timelimit("武道大会", limit=60*60, init=True)
-            # .............................................
-            if not exists(武道界面):
-                TimeErr(self.prefix+":不在武道大会初始界面")
-                return False
-            # .............................................
-            if self.健康系统():
-                return False
-            if self.Tool.存在同步文件():
-                return False
-            if self.Tool.timelimit(timekey="武道大会_计时", limit=60*50, init=False):
-                TimeECHO(self.prefix+":武道大会达到时间上限")
-                # 这里其实还在探索关卡,直接return不行,程序还在探索
-                self.移动端.重启APP(10)
-                return False
-            #
-            挑战按钮1 = Template(r"tpl1703482958121.png", record_pos=(0.307, 0.106), resolution=(960, 540))
-            self.Tool.existsTHENtouch(挑战按钮1, "主挑战按钮", savepos=True)
-            sleep(5)
-            # 这里等待判断是不是对战次数达到上限
-            挑战界面 = Template(r"tpl1703482977909.png", record_pos=(-0.002, -0.116), resolution=(960, 540))
-            if not exists(挑战界面):
-                TimeECHO(self.prefix+":武道大会今日达标")
-                return True
-            挑战按钮2 = Template(r"tpl1703482967110.png", record_pos=(0.122, -0.046), resolution=(960, 540))
-            self.Tool.existsTHENtouch(挑战按钮2, "次挑战按钮", savepos=True)
-            sleep(5)
-            没选择英雄时 = Template(r"tpl1703483013544.png", record_pos=(0.427, -0.011), resolution=(960, 540))
-            if exists(没选择英雄时):
-                TimeErr(self.prefix+":需要手动选择英雄")
-                return False
-            确定挑战 = Template(r"tpl1703483092932.png", record_pos=(0.427, 0.239), resolution=(960, 540))
-            self.Tool.existsTHENtouch(确定挑战, "确定挑战", savepos=True)
-            # sleep至对战阶段,这个要判断勤点,不然直接循环的就太久了
-            for i in range(60):
-                if self.判断对战中():
-                    break  # 流程正常
-                TimeECHO(self.prefix+":sleep等待对战检测")
-                sleep(2)
-                if self.Tool.existsTHENtouch(挑战按钮2, "loop次挑战按钮", savepos=False):
-                    sleep(1)
-                if self.Tool.existsTHENtouch(确定挑战, "loop确定挑战", savepos=False):
-                    sleep(1)  # 玩意没有确定成功
-            # 等待对战结束
-            for i in range(10):
-                if self.判断对战中():
-                    TimeECHO(self.prefix+":sleep等待对战结束")
-                    sleep(90)  # 等待长一点时间
-                else:
-                    sleep(30)  # 避免刚结束对战，程序有点小卡
-                    break
-            #
-            任意点击继续 = Template(r"tpl1703483189920.png", record_pos=(0.003, 0.228), resolution=(960, 540))
-            self.Tool.existsTHENtouch(任意点击继续, "任意点击继续", savepos=True)
-            sleep(10)
-            确定继续 = Template(r"tpl1703483203726.png", record_pos=(0.302, 0.23), resolution=(960, 540))
-            self.Tool.existsTHENtouch(确定继续, "确定继续")
-            sleep(10)
-            任意继续 = Template(r"tpl1703483241120.png", record_pos=(-0.006, -0.255), resolution=(960, 540))
-            self.Tool.existsTHENtouch(任意继续, "任意继续")
-            sleep(10)
-            黄色确定 = Template(r"tpl1703207718965.png", record_pos=(-0.004, 0.164), resolution=(960, 540))
-            if self.Tool.existsTHENtouch(黄色确定, "段位提升黄色确定"):
-                sleep(10)
-            继续按钮 = Template(r"tpl1703483264138.png", record_pos=(-0.002, 0.24), resolution=(960, 540))
-            self.Tool.existsTHENtouch(继续按钮, "继续按钮")
-            sleep(10)
-            if self.健康系统():
-                return False
-            if not exists(武道界面):
-                TimeECHO(self.prefix+"找不到武道界面了,重新进入界面")
-                sleep(30)
-                self.移动端.重启APP()
-                self.登录游戏()
-                self.进入大厅()
-                self.Tool.existsTHENtouch(万象天工, "万象天工")
-                self.Tool.existsTHENtouch(冒险玩法, "冒险玩法")
-                self.Tool.existsTHENtouch(武道大会入口, "武道大会入口")
 # 状态判断
 
     def 判断大厅中(self):
@@ -3845,7 +3614,7 @@ class wzry_task:
                     #
                     if self.Tool.timelimit(timekey="endgame", limit=60*30, init=False):
                         TimeErr(self.prefix+"对战中游戏时间过长,重启游戏")  # 存在对战的时间超过20min,大概率卡死了
-                        self.移动端.重启APP(10)
+                        self.APPOB.重启APP(10)
                         self.登录游戏()
                         self.进入大厅()
                         return False
@@ -3923,14 +3692,14 @@ class wzry_task:
 
     def 健康系统_常用命令(self):
         if self.健康系统():
-            self.移动端.关闭APP()
+            self.APPOB.关闭APP()
             if self.组队模式:
                 TimeErr(self.prefix+"组队情况检测到健康系统,所以touch同步文件")
                 self.Tool.touch同步文件()
             else:
                 TimeErr(self.prefix+"组队情况检测到健康系统,所以touch独立同步文件")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
-                self.移动端.重启APP(60*5)
+                self.APPOB.重启APP(60*5)
             return True
         else:
             return False
@@ -4002,6 +3771,7 @@ class wzry_task:
         #
 
     def RUN(self):  # 程序入口
+        self.APPOB.打开APP()
         while True:
             # ------------------------------------------------------------------------------
             # 检测是否出现控制冲突,双脚本情况
@@ -4039,7 +3809,7 @@ class wzry_task:
                 TimeECHO(self.prefix+"存在同步文件,重新开始设置")
                 self.移动端.连接设备()
                 if connect_status():
-                    self.移动端.关闭APP()
+                    self.APPOB.关闭APP()
                 else:
                     TimeErr(self.prefix+"连接不上设备. 待同步后退出")
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
@@ -4074,7 +3844,7 @@ class wzry_task:
                     self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                     if self.王者营地礼包:
                         self.每日礼包_王者营地()
-                self.移动端.重启APP(sleeptime=self.mynode*10+60)
+                self.APPOB.重启APP(sleeptime=self.mynode*10+60)
                 # 因为self.登录游戏()会根据组队情况与否创建self.Tool.辅助同步文件，导致这里无线循环，所以提前设定self.组队模式
                 self.登录游戏()
             # ------------------------------------------------------------------------------
@@ -4094,7 +3864,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             if os.path.exists(self.结束游戏FILE):
                 TimeECHO(self.prefix+f"检测到{self.结束游戏FILE}, stop")
-                self.移动端.关闭APP()
+                self.APPOB.关闭APP()
                 return
             #
             while os.path.exists(self.SLEEPFILE):
@@ -4138,11 +3908,11 @@ class wzry_task:
                 #
                 TimeECHO(self.prefix+"夜间停止刷游戏")
                 #
-                # 这里仅领礼包,不要插入六国远征等不稳定的任务
+                # 这里仅领礼包,不要插入不稳定的任务
                 self.每日礼包(强制领取=True)
                 #
                 # 关闭APP并SLEEP等待下一个时间周期
-                self.移动端.关闭APP()
+                self.APPOB.关闭APP()
                 # 计算休息时间
                 hour, minu = self.Tool.time_getHM()
                 leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
@@ -4156,30 +3926,24 @@ class wzry_task:
                 if self.debug:
                     leftmin = 0.5
                 if leftmin > 60:
-                    self.移动端.重启APP(leftmin*60)
+                    self.APPOB.重启APP(leftmin*60)
                 else:
                     sleep(leftmin*60)
                 if not self.check_connect_status():
                     self.移动端.连接设备()
-                    self.移动端.重启APP(30)
+                    self.APPOB.重启APP(30)
                 #
                 if self.debug:
                     break
                 hour, minu = self.Tool.time_getHM()
             if 新的一天:
                 TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                self.移动端.重启APP(10)
+                self.APPOB.重启APP(10)
                 self.登录游戏()
                 self.jinristep = 0
-                self.赛季 = "2024"
-                self.进行六国远征 = False
-                self.进行武道大会 = False
+                self.WZ新功能 = True
                 self.本循环参数 = wzry_runinfo()
                 self.上循环参数 = wzry_runinfo()
-                if "2023" in self.赛季:
-                    # 存在该文件则进行六国远征
-                    self.Tool.touchfile(self.prefix+"六国远征.txt")
-                    self.Tool.touchfile(self.prefix+"武道大会.txt")
                 self.选择人机模式 = True
                 self.青铜段位 = False
                 # 因为免费商城礼包每天只领取一次
@@ -4202,7 +3966,7 @@ class wzry_task:
                     self.Tool.removefile(self.重新登录FILE)
                     if self.Tool.totalnode_bak > 1:
                         self.Tool.removefile(self.无法进行组队FILE)
-                    self.移动端.重启APP()
+                    self.APPOB.重启APP()
                     self.登录游戏()
             #
             if os.path.exists(self.重新登录FILE):
@@ -4248,30 +4012,6 @@ class wzry_task:
             self.房主 = self.mynode == 0 or self.totalnode == 1
             TimeECHO(self.prefix+f"运行次数{self.runstep}|今日步数{self.jinristep}")
             #
-            # 仅在单人模式时进行六国远征
-            self.进行六国远征 = False  # not self.组队模式 and os.path.exists(self.prefix+"六国远征.txt")
-            self.进行武道大会 = False  # not self.组队模式 and os.path.exists(self.prefix+"武道大会.txt")
-            if self.进行六国远征:
-                self.进行六国远征 = not self.六国远征()
-                self.进入大厅()
-                if self.进行六国远征:
-                    TimeECHO(self.prefix+"六国远征探索未结束,需要重复进行探索")
-                else:
-                    TimeECHO(self.prefix+"今日六国远征探索完成")
-                    self.Tool.removefile(self.prefix+"六国远征.txt")
-                if self.Tool.存在同步文件():
-                    continue
-            #
-            if self.进行武道大会:
-                self.进行武道大会 = not self.武道大会()
-                self.进入大厅()
-                if self.进行武道大会:
-                    TimeECHO(self.prefix+"武道大会探索未结束,需要重复进行探索")
-                else:
-                    TimeECHO(self.prefix+"今日武道大会探索完成")
-                    self.Tool.removefile(self.prefix+"武道大会.txt")
-                if self.Tool.存在同步文件():
-                    continue
             self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
             #
             if self.Tool.存在同步文件():
@@ -4355,7 +4095,7 @@ class wzry_task:
             #
             if self.移动端.实体终端 and self.Tool.timelimit("休息手机", limit=60*60, init=False):
                 TimeECHO(self.prefix+":实体终端,休息设备")
-                # self.移动端.关闭APP()
+                # self.APPOB.关闭APP()
                 sleep(60*2)
 
 
@@ -4366,7 +4106,7 @@ class auto_airtest:
         self.设备类型 = 设备类型.lower()
         self.prefix = f"({self.mynode}/{self.totalnode})"
         self.debug = "darwin" in sys.platform.lower()
-
+        self.debug = self.debug or os.path.exists("oracle.txt")
         # 设备信息
         if len(LINK_dict) == 0:
             LINK_dict = {}
@@ -4400,17 +4140,15 @@ class auto_airtest:
         #
         self.LINK = LINK_dict[mynode]
         self.设备类型 = self.LINK.split(":")[0].lower()
-        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.printINFO()
-        self.移动端 = deviceOB(设备类型=self.设备类型, mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK, APPID=self.APPID)
+        self.移动端 = deviceOB(设备类型=self.设备类型, mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
         if not self.移动端.device:
             TimeErr(self.prefix+f"{self.prefix}:连接设备失败,退出")
         #
-        对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
-        TASK = wzry_task(self.移动端, 对战模式, shiftnode=-4, debug=self.debug)
+        TASK = wzry_task(self.移动端)
         # 以后的测试脚本写在WZRY.0.临时初始化.txt中,不再插入到object.py中
         TASK.RUN()
-        self.移动端.关闭APP()
+        self.APPOB.关闭APP()
         #
 
     def printINFO(self):
@@ -4418,7 +4156,6 @@ class auto_airtest:
         TimeECHO(self.prefix+f"{self.prefix}:设备类型={self.设备类型}")
         TimeECHO(self.prefix+f"{self.prefix}:mynode={self.mynode}")
         TimeECHO(self.prefix+f"{self.prefix}:totalnode={self.totalnode}")
-        TimeECHO(self.prefix+f"{self.prefix}:APPID={self.APPID}")
 
 
 # @todo
