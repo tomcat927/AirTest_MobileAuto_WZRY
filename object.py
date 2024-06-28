@@ -299,6 +299,9 @@ class DQWheel:
         return self.stopnow
 
     def readfile(self, filename):
+        if not os.path.exists(filename):
+            TimeECHO(self.prefix+"Read["+filename+"]不存在")
+            return [""]
         try:
             f = open(filename, 'r', encoding='utf-8')
             content = f.readlines()
@@ -1594,6 +1597,33 @@ class wzry_figure:
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1691463676972.png", record_pos=(0.356, -0.258), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304304172.png", record_pos=(0.39, -0.259), resolution=(960, 540)))
+        # 对战页面元素
+        self.普攻 = Template(r"tpl1689666416575.png", record_pos=(0.362, 0.2), resolution=(960, 540), threshold=0.9)
+        self.移动 = Template(r"tpl1702267006237.png", record_pos=(-0.327, 0.16), resolution=(960, 540))
+        self.钱袋 = Template(r"tpl1719485696322.png", record_pos=(-0.469, -0.059), resolution=(960, 540), threshold=0.9)
+        self.普攻S = [self.普攻]  # 其他特色的攻击图标
+        self.移动S = [self.移动]  # 其他特色的移动图标
+        self.装备S = []
+        #
+        self.普攻S.append(Template(r"tpl1719546715992.png", record_pos=(0.366, 0.196), resolution=(960, 540)))
+        self.普攻S.append(Template(r"tpl1719546725396.png", record_pos=(0.37, 0.197), resolution=(960, 540)))
+        self.普攻S.append(Template(r"tpl1719546735621.png", record_pos=(0.369, 0.199), resolution=(960, 540)))
+        self.普攻S.append(Template(r"tpl1719546976757.png", record_pos=(0.368, 0.201), resolution=(960, 540)))
+        self.普攻S.append(Template(r"tpl1719546988763.png", record_pos=(0.366, 0.2), resolution=(960, 540)))
+        self.普攻S.append(Template(r"tpl1719547004757.png", record_pos=(0.365, 0.198), resolution=(960, 540)))
+        #
+        self.装备S.append(Template(r"tpl1709220117102.png", record_pos=(0.401, -0.198), resolution=(960, 540)))
+        self.装备S.append(Template(r"tpl1719546874415.png", record_pos=(-0.403, -0.057), resolution=(960, 540)))
+        #
+        self.对战图片元素 = [self.钱袋]
+        for i in self.普攻S:
+            self.对战图片元素.append(i)
+        for i in self.移动S:
+            self.对战图片元素.append(i)
+        for i in self.装备S:
+            self.对战图片元素.append(i)
+        self.对战图片元素.append(Template(r"tpl1719546803645.png", record_pos=(-0.005, 0.223), resolution=(960, 540)))
+        #
         # 登录关闭按钮
         self.王者登录关闭按钮 = []
         self.王者登录关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
@@ -2125,17 +2155,6 @@ class wzry_task:
             return True
         #
         self.进入大厅()
-        #
-        #目前灰度测试稷下学院, 主页的图标不同, 这里做一下判断
-        if self.图片.大厅万象天工 != self.图片.大厅万象天工2:
-            if exists(self.图片.大厅对战图标2):
-                self.WZ新功能 = False
-                TimeECHO(self.prefix+"本账号未开放稷下学院入口")
-                self.图片.大厅对战图标 = self.图片.大厅对战图标2
-                self.图片.大厅万象天工 = self.图片.大厅万象天工2
-            elif exists(self.图片.大厅对战图标): 
-                self.图片.大厅对战图标2 = self.图片.大厅对战图标
-                self.图片.大厅万象天工2 = self.图片.大厅万象天工
         #
         self.check_connect_status()
         if self.Tool.存在同步文件():
@@ -2798,8 +2817,6 @@ class wzry_task:
     # @todo,其他活动一键领取
 
     def 商城免费礼包(self, times=1):
-        # 新界面的领取方式
-        if not self.WZ新功能: return self.商城免费礼包_old(times)
         #
         self.check_connect_status()
         if self.Tool.存在同步文件():
@@ -2885,93 +2902,6 @@ class wzry_task:
             TimeECHO(self.prefix+f"没检测到免费图标,可能领取过了")
             self.Tool.LoopTouch(返回, "返回")
             return True
-        if not 领取成功:
-            TimeECHO(self.prefix+f"领取每日礼包失败")
-        return True
-
-    def 商城免费礼包_old(self, times=1):
-        self.check_connect_status()
-        if self.Tool.存在同步文件():
-            return True
-        #
-        if times > 10:
-            return False
-        #
-        self.进入大厅()
-        if times == 1:
-            self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=True)
-        else:
-            if self.Tool.timelimit(timekey="领商城免费礼包", limit=60*5, init=False):
-                TimeErr(self.prefix+"领商城免费礼包超时")
-                return False
-        #
-        times = times+1
-        #
-        # 商城免费礼包
-        TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
-        if self.健康系统():
-            return False
-        #
-        TimeECHO(self.prefix+f":商城免费礼包")
-        # 做活动时，商城入口会变
-        商城入口 = []
-        商城入口.append(Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540)))
-        商城入口.append(Template(r"tpl1705718545013.png", target_pos=2, record_pos=(0.461, -0.115), resolution=(960, 540)))
-        特惠入口 = Template(r"tpl1705069563125.png", record_pos=(-0.43, 0.14), resolution=(960, 540))
-        免费图标 = Template(r"tpl1705069610816.png", record_pos=(0.165, -0.159), resolution=(960, 540))
-        免费购买 = Template(r"tpl1705069621203.png", record_pos=(0.244, 0.244), resolution=(960, 540), threshold=0.95)
-        免费点券 = Template(r"tpl1705069633600.png", record_pos=(-0.004, 0.142), resolution=(960, 540))
-        确定购买 = Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540))
-        商城界面 = []
-        商城界面.append(免费图标)
-        商城界面.append(免费购买)
-        商城界面.append(Template(r"tpl1705070445445.png", record_pos=(0.464, -0.04), resolution=(960, 540)))
-        商城界面.append(Template(r"tpl1705070628028.png", record_pos=(0.15, -0.003), resolution=(960, 540)))
-        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
-        #
-        找到商城入口 = False
-        for i in range(len(商城入口)):
-            TimeECHO(self.prefix+f"寻找商城入口{i}")
-            找到商城入口 = self.Tool.existsTHENtouch(商城入口[i], "商城入口", savepos=True)
-            if 找到商城入口:
-                break
-        if not 找到商城入口:
-            TimeECHO(self.prefix+f"无法找到商城入口")
-            return self.商城免费礼包(times=times)
-        sleep(30)
-        进入商城界面 = False
-        for i in range(len(商城界面)):
-            self.Tool.existsTHENtouch(特惠入口, f"点击特惠入口", savepos=True)
-            sleep(20)
-            TimeECHO(self.prefix+f"检测商城界面中...{i}")
-            if exists(商城界面[i]):
-                进入商城界面 = True
-                break
-        if self.健康系统():
-            return False
-        if not 进入商城界面:
-            TimeECHO(self.prefix+f"未检测到商城界面, 重新进入商城")
-            self.Tool.LoopTouch(返回, "返回")
-            if "商城入口" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["商城入口"]
-            if "特惠入口" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["特惠入口"]
-            return self.商城免费礼包(times=times)
-        #
-        if not self.Tool.existsTHENtouch(免费图标, "免费礼包的图标"):
-            TimeECHO(self.prefix+f"没检测到免费图标,可能领取过了")
-            self.Tool.LoopTouch(返回, "返回")
-            return True
-
-        领取成功 = False
-        if self.Tool.existsTHENtouch(免费购买, "免费购买", savepos=False):
-            sleep(5)
-            领取成功 = self.Tool.existsTHENtouch(免费点券, "免费点券", savepos=False)
-            sleep(10)
-            self.Tool.LoopTouch(确定购买, "确定购买")
-            self.关闭按钮()
-            self.Tool.LoopTouch(返回, "返回")
-            self.确定按钮()
         if not 领取成功:
             TimeECHO(self.prefix+f"领取每日礼包失败")
         return True
@@ -3564,68 +3494,107 @@ class wzry_task:
     def 判断对战中(self, 处理=False):
         if "模拟战" in self.对战模式:
             return self.判断对战中_模拟战(处理)
-        对战 = Template(r"tpl1689666416575.png", record_pos=(0.362, 0.2), resolution=(960, 540), threshold=0.9)
-        移动 = Template(r"tpl1702267006237.png", record_pos=(-0.327, 0.16), resolution=(960, 540))
-        装备 = Template(r"tpl1709220117102.png", record_pos=(0.401, -0.198), resolution=(960, 540))
-        钱袋 = Template(r"tpl1719485696322.png", record_pos=(-0.469, -0.059), resolution=(960, 540), threshold=0.9)
-        TimeECHO(self.prefix+"判断对战中")
-        对战图片元素 = [对战, 移动, 装备, 钱袋]
-        找到对战按钮, 对战图片元素 = self.Tool.存在任一张图(对战图片元素, "对战图片元素")
-        # 元流之子的对战按钮好几个，对战按钮无法判断
-        if 找到对战按钮:
-            TimeECHO(self.prefix+"正在对战中")
-            if 处理:
-                TimeECHO(self.prefix+"加速对战中:建议把自动买装备和自动技能加点打开,更真实一些")
-                self.Tool.timelimit(timekey="endgame", limit=60*30, init=True)
-                移动pos = False
-                装备pos = False
-                self.Tool.timelimit(timekey="check_connect_status", limit=60, init=True)
-                while self.Tool.existsTHENtouch(对战):
-                    TimeECHO(self.prefix+"加速对战中:对战按钮")
-                    if self.Tool.timelimit(timekey="check_connect_status", limit=60, init=False):
-                        self.check_connect_status()
-                    if self.Tool.存在同步文件():
-                        return True
-                    if not 装备pos:
-                        装备poskey = "装备pos"+self.prefix
+        #
+        对战中 = False
+        if self.当前界面 == "对战中":
+            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                self.当前界面 == "未知"
+            else:
+                TimeECHO(self.prefix+f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                对战中 = True
+        if not 对战中:
+            对战中, self.图片.对战图片元素 = self.Tool.存在任一张图(self.图片.对战图片元素, "对战图片元素")
+            if 对战中:
+                self.Tool.timelimit(timekey="当前界面", init=True)
+        #
+        if 对战中:
+            TimeECHO(self.prefix+"判断对战:正在对战")
+        if not 对战中:
+            TimeECHO(self.prefix+"判断对战:没有对战")
+        if not 处理 or not 对战中:
+            return 对战中
+        #
+        # 开始处理加速对战
+        TimeECHO(self.prefix+"加速对战中:建议把自动买装备和自动技能加点打开,更真实一些")
+        self.Tool.timelimit(timekey="endgame", limit=60*30, init=True)
+        self.Tool.timelimit(timekey="check_connect_status", limit=60, init=True)
+        # 识别到的位置
+        装备pos = False
+        移动pos = False
+        普攻pos = False
+        装备poskey = "装备pos"+self.prefix
+        移动poskey = "移动pos"+self.prefix
+        普攻poskey = "普攻pos"+self.prefix
+        # 不同账户出装位置不同,避免点击错误, 可以删除装备位置
+        if 装备poskey in self.Tool.var_dict.keys():
+            del self.Tool.var_dict[装备poskey]
+        # 开始模拟人手点击
+        while self.判断对战中(处理=False):
+            TimeECHO(self.prefix+"加速对战中:对战按钮")
+            if self.Tool.timelimit(timekey="check_connect_status", limit=60, init=False):
+                self.check_connect_status()
+            if self.Tool.存在同步文件():
+                return True
+            if not 装备pos:
+                if 装备poskey in self.Tool.var_dict.keys():
+                    装备pos = self.Tool.var_dict[装备poskey]
+                else:
+                    存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, "装备S元素")
+                    装备 = self.图片.装备S[0]
+                    if 存在装备图标:
                         self.Tool.existsTHENtouch(装备, 装备poskey, savepos=True)
-                        装备pos = exists(装备)
-                        if not 装备pos and 装备poskey in self.Tool.var_dict.keys():
-                            装备pos = self.Tool.var_dict[装备poskey]
-                    else:
-                        self.Tool.existsTHENtouch(装备, "装备pos", savepos=True)
-                    if not 移动pos:
-                        self.Tool.existsTHENtouch(移动, "移动按钮", savepos=True)
-                        移动pos = exists(移动)
-                        if not 移动pos and "移动按钮" in self.Tool.var_dict.keys():
-                            移动pos = self.Tool.var_dict["移动按钮"]
-                    else:
-                        TimeECHO(self.prefix+"加速对战中:移动按钮")
-                        for i in range(random.randint(1, 5)):
-                            x = 0.2+random.random()/5
-                            y = -0.2+random.random()/5
-                            inputxy = self.Tool.readfile(self.触摸对战FILE)
-                            if len(inputxy) > 1:
-                                try:
-                                    x = float(inputxy[0])
-                                    y = float(inputxy[1])
-                                    TimeECHO(self.prefix+": x=%5.3f, y=%5.3f" % (x, y))
-                                except:
-                                    traceback.print_exc()
-                                    TimeErr(self.prefix+".error set x,y=inputxy")
-                            swipe(移动pos, vector=[x, y])
-                            self.Tool.existsTHENtouch(对战, "对战按钮", savepos=True)
-                    #
-                    if self.Tool.timelimit(timekey="endgame", limit=60*30, init=False):
-                        TimeErr(self.prefix+"对战中游戏时间过长,重启游戏")  # 存在对战的时间超过20min,大概率卡死了
-                        self.APPOB.重启APP(10)
-                        self.登录游戏()
-                        self.进入大厅()
-                        return False
-            return True
-        TimeECHO(self.prefix+"判断对战中:没有对战")
+            #
+            if not 移动pos:
+                if 移动poskey in self.Tool.var_dict.keys():
+                    移动pos = self.Tool.var_dict[移动poskey]
+                else:
+                    存在移动图标, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, "移动S元素")
+                    移动 = self.图片.移动S[0]
+                    if 存在移动图标:
+                        self.Tool.existsTHENtouch(移动, 移动poskey, savepos=True)
+            #
+            if not 普攻pos:
+                if 普攻poskey in self.Tool.var_dict.keys():
+                    普攻pos = self.Tool.var_dict[普攻poskey]
+                else:
+                    存在普攻图标, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, "普攻S元素")
+                    普攻 = self.图片.普攻S[0]
+                    if 存在普攻图标:
+                        self.Tool.existsTHENtouch(普攻, 普攻poskey, savepos=True)
 
-        return False
+            if 装备pos:
+                touch(装备pos)
+            #
+            if 移动pos:
+                TimeECHO(self.prefix+"加速对战中:移动按钮")
+                for i in range(random.randint(1, 5)):
+                    x = 0.2+random.random()/5
+                    y = -0.2+random.random()/5
+                    inputxy = self.Tool.readfile(self.触摸对战FILE)
+                    if len(inputxy) > 1:
+                        try:
+                            x = float(inputxy[0])
+                            y = float(inputxy[1])
+                            TimeECHO(self.prefix+": x=%5.3f, y=%5.3f" % (x, y))
+                        except:
+                            traceback.print_exc()
+                            TimeErr(self.prefix+".error set x,y=inputxy")
+                    swipe(移动pos, vector=[x, y])
+                    #
+                    if 普攻pos:
+                        sleep(0.2)
+                        touch(普攻pos)
+            #
+            if 普攻pos:
+                touch(普攻pos)
+            #
+            if self.Tool.timelimit(timekey="endgame", limit=60*30, init=False):
+                TimeErr(self.prefix+"对战中游戏时间过长,重启游戏")  # 存在对战的时间超过20min,大概率卡死了
+                self.APPOB.重启APP(10)
+                self.登录游戏()
+                self.进入大厅()
+                return False
+        return True
 
     def 判断对战中_模拟战(self, 处理=False):
         正在对战 = False
@@ -4152,7 +4121,7 @@ class auto_airtest:
         TASK = wzry_task(self.移动端)
         # 以后的测试脚本写在WZRY.0.临时初始化.txt中,不再插入到object.py中
         TASK.RUN()
-        self.APPOB.关闭APP()
+        TASK.APPOB.关闭APP()
         #
 
     def printINFO(self):
