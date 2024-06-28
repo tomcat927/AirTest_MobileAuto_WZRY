@@ -199,7 +199,7 @@ class DQWheel:
         self.mynode = mynode
         self.totalnode = totalnode
         self.totalnode_bak = totalnode
-        self.prefix = (f"({mynode})" if mynode >= 0 else "(DQWheel)")+prefix
+        self.prefix = (f"({mynode})" if mynode >= 0 else "")+prefix
         #
         self.barrierlimit = 60*20  # 同步最大时长
         self.filelist = []  # 建立的所有文件，用于后期clear
@@ -1013,22 +1013,23 @@ class appOB:
 
 
 class wzyd_libao:
-    def __init__(self, prefix="wzyd", 设备类型="android", Tool=None, 初始化检查=False):
+    def __init__(self, prefix="0", 设备类型="android", Tool=None, 初始化检查=False):
+        # 默认只创建对象, 开启初始化检查才会检查
         self.体验币成功 = False
         self.营地活动 = True
         self.设备类型 = 设备类型
         # 这里prefix+,是用于输出到屏幕
         # 输入的prefix是mynode
-        self.prefix = f"({prefix})王者营地:"
+        self.prefix = f"({prefix})王者营地"
         self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.gamehelper.smoba"
         # com.tencent.gamehelper.smoba/com.tencent.gamehelper.biz.launcher.ui.SplashActivity
         self.APPOB = appOB(prefix=self.prefix, APPID=self.APPID)
         self.IOS = "ios" in self.设备类型
         #
-        self.营地初始化FILE = prefix+".营地初始化.txt"
-        self.营地需要登录FILE = prefix+".营地需要登录.txt"
+        self.营地初始化FILE = self.prefix+".初始化.txt"
+        self.营地需要登录FILE = self.prefix+".需要登录.txt"
         # 使用输入的prefix,才可以用一套同步文件
-        self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
+        self.Tool = DQWheel(prefix=self.prefix, var_dict_file="."+self.prefix+"var_dict_file.txt") if Tool == None else Tool
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
         self.游戏界面图标 = Template(r"tpl1704381547456.png", record_pos=(0.187, 0.726), resolution=(540, 960))
@@ -1073,13 +1074,13 @@ class wzyd_libao:
     def 营地初始化(self, 初始化检查=False):
         # 判断网络情况
         if not connect_status():
-            TimeECHO(self.prefix+"营地暂时无法触摸,返回")
+            TimeECHO(self.prefix+":营地暂时无法触摸,返回")
             if 初始化检查:
                 return True
             return False
         # 打开APP
-        if not self.APPOB.打开APP():
-            TimeECHO(self.prefix+"营地无法打开,返回")
+        if not self.APPOB.重启APP(10):
+            TimeECHO(self.prefix+":营地无法打开,返回")
             self.APPOB.关闭APP()
             return False
         sleep(20)  # 等待营地打开
@@ -1102,16 +1103,19 @@ class wzyd_libao:
         #
         # 判断营地是否登录的界面
         if self.判断营地登录中():
-            TimeECHO(self.prefix+"检测到营地登录界面,不领取礼包")
+            TimeECHO(self.prefix+":检测到营地登录界面,不领取礼包")
             self.Tool.touchfile(self.营地需要登录FILE)
             self.APPOB.关闭APP()
             return False
-        #
+        # 这里很容易出问题，主页的图标变来变去
         if not self.判断营地大厅中():
-            TimeECHO(self.prefix+"营地未知原因没能进入大厅,不领取礼包")
-            self.Tool.touchfile(self.营地需要登录FILE)
-            self.APPOB.关闭APP()
-            return False
+            TimeECHO(self.prefix+":营地未知原因没能进入大厅,再次尝试")
+            self.APPOB.重启APP(40)
+            if not self.判断营地大厅中():
+                self.Tool.touchfile(self.营地需要登录FILE)
+                self.APPOB.关闭APP()
+                self.Tool.timedict["检测营地登录"] = 0 #下次继续检查
+                return False
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
@@ -1136,7 +1140,7 @@ class wzyd_libao:
         #
         self.初始化成功 = self.营地初始化(初始化检查=False)
         if not self.初始化成功:
-            TimeECHO(self.prefix+"营地初始化失败")
+            TimeECHO(self.prefix+":营地初始化失败")
             self.APPOB.关闭APP()
             return False
         #
@@ -1151,6 +1155,7 @@ class wzyd_libao:
         self.营地币兑换碎片()
         self.营地战令经验()
         self.APPOB.关闭APP()
+        return True
 
     def 营地任务_观看赛事(self, times=1):
         #
@@ -1401,7 +1406,7 @@ class wzyd_libao:
                 TimeECHO(self.prefix+f"寻找奖励兑换页面中{i}")
 
         if not pos:
-            TimeECHO(self.prefix+"没进入奖励兑换页面")
+            TimeECHO(self.prefix+":没进入奖励兑换页面")
             return self.体验服礼物(times)
         #
         swipe(pos, vector=[0.0, -0.5])
@@ -1422,9 +1427,9 @@ class wzyd_libao:
         touch(奖励位置)
         成功领取 = Template(r"tpl1699874950410.png", record_pos=(-0.002, -0.006), resolution=(540, 960))
         if exists(成功领取):
-            TimeECHO(self.prefix+"成功领取")
+            TimeECHO(self.prefix+":成功领取")
         else:
-            TimeECHO(self.prefix+"领取过了/体验币不够")
+            TimeECHO(self.prefix+":领取过了/体验币不够")
         return
         #
 
@@ -1506,9 +1511,9 @@ class wzyd_libao:
             if pos:
                 break
             else:
-                TimeECHO(self.prefix+f"寻找兑换页面中{i}")
+                TimeECHO(self.prefix+f":寻找兑换页面中{i}")
         if not pos:
-            TimeECHO(self.prefix+"没进入营地币兑换页面")
+            TimeECHO(self.prefix+":没进入营地币兑换页面")
             return self.营地币兑换碎片(times)
         swipe(pos, vector=[0.0, -0.5])
         碎片奖励 = Template(r"tpl1699873407201.png", record_pos=(0.009, 0.667), resolution=(540, 960))
@@ -1522,7 +1527,7 @@ class wzyd_libao:
                 TimeECHO(self.prefix+f"寻找营地币换碎片中{i}")
             swipe(pos, vector=[0.0, -0.5])
         if not 奖励位置:
-            TimeECHO(self.prefix+"没找到营地币")
+            TimeECHO(self.prefix+":没找到营地币")
             return self.营地币兑换碎片(times)
         touch(奖励位置)
         self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
@@ -1821,6 +1826,7 @@ class wzry_task:
         self.王者营地礼包 = True
         self.玉镖夺魁签到 = False
         # 刷新礼包的领取计时
+        self.王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, 初始化检查=False)
         self.每日礼包()
         # 设置为0,可以保证下次必刷礼包
         self.Tool.timedict["领游戏礼包"] = 0
@@ -3090,26 +3096,24 @@ class wzry_task:
             return False
         #
         if 初始化:
-            王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, Tool=self.Tool, 初始化检查=True)
-            # 重新打开王者荣耀,恢复屏幕分辨率
+            初始化成功 = self.王者营地.营地初始化(初始化检查=True)
+            self.王者营地.APPOB.关闭APP()
             self.APPOB.打开APP()
-            return 王者营地.初始化成功
+            return 初始化成功
         #
         if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
             TimeECHO(self.prefix+"时间太短,暂时不领取营地礼包")
             return False
+        #
         # 关闭王者节省内存
         self.APPOB.关闭APP()
-        王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, Tool=self.Tool)
         #
         TimeECHO(self.prefix+"王者营地礼包开始")
-        try:
-            王者营地.RUN()
+        if self.王者营地.RUN():
             TimeECHO(self.prefix+"王者营地礼包领取成功")
-        except:
-            traceback.print_exc()
+        else:
             TimeErr(self.prefix+"王者营地礼包领取失败")
-        王者营地.STOP()  # 杀掉后台,提高王者、WDA活性
+        self.王者营地.STOP()  # 杀掉后台,提高王者、WDA活性
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
         #
         self.APPOB.打开APP()
