@@ -33,6 +33,7 @@
 |  客户端 | 控制端  | 客户端控制  |
 | ------------ | ------------ | ------------ |
 | BlueStack |  Windows | 打开、关闭、重启  |
+|  LDPlayer等模拟器 |  Windows | 重启  |
 | Docker  | Linux  | 打开、关闭、重启  |
 | IOS  | Mac  | tidevice重连、重启  |
 | 远程Android  | Mac  | adb重新连接  |

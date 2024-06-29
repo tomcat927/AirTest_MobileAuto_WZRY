@@ -786,10 +786,25 @@ class deviceOB:
         self.LINKport = self.LINK.split(":")[-1]
         self.LINKhead = self.LINK[:-len(self.LINKport)]
         self.device = None
+        #
+        self.设备类型 = 设备类型.lower()
         self.控制端 = sys.platform.lower()
+        self.客户端 = "adb"
+        # 不同客户端对重启的适配能力不同
         if "darwin" in self.控制端:  # 避免和windows一致
             self.控制端 = "macos"
-        self.设备类型 = 设备类型.lower()
+            self.客户端 = "adb"
+        if "win" in self.控制端 and "127.0.0.1" in self.LINK:
+            if os.path.exists("C:\\Program Files\\BlueStacks_nxt"): # BlueStack地址
+                self.客户端 = "win_BlueStacks"
+            if os.path.exists("D:\\GreenSoft\\LDPlayer"): # 雷电模拟器地址
+                self.客户端 = "win_LDPlayer"
+        if "linux" in self.控制端 and "127.0.0.1" in self.LINK: # Linux + docker
+            if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
+                self.客户端 = "lin_docker"
+        if "ios" in self.设备类型.lower():
+            self.客户端 = "ios"
+        #
         # 设备ID,用于控制设备重启关闭省电等,为docker和虚拟机使用
         self.设备ID = None
         self.mynode = mynode
@@ -803,6 +818,8 @@ class deviceOB:
         self.实体终端 = "mac" in self.控制端 or "ios" in self.设备类型
         self.容器优化 = "linux" in self.控制端 and "android" in self.设备类型
         #
+        TimeECHO(self.prefix+f"控制端({self.控制端})")
+        TimeECHO(self.prefix+f"客户端({self.客户端})")
 
     # 尝试连接timesMax次,当前是times次
     def 连接设备(self, times=1, timesMax=3):
@@ -828,9 +845,13 @@ class deviceOB:
             return False
 
     def 启动设备(self):
-        if "ios" in self.设备类型:
+        if self.客户端 == "ios":
+            if "mac" in self.控制端:
+                TimeECHO(self.prefix+f"测试本地IOS打开中")
+            else:
+                TimeECHO(self.prefix+f"当前模式无法打开IOS")
+                return False
             try:
-                TimeECHO(self.prefix+f"IOS测试重启中")
                 import subprocess
                 result = subprocess.getstatusoutput("tidevice list")
                 if 'ConnectionType.USB' in result[1]:
@@ -848,17 +869,27 @@ class deviceOB:
             sleep(20)
             return True
         # android
-        try:
-            if "mac" in self.控制端 or "127.0.0.1" not in self.LINK:
-                TimeECHO(self.prefix+f"测试远程连接安卓设备by adb reconnect")
-                command = "adb disconnect "+self.LINK.split("/")[-1]
-                command = command+"; adb connect "+self.LINK.split("/")[-1]
-            elif "win" in self.控制端:  # BlueStack虚拟机
+        if self.客户端 == "win_BlueStacks": # BlueStack虚拟机
                 CMDtitle = "cndaqiangHDPlayer"+str(self.mynode)
                 command = f"start \"{CMDtitle}\" /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance Nougat32_%{self.mynode}"
-            elif "linux" in self.控制端:  # 容器
+        elif self.客户端 == "win_LDPlayer": #雷电模拟器暂时不支持关闭，但是通过reboot的方式可以实现重启和解决资源的效果
+                command = f"adb.exe -s "+self.LINK.split("/")[-1]+" reboot"
+        elif self.客户端 == "lin_docker":
                 虚拟机ID = f"androidcontain{self.mynode}"
                 command = f"docker restart {虚拟机ID}"
+        elif self.客户端 == "adb":
+            TimeECHO(self.prefix+f"测试远程连接安卓设备by adb reconnect")
+            if "win" in self.控制端:
+                adb="adb.exe"
+            else:
+                adb="adb"
+            command = adb+" disconnect "+self.LINK.split("/")[-1]
+            command = command+"; "+adb+" connect "+self.LINK.split("/")[-1]
+        else:
+            TimeECHO(self.prefix+f"未知设备类型")
+            return False
+        # 开始启动
+        try:
             exit_code = os.system(command)
             if exit_code == 0:
                 sleep(60)  # 等待设备启动过程
@@ -873,9 +904,8 @@ class deviceOB:
             return False
 
     def 关闭设备(self):
-        # ios
-        if "ios" in self.设备类型:
-            if "mac" in self.控制端 or "127.0.0.1" in self.LINK:
+        if self.客户端 == "ios":
+            if "mac" in self.控制端:
                 TimeECHO(self.prefix+f"测试本地IOS关闭中")
                 command = "tidevice reboot"
             else:
@@ -895,21 +925,30 @@ class deviceOB:
                 TimeErr(self.prefix+f"关闭失败")
                 return False
         # android
-        try:
-            if "mac" in self.控制端 or "127.0.0.1" not in self.LINK:
-                TimeECHO(self.prefix+f"测试远程断开安卓设备by adb disconnect")
-                command = "adb disconnect "+self.LINK.split("/")[-1]
-            elif "win" in self.控制端:  # BlueStack虚拟机
-                CMDtitle = "cndaqiangHDPlayer"+str(mynode)
-                command = f"start \"{CMDtitle}\" /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance Nougat32_%{self.mynode}"
+        if self.客户端 == "win_BlueStacks": # BlueStack虚拟机
                 if int(self.PID) > 0:
                     command = f'taskkill /F /FI "PID eq {self.PID}"'
                 else:  # 关闭所有虚拟机，暂时用不到
                     command = 'taskkill /f /im HD-Player.exe'
-            elif "linux" in self.控制端:  # 容器
+        elif self.客户端 == "win_LDPlayer": #雷电模拟器暂时不支持关闭，但是通过reboot的方式可以实现重启和解决资源的效果
+                command = f"adb.exe -s "+self.LINK.split("/")[-1]+" reboot"
+        elif self.客户端 == "lin_docker":
                 虚拟机ID = f"androidcontain{self.mynode}"
                 command = f"docker stop {虚拟机ID}"
-            #
+        elif self.客户端 == "adb":
+            TimeECHO(self.prefix+f"测试远程连接安卓设备by adb reconnect")
+            if "win" in self.控制端:
+                adb="adb.exe"
+            else:
+                adb="adb"
+            # 虽然adb -s 192.168.192.10:5555 reboot 支持一些机器的重启
+            # 但是docker reboot后直接就关机了 
+            command = adb+" disconnect "+self.LINK.split("/")[-1]
+        else:
+            TimeECHO(self.prefix+f"未知设备类型")
+            return False
+        # 开始启动
+        try:
             exit_code = os.system(command)
             if exit_code == 0:
                 TimeECHO(self.prefix+f"关闭成功")
@@ -922,9 +961,8 @@ class deviceOB:
             TimeErr(self.prefix+f"关闭失败")
             return False
     #
-
     def 重启设备(self, sleeptime=0):
-        TimeECHO(self.prefix+f"重新启动{self.LINK}")
+        TimeECHO(self.prefix+f"重新启动({self.LINK})")
         self.关闭设备()
         sleeptime = max(10, sleeptime-60)
         printtime = max(30, sleeptime/10)
@@ -1114,7 +1152,7 @@ class wzyd_libao:
             if not self.判断营地大厅中():
                 self.Tool.touchfile(self.营地需要登录FILE)
                 self.APPOB.关闭APP()
-                self.Tool.timedict["检测营地登录"] = 0 #下次继续检查
+                self.Tool.timedict["检测营地登录"] = 0  # 下次继续检查
                 return False
         # 前面的都通过了,判断成功
         if 初始化检查:
@@ -1918,6 +1956,9 @@ class wzry_task:
                 return False
         # 次数上限
         if times % 4 == 0:
+            # 新赛季频繁提示资源损坏，次数太多进不去，就重启设备：
+            if times > 4:
+                self.移动端.重启设备(10)
             self.APPOB.重启APP(10)
             self.登录游戏()
         times = times+1
