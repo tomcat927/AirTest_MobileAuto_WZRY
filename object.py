@@ -1621,12 +1621,12 @@ class wzry_figure:
         self.装备S.append(Template(r"tpl1719546874415.png", record_pos=(-0.403, -0.057), resolution=(960, 540)))
         #
         self.对战图片元素 = [self.钱袋]
-        for i in self.普攻S:
+        for i in self.普攻S[:1]:
             self.对战图片元素.append(i)
         for i in self.移动S:
             self.对战图片元素.append(i)
-        for i in self.装备S:
-            self.对战图片元素.append(i)
+        # for i in self.装备S:
+        #     self.对战图片元素.append(i)
         self.对战图片元素.append(Template(r"tpl1719546803645.png", record_pos=(-0.005, 0.223), resolution=(960, 540)))
         #
         # 登录关闭按钮
