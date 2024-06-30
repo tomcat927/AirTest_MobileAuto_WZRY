@@ -71,7 +71,6 @@ windows模拟器
 * * [推荐]不兼容hyper-v的**Nougat模式**更省电，适合不用开wsl的笔记本, 而且adb的端口也不会变
 * LDPlayer等模拟器
 * * 目前通过`adb reboot`实现设备管理，还是费一点电
-* * 将object.py中的`os.path.exists("D:\\GreenSoft\\LDPlayer")`替换为你正在使用的模拟器路径即可
 
 Linux 容器
 * 使用[remote-android](https://github.com/remote-android/), 支持arm服务器

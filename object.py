@@ -10,6 +10,7 @@
 # .......
 from datetime import datetime, timezone, timedelta
 import time
+import airtest
 from airtest.core.settings import Settings as ST
 import logging
 import sys
@@ -77,6 +78,32 @@ def TimeECHO(info="None", end=""):
 def TimeErr(info="None"):
     TimeECHO("NNNN:"+info)
 
+# 执行命令
+
+
+def run_command(command=[], sleeptime=20, quiet=False, must_ok=False):
+    exit_code_o = 0
+    # 获得运行的结果
+    import subprocess
+    for i in command:
+        if len(i) < 1:
+            continue
+        result = subprocess.getstatusoutput(i)
+        # exit_code = os.system(i)
+        exit_code = result[0]
+        if not quiet:
+            TimeECHO("sysrun:"+i)
+            if exit_code == 0:
+                TimeECHO("result: "+result[1])
+            else:
+                TimeECHO("result:"+">"*20)
+                TimeECHO(result[1])
+                TimeECHO("result:"+"<"*20)
+        exit_code_o += exit_code
+        if must_ok and exists_o != 0:
+            break
+        sleep(sleeptime)
+    return exit_code_o
 # ........................
 
 
@@ -87,7 +114,8 @@ def connect_status(times=10):
             exists_o(png)
             return True
         except:
-            traceback.print_exc()
+            if i == times - 1:
+                traceback.print_exc()
             TimeECHO(f"cndaqiang: 无法连接设备,重试中{i}")
             sleep(1)
             continue
@@ -99,7 +127,8 @@ def exists(*args, **kwargs):
     try:
         result = exists_o(*args, **kwargs)
     except:
-        traceback.print_exc()
+        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
+        # traceback.print_exc()
         TimeECHO("cndaqiang: exists失败")
         sleep(1)
         try:
@@ -115,7 +144,8 @@ def touch(*args, **kwargs):
     try:
         result = touch_o(*args, **kwargs)
     except:
-        traceback.print_exc()
+        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
+        # traceback.print_exc()
         TimeECHO("cndaqiang: touch失败")
         sleep(1)
         try:
@@ -131,7 +161,8 @@ def swipe(*args, **kwargs):
     try:
         result = swipe_o(*args, **kwargs)
     except:
-        traceback.print_exc()
+        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
+        # traceback.print_exc()
         TimeECHO("cndaqiang: swipe失败")
         sleep(1)
         try:
@@ -148,7 +179,8 @@ def start_app(*args, **kwargs):
         result = True
         start_app_o(*args, **kwargs)
     except:
-        traceback.print_exc()
+        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
+        # traceback.print_exc()
         TimeECHO("cndaqiang: start_app失败")
         sleep(1)
         try:
@@ -175,7 +207,8 @@ def stop_app(*args, **kwargs):
         result = True
         stop_app_o(*args, **kwargs)
     except:
-        traceback.print_exc()
+        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
+        # traceback.print_exc()
         TimeECHO("cndaqiang: stop_app失败")
         sleep(1)
         try:
@@ -788,22 +821,34 @@ class deviceOB:
         self.device = None
         #
         self.设备类型 = 设备类型.lower()
+        # 控制端
         self.控制端 = sys.platform.lower()
-        self.客户端 = "adb"
+        # 避免和windows名字接近
+        self.控制端 = "macos" if "darwin" in self.控制端 else self.控制端
+        self.adbpath = "adb"
+        from airtest.core import api as api_o
+        dir = os.path.dirname(api_o.__file__)
+        if "android" in self.设备类型:
+            from airtest.core.android import adb
+            self.ADB = adb.ADB()
+            self.adbpath = self.ADB.adb_path
+        #
+        # 客户端
         # 不同客户端对重启的适配能力不同
-        if "darwin" in self.控制端:  # 避免和windows一致
-            self.控制端 = "macos"
-            self.客户端 = "adb"
-        if "win" in self.控制端 and "127.0.0.1" in self.LINK:
-            if os.path.exists("C:\\Program Files\\BlueStacks_nxt"): # BlueStack地址
+        if "ios" in self.设备类型:
+            self.客户端 = "ios"
+        elif "win" in self.控制端 and "127.0.0.1" in self.LINK:
+            if os.path.exists("C:\\Program Files\\BlueStacks_nxt"):  # BlueStack地址
                 self.客户端 = "win_BlueStacks"
-            if os.path.exists("D:\\GreenSoft\\LDPlayer"): # 雷电模拟器地址
-                self.客户端 = "win_LDPlayer"
-        if "linux" in self.控制端 and "127.0.0.1" in self.LINK: # Linux + docker
+            else:  # 模拟器地址
+                self.客户端 = "win_模拟器"
+        elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
             if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
                 self.客户端 = "lin_docker"
-        if "ios" in self.设备类型.lower():
-            self.客户端 = "ios"
+        else:  # 未知的安卓设备
+            # 虽然adb -s 192.168.192.10:5555 reboot 支持一些机器的重启
+            # 但是一些机器重启后就不会开机了，例如docker, 只能adb disconnect的方式控制
+            self.客户端 = "RemoteAndroid"
         #
         # 设备ID,用于控制设备重启关闭省电等,为docker和虚拟机使用
         self.设备ID = None
@@ -820,8 +865,10 @@ class deviceOB:
         #
         TimeECHO(self.prefix+f"控制端({self.控制端})")
         TimeECHO(self.prefix+f"客户端({self.客户端})")
+        TimeECHO(self.prefix+f"ADB =({self.adbpath})")
 
     # 尝试连接timesMax次,当前是times次
+
     def 连接设备(self, times=1, timesMax=3):
         self.device = False
         TimeECHO(self.prefix+f"{self.LINK}:开始第{times}/{timesMax+1}次连接")
@@ -831,7 +878,8 @@ class deviceOB:
                 TimeECHO(self.prefix+f"{self.LINK}:链接成功")
                 return True
         except:
-            traceback.print_exc()
+            if times == timesMax+1:
+                traceback.print_exc()
             TimeErr(self.prefix+f"{self.LINK}:链接失败")
             if "ios" in self.设备类型:
                 TimeECHO(self.prefix+"重新插拔数据线")
@@ -845,122 +893,89 @@ class deviceOB:
             return False
 
     def 启动设备(self):
+        command = []
+        TimeECHO(self.prefix+f"尝试启动设备中...")
         if self.客户端 == "ios":
             if "mac" in self.控制端:
                 TimeECHO(self.prefix+f"测试本地IOS打开中")
             else:
                 TimeECHO(self.prefix+f"当前模式无法打开IOS")
                 return False
-            try:
-                import subprocess
-                result = subprocess.getstatusoutput("tidevice list")
-                if 'ConnectionType.USB' in result[1]:
-                    # wdaproxy这个命令会同时调用xctest和relay，另外当wda退出时，会自动重新启动xctest
-                    # tidevice不支持企业签名的WDA
-                    self.LINKport = str(int(self.LINKport)+1)
-                    self.LINK = self.LINKhead+self.LINKport
-                    os.system(f"tidevice $(cat para.txt) wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner --port {self.LINKport} > tidevice.result.txt 2>&1 &")
-                else:
-                    TimeErr(self.prefix+": tidevice list 无法找到设备, IOS重启失败")
-                    #
-            except:
-                traceback.print_exc()
-                TimeECHO(self.prefix+f"IOS重启失败")
-            sleep(20)
-            return True
-        # android
-        if self.客户端 == "win_BlueStacks": # BlueStack虚拟机
-                CMDtitle = "cndaqiangHDPlayer"+str(self.mynode)
-                command = f"start \"{CMDtitle}\" /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance Nougat32_%{self.mynode}"
-        elif self.客户端 == "win_LDPlayer": #雷电模拟器暂时不支持关闭，但是通过reboot的方式可以实现重启和解决资源的效果
-                command = f"adb.exe -s "+self.LINK.split("/")[-1]+" reboot"
-        elif self.客户端 == "lin_docker":
-                虚拟机ID = f"androidcontain{self.mynode}"
-                command = f"docker restart {虚拟机ID}"
-        elif self.客户端 == "adb":
-            TimeECHO(self.prefix+f"测试远程连接安卓设备by adb reconnect")
-            if "win" in self.控制端:
-                adb="adb.exe"
+            # 获得运行的结果
+            import subprocess
+            result = subprocess.getstatusoutput("tidevice list")
+            if 'ConnectionType.USB' in result[1]:
+                # wdaproxy这个命令会同时调用xctest和relay，另外当wda退出时，会自动重新启动xctest
+                # tidevice不支持企业签名的WDA
+                self.LINKport = str(int(self.LINKport)+1)
+                self.LINK = self.LINKhead+self.LINKport
+                command.append(f"tidevice $(cat para.txt) wdaproxy - B  com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner --port {self.LINKport} > tidevice.result.txt 2 > &1 &")
+                sleep(20)
             else:
-                adb="adb"
-            command = adb+" disconnect "+self.LINK.split("/")[-1]
-            command = command+"; "+adb+" connect "+self.LINK.split("/")[-1]
+                TimeErr(self.prefix+": tidevice list 无法找到IOS设备重启失败")
+                return False
+        # android
+        elif self.客户端 == "win_BlueStacks":  # BlueStack虚拟机
+            CMDtitle = "cndaqiangHDPlayer"+str(self.mynode)
+            command.append(f"start \"{CMDtitle}\" / MIN C: \Progra~1\BlueStacks_nxt\HD-Player.exe --instance Nougat32_ % {self.mynode}")
+        elif self.客户端 == "win_模拟器":
+            # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
+            command.append(f" {self.adbpath} connect "+self.LINK.split("/")[-1])
+            command.append(f"{self.adbpath} -s "+self.LINK.split("/")[-1]+" reboot")
+        elif self.客户端 == "lin_docker":
+            虚拟机ID = f"androidcontain{self.mynode}"
+            command.append(f"docker restart {虚拟机ID}")
+        elif self.客户端 == "RemoteAndroid":
+            command.append(f"{self.adbpath} connect "+self.LINK.split("/")[-1])
         else:
             TimeECHO(self.prefix+f"未知设备类型")
             return False
-        # 开始启动
-        try:
-            exit_code = os.system(command)
-            if exit_code == 0:
-                sleep(60)  # 等待设备启动过程
-                TimeECHO(self.prefix+f"启动成功")
-                return True
-            else:
-                TimeErr(self.prefix+f"启动失败")
-                return False
-        except:
-            traceback.print_exc()
+        # 开始运行
+        exit_code = run_command(command)
+        if exit_code == 0:
+            TimeECHO(self.prefix+f"启动成功")
+            return True
+        else:
             TimeErr(self.prefix+f"启动失败")
             return False
 
     def 关闭设备(self):
+        command = []
+        TimeECHO(self.prefix+f"尝试关闭设备中...")
         if self.客户端 == "ios":
             if "mac" in self.控制端:
                 TimeECHO(self.prefix+f"测试本地IOS关闭中")
-                command = "tidevice reboot"
+                command.append("tidevice reboot")
             else:
                 TimeECHO(self.prefix+f"当前模式无法关闭IOS")
                 return False
-            try:
-                exit_code = os.system(command)
-                if exit_code == 0:
-                    TimeECHO(self.prefix+f"关闭成功")
-                    sleep(60)
-                    return True
-                else:
-                    TimeECHO(self.prefix+f"关闭失败")
-                    return False
-            except:
-                traceback.print_exc()
-                TimeErr(self.prefix+f"关闭失败")
-                return False
         # android
-        if self.客户端 == "win_BlueStacks": # BlueStack虚拟机
-                if int(self.PID) > 0:
-                    command = f'taskkill /F /FI "PID eq {self.PID}"'
-                else:  # 关闭所有虚拟机，暂时用不到
-                    command = 'taskkill /f /im HD-Player.exe'
-        elif self.客户端 == "win_LDPlayer": #雷电模拟器暂时不支持关闭，但是通过reboot的方式可以实现重启和解决资源的效果
-                command = f"adb.exe -s "+self.LINK.split("/")[-1]+" reboot"
+        elif self.客户端 == "win_BlueStacks":  # BlueStack虚拟机
+            if int(self.PID) > 0:
+                command.append(f'taskkill /F /FI "PID eq {self.PID}"')
+            else:  # 关闭所有虚拟机，暂时用不到
+                command.append('taskkill /f /im HD-Player.exe')
+        elif self.客户端 == "win_模拟器":
+            # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
+            command.append(f" {self.adbpath} connect "+self.LINK.split("/")[-1])
+            command.append(f"{self.adbpath} -s "+self.LINK.split("/")[-1]+" reboot")
         elif self.客户端 == "lin_docker":
-                虚拟机ID = f"androidcontain{self.mynode}"
-                command = f"docker stop {虚拟机ID}"
-        elif self.客户端 == "adb":
-            TimeECHO(self.prefix+f"测试远程连接安卓设备by adb reconnect")
-            if "win" in self.控制端:
-                adb="adb.exe"
-            else:
-                adb="adb"
-            # 虽然adb -s 192.168.192.10:5555 reboot 支持一些机器的重启
-            # 但是docker reboot后直接就关机了 
-            command = adb+" disconnect "+self.LINK.split("/")[-1]
+            虚拟机ID = f"androidcontain{self.mynode}"
+            command.append(f"docker stop {虚拟机ID}")
+        elif self.客户端 == "RemoteAndroid":
+            command.append(f"{self.adbpath} disconnect "+self.LINK.split("/")[-1])
         else:
             TimeECHO(self.prefix+f"未知设备类型")
             return False
-        # 开始启动
-        try:
-            exit_code = os.system(command)
-            if exit_code == 0:
-                TimeECHO(self.prefix+f"关闭成功")
-                return True
-            else:
-                TimeECHO(self.prefix+f"关闭失败")
-                return False
-        except:
-            traceback.print_exc()
-            TimeErr(self.prefix+f"关闭失败")
+        # 开始运行
+        exit_code = run_command(command, sleeptime=60)
+        if exit_code == 0:
+            TimeECHO(self.prefix+f"关闭成功")
+            return True
+        else:
+            TimeECHO(self.prefix+f"关闭失败")
             return False
-    #
+
     def 重启设备(self, sleeptime=0):
         TimeECHO(self.prefix+f"重新启动({self.LINK})")
         self.关闭设备()
@@ -1013,11 +1028,7 @@ class appOB:
 
     def 重启APP(self, sleeptime=0):
         TimeECHO(self.prefix+f"重启APP中")
-        try:
-            self.关闭APP()
-        except:
-            traceback.print_exc()
-            TimeErr(self.prefix+f"关闭APP失败")
+        self.关闭APP()
         sleep(10)
         sleeptime = max(10, sleeptime)  # 这里的单位是s
         printtime = max(30, sleeptime/10)
@@ -1166,6 +1177,8 @@ class wzyd_libao:
 
     def RUN(self):
         #
+        self.Tool.removefile(self.Tool.独立同步文件)
+        #
         if os.path.exists(self.营地需要登录FILE):
             if self.Tool.timelimit(timekey="检测营地登录", limit=60*60*8, init=False):
                 TimeECHO(self.prefix+f"存在[{self.营地需要登录FILE}],重新检测登录状态")
@@ -1209,11 +1222,13 @@ class wzyd_libao:
                 return False
         #
         TimeECHO(self.prefix+f"{keystr}{times}")
-        if times > 0:
-            sleep(5)
         self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         # 都保存位置,最后进不去再return
@@ -1240,12 +1255,13 @@ class wzyd_libao:
                 return False
         #
         TimeECHO(self.prefix+f"{keystr}{times}")
-        if times > 0:
-            sleep(5)
-        self.APPOB.关闭APP()
-        self.APPOB.打开APP()
+        self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         # 都保存位置,最后进不去再return
@@ -1290,11 +1306,13 @@ class wzyd_libao:
                 return False
         #
         TimeECHO(self.prefix+f"{keystr}{times}")
-        if times > 0:
-            sleep(5)
         self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         #
@@ -1333,11 +1351,13 @@ class wzyd_libao:
                 return False
         #
         TimeECHO(self.prefix+f"营地战令经验{times}")
-        if times > 0:
-            sleep(5)
         self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         # 都保存位置,最后进不去再return
@@ -1394,11 +1414,13 @@ class wzyd_libao:
                 return False
         #
         TimeECHO(self.prefix+f"体验币{times}")
-        if times > 0:
-            sleep(5)
         self.APPOB.重启APP(10)
         sleep(10)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         # 都保存位置,最后进不去再return
@@ -1484,13 +1506,13 @@ class wzyd_libao:
                 TimeECHO(self.prefix+f"营地每日签到{times}超时退出")
                 return False
         #
-        if times > 0:
-            sleep(5)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 5:
             return False
-        if times > 0:
-            sleep(5)
         # 每日签到
         self.APPOB.重启APP(10)
         sleep(10)
@@ -1525,9 +1547,11 @@ class wzyd_libao:
                 TimeECHO(self.prefix+f"营地币兑换碎片{times}超时退出")
                 return False
         #
-        if times > 0:
-            sleep(5)
         times = times+1
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         self.APPOB.重启APP(10)
@@ -2052,6 +2076,9 @@ class wzry_task:
         if times == 1:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
         times = times+1
+        if not connect_status():
+            self.Tool.touch同步文件()
+            return False
         if times > 2 and not 检测到登录界面:
             TimeErr(self.prefix+f"登录游戏:{times}次没有检测到登录界面,返回")
         if times > 5:
@@ -2869,6 +2896,10 @@ class wzry_task:
         if self.Tool.存在同步文件():
             return True
         #
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         #
@@ -2959,6 +2990,10 @@ class wzry_task:
         # 玉镖夺魁
         TimeECHO(self.prefix+f":玉镖夺魁{times}")
         #
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         #
@@ -3171,6 +3206,10 @@ class wzry_task:
             if self.Tool.timelimit(timekey="KPL每日观赛", limit=观赛时长, init=False):
                 TimeErr(self.prefix+"KPL每日观赛超时")
                 return False
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 100:
             return False
         times = times+1
@@ -3224,6 +3263,10 @@ class wzry_task:
         else:
             if self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=False):
                 TimeErr(self.prefix+"领任务礼包超时")
+                return False
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
                 return False
         if times > 10:
             return False
@@ -3361,6 +3404,10 @@ class wzry_task:
             if self.Tool.timelimit(timekey="领邮件礼包", limit=60*5, init=False):
                 TimeErr(self.prefix+"领任务礼包超时")
                 return False
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
+                return False
         if times > 10:
             return False
         #
@@ -3437,6 +3484,10 @@ class wzry_task:
         else:
             if self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=False):
                 TimeErr(self.prefix+"领任务礼包超时")
+                return False
+        if times % 4 == 3:
+            if not connect_status():
+                self.Tool.touch同步文件()
                 return False
         if times > 10:
             return False
@@ -3550,6 +3601,7 @@ class wzry_task:
         if not 对战中:
             对战中, self.图片.对战图片元素 = self.Tool.存在任一张图(self.图片.对战图片元素, "对战图片元素")
             if 对战中:
+                self.当前界面 = "对战中"
                 self.Tool.timelimit(timekey="当前界面", init=True)
         #
         if 对战中:
@@ -3790,6 +3842,7 @@ class wzry_task:
 
     def RUN(self):  # 程序入口
         self.APPOB.打开APP()
+        新的一天 = False
         while True:
             # ------------------------------------------------------------------------------
             # 检测是否出现控制冲突,双脚本情况
@@ -3824,7 +3877,7 @@ class wzry_task:
             # 然后多节点进行同步后
             # 再统一退出
             if not connect_status() or self.Tool.存在同步文件():
-                TimeECHO(self.prefix+"存在同步文件,重新开始设置")
+                TimeECHO(self.prefix+"连接失败,或者存在同步文件,重置客户端")
                 self.移动端.连接设备()
                 if connect_status():
                     self.APPOB.关闭APP()
@@ -3853,7 +3906,7 @@ class wzry_task:
                                        同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
                     self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.限时组队时间, name="限时组队时间")
                 else:
-                    TimeECHO(self.prefix+f"单账户进行同步，即重新打开APP")
+                    TimeECHO(self.prefix+f"单账户重置完成")
                 #
                 if not connect_status():
                     sleep(60)
@@ -3902,19 +3955,8 @@ class wzry_task:
                 endclock = 25
             hour, minu = self.Tool.time_getHM()
             #
-            新的一天 = False
-            # 这里做一个循环的判断
+            # 这里做一个循环的判断，夜间不自动刷
             while not self.Tool.hour_in_span(hour, startclock, endclock):
-                #
-                if self.myPID != self.Tool.readfile(self.WZRYPIDFILE)[0].strip():
-                    TimeErr(self.prefix+f": 本次运行PID[{self.myPID}]不同于[{self.WZRYPIDFILE}],退出中.....")
-                    if self.totalnode_bak > 1:  # 让其他节点抓紧结束
-                        self.Tool.touch同步文件()
-                    return True
-                #
-                新的一天 = True
-                if self.Tool.存在同步文件():
-                    break
                 #
                 # 还有多久开始，太短则直接跳过等待了
                 hour, minu = self.Tool.time_getHM()
@@ -3924,13 +3966,28 @@ class wzry_task:
                     sleep(leftmin*60)
                     continue
                 #
-                TimeECHO(self.prefix+"夜间停止刷游戏")
+                # 这里仅领礼包
+                # 在第二天的时候（新的一天=True）就不会执行这个命令了
+                if not 新的一天:
+                    TimeECHO(self.prefix+"夜间停止刷游戏前领取礼包")
+                    self.每日礼包(强制领取=True)
+                    # 关闭APP并SLEEP等待下一个时间周期
+                    self.APPOB.关闭APP()
+                新的一天 = True
                 #
-                # 这里仅领礼包,不要插入不稳定的任务
-                self.每日礼包(强制领取=True)
+                # 避免还存在其他进行没有同步完成的情况
+                hour, minu = self.Tool.time_getHM()
+                leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
+                if leftmin > 60 and self.totalnode_bak > 1:
+                    self.APPOB.关闭APP()
+                    self.移动端.关闭设备()
+                    for i in range(6):
+                        TimeECHO(self.prefix+"夜间已关闭设备, 检测是否有多账户同步残留")
+                        if self.Tool.存在同步文件():
+                            break
+                        sleep(10*60)
                 #
-                # 关闭APP并SLEEP等待下一个时间周期
-                self.APPOB.关闭APP()
+                TimeECHO(self.prefix+"准备休息")
                 # 计算休息时间
                 hour, minu = self.Tool.time_getHM()
                 leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
@@ -3954,6 +4011,7 @@ class wzry_task:
                 if self.debug:
                     break
                 hour, minu = self.Tool.time_getHM()
+                #
             if 新的一天:
                 TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 self.APPOB.重启APP(10)
@@ -4161,7 +4219,10 @@ class auto_airtest:
         self.printINFO()
         self.移动端 = deviceOB(设备类型=self.设备类型, mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
         if not self.移动端.device:
+            TimeErr(self.prefix+f"{self.prefix}"+"-"*10)
             TimeErr(self.prefix+f"{self.prefix}:连接设备失败,退出")
+            self.printINFO(">>>")
+            return
         #
         TASK = wzry_task(self.移动端)
         # 以后的测试脚本写在WZRY.0.临时初始化.txt中,不再插入到object.py中
@@ -4169,11 +4230,12 @@ class auto_airtest:
         TASK.APPOB.关闭APP()
         #
 
-    def printINFO(self):
-        TimeECHO(self.prefix+f"{self.prefix}:LINK={self.LINK}")
-        TimeECHO(self.prefix+f"{self.prefix}:设备类型={self.设备类型}")
-        TimeECHO(self.prefix+f"{self.prefix}:mynode={self.mynode}")
-        TimeECHO(self.prefix+f"{self.prefix}:totalnode={self.totalnode}")
+    def printINFO(self, prefix=""):
+        TimeECHO(prefix+f"airtest目录: {os.path.dirname(airtest.__file__)}")
+        TimeECHO(prefix+f"{self.prefix}:LINK={self.LINK}")
+        TimeECHO(prefix+f"{self.prefix}:设备类型={self.设备类型}")
+        TimeECHO(prefix+f"{self.prefix}:mynode={self.mynode}")
+        TimeECHO(prefix+f"{self.prefix}:totalnode={self.totalnode}")
 
 
 # @todo
