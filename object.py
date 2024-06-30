@@ -1056,7 +1056,7 @@ class appOB:
         if sleeptime > 60*60 and self.device:  # >1h
             self.device.重启设备(sleeptime)
         else:
-            TimeECHO("sleep %d min" % (sleeptime/60))
+            TimeECHO(self.prefix+"sleep %d min" % (sleeptime/60))
             nstep = int(sleeptime/printtime)
             for i in np.arange(nstep):
                 TimeECHO(self.prefix+f"...taskkill_sleep: {i}/{nstep}", end='\r')
