@@ -46,6 +46,13 @@ chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/an
 ```
 python -u object.py 2>&1 | tee result
 ```
+指定设备运行
+```
+#无线ADB调试设备
+python -u object.py "LINK=Android:///127.0.0.1:5555"
+#usb直连的设备
+python -u object.py "LINK=Android:///4e86ac13"
+```
 
 n个进程模式
 
@@ -61,6 +68,10 @@ python -u object.py   0   n
 python -u object.py   1   n
 #...
 python -u object.py (n-1) n
+```
+debug模式
+```
+python -u object.py n 1 # n > 4
 ```
 
 ### 客户端

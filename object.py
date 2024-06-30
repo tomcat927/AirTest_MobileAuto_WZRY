@@ -19,6 +19,7 @@ import numpy as np
 import copy
 import random
 import traceback
+import subprocess
 # 重写函数#
 from airtest.core.api import Template, connect_device, sleep
 from airtest.core.api import exists as exists_o
@@ -84,7 +85,6 @@ def TimeErr(info="None"):
 def run_command(command=[], sleeptime=20, quiet=False, must_ok=False):
     exit_code_o = 0
     # 获得运行的结果
-    import subprocess
     for i in command:
         if len(i) < 1:
             continue
@@ -814,26 +814,27 @@ class DQWheel:
 
 
 class deviceOB:
-    def __init__(self, 设备类型="IOS", mynode=0, totalnode=1, LINK="Android:///"+"127.0.0.1:"+str(5555)):
-        self.LINK = LINK
-        self.LINKport = self.LINK.split(":")[-1]
-        self.LINKhead = self.LINK[:-len(self.LINKport)]
-        self.device = None
-        #
-        self.设备类型 = 设备类型.lower()
+    def __init__(self, 设备类型=None, mynode=0, totalnode=1, LINK="Android:///"+"127.0.0.1:"+str(5555)):
         # 控制端
         self.控制端 = sys.platform.lower()
         # 避免和windows名字接近
         self.控制端 = "macos" if "darwin" in self.控制端 else self.控制端
-        self.adbpath = "adb"
-        from airtest.core import api as api_o
-        dir = os.path.dirname(api_o.__file__)
+        #
+        # 客户端
+        self.device = None
+        self.LINK = LINK
+        self.LINKport = self.LINK.split(":")[-1]
+        self.LINKport = "" if "/" in self.LINKport else self.LINKport  # USB连接时"Android:///id",没有端口
+        self.LINKtype = self.LINK.split(":")[0].lower()
+        self.LINKhead = self.LINK[:-len(self.LINKport)] if len(self.LINKport) > 0 else self.LINK
+        self.LINKURL = self.LINKhead.split("/")[-1]
+        self.设备类型 = 设备类型.lower() if 设备类型 else self.LINKtype
+        #
+        self.adb_path = "adb"
         if "android" in self.设备类型:
             from airtest.core.android import adb
             self.ADB = adb.ADB()
-            self.adbpath = self.ADB.adb_path
-        #
-        # 客户端
+            self.adb_path = self.ADB.adb_path
         # 不同客户端对重启的适配能力不同
         if "ios" in self.设备类型:
             self.客户端 = "ios"
@@ -845,10 +846,12 @@ class deviceOB:
         elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
             if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
                 self.客户端 = "lin_docker"
-        else:  # 未知的安卓设备
+        elif len(self.LINKport) > 0:  # 通过网络访问的安卓设备
             # 虽然adb -s 192.168.192.10:5555 reboot 支持一些机器的重启
             # 但是一些机器重启后就不会开机了，例如docker, 只能adb disconnect的方式控制
             self.客户端 = "RemoteAndroid"
+        else:
+            self.客户端 = "USBAndroid"
         #
         # 设备ID,用于控制设备重启关闭省电等,为docker和虚拟机使用
         self.设备ID = None
@@ -865,7 +868,12 @@ class deviceOB:
         #
         TimeECHO(self.prefix+f"控制端({self.控制端})")
         TimeECHO(self.prefix+f"客户端({self.客户端})")
-        TimeECHO(self.prefix+f"ADB =({self.adbpath})")
+        TimeECHO(self.prefix+f"ADB =({self.adb_path})")
+        TimeECHO(self.prefix+f"LINK({self.LINK})")
+        TimeECHO(self.prefix+f"LINKhead({self.LINKhead})")
+        TimeECHO(self.prefix+f"LINKtype({self.LINKtype})")
+        TimeECHO(self.prefix+f"LINKURL({self.LINKURL})")
+        TimeECHO(self.prefix+f"LINKport({self.LINKport})")
 
     # 尝试连接timesMax次,当前是times次
 
@@ -902,7 +910,6 @@ class deviceOB:
                 TimeECHO(self.prefix+f"当前模式无法打开IOS")
                 return False
             # 获得运行的结果
-            import subprocess
             result = subprocess.getstatusoutput("tidevice list")
             if 'ConnectionType.USB' in result[1]:
                 # wdaproxy这个命令会同时调用xctest和relay，另外当wda退出时，会自动重新启动xctest
@@ -920,13 +927,20 @@ class deviceOB:
             command.append(f"start \"{CMDtitle}\" / MIN C: \Progra~1\BlueStacks_nxt\HD-Player.exe --instance Nougat32_ % {self.mynode}")
         elif self.客户端 == "win_模拟器":
             # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
-            command.append(f" {self.adbpath} connect "+self.LINK.split("/")[-1])
-            command.append(f"{self.adbpath} -s "+self.LINK.split("/")[-1]+" reboot")
+            command.append(f" {self.adb_path} connect "+self.LINKURL)
+            command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
         elif self.客户端 == "lin_docker":
             虚拟机ID = f"androidcontain{self.mynode}"
             command.append(f"docker restart {虚拟机ID}")
         elif self.客户端 == "RemoteAndroid":
-            command.append(f"{self.adbpath} connect "+self.LINK.split("/")[-1])
+            command.append(f"{self.adb_path} connect "+self.LINKURL)
+        elif self.客户端 == "USBAndroid":
+            result = subprocess.getstatusoutput("adb devices")
+            if self.LINKURL in result[1]:
+                command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+            else:
+                TimeECHO(self.prefix+f"没有找到USB设备{self.LINKURL}\n"+result[1])
+                return False
         else:
             TimeECHO(self.prefix+f"未知设备类型")
             return False
@@ -957,13 +971,20 @@ class deviceOB:
                 command.append('taskkill /f /im HD-Player.exe')
         elif self.客户端 == "win_模拟器":
             # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
-            command.append(f" {self.adbpath} connect "+self.LINK.split("/")[-1])
-            command.append(f"{self.adbpath} -s "+self.LINK.split("/")[-1]+" reboot")
+            command.append(f" {self.adb_path} connect "+self.LINKURL)
+            command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
         elif self.客户端 == "lin_docker":
             虚拟机ID = f"androidcontain{self.mynode}"
             command.append(f"docker stop {虚拟机ID}")
         elif self.客户端 == "RemoteAndroid":
-            command.append(f"{self.adbpath} disconnect "+self.LINK.split("/")[-1])
+            command.append(f"{self.adb_path} disconnect "+self.LINKURL)
+        elif self.客户端 == "USBAndroid":
+            result = subprocess.getstatusoutput("adb devices")
+            if self.LINKURL in result[1]:
+                command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+            else:
+                TimeECHO(self.prefix+f"没有找到USB设备{self.LINKURL}\n"+result[1])
+                return False
         else:
             TimeECHO(self.prefix+f"未知设备类型")
             return False
@@ -3964,6 +3985,7 @@ class wzry_task:
                 if leftmin < 10:
                     TimeECHO(self.prefix+f"剩余{leftmin}分钟进入新的一天")
                     sleep(leftmin*60)
+                    新的一天 = True
                     continue
                 #
                 # 这里仅领礼包
@@ -4007,10 +4029,6 @@ class wzry_task:
                 if not self.check_connect_status():
                     self.移动端.连接设备()
                     self.APPOB.重启APP(30)
-                #
-                if self.debug:
-                    break
-                hour, minu = self.Tool.time_getHM()
                 #
             if 新的一天:
                 TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -4181,8 +4199,12 @@ class auto_airtest:
         self.totalnode = totalnode
         self.设备类型 = 设备类型.lower()
         self.prefix = f"({self.mynode}/{self.totalnode})"
+        # mac平台
         self.debug = "darwin" in sys.platform.lower()
+        # 连接远程的oracle客户端进行测试, 占用mynode=0~4
         self.debug = self.debug or os.path.exists("oracle.txt")
+        # 使用object.py n 1, 当n大于4时，使用我特定的测试客户端进行测试
+        self.debug = self.debug or mynode > 4
         # 设备信息
         if len(LINK_dict) == 0:
             LINK_dict = {}
@@ -4200,15 +4222,19 @@ class auto_airtest:
                 LINK_dict[4] = "ios:///http://"+"192.168.12.130:8104"
             if self.debug:
                 # 当在这里手动指定Link时,自动进行修正
+                # docker容器
                 LINK_dict[0] = "Android:///"+"192.168.192.10:5555"
                 LINK_dict[1] = "Android:///"+"192.168.192.10:5565"
                 LINK_dict[2] = "Android:///"+"192.168.192.10:5575"
                 LINK_dict[3] = "Android:///"+"192.168.192.10:5585"
-                # 以后不再以IOS平台进行测试,这里暂时关闭IOS入口
-                # LINK_dict[2] = "ios:///http://127.0.0.1:8200"
-                # LINK_dict[totalnode-1]="ios:///http://127.0.0.1:8200"
-                # LINK_dict[totalnode-1]="ios:///http://169.254.83.56:8100"
-                # LINK_dict[2]="ios:///http://169.254.83.56:8100"
+                LINK_dict[4] = "Android:///"+"192.168.192.10:5595"
+                # 一些特殊的测试机器
+                LINK_dict[5] = "Android:///"+"192.168.192.39:5555"  # windows电脑上的安卓模拟器
+                LINK_dict[6] = "Android:///"+"192.168.192.39:5565"  # windows电脑上的安卓模拟器
+                LINK_dict[7] = "ios:///http://127.0.0.1:8200"  # Iphone SE映射到本地
+                LINK_dict[8] = "ios:///http://169.254.83.56:8100"  # Iphone 11支持无线连接
+                LINK_dict[9] = "Android:///emulator-5554"  # 本地的安卓模拟器
+                LINK_dict[10] = "Android:///4e86ac13"  # usb连接的安卓手机
                 self.debug = False  # 仅用于设置ios连接,程序还是正常运行
         # 使用端口映射成8200后, usb接口老频繁失灵，怀疑与这个有关,还是采用默认的方式
         # if "ios" in LINK_dict[0]: os.system("tidevice wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner > tidevice.result.txt 2>&1 &")
@@ -4217,7 +4243,7 @@ class auto_airtest:
         self.LINK = LINK_dict[mynode]
         self.设备类型 = self.LINK.split(":")[0].lower()
         self.printINFO()
-        self.移动端 = deviceOB(设备类型=self.设备类型, mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
+        self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
         if not self.移动端.device:
             TimeErr(self.prefix+f"{self.prefix}"+"-"*10)
             TimeErr(self.prefix+f"{self.prefix}:连接设备失败,退出")
@@ -4264,6 +4290,10 @@ if __name__ == "__main__":
     else:  # 组队模式,但是自己单进程跑
         mynode = int(sys.argv[1])
         totalnode = int(sys.argv[2])
+    if len(sys.argv) == 2:
+        if "LINK" in sys.argv[1]:
+            auto_airtest(mynode=0, totalnode=1, LINK_dict=[sys.argv[1].split("=")[-1]])
+            exit()
     if not multi_run:
         auto_airtest(mynode, totalnode, 设备类型)
     else:
@@ -4278,3 +4308,4 @@ if __name__ == "__main__":
             out = p.map_async(multi_start, m_cpu).get()
             p.close()
             p.join()
+    exit()
