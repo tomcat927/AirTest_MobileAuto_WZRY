@@ -555,7 +555,7 @@ class DQWheel:
             runloop = runloop+1
         #
         if exists(png):
-            TimeErr(keystr+"图片仍存在")
+            TimeErr(self.prefix+keystr+"图片仍存在")
             return True
         else:
             return False
@@ -2111,6 +2111,7 @@ class wzry_task:
             self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
 
         取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
+        关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
         # 更新公告
         self.check_connect_status()
         if self.Tool.存在同步文件():
@@ -2172,8 +2173,10 @@ class wzry_task:
         随意点击 = self.图片.登录界面开始游戏图标
         self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
         self.Tool.existsTHENtouch(取消, "取消按钮")
+        self.Tool.existsTHENtouch(关闭, "关闭按钮")
         self.关闭按钮()
         self.Tool.existsTHENtouch(取消, "取消按钮")
+        self.Tool.existsTHENtouch(关闭, "关闭按钮")
         if self.判断大厅中():
             return True
         #
