@@ -4012,9 +4012,8 @@ class wzry_task:
                 leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
                 if leftmin > 60 and self.totalnode_bak > 1:
                     self.APPOB.关闭APP()
-                    self.移动端.关闭设备()
                     for i in range(6):
-                        TimeECHO(self.prefix+"夜间已关闭设备, 检测是否有多账户同步残留")
+                        TimeECHO(self.prefix+"夜间已关闭APP, 检测是否有多账户同步残留")
                         if self.Tool.存在同步文件():
                             break
                         sleep(10*60)
