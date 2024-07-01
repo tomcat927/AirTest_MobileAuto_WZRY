@@ -79,35 +79,78 @@ def TimeECHO(info="None", end=""):
 def TimeErr(info="None"):
     TimeECHO("NNNN:"+info)
 
-# 执行命令
 
-
-def run_command(command=[], sleeptime=20, quiet=False, must_ok=False):
+def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False):
+    """
+     执行命令
+    """
     exit_code_o = 0
+    command_step = 0
     # 获得运行的结果
-    for i in command:
-        if len(i) < 1:
+    for i_command in command:
+        # 去掉所有的空白符号看是否还有剩余命令
+        trim_insert = i_command.strip()
+        if len(trim_insert) < 1:
             continue
-        result = subprocess.getstatusoutput(i)
+        result = subprocess.getstatusoutput(i_command)
+        command_step = command_step + 1
         # exit_code = os.system(i)
         exit_code = result[0]
         if not quiet:
-            TimeECHO("sysrun:"+i)
+            TimeECHO(prefix+"sysrun:"+i_command)
             if exit_code == 0:
-                TimeECHO("result: "+result[1])
+                TimeECHO(prefix+"result: "+result[1])
             else:
-                TimeECHO("result:"+">"*20)
+                TimeECHO(prefix+"result:"+">"*20)
                 TimeECHO(result[1])
-                TimeECHO("result:"+"<"*20)
+                TimeECHO(prefix+"result:"+"<"*20)
         exit_code_o += exit_code
-        if must_ok and exists_o != 0:
+        if must_ok and exit_code_o != 0:
             break
         sleep(sleeptime)
+    # 没有执行任何命令
+    if command_step == 0:
+        exit_code_o = -100
     return exit_code_o
+
+
+def run_class_command(self=None, command=[], prefix="", quiet=False, must_ok=False):
+    """
+ # 执行模块内的文件
+ # 以为文件中的命令可能包含self,所以把self作为输入参数
+    """
+    # 获得运行的结果
+    exit_code_o = 0
+    command_step = 0
+    for i_command in command:
+        # 去掉所有的空白符号看是否还有剩余命令
+        trim_insert = i_command.strip()
+        if len(trim_insert) < 1:
+            continue
+        if '#' == trim_insert[0]:
+            continue
+        if not quiet:
+            # [:-1]是因为有换行符
+            TimeECHO(prefix+'python: '+i_command[:-1])
+        try:
+            exec(i_command)
+            exit_code = 0
+            command_step = command_step + 1
+        except:
+            traceback.print_exc()
+            exit_code = 1
+        exit_code_o += exit_code
+        if must_ok and exit_code_o != 0:
+            break
+    # 没有执行任何命令
+    if command_step == 0:
+        exit_code_o = -100
+    return exit_code_o
+
 # ........................
 
 
-def connect_status(times=10):
+def connect_status(times=10, prefix=""):
     png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
     for i in np.arange(times):
         try:
@@ -116,10 +159,10 @@ def connect_status(times=10):
         except:
             if i == times - 1:
                 traceback.print_exc()
-            TimeECHO(f"cndaqiang: 无法连接设备,重试中{i}")
+            TimeECHO(prefix+f"cndaqiang: 无法连接设备,重试中{i}")
             sleep(1)
             continue
-    TimeECHO("cndaqiang: 设备失去联系")
+    TimeECHO(prefix+"cndaqiang: 设备失去联系")
     return False
 
 
@@ -333,7 +376,7 @@ class DQWheel:
 
     def readfile(self, filename):
         if not os.path.exists(filename):
-            TimeECHO(self.prefix+"Read["+filename+"]不存在")
+            TimeECHO(self.prefix+"不存在["+filename+"]")
             return [""]
         try:
             f = open(filename, 'r', encoding='utf-8')
@@ -945,7 +988,7 @@ class deviceOB:
             TimeECHO(self.prefix+f"未知设备类型")
             return False
         # 开始运行
-        exit_code = run_command(command)
+        exit_code = run_command(command=command, prefix=self.prefix)
         if exit_code == 0:
             TimeECHO(self.prefix+f"启动成功")
             return True
@@ -989,7 +1032,7 @@ class deviceOB:
             TimeECHO(self.prefix+f"未知设备类型")
             return False
         # 开始运行
-        exit_code = run_command(command, sleeptime=60)
+        exit_code = run_command(command=command, prefix=self.prefix, sleeptime=60)
         if exit_code == 0:
             TimeECHO(self.prefix+f"关闭成功")
             return True
@@ -1154,22 +1197,7 @@ class wzyd_libao:
             self.APPOB.关闭APP()
             return False
         sleep(20)  # 等待营地打开
-        if os.path.exists(self.营地初始化FILE):
-            TimeECHO(self.prefix+f":注入营地初始化代码({self.营地初始化FILE})")
-            exec_insert = self.Tool.readfile(self.营地初始化FILE)
-            for i_insert in exec_insert:
-                trim_insert = i_insert.strip()
-                if len(trim_insert) < 1:
-                    continue
-                if '#' == trim_insert[0]:
-                    continue
-                try:
-                    exec(i_insert)
-                    if "TimeE" not in i_insert:
-                        TimeECHO(self.prefix+".营地初始化.run: "+i_insert[:-1])
-                except:
-                    traceback.print_exc()
-                    TimeErr(self.prefix+".营地初始化.Error run: "+i_insert[:-1])
+        run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.营地初始化FILE))
         #
         # 判断营地是否登录的界面
         if self.判断营地登录中():
@@ -1770,22 +1798,7 @@ class wzry_figure:
         #
         # ------------------------------------------------------------------------------
         self.图片更新FILE = "WZRY.图片更新.txt"
-        if os.path.exists(self.图片更新FILE) and self.Tool != None:
-            TimeECHO(self.prefix+f":注入图片更新FILE代码({self.图片更新FILE})")
-            exec_insert = self.Tool.readfile(self.图片更新FILE)
-            for i_insert in exec_insert:
-                trim_insert = i_insert.strip()
-                if len(trim_insert) < 1:
-                    continue
-                if '#' == trim_insert[0]:
-                    continue
-                try:
-                    exec(i_insert)
-                    if "TimeE" not in i_insert:
-                        TimeECHO(self.prefix+".图片更新FILE.run: "+i_insert[:-1])
-                except:
-                    traceback.print_exc()
-                    TimeErr(self.prefix+".图片更新FILE.Error run: "+i_insert[:-1])
+        run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.图片更新FILE))
 
 
 class wzry_task:
@@ -2545,23 +2558,8 @@ class wzry_task:
         #
         # 选择英雄
         if self.选择英雄:
-            if os.path.exists(self.重新设置英雄FILE):
-                TimeECHO(self.prefix+":重新设置英雄")
-                exec_insert = self.Tool.readfile(self.重新设置英雄FILE)
-                for i_insert in exec_insert:
-                    trim_insert = i_insert.strip()
-                    if len(trim_insert) < 1:
-                        continue
-                    if '#' == trim_insert[0]:
-                        continue
-                    try:
-                        exec(i_insert)
-                        if "TimeE" not in i_insert:
-                            TimeECHO(self.prefix+".重新设置英雄.run: "+i_insert[:-1])
-                    except:
-                        traceback.print_exc()
-                        TimeErr(self.prefix+".重新设置英雄.Error run: "+i_insert[:-1])
-            else:
+            exit_code = run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.重新设置英雄FILE), must_ok=True)
+            if exit_code != 0:
                 sleep(1)
                 self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
                 sleep(5)
@@ -2900,6 +2898,7 @@ class wzry_task:
         # 战队礼包
         TimeECHO(self.prefix+f":战队礼包")
         self.Tool.existsTHENtouch(Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540)), "战队")
+        # @todo, 添加已阅战队赛
         sleep(10)
         self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540)), "展开战队")
         sleep(10)
@@ -3546,6 +3545,7 @@ class wzry_task:
             self.Tool.LoopTouch(收下, "收下", loop=10)
             self.Tool.LoopTouch(确定, "确定", loop=10)
             self.Tool.LoopTouch(收下, "收下", loop=10)
+            self.Tool.LoopTouch(确定, "确定", loop=10)
         self.Tool.existsTHENtouch(能力测试关闭, "能力测试关闭")
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
@@ -3878,22 +3878,7 @@ class wzry_task:
                 return True
             #
             # ------------------------------------------------------------------------------
-            if os.path.exists(self.临时初始化FILE):
-                TimeECHO(self.prefix+f":注入临时初始化代码({self.临时初始化FILE})")
-                exec_insert = self.Tool.readfile(self.临时初始化FILE)
-                for i_insert in exec_insert:
-                    trim_insert = i_insert.strip()
-                    if len(trim_insert) < 1:
-                        continue
-                    if '#' == trim_insert[0]:
-                        continue
-                    try:
-                        exec(i_insert)
-                        if "TimeE" not in i_insert:
-                            TimeECHO(self.prefix+".临时初始.run: "+i_insert[:-1])
-                    except:
-                        traceback.print_exc()
-                        TimeErr(self.prefix+".临时初始.Error run: "+i_insert[:-1])
+            run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.临时初始化FILE))
             # ------------------------------------------------------------------------------
             if self.Tool.存在同步文件():
                 self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
@@ -4139,22 +4124,7 @@ class wzry_task:
             # 若希望进行自动调整分路和设置触摸对战等参数，
             # 可以将相关指令添加到"self.对战前插入FILE",
             # 示例代码：WZRY.node.对战前插入.py
-            if os.path.exists(self.对战前插入FILE):
-                TimeECHO(self.prefix+f":对战前注入代码({self.对战前插入FILE})")
-                exec_insert = self.Tool.readfile(self.对战前插入FILE)
-                for i_insert in exec_insert:
-                    trim_insert = i_insert.strip()
-                    if len(trim_insert) < 1:
-                        continue
-                    if '#' == trim_insert[0]:
-                        continue
-                    try:
-                        exec(i_insert)
-                        if "TimeE" not in i_insert:
-                            TimeECHO(self.prefix+".对战前注入.run: "+i_insert[:-1])
-                    except:
-                        traceback.print_exc()
-                        TimeErr(self.prefix+".对战前注入.Error run: "+i_insert[:-1])
+            run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.对战前插入FILE))
             # ------------------------------------------------------------------------------
             if self.标准触摸对战:
                 self.标准模式 = True
