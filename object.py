@@ -16,17 +16,17 @@ import logging
 import sys
 import os
 import numpy as np
-import copy
 import random
 import traceback
 import subprocess
 # 重写函数#
-from airtest.core.api import Template, connect_device, sleep
+from airtest.core.api import connect_device, sleep
 from airtest.core.api import exists as exists_o
 from airtest.core.api import touch as touch_o
 from airtest.core.api import swipe as swipe_o
 from airtest.core.api import start_app as start_app_o
 from airtest.core.api import stop_app as stop_app_o
+from airtest.core.api import Template as Template_o
 # from airtest.core.api import touch as touch
 # from airtest.core.api import swipe as swipe
 # from airtest.core.api import exists as exists
@@ -265,6 +265,27 @@ def stop_app(*args, **kwargs):
             TimeErr("start_app: 连接不上设备")
             return False
     return result
+
+
+def Template(*args, **kwargs):
+    # 在这里修改args和kwargs，例如针对kwargs中的key进行添加内容
+    dirname = "assets"
+    if "dirname" in kwargs:
+        dirname = kwargs["dirname"]
+        del kwargs["dirname"]
+    # 将args转换为列表以进行修改
+    args_list = list(args)
+    if args_list and "png" in args_list[0]:
+        filename = os.path.join(dirname, args_list[0].lstrip('/'))
+        if os.path.exists(filename):
+            args_list[0] = os.path.join(dirname, args_list[0].lstrip('/'))
+        else:
+            TimeErr("不存在{filename}")
+            filename = args_list[0]
+            if not os.path.exists(filename):
+                TimeErr("不存在{filename}")
+    # 调用Template_o函数，传入修改后的参数
+    return Template_o(*args_list, **kwargs)
 
 
 class DQWheel:
