@@ -695,7 +695,9 @@ class DQWheel:
                 end_timestamp = int(time.time())
                 sleepNtime = max(10, sleeptime-(end_timestamp-start_timestamp))+mynode*5
                 self.同步等待(mynode, totalnode, 同步文件, sleepNtime)
-        TimeECHO(self.prefix+"-+"*20)
+            TimeECHO(self.prefix+"-+"*20)
+        else:
+            return True
         return not self.存在同步文件(同步文件)
 
     # 这仅针对辅助模式,因此同步文件取self.辅助同步文件
@@ -3237,9 +3239,13 @@ class wzry_task:
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
     def 每日礼包_王者营地(self, 初始化=False):
+        if 初始化:
+            TimeECHO(self.prefix+f"[{fun_name(1)}]检测王者营地状态")
         if not self.check_run_status():
+            #连接失败，不是营地有问题，所以返回True
             if 初始化:
                 return True
+            # 单纯的领取失败
             return False
         #
         if 初始化:
@@ -3849,6 +3855,9 @@ class wzry_task:
                 self.Tool.touch同步文件(self.Tool.辅助同步文件)
             TimeECHO(self.prefix+f"[{calname}]check_run_status失败:存在[{self.Tool.独立同步文件}]")
             return False
+        if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):
+            TimeECHO(self.prefix+f"[{calname}]check_run_status失败:存在[{self.Tool.辅助同步文件}]")
+            return False
         #
         if not connect_status(prefix=self.prefix):
             # 尝试连接一下,还不行就同步吧
@@ -3916,68 +3925,52 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.临时初始化FILE))
             # ------------------------------------------------------------------------------
+            # >>> 设备状态调整
             if self.Tool.存在同步文件():
                 self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
-            # 健康系统连接失败等原因
-            # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
-            # 然后多节点进行同步后
-            # 再统一退出
+            # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里同意处理
             if not self.check_run_status():
-                self.移动端.连接设备()
-                if connect_status(prefix=self.prefix):
-                    self.APPOB.关闭APP()
-                else:
-                    TimeErr(self.prefix+"连接不上设备. 待同步后退出")
+                #
+                if not connect_status(prefix=self.prefix):
+                    self.移动端.连接设备()
+                #
+                # 必须所有节点都能上线，否则并行任务就全部停止
+                if not connect_status(prefix=self.prefix):
+                    TimeErr(self.prefix+"连接不上设备. 所有节点全部准备终止")
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                         self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
-                        # 这里会创建全局同步文件self.Tool.辅助同步文件
                         self.Tool.touchfile(self.无法进行组队FILE)
+                        self.Tool.stoptask()
+                        self.Tool.touch同步文件(self.Tool.辅助同步文件)
                     else:
                         TimeErr(self.prefix+"连接不上设备. 退出")
-                        return True
-                # 多进程账户同步
-                # 状态判断
-                self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
-                if self.无法进行组队:
-                    TimeECHO(self.prefix+f"检测到{self.无法进行组队FILE}, 同步阶段关闭组队必选死循环")
-                    self.组队模式 = False
-                    self.totalnode = 1
-                    # 当某个节点出现问题时，全局不再进行同步
-                    self.Tool.removefile(self.Tool.辅助同步文件)
-                # 无论发生何种情况，一定要进行同步
-                if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):
-                    TimeECHO(self.prefix+f"存在{self.Tool.辅助同步文件},需要同步不同进程")
-                    self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode,
+                    return True
+                #
+                # 如果个人能连上，检测是否有组队情况存在同步文件
+                if self.totalnode_bak > 1:
+                    # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在readstopfile）
+                    self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode_bak,
                                        同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
-                    self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.限时组队时间, name="限时组队时间")
+                    if self.Tool.readstopfile():
+                        self.Tool.stoptask()
+                        return True
                 else:
                     TimeECHO(self.prefix+f"单账户重置完成")
+                self.Tool.removefile(self.Tool.独立同步文件)
                 #
                 if not connect_status(prefix=self.prefix):
                     sleep(60)
                     continue
+                # 重置完成
                 if not self.组队模式:
-                    self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
+                    if not self.王者营地礼包:
+                        self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
                     if self.王者营地礼包:
                         self.每日礼包_王者营地()
                 self.APPOB.重启APP(sleeptime=self.mynode*10+60)
-                # 因为self.登录游戏()会根据组队情况与否创建self.Tool.辅助同步文件，导致这里无线循环，所以提前设定self.组队模式
                 self.登录游戏()
-            # ------------------------------------------------------------------------------
-            # 现在所有进程都在这里了,开始判断单个节点的问题,以及是否退出
-            # 检查本节点是否需要独立同步(重置连接)
-            # 是否有节点存在物理故障
-            if self.totalnode_bak > 1:
-                if self.Tool.readstopfile():  # 这个只在多节点运行时会创建
-                    self.Tool.stoptask()
-                    return  # 就是结束
-            else:
-                if not connect_status(prefix=self.prefix):
-                    TimeErr(self.prefix+"连接不上设备. 退出")
-                    return
             self.Tool.removefile(self.Tool.独立同步文件)
             #
-            # ------------------------------------------------------------------------------
             if os.path.exists(self.结束游戏FILE):
                 TimeECHO(self.prefix+f"检测到{self.结束游戏FILE}, stop")
                 self.APPOB.关闭APP()
