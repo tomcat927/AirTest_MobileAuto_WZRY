@@ -1,5 +1,7 @@
 字典.分路.android.var_dict_N.zip
 untitled.air
+*.bak
+.vscode
 
 #clean png
 .pngtmp/
