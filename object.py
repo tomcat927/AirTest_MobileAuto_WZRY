@@ -27,13 +27,10 @@ from airtest.core.api import swipe as swipe_o
 from airtest.core.api import start_app as start_app_o
 from airtest.core.api import stop_app as stop_app_o
 from airtest.core.api import Template as Template_o
-# from airtest.core.api import touch as touch
-# from airtest.core.api import swipe as swipe
-# from airtest.core.api import exists as exists
-
 
 # ........................
 # python -m pip install --upgrade --no-deps --force-reinstall airtest
+# vscode设置image preview的解析目录为assets,就可以预览了
 ST.OPDELAY = 1
 # 全局阈值的范围为[0, 1]
 ST.THRESHOLD_STRICT = 0.8  # assert_exists语句touch(Template(r"tpl1689665366952.png", record_pos=(-0.425, -0.055), resolution=(960, 540)))的默认阈值，一般比THRESHOLD更高一些
@@ -163,22 +160,6 @@ def run_class_command(self=None, command=[], prefix="", quiet=False, must_ok=Fal
 # ........................
 
 
-def connect_status(times=10, prefix=""):
-    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
-    for i in np.arange(times):
-        try:
-            exists_o(png)
-            return True
-        except:
-            if i == times - 1:
-                traceback.print_exc()
-            TimeECHO(f"{prefix} 无法连接设备,重试中{i}")
-            sleep(1)
-            continue
-    TimeECHO(f"{prefix} 设备失去联系")
-    return False
-
-
 def exists(*args, **kwargs):
     prefix = ""
     if "prefix" in kwargs:
@@ -189,13 +170,13 @@ def exists(*args, **kwargs):
     except:
         # 下面仍会输出信息，所以这里少报错，让屏幕更干净
         # traceback.print_exc()
-        TimeECHO(f"{prefix} exists失败")
+        TimeECHO(f"{prefix}  {fun_name(1)}  失败")
         sleep(1)
         try:
             result = exists_o(*args, **kwargs)
         except:
             traceback.print_exc()
-            TimeECHO(f"{prefix} 再次尝试仍失败")
+            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败")
             result = False
     return result
 
@@ -210,13 +191,13 @@ def touch(*args, **kwargs):
     except:
         # 下面仍会输出信息，所以这里少报错，让屏幕更干净
         # traceback.print_exc()
-        TimeECHO(f"{prefix} touch失败")
+        TimeECHO(f"{prefix}  {fun_name(1)}  失败")
         sleep(1)
         try:
             result = touch_o(*args, **kwargs)
         except:
             traceback.print_exc()
-            TimeECHO(f"{prefix} 再次尝试仍失败")
+            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败")
             result = False
     return result
 
@@ -231,13 +212,13 @@ def swipe(*args, **kwargs):
     except:
         # 下面仍会输出信息，所以这里少报错，让屏幕更干净
         # traceback.print_exc()
-        TimeECHO(f"{prefix} swipe失败")
+        TimeECHO(f"{prefix}  {fun_name(1)}  失败")
         sleep(1)
         try:
             result = swipe_o(*args, **kwargs)
         except:
             traceback.print_exc()
-            TimeECHO(f"{prefix} 再次尝试仍失败")
+            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败")
             result = False
     return result
 
@@ -251,26 +232,49 @@ def start_app(*args, **kwargs):
         result = True
         start_app_o(*args, **kwargs)
     except:
+        result = False
+        TimeECHO(f"{prefix} {fun_name(1)} 失败")
+        if not connect_status(prefix=prefix):
+            TimeErr(f"{prefix} {fun_name(1)}连接不上设备")
+            return result
+        sleep(1)
         # 下面仍会输出信息，所以这里少报错，让屏幕更干净
         # traceback.print_exc()
-        TimeECHO(f"{prefix} start_app失败")
-        sleep(1)
+        # ......
+        # 安卓系统的报错, 尝试进行修复
+        errormessgae = traceback.format_exc()
+        if "AdbError" in errormessgae:
+            """
+            使用start_app启动安卓软件的各种坑（有的安卓系统使用monkey需要添加参数，否则报错）
+            方式1(monkey). start_app(package_name), 需要修改Airtest的代码添加`--pct-syskeys 0`(https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+            方式2(am start). start_app(package_name, activity)
+            获得Activity的方法`adb -s 127.0.0.1:5565 shell dumpsys package com.tencent.tmgp.sgame`有一个Activity Resolver Table
+            Airtest代码中是 adb -s 127.0.0.1:5565  shell am start -n package_name/package_name.activity
+            可并不是所有的app的启动都遵循这一原则,如
+            "com.tencent.tmgp.sgame/SGameActivity",
+            "com.tencent.gamehelper.smoba/com.tencent.gamehelper.biz.launcher.ui.SplashActivit
+            所以如果相同方式2，还是要修改Airtest的代码，变为package_name/activity
+            综合上述原因，还是采取方式1, 添加`--pct-syskeys 0`
+            虽然start_app(self.APPID)也能启动, 但是要修改代码airtest/core/android/adb.py,
+            即使用start_app(self.APPID,Activity)就不用修改代码了
+            """
+            args_list = list(args)
+            if args_list and "SYS_KEYS has no physical keys but with factor" in errormessgae:
+                args_list = list(args)
+                args_list[0] = str(args_list[0])+" --pct-syskeys 0"
+                args = args_list
+                TimeECHO(prefix+f"{fun_name(1)} with {args_list[0]}")
+            if "device offline" in errormessgae:
+                TimeECHO(prefix+"ADB device offline")
+                return result
+        # ......
         try:
             result = True
             start_app_o(*args, **kwargs)
         except:
             traceback.print_exc()
-            TimeECHO(f"{prefix} 再次尝试仍失败")
+            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败")
             result = False
-        if not connect_status():
-            TimeErr("start_app:"+"连接不上设备")
-            result = False
-    if not result:
-        TimeECHO(f"{prefix} 如果持续失败, 原因(1) 没有安装APP, "+str(args))
-        TimeECHO(f"{prefix} 如果持续失败, 原因(2) 请修改`airtest/core/android/adb.py`文件")
-        sleep(5)
-        TimeECHO(f"{prefix} 具体修改参考 https://cndaqiang.github.io/2023/11/10/MobileAuto/")
-        sleep(5)
     return result
 
 
@@ -283,20 +287,22 @@ def stop_app(*args, **kwargs):
         result = True
         stop_app_o(*args, **kwargs)
     except:
+        result = False
+        TimeECHO(f"{prefix} {fun_name(1)} 失败")
+        if not connect_status(prefix=prefix):
+            TimeErr(f"{prefix} {fun_name(1)}连接不上设备")
+            return result
+        sleep(1)
         # 下面仍会输出信息，所以这里少报错，让屏幕更干净
         # traceback.print_exc()
-        TimeECHO(f"{prefix} stop_app失败")
-        sleep(1)
+        #
         try:
             result = True
             stop_app_o(*args, **kwargs)
         except:
             traceback.print_exc()
-            TimeECHO(f"{prefix} 再次尝试仍失败")
+            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败")
             result = False
-        if not connect_status():
-            TimeErr("start_app: 连接不上设备")
-            return False
     return result
 
 
@@ -320,6 +326,22 @@ def Template(*args, **kwargs):
         args = args_list
     # 调用Template_o函数，传入修改后的参数
     return Template_o(*args, **kwargs)
+
+
+def connect_status(times=10, prefix=""):
+    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
+    for i in np.arange(times):
+        try:
+            exists_o(png)
+            return True
+        except:
+            if i == times - 1:
+                traceback.print_exc()
+            TimeECHO(f"{prefix} 无法连接设备,重试中{i}")
+            sleep(1)
+            continue
+    TimeECHO(f"{prefix} 设备失去联系")
+    return False
 
 
 class DQWheel:
@@ -1130,19 +1152,6 @@ class appOB:
     #
 
     def 打开APP(self):
-        # 使用start_app启动安卓软件的各种坑
-        # 方式1(monkey). start_app(package_name), 需要修改Airtest的代码添加`--pct-syskeys 0`(https://cndaqiang.github.io/2023/11/10/MobileAuto/)
-        # 方式2(am start). start_app(package_name, activity)
-        # 获得Activity的方法`adb -s 127.0.0.1:5565 shell dumpsys package com.tencent.tmgp.sgame`有一个Activity Resolver Table
-        # Airtest代码中是 adb -s 127.0.0.1:5565  shell am start -n package_name/package_name.activity
-        # 可并不是所有的app的启动都遵循这一原则,如
-        # "com.tencent.tmgp.sgame/SGameActivity",
-        # "com.tencent.gamehelper.smoba/com.tencent.gamehelper.biz.launcher.ui.SplashActivit
-        # 所以如果相同方式2，还是要修改Airtest的代码，变为package_name/activity
-        # 综合上述原因，还是采取方式1, 添加`--pct-syskeys 0`
-        # 虽然start_app(self.APPID)也能启动, 但是要修改代码airtest/core/android/adb.py,
-        # 即
-        # 使用start_app(self.APPID,Activity)就不用修改代码了
         if self.Activity:
             TimeECHO(self.prefix+f"打开APP[{self.APPID}/{self.Activity}]中")
             启动成功 = start_app(self.APPID, self.Activity)
@@ -3242,7 +3251,7 @@ class wzry_task:
         if 初始化:
             TimeECHO(self.prefix+f"[{fun_name(1)}]检测王者营地状态")
         if not self.check_run_status():
-            #连接失败，不是营地有问题，所以返回True
+            # 连接失败，不是营地有问题，所以返回True
             if 初始化:
                 return True
             # 单纯的领取失败
@@ -3936,8 +3945,8 @@ class wzry_task:
                 #
                 # 必须所有节点都能上线，否则并行任务就全部停止
                 if not connect_status(prefix=self.prefix):
-                    TimeErr(self.prefix+"连接不上设备. 所有节点全部准备终止")
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
+                        TimeErr(self.prefix+"连接不上设备. 所有节点全部准备终止")
                         self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
                         self.Tool.touchfile(self.无法进行组队FILE)
                         self.Tool.stoptask()
@@ -4253,8 +4262,8 @@ class auto_airtest:
         self.printINFO()
         self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
         if not self.移动端.device:
-            TimeErr(self.prefix+f"{self.prefix}"+"-"*10)
-            TimeErr(self.prefix+f"{self.prefix}:连接设备失败,退出")
+            TimeErr(f"{self.prefix}"+"-"*10)
+            TimeErr(f"{self.prefix}:连接设备失败,退出")
             self.printINFO(">>>")
             return
         #
@@ -4317,3 +4326,4 @@ if __name__ == "__main__":
             p.close()
             p.join()
     exit()
+

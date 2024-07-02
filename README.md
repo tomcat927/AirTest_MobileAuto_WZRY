@@ -16,6 +16,7 @@
 * 套壳AirTest函数, 多次运行失败则尝试重新连接而不是报错
 * * 减少网络故障获取截图失败导致的程序终止. 
 * * 极小概率有意外:ios有时需要重新插拔数据线才能`tidevice list`检测到设备.
+* * 修复`start_app`在一些安卓系统上的报错
 * 全程自动运行, 无人值守. 检测到出错, 自动重启APP, 仍无法恢复则重启控制端(如docker、安卓模拟器)进行重置.
 * 时间采用`UTC/GMT+08:00`, 方便根据中国游戏的任务刷新时间执行脚本
 * 格式化输出`[%m-%d %H:%M:%S]+info`
@@ -32,11 +33,14 @@
 
 |  客户端 | 控制端  | 客户端控制  |
 | ------------ | ------------ | ------------ |
-| BlueStack |  Windows | 打开、关闭、重启  |
-| 其他模拟器 |  Windows | 重启  |
-| Docker  | Linux  | 打开、关闭、重启  |
-| IOS  | Mac  | tidevice重连、重启  |
-| 远程Android  | Mac  | adb重新连接  |
+| BlueStack |  Windows | 打开、关闭、重启模拟器  |
+| 本地Android模拟器/USB线连接的手机 |  Windows | 重启安卓系统  |
+| Docker  | Linux  | 打开、关闭、重启容器  |
+| IOS  | Mac  | tidevice重连、重启IOS  |
+| 远程/无线Android设备  | ALL  | adb重新连接  |
+
+#### APP管理模块 `appOB`
+* 打开、关闭、重启APP
 
 #### 相关工具DQWheel
 
@@ -50,25 +54,24 @@
 * - 利用文件&字典进行存取图片坐标, 减少重复寻找元素坐标时间.<br>亦可用于选中特定位置(如王者荣耀英雄按熟练度排序选择熟练度最低的英雄的坐标)
 * - 存在则点击, 不断存在点击等
 
-## 运行方式
 
-### 通用多账户版本(需要adb、python、终端基础)
-* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY)
-* 修改代码中客户端的ip地址`auto_airtest>LINK_dict[i]=`
-* [控制端、客户端配置](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/blob/master/howtorun.md)
-* [其他参考资料](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
-
-### 简易单账户版本(需要安卓adb基础)
-
-* 重装了Windows系统, 记录了全新安装python+雷电模拟器使用本脚本控制王者荣耀的详细过程[Windows全新安装python、依赖+雷电模拟器](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1901771876)
-* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
-* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
 
 ## 开发实例: 王者荣耀脚本
 
-使用MacOS系统控制Iphone和Andriod容器进行组队人机对战
+### 💻 运行方式
+🌟**[Howto](howtorun.md)**
+* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
+* 修改代码中客户端的ip地址`auto_airtest>LINK_dict[i]=`
+* [配置控制端、客户端](howtorun.md)
+* 启动
 
-![Alt text](image.png)
+
+一些实例
+* 重装了Windows系统, 记录了全新安装python+雷电模拟器使用本脚本控制王者荣耀的详细过程[Windows全新安装python、依赖+雷电模拟器](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1901771876)
+* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
+* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
+* [Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+
 
 ### Features
 
@@ -158,9 +161,8 @@
 
 ## 致谢
 
-本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目, 是我学习AirTest脚本的主要参考.
-
-本脚本的历史版本[WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11), [WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
+* ❤️ 本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目, 是我学习AirTest脚本的主要参考.
+* 本脚本的历史版本[WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11), [WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
 
 ## Star History
 
