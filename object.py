@@ -280,10 +280,10 @@ def Template(*args, **kwargs):
         if os.path.exists(filename):
             args_list[0] = os.path.join(dirname, args_list[0].lstrip('/'))
         else:
-            TimeErr("不存在{filename}")
+            TimeErr(f"不存在{filename}")
             filename = args_list[0]
             if not os.path.exists(filename):
-                TimeErr("不存在{filename}")
+                TimeErr(f"不存在{filename}")
     # 调用Template_o函数，传入修改后的参数
     return Template_o(*args_list, **kwargs)
 
@@ -1207,7 +1207,7 @@ class wzyd_libao:
 
     def 营地初始化(self, 初始化检查=False):
         # 判断网络情况
-        if not connect_status():
+        if not connect_status(prefix=self.prefix):
             TimeECHO(self.prefix+":营地暂时无法触摸,返回")
             if 初始化检查:
                 return True
@@ -4035,12 +4035,11 @@ class wzry_task:
                     self.APPOB.重启APP(leftmin*60)
                 else:
                     sleep(leftmin*60)
-                if not self.check_connect_status():
-                    self.移动端.连接设备()
-                    self.APPOB.重启APP(30)
                 #
             if 新的一天:
                 TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                if not self.check_connect_status():
+                    self.移动端.连接设备()
                 self.APPOB.重启APP(10)
                 self.登录游戏()
                 self.jinristep = 0
@@ -4058,9 +4057,13 @@ class wzry_task:
                 self.Tool.removefile(self.无法进行组队FILE)
                 if self.totalnode_bak > 1:
                     TimeECHO(self.prefix+":新的一天创建同步文件进行初次校准")
+                    self.totalnode = self.totalnode_bak
                     self.Tool.touch同步文件()
                 # 更新图片
                 self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
+                # 更新时间戳，不然容易，第一天刚开局同步出错直接去领礼包了
+                self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
+                self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
                 continue
             #
             if os.path.exists(self.重新登录FILE):
@@ -4088,17 +4091,17 @@ class wzry_task:
                 self.组队模式 = False
                 self.totalnode = 1
             # 组队的时间判断
-            if not self.无法进行组队:
+            if not self.无法进行组队 and self.totalnode_bak > 1:
                 hour, minu = self.Tool.time_getHM()
                 if not self.Tool.hour_in_span(hour, startclock, self.限时组队时间) and not self.Tool.存在同步文件() and self.totalnode > 1:
-                    TimeECHO(self.prefix+"限时进入单人模式")
+                    TimeECHO(self.prefix+"进入单人模式")
                     self.totalnode = 1
                 # 正常组队情况
-                if self.Tool.hour_in_span(hour, startclock, self.限时组队时间):
-                    self.totalnode = self.totalnode_bak
-                else:
-                    if self.totalnode_bak > 1 and self.totalnode == 1:
-                        if os.path.exists(self.临时组队FILE):
+                if  self.totalnode == 1:
+                    if self.Tool.hour_in_span(hour, startclock, self.限时组队时间):
+                        TimeECHO(self.prefix+"进入组队模式")
+                        self.totalnode = self.totalnode_bak
+                    elif os.path.exists(self.临时组队FILE):
                             TimeECHO(self.prefix+f"检测到{self.临时组队FILE}, 使用组队模式对战")
                             self.totalnode = self.totalnode_bak
             #
