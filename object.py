@@ -80,26 +80,26 @@ def TimeErr(info="None"):
 def fun_name(level=1):
     import inspect
     fun = inspect.currentframe()
-    level=0
+    ilevel = 0
     for i in range(level):
         try:
             fun = fun.f_back
-            level=level+1
+            ilevel = ilevel+1
         except:
             break
     try:
         return str(fun.f_code.co_name)
     except:
-        return f"not found fun_name({level})"
+        return f"not found fun_name({ilevel})"
 
 
 def getstatusoutput(*args, **kwargs):
     try:
         return subprocess.getstatusoutput(*args, **kwargs)
     except:
-        return [ 1, traceback.format_exc()]
+        return [1, traceback.format_exc()]
 
-    
+
 def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False):
     """
      执行命令
@@ -173,8 +173,8 @@ def connect_status(times=10, prefix=""):
     # png = Template_o(r"assets/tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
     # 同一个py文件, 只要在调用之前定义过了就可以
     png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
-    prefix = f"{prefix} [{fun_name(2)}][{fun_name(1)}] connect_status"
-    #        
+    prefix = f"{prefix} [{fun_name(2)}][{fun_name(1)}]"
+    #
     for i in np.arange(times):
         try:
             exists_o(png)
@@ -3905,26 +3905,25 @@ class wzry_task:
 
     def check_run_status(self):
         #
-        calname = fun_name(2)
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
             if self.组队模式:
                 self.Tool.touch同步文件(self.Tool.辅助同步文件)
-            TimeECHO(self.prefix+f"[{calname}]check_run_status失败:存在[{self.Tool.独立同步文件}]")
+            TimeECHO(self.prefix+f"[{fun_name(2)}][{fun_name(1)}]失败:存在[{self.Tool.独立同步文件}]")
             return False
         if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):
-            TimeECHO(self.prefix+f"[{calname}]check_run_status失败:存在[{self.Tool.辅助同步文件}]")
+            TimeECHO(self.prefix+f"[{fun_name(2)}][{fun_name(1)}]:存在[{self.Tool.辅助同步文件}]")
             return False
         #
-        if not connect_status(prefix=self.prefix+calname):
+        if not connect_status(prefix=self.prefix+fun_name(2)):
             # 尝试连接一下,还不行就同步吧
             self.移动端.连接设备(times=1, timesMax=2)
-            if connect_status(prefix=self.prefix+calname):
+            if connect_status(prefix=self.prefix+fun_name(2)):
                 return True
             # 单人模式创建同步文件后等待,组队模式则让全体返回
             self.Tool.touch同步文件(self.Tool.独立同步文件)
             if self.组队模式:
                 self.Tool.touch同步文件(self.Tool.辅助同步文件)
-            TimeECHO(self.prefix+f"[{calname}]check_run_status失败:无法connect")
+            TimeECHO(self.prefix+f"[{fun_name(2)}][{fun_name(1)}]失败:无法connect")
             return False
         else:
             return True
@@ -3991,7 +3990,7 @@ class wzry_task:
                     self.移动端.连接设备()
                 #
                 # 必须所有节点都能上线，否则并行任务就全部停止
-                if not connect_status(times = 2, prefix=self.prefix):
+                if not connect_status(times=2, prefix=self.prefix):
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                         TimeErr(self.prefix+"连接不上设备. 所有节点全部准备终止")
                         self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
