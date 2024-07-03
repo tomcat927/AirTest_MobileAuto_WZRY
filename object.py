@@ -80,14 +80,26 @@ def TimeErr(info="None"):
 def fun_name(level=1):
     import inspect
     fun = inspect.currentframe()
+    level=0
     for i in range(level):
         try:
             fun = fun.f_back
+            level=level+1
         except:
             break
-    return str(fun.f_code.co_name)
+    try:
+        return str(fun.f_code.co_name)
+    except:
+        return f"not found fun_name({level})"
 
 
+def getstatusoutput(*args, **kwargs):
+    try:
+        return subprocess.getstatusoutput(*args, **kwargs)
+    except:
+        return [ 1, traceback.format_exc()]
+
+    
 def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False):
     """
      执行命令
@@ -102,12 +114,11 @@ def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False
             continue
         if not quiet:
             TimeECHO(prefix+"sysrun:"+i_command)
-        result = subprocess.getstatusoutput(i_command)
+        result = getstatusoutput(i_command)
         command_step = command_step + 1
         # exit_code = os.system(i)
         exit_code = result[0]
         if not quiet:
-            TimeECHO(prefix+"sysrun:"+i_command)
             if exit_code == 0:
                 TimeECHO(prefix+"result: "+result[1])
             else:
@@ -157,6 +168,25 @@ def run_class_command(self=None, command=[], prefix="", quiet=False, must_ok=Fal
         exit_code_o = -100
     return exit_code_o
 
+
+def connect_status(times=10, prefix=""):
+    # png = Template_o(r"assets/tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
+    # 同一个py文件, 只要在调用之前定义过了就可以
+    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
+    prefix = f"{prefix} [{fun_name(2)}][{fun_name(1)}] connect_status"
+    #        
+    for i in np.arange(times):
+        try:
+            exists_o(png)
+            return True
+        except:
+            if i == times - 1:
+                traceback.print_exc()
+            TimeECHO(f"{prefix}无法连接设备,重试中{i}")
+            sleep(1)
+            continue
+    TimeECHO(f"{prefix}设备失去联系")
+    return False
 # ........................
 
 
@@ -168,9 +198,11 @@ def exists(*args, **kwargs):
     try:
         result = exists_o(*args, **kwargs)
     except:
-        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
-        # traceback.print_exc()
+        result = False
         TimeECHO(f"{prefix}  {fun_name(1)}  失败")
+        if not connect_status(prefix=prefix):
+            TimeErr(f"{prefix} {fun_name(1)}连接不上设备")
+            return result
         sleep(1)
         try:
             result = exists_o(*args, **kwargs)
@@ -189,9 +221,11 @@ def touch(*args, **kwargs):
     try:
         result = touch_o(*args, **kwargs)
     except:
-        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
-        # traceback.print_exc()
+        result = False
         TimeECHO(f"{prefix}  {fun_name(1)}  失败")
+        if not connect_status(prefix=prefix):
+            TimeErr(f"{prefix} {fun_name(1)}连接不上设备")
+            return result
         sleep(1)
         try:
             result = touch_o(*args, **kwargs)
@@ -207,12 +241,15 @@ def swipe(*args, **kwargs):
     if "prefix" in kwargs:
         prefix = kwargs["prefix"]
         del kwargs["prefix"]
+    result = False
     try:
         result = swipe_o(*args, **kwargs)
     except:
-        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
-        # traceback.print_exc()
+        result = False
         TimeECHO(f"{prefix}  {fun_name(1)}  失败")
+        if not connect_status(prefix=prefix):
+            TimeErr(f"{prefix} {fun_name(1)}连接不上设备")
+            return result
         sleep(1)
         try:
             result = swipe_o(*args, **kwargs)
@@ -238,8 +275,6 @@ def start_app(*args, **kwargs):
             TimeErr(f"{prefix} {fun_name(1)}连接不上设备")
             return result
         sleep(1)
-        # 下面仍会输出信息，所以这里少报错，让屏幕更干净
-        # traceback.print_exc()
         # ......
         # 安卓系统的报错, 尝试进行修复
         errormessgae = traceback.format_exc()
@@ -326,22 +361,6 @@ def Template(*args, **kwargs):
         args = args_list
     # 调用Template_o函数，传入修改后的参数
     return Template_o(*args, **kwargs)
-
-
-def connect_status(times=10, prefix=""):
-    png = Template(r"tpl_target_pos.png", record_pos=(-0.28, 0.153), resolution=(960, 540), target_pos=6)
-    for i in np.arange(times):
-        try:
-            exists_o(png)
-            return True
-        except:
-            if i == times - 1:
-                traceback.print_exc()
-            TimeECHO(f"{prefix} [{fun_name(2)}]无法连接设备,重试中{i}")
-            sleep(1)
-            continue
-    TimeECHO(f"{prefix} [{fun_name(2)}]设备失去联系")
-    return False
 
 
 class DQWheel:
@@ -1005,9 +1024,9 @@ class deviceOB:
         #
         self.连接设备()
 
-    def 连接设备(self, times=1, timesMax=3):
+    def 连接设备(self, times=1, timesMax=2):
         """
-        # 尝试连接timesMax次,当前是times次
+        # 尝试连接timesMax+1次,当前是times次
         """
         self.device = False
         TimeECHO(self.prefix+f"{self.LINK}:开始第{times}/{timesMax+1}次连接")
@@ -1041,7 +1060,7 @@ class deviceOB:
                 TimeECHO(self.prefix+f"当前模式无法打开IOS")
                 return False
             # 获得运行的结果
-            result = subprocess.getstatusoutput("tidevice list")
+            result = getstatusoutput("tidevice list")
             if 'ConnectionType.USB' in result[1]:
                 # wdaproxy这个命令会同时调用xctest和relay，另外当wda退出时，会自动重新启动xctest
                 # tidevice不支持企业签名的WDA
@@ -1066,7 +1085,7 @@ class deviceOB:
         elif self.客户端 == "RemoteAndroid":
             command.append(f"{self.adb_path} connect "+self.LINKURL)
         elif self.客户端 == "USBAndroid":
-            result = subprocess.getstatusoutput("adb devices")
+            result = getstatusoutput("adb devices")
             if self.LINKURL in result[1]:
                 command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
             else:
@@ -1110,7 +1129,7 @@ class deviceOB:
         elif self.客户端 == "RemoteAndroid":
             command.append(f"{self.adb_path} disconnect "+self.LINKURL)
         elif self.客户端 == "USBAndroid":
-            result = subprocess.getstatusoutput("adb devices")
+            result = getstatusoutput("adb devices")
             if self.LINKURL in result[1]:
                 command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
             else:
@@ -1737,13 +1756,27 @@ class wzry_runinfo:
         self.标准触摸对战 = False
         self.prefix = ""
 
-    def compate(self, other):
+    def printinfo(self):
+        TimeECHO(f"{self.prefix} RUNINFO")
+        TimeECHO(f"{self.prefix} 组队模式 = {str(self.组队模式)}")
+        TimeECHO(f"{self.prefix} 房主 = {str(self.房主)}")
+        TimeECHO(f"{self.prefix} 对战模式 = {str(self.对战模式)}")
+        TimeECHO(f"{self.prefix} 限时组队时间 = {str(self.限时组队时间)}")
+        TimeECHO(f"{self.prefix} runstep = {str(self.runstep)}")
+        TimeECHO(f"{self.prefix} jinristep = {str(self.jinristep)}")
+        TimeECHO(f"{self.prefix} 青铜段位 = {str(self.青铜段位)}")
+        TimeECHO(f"{self.prefix} 标准模式 = {str(self.标准模式)}")
+        TimeECHO(f"{self.prefix} 触摸对战 = {str(self.触摸对战)}")
+        TimeECHO(f"{self.prefix} 标准触摸对战 = {str(self.标准触摸对战)}")
+
+    def compare(self, other):
         if self.组队模式 != other.组队模式:
             TimeECHO(self.prefix+f"RUNINFO:组队模式变化->{str(self.组队模式)}")
             return False
         if self.对战模式 != other.对战模式:
             TimeECHO(self.prefix+f"RUNINFO:对战模式变化->{str(self.对战模式)}")
             return False
+        # 对战模式没变时，模拟战不用判断了
         if "模拟战" in self.对战模式:
             return True
         if "5v5匹配" in self.对战模式:
@@ -1814,6 +1847,15 @@ class wzry_figure:
         # for i in self.装备S:
         #     self.对战图片元素.append(i)
         self.对战图片元素.append(Template(r"tpl1719546803645.png", record_pos=(-0.005, 0.223), resolution=(960, 540)))
+        #
+        self.友方血条 = []
+        self.敌方血条 = []
+        self.敌方血条.append(Template(r"tpl1720003668795.png", record_pos=(0.082, -0.195), resolution=(960, 540)))
+        self.敌方血条.append(Template(r"tpl1720003679285.png", record_pos=(0.083, -0.193), resolution=(960, 540)))
+        self.敌方血条.append(Template(r"tpl1720003823052.png", record_pos=(-0.128, -0.191), resolution=(960, 540)))
+        self.友方血条.append(Template(r"tpl1720004138271.png", record_pos=(0.151, -0.121), resolution=(960, 540)))
+        self.友方血条.append(Template(r"tpl1720004235372.png", record_pos=(-0.342, -0.051), resolution=(960, 540)))
+        self.友方血条.append(Template(r"tpl1720004340139.png", record_pos=(0.007, -0.224), resolution=(960, 540)))
         #
         self.钱袋子_模拟战 = Template(r"tpl1690546610171.png", record_pos=(0.391, 0.216), resolution=(960, 540))
         self.刷新金币_模拟战 = Template(r"tpl1690547053276.png", record_pos=(0.458, -0.045), resolution=(960, 540))
@@ -1900,7 +1942,7 @@ class wzry_task:
         self.设备类型 = self.移动端.设备类型
         self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         # "com.tencent.tmgp.sgame/SGameActivity"
-        self.APPOB = appOB(prefix=self.prefix, APPID=self.APPID, big=True)
+        self.APPOB = appOB(prefix=self.prefix, APPID=self.APPID, big=True, device=self.移动端)
         #
         self.对战模式 = 对战模式  # "5v5匹配" or "王者模拟战"
         # 对战模式 = "模拟战" if "moni" in __file__ else "5v5匹配"
@@ -2446,7 +2488,7 @@ class wzry_task:
             return
         TimeECHO(self.prefix+"进入组队匹配房间")
         # 组队时,使用青铜模式进行, 前面应该已经配置好了青铜段位,这里进一步加强青铜段位确定
-        if not "模拟战" in self.对战模式 and not self.青铜段位 and self.房主:
+        if "5v5匹配" == self.对战模式 and not self.青铜段位 and self.房主:
             TimeECHO(self.prefix+":组队模式只在青铜段位进行,房主应该使用青铜段位建房间,重建房间中")
             self.青铜段位 = True
             self.进入大厅()
@@ -2473,7 +2515,7 @@ class wzry_task:
                 #
                 # 需要小号和主号建立亲密关系，并在主号中设置亲密关系自动进入房间
                 TimeECHO(self.prefix+"不在组队的房间中")
-                if not self.判断房间中():
+                if not self.判断房间中(处理=False):
                     self.单人进入人机匹配房间()
                 # 这里给的是特殊账户的头像
                 进房 = self.图片.房主头像
@@ -2510,7 +2552,8 @@ class wzry_task:
     def 单人进入人机匹配房间_模拟战(self, times=1):
         if self.判断对战中():
             self.结束人机匹配()
-        if self.判断房间中():
+        # 模拟战的房间很干净，不用处理
+        if self.判断房间中(处理=False):
             return True
         self.进入大厅()
         if not self.check_run_status():
@@ -2549,7 +2592,7 @@ class wzry_task:
             sleep(20)
             self.Tool.existsTHENtouch(邀请好友, "邀请好友")
         #
-        if self.判断房间中():
+        if self.判断房间中(处理=False):
             return True
         else:
             return self.单人进入人机匹配房间(times)
@@ -2709,7 +2752,7 @@ class wzry_task:
                 jixu = False
                 sleep(30)
                 continue
-            if self.判断房间中():
+            if self.判断房间中(处理=False):
                 return
             if 加速对战:
                 self.判断对战中(加速对战)
@@ -2809,8 +2852,8 @@ class wzry_task:
             if self.对战结束返回房间:
                 if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
                     sleep(10)
+                # 万一返回房间后来一堆提示
                 self.网络优化()
-                #
                 if self.判断房间中():
                     return
             else:
@@ -2831,7 +2874,7 @@ class wzry_task:
             if self.Tool.timelimit(timekey="结束模拟战", limit=60*30, init=False) or self.健康系统() or self.判断大厅中():
                 TimeErr(self.prefix+"结束游戏时间过长 OR 健康系统 OR 大厅中")
                 return self.进入大厅()
-            if self.判断房间中():
+            if self.判断房间中(处理=False):
                 return
             点击屏幕继续 = Template(r"tpl1701229138066.png", record_pos=(-0.002, 0.226), resolution=(960, 540))
             self.Tool.existsTHENtouch(点击屏幕继续, self.prefix+"点击屏幕继续")
@@ -2856,7 +2899,7 @@ class wzry_task:
             if exists(Template(r"tpl1690545494867.png", record_pos=(0.0, 0.179), resolution=(960, 540))):
                 TimeECHO(self.prefix+"检测到:[退出+观战]界面")
                 self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540)), "选择退出对战")
-            if self.判断房间中():
+            if self.判断房间中(处理=False):
                 return
             if self.判断大厅中():
                 return
@@ -2871,26 +2914,21 @@ class wzry_task:
             #
             if self.Tool.existsTHENtouch(Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))):
                 TimeECHO(self.prefix+"继续1")
-                jixu = True
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1690545802859.png", record_pos=(0.047, 0.124), resolution=(960, 540))):
                 TimeECHO(self.prefix+"继续2")
-                jixu = True
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1690545854354.png", record_pos=(0.002, 0.227), resolution=(960, 540))):
                 TimeECHO(self.prefix+"继续3")
-                jixu = True
                 sleep(5)
             #
-            # 因为不能保证返回辅助账户返回房间，所以返回大厅更稳妥
             if exists(Template(r"tpl1690545925867.png", record_pos=(-0.001, 0.241), resolution=(960, 540))):
                 if self.对战结束返回房间:
                     if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间", savepos=True):
                         sleep(10)
-    # @todo ,添加barrier
-                        if self.判断房间中():
+                        if self.判断房间中(处理=False):
                             break
-            if self.判断房间中():
+            if self.判断房间中(处理=False):
                 return
             if self.判断大厅中():
                 return
@@ -3748,24 +3786,46 @@ class wzry_task:
                     普攻 = self.图片.普攻S[0]
                     if 存在普攻图标:
                         self.Tool.existsTHENtouch(普攻, 普攻poskey, savepos=True)
-
+            #
             if 装备pos:
                 touch(装备pos)
             #
             if 移动pos:
+                content = self.Tool.readfile(self.触摸对战FILE)
+                # 如果有血条在第一行，则进行下面的测试代码
+                # 很难判断成功
+                if len(content) > 1:
+                    if "血条" in content[0]:
+                        del content[0]
+                        # 针对血条调整运动方向
+                        vector = None
+                        存在敌方, self.图片.敌方血条 = self.Tool.存在任一张图(self.图片.敌方血条, "敌方血条元素")
+                        if 存在敌方:
+                            vector = [-0.2, random.random()/5]
+                        else:
+                            存在友方, self.图片.友方血条 = self.Tool.存在任一张图(self.图片.友方血条, "友方血条元素")
+                            if 存在友方:
+                                vector = [0.2, random.random()/5]
+                        if vector:
+                            TimeECHO(self.prefix+"针对英雄调整位置")
+                            for i in range(10):
+                                swipe(移动pos, vector=[x, y])
+                #
+                # 随机移动和攻击
                 TimeECHO(self.prefix+"加速对战中:移动按钮")
+                x = None
+                inputxy = content
+                if len(inputxy) > 1:
+                    try:
+                        x = float(inputxy[0])
+                        y = float(inputxy[1])
+                        TimeECHO(self.prefix+": x=%5.3f, y=%5.3f" % (x, y))
+                    except:
+                        TimeErr(self.prefix+f" not found x y in [{self.触摸对战FILE}]")
                 for i in range(random.randint(1, 5)):
-                    x = 0.2+random.random()/5
-                    y = -0.2+random.random()/5
-                    inputxy = self.Tool.readfile(self.触摸对战FILE)
-                    if len(inputxy) > 1:
-                        try:
-                            x = float(inputxy[0])
-                            y = float(inputxy[1])
-                            TimeECHO(self.prefix+": x=%5.3f, y=%5.3f" % (x, y))
-                        except:
-                            traceback.print_exc()
-                            TimeErr(self.prefix+".error set x,y=inputxy")
+                    if not x:
+                        x = 0.2+random.random()/5
+                        y = -0.2+random.random()/5
                     swipe(移动pos, vector=[x, y])
                     #
                     if 普攻pos:
@@ -3931,7 +3991,7 @@ class wzry_task:
                     self.移动端.连接设备()
                 #
                 # 必须所有节点都能上线，否则并行任务就全部停止
-                if not connect_status(prefix=self.prefix):
+                if not connect_status(times = 2, prefix=self.prefix):
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                         TimeErr(self.prefix+"连接不上设备. 所有节点全部准备终止")
                         self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
@@ -4140,49 +4200,52 @@ class wzry_task:
             # 计算参数设置
             self.runstep = self.runstep+1
             self.jinristep = self.jinristep+1
-            self.青铜段位 = os.path.exists(self.青铜段位FILE)
-            self.标准模式 = os.path.exists(self.标准模式FILE)
-            self.触摸对战 = os.path.exists(self.触摸对战FILE)
-            self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
-            if self.组队模式 and not self.青铜段位:
-                TimeECHO(self.prefix+f"组队时采用青铜段位")
-                self.青铜段位 = True
-            # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
-            if not self.青铜段位:
-                if self.触摸对战:
-                    TimeECHO(self.prefix+f"非青铜局不模拟人手触摸")
-                    self.触摸对战 = False
+            if "5v5匹配" == self.对战模式:
+                self.青铜段位 = os.path.exists(self.青铜段位FILE)
+                self.标准模式 = os.path.exists(self.标准模式FILE)
+                self.触摸对战 = os.path.exists(self.触摸对战FILE)
+                self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
+                if self.组队模式 and not self.青铜段位:
+                    TimeECHO(self.prefix+f"组队时采用青铜段位")
+                    self.青铜段位 = True
+                # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
+                if not self.青铜段位:
+                    if self.触摸对战:
+                        TimeECHO(self.prefix+f"非青铜局不模拟人手触摸")
+                        self.触摸对战 = False
+                    if self.标准触摸对战:
+                        TimeECHO(self.prefix+f"非青铜局不进行标准模式的人手触摸")
+                        self.标准触摸对战 = False
+                # ------------------------------------------------------------------------------
+                # 若希望进行自动调整分路和设置触摸对战等参数，
+                # 可以将相关指令添加到"self.对战前插入FILE",
+                # 示例代码：WZRY.node.对战前插入.py
+                run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.对战前插入FILE))
+                # ------------------------------------------------------------------------------
                 if self.标准触摸对战:
-                    TimeECHO(self.prefix+f"非青铜局不进行标准模式的人手触摸")
-                    self.标准触摸对战 = False
-            # ------------------------------------------------------------------------------
-            # 若希望进行自动调整分路和设置触摸对战等参数，
-            # 可以将相关指令添加到"self.对战前插入FILE",
-            # 示例代码：WZRY.node.对战前插入.py
-            run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.对战前插入FILE))
-            # ------------------------------------------------------------------------------
-            if self.标准触摸对战:
-                self.标准模式 = True
-                self.触摸对战 = True
-            if self.触摸对战:
-                TimeECHO(self.prefix+f"本局对战:模拟人手触摸")
-            if self.标准模式:
-                TimeECHO(self.prefix+f"本局对战:使用标准模式")
+                    self.标准模式 = True
+                    self.触摸对战 = True
+                if self.触摸对战:
+                    TimeECHO(self.prefix+f"本局对战:模拟人手触摸")
+                if self.标准模式:
+                    TimeECHO(self.prefix+f"本局对战:使用标准模式")
             #
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
             # 后续程序的控制，仍采用 self.触摸对战等参数
-            self.本循环参数 = self.构建循环参数(self.本循环参数)
+            self.构建循环参数(self.本循环参数)
             # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
-            if not self.本循环参数.compate(self.上循环参数):
+            self.本循环参数.printinfo()
+            if not self.本循环参数.compare(self.上循环参数):
                 TimeECHO(self.prefix+f"上步计算参数不同,回到大厅重新初始化")
+                self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
                 self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------
             # 如果计算过程中对参数进行了更改，这里可以记录最新的参数
-            self.上循环参数 = self.构建循环参数(self.本循环参数)
+            self.构建循环参数(self.上循环参数)
             # ------------------------------------------------------------------------------
             if not self.check_run_status():
                 TimeECHO(self.prefix+"战斗结束,check_run_status失败,返回")
@@ -4205,10 +4268,8 @@ class auto_airtest:
         self.prefix = f"({self.mynode}/{self.totalnode})"
         # mac平台
         self.debug = "darwin" in sys.platform.lower()
-        # 连接远程的oracle客户端进行测试, 占用mynode=0~4
-        self.debug = self.debug or os.path.exists("oracle.txt")
-        # 使用object.py n 1, 当n大于4时，使用我特定的测试客户端进行测试
-        self.debug = self.debug or mynode > 4
+        # 使用debug的LINK, mynode=0~4: 我的linux服务器上的安卓容器, 5~10: 本地模拟器、手机等测试设备
+        self.debug = self.debug or os.path.exists("debug.txt") or mynode > 4
         # 设备信息
         if len(LINK_dict) == 0:
             LINK_dict = {}
@@ -4240,9 +4301,6 @@ class auto_airtest:
                 LINK_dict[9] = "Android:///emulator-5554"  # 本地的安卓模拟器
                 LINK_dict[10] = "Android:///4e86ac13"  # usb连接的安卓手机
                 self.debug = False  # 仅用于设置ios连接,程序还是正常运行
-        # 使用端口映射成8200后, usb接口老频繁失灵，怀疑与这个有关,还是采用默认的方式
-        # if "ios" in LINK_dict[0]: os.system("tidevice wdaproxy -B com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner > tidevice.result.txt 2>&1 &")
-        #
         #
         self.LINK = LINK_dict[mynode]
         self.设备类型 = self.LINK.split(":")[0].lower()
