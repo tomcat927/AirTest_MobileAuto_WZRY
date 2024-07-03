@@ -337,10 +337,10 @@ def connect_status(times=10, prefix=""):
         except:
             if i == times - 1:
                 traceback.print_exc()
-            TimeECHO(f"{prefix} 无法连接设备,重试中{i}")
+            TimeECHO(f"{prefix} [{fun_name(2)}]无法连接设备,重试中{i}")
             sleep(1)
             continue
-    TimeECHO(f"{prefix} 设备失去联系")
+    TimeECHO(f"{prefix} [{fun_name(2)}]设备失去联系")
     return False
 
 
@@ -1739,24 +1739,24 @@ class wzry_runinfo:
 
     def compate(self, other):
         if self.组队模式 != other.组队模式:
-            TimeECHO(self.prefix+f"RUNINFO:组队模式变化{str(other.组队模式)}")
+            TimeECHO(self.prefix+f"RUNINFO:组队模式变化->{str(self.组队模式)}")
             return False
         if self.对战模式 != other.对战模式:
-            TimeECHO(self.prefix+f"RUNINFO:对战模式变化{str(other.对战模式)}")
+            TimeECHO(self.prefix+f"RUNINFO:对战模式变化->{str(self.对战模式)}")
             return False
         if "模拟战" in self.对战模式:
-            TimeECHO(self.prefix+f"RUNINFO:对战模式模拟战则认为计算信息变化，以重新进入大厅初始化")
             return True
         if "5v5匹配" in self.对战模式:
             if self.青铜段位 == other.青铜段位:
                 if self.标准模式 == other.标准模式:
                     return True
                 else:
-                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化{str(other.标准模式)}")
+                    TimeECHO(self.prefix+f"RUNINFO:标准模式变化->{str(self.标准模式)}")
             else:
-                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化{str(other.青铜段位)}")
-        TimeECHO(self.prefix+f"RUNINFO:对战参数有所变化")
-        return False
+                TimeECHO(self.prefix+f"RUNINFO:青铜段位变化->{str(self.青铜段位)}")
+                return False
+        TimeECHO(self.prefix+f"RUNINFO:对战参数没有变化")
+        return True
 
 
 class wzry_figure:
@@ -1781,8 +1781,8 @@ class wzry_figure:
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅万象天工)
-        self.大厅元素.append(self.大厅对战图标2)
-        self.大厅元素.append(self.大厅万象天工2)
+        # self.大厅元素.append(self.大厅对战图标2)
+        # self.大厅元素.append(self.大厅万象天工2)
         self.房间元素 = []
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
@@ -1815,6 +1815,13 @@ class wzry_figure:
         #     self.对战图片元素.append(i)
         self.对战图片元素.append(Template(r"tpl1719546803645.png", record_pos=(-0.005, 0.223), resolution=(960, 540)))
         #
+        self.钱袋子_模拟战 = Template(r"tpl1690546610171.png", record_pos=(0.391, 0.216), resolution=(960, 540))
+        self.刷新金币_模拟战 = Template(r"tpl1690547053276.png", record_pos=(0.458, -0.045), resolution=(960, 540))
+        self.关闭钱袋子_模拟战 = Template(r"tpl1690547457483.png", record_pos=(0.392, 0.216), resolution=(960, 540))
+        self.对战图片元素_模拟战 = [self.钱袋子_模拟战, self.刷新金币_模拟战, self.关闭钱袋子_模拟战]
+        self.对战图片元素_模拟战.append(Template(r"tpl1690546926096.png", record_pos=(-0.416, -0.076), resolution=(960, 540)))
+        self.对战图片元素_模拟战.append(Template(r"tpl1690547491681.png", record_pos=(0.471, 0.165), resolution=(960, 540)))
+        self.对战图片元素_模拟战.append(Template(r"tpl1690552290188.png", record_pos=(0.158, 0.089), resolution=(960, 540)))
         # 登录关闭按钮
         self.王者登录关闭按钮 = []
         self.王者登录关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
@@ -3778,54 +3785,34 @@ class wzry_task:
 
     def 判断对战中_模拟战(self, 处理=False):
         正在对战 = False
-        if exists(Template(r"tpl1690546926096.png", record_pos=(-0.416, -0.076), resolution=(960, 540))):
-            TimeECHO(self.prefix+"开始中")
-            if not 处理:
-                return True
-            sleep(5)
-            正在对战 = True
-        # 立信界面
-
-        if exists(Template(r"tpl1690547491681.png", record_pos=(0.471, 0.165), resolution=(960, 540))):
-            TimeECHO(self.prefix+"战斗界面")
-            if not 处理:
-                return True
-            sleep(5)
-            正在对战 = True
-
-        if exists(Template(r"tpl1690552290188.png", record_pos=(0.158, 0.089), resolution=(960, 540))):
-            TimeECHO(self.prefix+"方案界面")
-            if not 处理:
-                return True
-            sleep(5)
-            正在对战 = True
-        钱袋子 = Template(r"tpl1690546610171.png", record_pos=(0.391, 0.216), resolution=(960, 540))
-        刷新金币 = Template(r"tpl1690547053276.png", record_pos=(0.458, -0.045), resolution=(960, 540))
-        关闭钱袋子 = Template(r"tpl1690547457483.png", record_pos=(0.392, 0.216), resolution=(960, 540))
-        if exists(钱袋子):
-            TimeECHO(self.prefix+"钱袋子")
-            if not 处理:
-                return True
-        if exists(刷新金币):
-            TimeECHO(self.prefix+"刷新金币")
-            if not 处理:
-                return True
         #
-        if not 处理:
-            return 正在对战
-        if not 正在对战:
-            return 正在对战
+        对战中 = False
+        if self.当前界面 == "对战中_模拟战":
+            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                self.当前界面 == "未知"
+            else:
+                TimeECHO(self.prefix+f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                对战中 = True
+        if not 对战中:
+            对战中, self.图片.对战图片元素_模拟战 = self.Tool.存在任一张图(self.图片.对战图片元素_模拟战, "对战图片元素_模拟战")
+            if 对战中:
+                self.当前界面 = "对战中_模拟战"
+                self.Tool.timelimit(timekey="当前界面", init=True)
         #
+        if 对战中:
+            TimeECHO(self.prefix+"判断对战中_模拟战:正在对战")
+        if not 对战中:
+            TimeECHO(self.prefix+"判断对战中_模拟战:没有对战")
+        if not 处理 or not 对战中:
+            return 对战中
         #
-        # 下面开始处理对战
-        self.Tool.LoopTouch(钱袋子, "初次钱袋子", loop=10)
-        self.Tool.LoopTouch(刷新金币, "初次刷新金币", loop=10)
+        # 开始处理加速对战
         self.Tool.timelimit(timekey="endgame", limit=60*20, init=True)
         while self.判断对战中_模拟战(False):
             TimeECHO(self.prefix+"处理对战中")
-            self.Tool.LoopTouch(钱袋子, "LOOP钱袋子", loop=10)  # 点击结束后,应该变成X号
-            self.Tool.LoopTouch(刷新金币, "LOOP刷新金币", loop=10)
-            if not exists(关闭钱袋子) and not exists(钱袋子):
+            self.Tool.LoopTouch(self.图片.钱袋子_模拟战, "LOOP钱袋子", loop=10)  # 点击结束后,应该变成X号
+            self.Tool.LoopTouch(self.图片.刷新金币_模拟战, "LOOP刷新金币", loop=10)
+            if not exists(self.图片.关闭钱袋子_模拟战) and not exists(self.图片.钱袋子_模拟战):
                 return False
             if self.Tool.timelimit(timekey="endgame", limit=60*20, init=False):
                 break
@@ -3868,10 +3855,10 @@ class wzry_task:
             TimeECHO(self.prefix+f"[{calname}]check_run_status失败:存在[{self.Tool.辅助同步文件}]")
             return False
         #
-        if not connect_status(prefix=self.prefix):
+        if not connect_status(prefix=self.prefix+calname):
             # 尝试连接一下,还不行就同步吧
             self.移动端.连接设备(times=1, timesMax=2)
-            if connect_status(prefix=self.prefix):
+            if connect_status(prefix=self.prefix+calname):
                 return True
             # 单人模式创建同步文件后等待,组队模式则让全体返回
             self.Tool.touch同步文件(self.Tool.独立同步文件)
@@ -4054,7 +4041,7 @@ class wzry_task:
                 #
             if 新的一天:
                 TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                if not connect_status(prefi=self.prefix):
+                if not connect_status(prefix=self.prefix):
                     self.移动端.连接设备()
                 self.APPOB.重启APP(20)
                 self.登录游戏()
@@ -4326,4 +4313,3 @@ if __name__ == "__main__":
             p.close()
             p.join()
     exit()
-
