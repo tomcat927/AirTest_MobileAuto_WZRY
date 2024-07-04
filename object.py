@@ -4373,6 +4373,7 @@ class auto_airtest:
         self.totalnode = totalnode
         self.设备类型 = 设备类型.lower()
         self.prefix = f"({self.mynode}/{self.totalnode})"
+        print(self.prefix)
         # mac平台
         self.debug = "darwin" in sys.platform.lower()
         # 使用debug的LINK, mynode=0~4: 我的linux服务器上的安卓容器, 5~10: 本地模拟器、手机等测试设备
@@ -4466,12 +4467,12 @@ if __name__ == "__main__":
     if not multi_run:
         auto_airtest(mynode, totalnode, 设备类型)
     else:
-        def multi_start(i):
-            auto_airtest(i, totalnode, 设备类型)
+        def multi_start(args):
+            auto_airtest(mynode=args[0],totalnode=args[1],设备类型=args[2])
+            return 0
         from pathos import multiprocessing
         m_process = totalnode
-        # barrier=multiprocessing.Barrier(totalnode)
-        m_cpu = [i for i in range(0, m_process)]
+        m_cpu = [[i,totalnode,设备类型] for i in range(0, m_process)]
         if __name__ == '__main__':
             p = multiprocessing.Pool(m_process)
             out = p.map_async(multi_start, m_cpu).get()
