@@ -151,8 +151,7 @@ def run_class_command(self=None, command=[], prefix="", quiet=False, must_ok=Fal
         if '#' == trim_insert[0]:
             continue
         if not quiet:
-            # [:-1]是因为有换行符
-            TimeECHO(prefix+'python: '+i_command[:-1])
+            TimeECHO(prefix+'python: '+i_command.rstrip())
         try:
             exec(i_command)
             exit_code = 0
@@ -903,13 +902,26 @@ class DQWheel:
         return datetime.now(eastern_eight_tz).weekday()
     # return 0 - 6
 
-    def hour_in_span(self, hour, startclock, endclock):
+    def hour_in_span(self,startclock=0, endclock=24, hour=None):
+        if not hour:
+            hour, minu, sec = self.time_getHMS()
+            hour = hour + minu/60.0+sec/60.0/60.0
+        startclock = (startclock+24)%24
+        endclock = (endclock+24)%24
         # 不跨越午夜的情况
         if startclock <= endclock:
-            return startclock <= hour <= endclock
+            left =  0 if startclock <= hour <= endclock else self.left_hour(startclock,hour)
         # 跨越午夜的情况
         else:
-            return hour >= startclock or hour <= endclock
+            left =  0 if hour >= startclock or hour <= endclock else self.left_hour(startclock,hour)
+        return left
+
+    def left_hour(self,endtime=24, hour=None):
+        if not hour:
+            hour, minu, sec = self.time_getHMS()
+            hour = hour + minu/60.0+sec/60.0/60.0
+        left = (endtime+24-hour) %24
+        return left
 
     def stoptask(self):
         TimeErr(self.prefix+f"停止Airtest控制,停止信息"+self.stopinfo)
@@ -1779,6 +1791,8 @@ class wzry_runinfo:
         # 对战模式没变时，模拟战不用判断了
         if "模拟战" in self.对战模式:
             return True
+        if "5v5排位" in self.对战模式:
+            return True
         if "5v5匹配" in self.对战模式:
             if self.青铜段位 == other.青铜段位:
                 if self.标准模式 == other.标准模式:
@@ -1800,11 +1814,14 @@ class wzry_figure:
         self.prefix = prefix
         self.Tool = DQWheel(prefix=self.prefix) if Tool == None else Tool
         # 一些图库, 后期使用图片更新
+        self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.大厅对战图标 = Template(r"tpl1719454669981.png", record_pos=(-0.242, 0.145), resolution=(960, 540))
         self.大厅对战图标2 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540), threshold=0.9)
         self.大厅万象天工 = Template(r"tpl1719454683770.png", record_pos=(0.232, 0.144), resolution=(960, 540))
         self.大厅万象天工2 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540), threshold=0.9)
+        self.大厅排位赛 = Template(r"tpl1720065349345.png", record_pos=(0.102, 0.144), resolution=(960, 540))
+        self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540)))
@@ -2245,9 +2262,16 @@ class wzry_task:
         if self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=False):
             TimeErr(self.prefix+"登录游戏超时返回,更新图片资源库")
             self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
-
-        取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
-        关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
+        #
+        if exists(self.图片.网络不可用):
+            TimeErr(self.prefix+"网络不可用:需要重启设备")
+            self.移动端.重启设备(10)
+            if self.组队模式:
+                TimeErr(self.prefix+"需要重启设备:创建同步文件")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件)
+            else:
+                TimeECHO(self.prefix+"需要重启设备:创建单节点同步")
+                self.Tool.touch同步文件(self.Tool.独立同步文件)
         # 更新公告
         if not self.check_run_status():
             return True
@@ -2307,6 +2331,9 @@ class wzry_task:
         # 现在打开可能会放一段视频，怎么跳过呢？使用0.1的精度测试一下.利用历史记录了
         随意点击 = self.图片.登录界面开始游戏图标
         self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
+        #
+        取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
+        关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
         self.Tool.existsTHENtouch(取消, "取消按钮")
         self.Tool.existsTHENtouch(关闭, "关闭按钮")
         self.关闭按钮()
@@ -2379,6 +2406,9 @@ class wzry_task:
         if "模拟战" in self.对战模式:
             TimeECHO(self.prefix+f"首先进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
+        if "5v5排位"  == self.对战模式:
+            TimeECHO(self.prefix+f"首先进入排位房间{times}")
+            return self.单人进入排位房间(times)            
         #
         TimeECHO(self.prefix+f"首先进入人机匹配房间{times}")
         if self.判断对战中():
@@ -2390,9 +2420,9 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        TimeECHO(self.prefix+"进入大厅,开始进入匹配房间")
+        TimeECHO(self.prefix+f"进入大厅,开始{fun_name(1)}")
         if times == 1:
-            self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=True)
+            self.Tool.timelimit(timekey=f"单人进入人机匹配房间", limit=60*10, init=True)
         #
         times = times+1
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=False):
@@ -2478,7 +2508,47 @@ class wzry_task:
                     return True
             return self.单人进入人机匹配房间(times)
         return True
-
+    def 单人进入排位房间(self, times=1):
+        if not self.check_run_status():
+            return True
+        #
+        if self.判断对战中():
+            self.结束人机匹配()
+        if self.判断房间中():
+            return True
+        #
+        self.进入大厅()
+        #
+        if not self.check_run_status():
+            return True
+        TimeECHO(self.prefix+f"进入大厅,开始{fun_name(1)}")
+        if times == 1:
+            self.Tool.timelimit(timekey=f"{fun_name(1)}", limit=60*10, init=True)
+        #
+        times = times+1
+        if not self.Tool.existsTHENtouch(self.图片.大厅排位赛, "大厅排位赛", savepos=False):
+            TimeErr(self.prefix+"找不到大厅排位赛")
+            return self.单人进入排位房间(times)
+        sleep(10)
+        if not self.Tool.existsTHENtouch(self.图片.进入排位赛, "进入排位赛", savepos=False):
+            TimeErr(self.prefix+"找不到进入排位赛")
+            return self.单人进入排位房间(times) 
+        #
+        if not self.判断房间中():
+            # 有时候长时间不进去被禁赛了
+            确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
+            while self.Tool.existsTHENtouch(确定按钮, "不匹配被禁赛的确定按钮"):
+                sleep(20)
+                if self.Tool.timelimit(timekey=f"{fun_name(1)}", limit=60*10, init=False):
+                    TimeErr(self.prefix+f"{fun_name(1)}超时,touch同步文件")
+                    if self.组队模式:
+                        self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                    else:
+                        self.Tool.touch同步文件(self.Tool.独立同步文件)
+                    return True
+            return self.单人进入排位房间(times)
+        return True
+    #
     def 进入人机匹配房间(self):
         if not self.check_run_status():
             return True
@@ -3966,7 +4036,6 @@ class wzry_task:
         #
 
     def RUN(self):  # 程序入口
-        self.APPOB.打开APP()
         新的一天 = False
         while True:
             # ------------------------------------------------------------------------------
@@ -4035,34 +4104,23 @@ class wzry_task:
                 TimeECHO(self.prefix+f"检测到{self.SLEEPFILE}, sleep(5min)")
                 sleep(60*5)
             # ------------------------------------------------------------------------------
-            # 下面就是正常的循环流程了
-            #
-            # ------------------------------------------------------------------------------
-            # 设定运行时间和运行模式
-            # 运行时间检测
-            startclock = self.对战时间[0]
-            endclock = self.对战时间[1]  # 服务器5点刷新礼包和信誉积分等
-            # if self.移动端.实体终端 and self.totalnode_bak == 1: endclock=19
-            if self.runstep == 0:
-                startclock = -1
-                endclock = 25
-            hour, minu = self.Tool.time_getHM()
-            #
-            # 这里做一个循环的判断，夜间不自动刷
-            while not self.Tool.hour_in_span(hour, startclock, endclock):
+            # 这里做一个循环的判断，夜间不自动刷任务
+            # 服务器5点刷新礼包和信誉积分等
+            startclock = self.对战时间[0]  
+            endclock = self.对战时间[1] 
+            while self.Tool.hour_in_span(startclock, endclock) > 0:
                 #
                 # 还有多久开始，太短则直接跳过等待了
-                hour, minu = self.Tool.time_getHM()
-                leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
+                leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if leftmin < 10:
-                    TimeECHO(self.prefix+f"剩余{leftmin}分钟进入新的一天")
+                    TimeECHO(self.prefix+"剩余%d分钟进入新的一天"%(leftmin))
                     sleep(leftmin*60)
                     新的一天 = True
                     continue
                 #
                 # 这里仅领礼包
                 # 在第二天的时候（新的一天=True）就不会执行这个命令了
-                if not 新的一天:
+                if not 新的一天 and leftmin > 60:
                     TimeECHO(self.prefix+"夜间停止刷游戏前领取礼包")
                     self.每日礼包(强制领取=True)
                     # 关闭APP并SLEEP等待下一个时间周期
@@ -4070,8 +4128,7 @@ class wzry_task:
                 新的一天 = True
                 #
                 # 避免还存在其他进行没有同步完成的情况
-                hour, minu = self.Tool.time_getHM()
-                leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
+                leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if leftmin > 60 and self.totalnode_bak > 1:
                     self.APPOB.关闭APP()
                     for i in range(6):
@@ -4080,14 +4137,9 @@ class wzry_task:
                             break
                         sleep(10*60)
                 #
-                TimeECHO(self.prefix+"准备休息")
                 # 计算休息时间
-                hour, minu = self.Tool.time_getHM()
-                leftmin = max(((startclock+24-hour) % 24)*60-minu, 1)
-                if leftmin > 60:  # 考虑startclock=N.m sleep的时间容易变成22.9h, 这里直接用20判断
-                    if abs(hour-startclock) < 2:
-                        TimeECHO(self.prefix+"hour距离startclock过短,不该大于60min,set leftmin=2")
-                        leftmin = 2
+                TimeECHO(self.prefix+"准备休息")
+                leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if self.移动端.容器优化:
                     leftmin = leftmin+self.mynode*1  # 这里的单位是分钟,每个node别差别太大
                 TimeECHO(self.prefix+"预计等待%d min ~ %3.2f h" % (leftmin, leftmin/60.0))
@@ -4099,7 +4151,8 @@ class wzry_task:
                     sleep(leftmin*60)
                 #
             if 新的一天:
-                TimeECHO(self.prefix+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                TimeECHO(self.prefix+">>>>>>>>>>>>>>>新的一天>>>>>>>>>>>>>>>>>>>>")
+                新的一天 = False
                 if not connect_status(prefix=self.prefix):
                     self.移动端.连接设备()
                 self.APPOB.重启APP(20)
@@ -4124,9 +4177,11 @@ class wzry_task:
                 # 更新图片
                 self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)
                 # 更新时间戳，不然容易，第一天刚开局同步出错直接去领礼包了
-                self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
-                self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
+                self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
+                self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
                 continue
+            # ------------------------------------------------------------------------------
+            # 下面就是正常的循环流程了
             #
             if os.path.exists(self.重新登录FILE):
                 if self.Tool.timelimit(timekey="检测王者登录", limit=60*60*4, init=False):
@@ -4151,7 +4206,7 @@ class wzry_task:
             # 各种原因无法组队判定
             if self.totalnode_bak > 1:
                 self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
-                组队时间内 = self.Tool.hour_in_span(hour, startclock, self.限时组队时间)
+                组队时间内 = self.Tool.hour_in_span(startclock, self.限时组队时间)
                 可以组队 = not self.无法进行组队 and 组队时间内
                 # 报告运行状态
                 组队原因 = ""
@@ -4215,20 +4270,22 @@ class wzry_task:
                     if self.标准触摸对战:
                         TimeECHO(self.prefix+f"非青铜局不进行标准模式的人手触摸")
                         self.标准触摸对战 = False
-                # ------------------------------------------------------------------------------
-                # 若希望进行自动调整分路和设置触摸对战等参数，
-                # 可以将相关指令添加到"self.对战前插入FILE",
-                # 示例代码：WZRY.node.对战前插入.py
-                run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.对战前插入FILE))
-                # ------------------------------------------------------------------------------
+            if "5v5排位" == self.对战模式:
+                self.触摸对战 = os.path.exists(self.触摸对战FILE)
+            # ------------------------------------------------------------------------------
+            # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.对战前插入FILE",
+            run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.对战前插入FILE))
+            if "5v5匹配" == self.对战模式 or "5v5排位" == self.对战模式:
                 if self.标准触摸对战:
                     self.标准模式 = True
                     self.触摸对战 = True
                 if self.触摸对战:
                     TimeECHO(self.prefix+f"本局对战:模拟人手触摸")
-                if self.标准模式:
+                if self.标准模式 and "5v5匹配" == self.对战模式:
                     TimeECHO(self.prefix+f"本局对战:使用标准模式")
-            #
+                if "5v5排位" == self.对战模式:
+                    TimeECHO(self.prefix+f"这是5v5排位, 小心你的信誉分啊喂")
+                    TimeECHO(self.prefix+f"5v5的游戏被你完成4v5了, 会被系统检测到的")
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
             # 后续程序的控制，仍采用 self.触摸对战等参数
@@ -4241,6 +4298,7 @@ class wzry_task:
                 self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
+            self.APPOB.打开APP()
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------
             # 如果计算过程中对参数进行了更改，这里可以记录最新的参数
