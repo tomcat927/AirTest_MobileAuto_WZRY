@@ -180,10 +180,11 @@ def getpid_win(IMAGENAME="HD-Player.exe", key="BlueStacks App Player 0"):
         TimeECHO(f"getpid_win({IMAGENAME}) error"+"-"*10)
     cont = tasklist.readlines()
     PID = 0
-    for i in cont:
-        if IMAGENAME in i and key in i:
-            PID = cont.split()[1]
+    for task in cont:
+        if IMAGENAME in task and key in task:
+            PID = task.split()[1]
             try:
+                TimeECHO(f"getpid_win:{task}")
                 PID = int(PID)
             except:
                 TimeECHO(f"getpid_win({IMAGENAME},{key}) error"+"-"*10)
@@ -1028,7 +1029,7 @@ class deviceOB:
             self.客户端 = "ios"
         elif "win" in self.控制端 and "127.0.0.1" in self.LINK:
             # 是否使用BlueStacks, 容易卡adb
-            if os.path.exists("C:\\Program Files\\BlueStacks_nxt") and False:
+            if os.path.exists("C:\\Program Files\\BlueStacks_nxt"):# and False:
                 self.客户端 = "win_BlueStacks"
                 # 如果创建了Bluestack, 则默认的ID是["",1,2,3,4,5,...]
                 # 如果中途删除了[2],则ID会是["",1,3,4,5,...]
@@ -1041,19 +1042,20 @@ class deviceOB:
                     if len(i) == 0:
                         self.BlueStacksWindows.append(f"BlueStacks App Player")
                         # 引擎, Nougat64,Nougat32,Pi64
-                        self.BlueStacksInstance.append(f"Nougat64")
+                        self.BlueStacksInstance.append(f"Nougat32")
                     else:
                         self.BlueStacksWindows.append(f"BlueStacks App Player {i}")
-                        self.BlueStacksInstance.append(f"Nougat64_{i}")
-
-            else:  # 模拟器地址
+                        self.BlueStacksInstance.append(f"Nougat32_{i}")
+            else:  # 模拟器地址，目前测试雷电模拟器通过
                 self.客户端 = "win_模拟器"
         elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
             if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
                 self.客户端 = "lin_docker"
         elif len(self.LINKport) > 0:  # 通过网络访问的安卓设备
             # 虽然adb -s 192.168.192.10:5555 reboot 支持一些机器的重启
-            # 但是一些机器重启后就不会开机了，例如docker, 只能adb disconnect的方式控制
+            # 但是一些机器重启后就不会开机了，例如docker
+            # 有些机器 adb reboot后会直接卡住， 例如BlueStack模拟器
+            # 暂时通过 adb disconnect的方式控制
             self.客户端 = "RemoteAndroid"
         else:
             self.客户端 = "USBAndroid"
@@ -1131,7 +1133,7 @@ class deviceOB:
             instance = self.BlueStacksInstance[self.mynode]
             command.append(f"start /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance {instance}")
         elif self.客户端 == "win_模拟器":
-            # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
+            # 通过reboot的方式可以实现重启和解决资源的效果
             command.append(f" {self.adb_path} connect "+self.LINKURL)
             command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
         elif self.客户端 == "lin_docker":
@@ -1178,7 +1180,7 @@ class deviceOB:
             else:  # 关闭所有虚拟机，暂时用不到
                 command.append('taskkill /f /im HD-Player.exe')
         elif self.客户端 == "win_模拟器":
-            # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
+            # 通过reboot的方式可以实现重启和解决资源的效果
             command.append(f" {self.adb_path} connect "+self.LINKURL)
             command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
         elif self.客户端 == "lin_docker":

@@ -1,13 +1,14 @@
 # 客户端推荐
 windows模拟器
-* [推荐]Bluestack, 目前支持打开关闭Bluestack更省电. 
+* Bluestack, 目前支持打开关闭Bluestack更省电. 
 * * 兼容hyper-v(Pie 64bit).  
 * * [推荐]不兼容hyper-v的**Nougat模式**更省电，适合不用开wsl的笔记本, 而且adb的端口也不会变
-* LDPlayer等模拟器
+* [推荐]LDPlayer等模拟器
 * * 目前通过`adb reboot`实现设备管理，还是费一点电
 
 Linux 容器
-* 使用[remote-android](https://github.com/remote-android/), 支持arm服务器
+* ~~使用[remote-android](https://github.com/remote-android/)~~, 支持arm服务器、openwrt路由器
+** 20240704 今天王者更新后，会检测wifi连接情况，容器没有wifi和数据，王者认为断网不让打开，暂时无法使用
 
 Mac未发现合适的
 
