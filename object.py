@@ -92,6 +92,8 @@ def fun_name(level=1):
     except:
         return f"not found fun_name({ilevel})"
 
+# 如果命令需要等待打开的程序关闭, 这个命令很容易卡住
+
 
 def getstatusoutput(*args, **kwargs):
     try:
@@ -114,14 +116,15 @@ def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False
             continue
         if not quiet:
             TimeECHO(prefix+"sysrun:"+i_command)
-        result = getstatusoutput(i_command)
+        try:
+            result = [os.system(i_command), f"run_command({i_command})"]
+            # 运行成功的结果会直接输出的
+        except:
+            result = [1, traceback.format_exc()]
         command_step = command_step + 1
-        # exit_code = os.system(i)
         exit_code = result[0]
         if not quiet:
-            if exit_code == 0:
-                TimeECHO(prefix+"result: "+result[1])
-            else:
+            if exit_code != 0:
                 TimeECHO(prefix+"result:"+">"*20)
                 TimeECHO(result[1])
                 TimeECHO(prefix+"result:"+"<"*20)
@@ -166,6 +169,29 @@ def run_class_command(self=None, command=[], prefix="", quiet=False, must_ok=Fal
     if command_step == 0:
         exit_code_o = -100
     return exit_code_o
+
+
+def getpid_win(IMAGENAME="HD-Player.exe", key="BlueStacks App Player 0"):
+    try:
+        tasklist = os.popen(f'tasklist -FI "IMAGENAME eq {IMAGENAME}" /V')
+    except:
+        TimeECHO(f"getpid_win({IMAGENAME}) error"+"-"*10)
+        traceback.print_exc()
+        TimeECHO(f"getpid_win({IMAGENAME}) error"+"-"*10)
+    cont = tasklist.readlines()
+    PID = 0
+    for i in cont:
+        if IMAGENAME in i and key in i:
+            PID = cont.split()[1]
+            try:
+                PID = int(PID)
+            except:
+                TimeECHO(f"getpid_win({IMAGENAME},{key}) error"+"-"*10)
+                traceback.print_exc()
+                TimeECHO(f"getpid_win({IMAGENAME},{key}) error"+"-"*10)
+                PID = 0
+            break
+    return PID
 
 
 def connect_status(times=10, prefix=""):
@@ -277,10 +303,11 @@ def start_app(*args, **kwargs):
         # ......
         # 安卓系统的报错, 尝试进行修复
         errormessgae = traceback.format_exc()
-        if "AdbError" in errormessgae:
+        if "AdbError" in errormessgae or True:
             """
             使用start_app启动安卓软件的各种坑（有的安卓系统使用monkey需要添加参数，否则报错）
             方式1(monkey). start_app(package_name), 需要修改Airtest的代码添加`--pct-syskeys 0`(https://cndaqiang.github.io/2023/11/10/MobileAuto/)
+            adb -s 127.0.0.1:5555 shell monkey -p com.tencent.tmgp.sgame
             方式2(am start). start_app(package_name, activity)
             获得Activity的方法`adb -s 127.0.0.1:5565 shell dumpsys package com.tencent.tmgp.sgame`有一个Activity Resolver Table
             Airtest代码中是 adb -s 127.0.0.1:5565  shell am start -n package_name/package_name.activity
@@ -307,7 +334,7 @@ def start_app(*args, **kwargs):
             start_app_o(*args, **kwargs)
         except:
             traceback.print_exc()
-            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败")
+            TimeECHO(f"{prefix} 再次尝试{fun_name(1)}仍失败，检测是否没有开启ADB,或者重新启动ADB")
             result = False
     return result
 
@@ -902,25 +929,25 @@ class DQWheel:
         return datetime.now(eastern_eight_tz).weekday()
     # return 0 - 6
 
-    def hour_in_span(self,startclock=0, endclock=24, hour=None):
+    def hour_in_span(self, startclock=0, endclock=24, hour=None):
         if not hour:
             hour, minu, sec = self.time_getHMS()
             hour = hour + minu/60.0+sec/60.0/60.0
-        startclock = (startclock+24)%24
-        endclock = (endclock+24)%24
+        startclock = (startclock+24) % 24
+        endclock = (endclock+24) % 24
         # 不跨越午夜的情况
         if startclock <= endclock:
-            left =  0 if startclock <= hour <= endclock else self.left_hour(startclock,hour)
+            left = 0 if startclock <= hour <= endclock else self.left_hour(startclock, hour)
         # 跨越午夜的情况
         else:
-            left =  0 if hour >= startclock or hour <= endclock else self.left_hour(startclock,hour)
+            left = 0 if hour >= startclock or hour <= endclock else self.left_hour(startclock, hour)
         return left
 
-    def left_hour(self,endtime=24, hour=None):
+    def left_hour(self, endtime=24, hour=None):
         if not hour:
             hour, minu, sec = self.time_getHMS()
             hour = hour + minu/60.0+sec/60.0/60.0
-        left = (endtime+24-hour) %24
+        left = (endtime+24-hour) % 24
         return left
 
     def stoptask(self):
@@ -1000,8 +1027,25 @@ class deviceOB:
         if "ios" in self.设备类型:
             self.客户端 = "ios"
         elif "win" in self.控制端 and "127.0.0.1" in self.LINK:
-            if os.path.exists("C:\\Program Files\\BlueStacks_nxt"):  # BlueStack地址
+            # 是否使用BlueStacks, 容易卡adb
+            if os.path.exists("C:\\Program Files\\BlueStacks_nxt") and False:
                 self.客户端 = "win_BlueStacks"
+                # 如果创建了Bluestack, 则默认的ID是["",1,2,3,4,5,...]
+                # 如果中途删除了[2],则ID会是["",1,3,4,5,...]
+                # 这里需要根据实际的电脑进行更改
+                Instance = ["", "1", "2", "3", "4", "5"]
+                # 虚拟机的名字前缀
+                self.BlueStacksWindows = []
+                self.BlueStacksInstance = []
+                for i in Instance:
+                    if len(i) == 0:
+                        self.BlueStacksWindows.append(f"BlueStacks App Player")
+                        # 引擎, Nougat64,Nougat32,Pi64
+                        self.BlueStacksInstance.append(f"Nougat64")
+                    else:
+                        self.BlueStacksWindows.append(f"BlueStacks App Player {i}")
+                        self.BlueStacksInstance.append(f"Nougat64_{i}")
+
             else:  # 模拟器地址
                 self.客户端 = "win_模拟器"
         elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
@@ -1019,7 +1063,6 @@ class deviceOB:
         self.mynode = mynode
         self.prefix = f"({self.mynode})"
         self.totalnode = totalnode
-        self.PID = -10  # Windows+Blustack专用,关闭特定虚拟机
         #
         self.实体终端 = False
         self.实体终端 = "mac" in self.控制端 or "ios" in self.设备类型
@@ -1085,8 +1128,8 @@ class deviceOB:
                 return False
         # android
         elif self.客户端 == "win_BlueStacks":  # BlueStack虚拟机
-            CMDtitle = "cndaqiangHDPlayer"+str(self.mynode)
-            command.append(f"start \"{CMDtitle}\" / MIN C: \Progra~1\BlueStacks_nxt\HD-Player.exe --instance Nougat32_ % {self.mynode}")
+            instance = self.BlueStacksInstance[self.mynode]
+            command.append(f"start /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance {instance}")
         elif self.客户端 == "win_模拟器":
             # 任意的模拟器，不确定模拟器的重启命令，但是通过reboot的方式可以实现重启和解决资源的效果
             command.append(f" {self.adb_path} connect "+self.LINKURL)
@@ -1127,8 +1170,11 @@ class deviceOB:
                 return False
         # android
         elif self.客户端 == "win_BlueStacks":  # BlueStack虚拟机
-            if int(self.PID) > 0:
-                command.append(f'taskkill /F /FI "PID eq {self.PID}"')
+            # 尝试获取PID
+            PID = getpid_win(IMAGENAME="HD-Player.exe", key=self.BlueStacksWindows[self.mynode])
+            # BlueStacks App Player 3
+            if PID > 0:
+                command.append(f'taskkill /F /FI "PID eq {str(PID)}"')
             else:  # 关闭所有虚拟机，暂时用不到
                 command.append('taskkill /f /im HD-Player.exe')
         elif self.客户端 == "win_模拟器":
@@ -2406,9 +2452,9 @@ class wzry_task:
         if "模拟战" in self.对战模式:
             TimeECHO(self.prefix+f"首先进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
-        if "5v5排位"  == self.对战模式:
+        if "5v5排位" == self.对战模式:
             TimeECHO(self.prefix+f"首先进入排位房间{times}")
-            return self.单人进入排位房间(times)            
+            return self.单人进入排位房间(times)
         #
         TimeECHO(self.prefix+f"首先进入人机匹配房间{times}")
         if self.判断对战中():
@@ -2508,6 +2554,7 @@ class wzry_task:
                     return True
             return self.单人进入人机匹配房间(times)
         return True
+
     def 单人进入排位房间(self, times=1):
         if not self.check_run_status():
             return True
@@ -2532,7 +2579,7 @@ class wzry_task:
         sleep(10)
         if not self.Tool.existsTHENtouch(self.图片.进入排位赛, "进入排位赛", savepos=False):
             TimeErr(self.prefix+"找不到进入排位赛")
-            return self.单人进入排位房间(times) 
+            return self.单人进入排位房间(times)
         #
         if not self.判断房间中():
             # 有时候长时间不进去被禁赛了
@@ -2549,6 +2596,7 @@ class wzry_task:
             return self.单人进入排位房间(times)
         return True
     #
+
     def 进入人机匹配房间(self):
         if not self.check_run_status():
             return True
@@ -4106,14 +4154,14 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 这里做一个循环的判断，夜间不自动刷任务
             # 服务器5点刷新礼包和信誉积分等
-            startclock = self.对战时间[0]  
-            endclock = self.对战时间[1] 
+            startclock = self.对战时间[0]
+            endclock = self.对战时间[1]
             while self.Tool.hour_in_span(startclock, endclock) > 0:
                 #
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if leftmin < 10:
-                    TimeECHO(self.prefix+"剩余%d分钟进入新的一天"%(leftmin))
+                    TimeECHO(self.prefix+"剩余%d分钟进入新的一天" % (leftmin))
                     sleep(leftmin*60)
                     新的一天 = True
                     continue
