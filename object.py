@@ -653,7 +653,7 @@ class DQWheel:
         dict_file = ".tmp."+name+".txt"
         if mynode == 0:
             self.save_dict(var, dict_file)
-        self.barriernode(mynode, totalnode, "bcastvar:"+name)
+        self.barriernode(mynode, totalnode, "bcastvar."+name)
         if self.存在同步文件():
             return var
         #
@@ -2166,9 +2166,6 @@ class wzry_task:
         # 刷新礼包的领取计时
         self.王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, 初始化检查=False)
         self.每日礼包()
-        # 设置为0,可以保证下次必刷礼包
-        self.Tool.timedict["领游戏礼包"] = 0
-        self.Tool.timedict["领营地礼包"] = 0
         self.Tool.touchfile(self.免费商城礼包FILE)
 
     # 保存运行信息
@@ -3903,6 +3900,8 @@ class wzry_task:
             if 对战中:
                 self.当前界面 = "对战中"
                 self.Tool.timelimit(timekey="当前界面", init=True)
+            else:
+                self.当前界面 = "未知"
         #
         if 对战中:
             TimeECHO(self.prefix+"判断对战:正在对战")
