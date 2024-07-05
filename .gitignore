@@ -1,5 +1,9 @@
 untitled.air
+*.bak
+.vscode
 
+#在assets中的是静态图片，根目录的是临时测试图片
+./tpl*.png
 #clean png
 .pngtmp/
 
