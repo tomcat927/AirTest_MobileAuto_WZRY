@@ -4,6 +4,10 @@ import subprocess
 import keyboard
 import sys
 
+try:
+    subprocess.Popen("adb", "kill-server")
+except:
+    pass
 # 获取命令行参数
 para = ["python", "-u", "object.py"] + sys.argv[1:]
 

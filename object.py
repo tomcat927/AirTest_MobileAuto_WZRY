@@ -4308,7 +4308,7 @@ class wzry_task:
             # 各种原因无法组队判定
             if self.totalnode_bak > 1:
                 self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
-                组队时间内 = self.Tool.hour_in_span(startclock, self.限时组队时间)
+                组队时间内 = not self.Tool.hour_in_span(startclock, self.限时组队时间) > 0
                 可以组队 = not self.无法进行组队 and 组队时间内
                 # 报告运行状态
                 组队原因 = ""
