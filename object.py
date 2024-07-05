@@ -44,6 +44,8 @@ eastern_eight_offset = timedelta(hours=8)
 # 创建一个时区对象
 eastern_eight_tz = timezone(eastern_eight_offset)
 # ? 设置,虚拟机,android docker, iphone, etc,主要进行设备的连接和重启
+BlueStackdir="C:\Program Files\BlueStacks_nxt"
+LDPlayerdir="D:\GreenSoft\LDPlayer"
 
 # 获取当前的运行信息, 有的客户端有bug
 AirtestIDE = "AirtestIDE" in sys.executable
@@ -117,7 +119,10 @@ def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False
         if not quiet:
             TimeECHO(prefix+"sysrun:"+i_command)
         try:
-            result = [os.system(i_command), f"run_command({i_command})"]
+            #result = [os.system(i_command), f"run_command({i_command})"]
+            #os.system的容易卡，各种命令兼容性也不好，subprocess.Popen可以直接填windows快捷方式里的内容
+            process = subprocess.Popen(i_command)
+            result = [0, str(process)]
             # 运行成功的结果会直接输出的
         except:
             result = [1, traceback.format_exc()]
@@ -172,6 +177,8 @@ def run_class_command(self=None, command=[], prefix="", quiet=False, must_ok=Fal
 
 
 def getpid_win(IMAGENAME="HD-Player.exe", key="BlueStacks App Player 0"):
+    if sys.platform.lower() != "win32":
+        return 0
     try:
         tasklist = os.popen(f'tasklist -FI "IMAGENAME eq {IMAGENAME}" /V')
     except:
@@ -181,7 +188,18 @@ def getpid_win(IMAGENAME="HD-Player.exe", key="BlueStacks App Player 0"):
     cont = tasklist.readlines()
     PID = 0
     for task in cont:
-        if IMAGENAME in task and key in task:
+        taskterm = task.split()
+        if len(taskterm) < 3:
+            continue
+        #IMAGENAME如果太长了会显示不全，因此不能直接IMAGENAME in task
+        lenname=len(taskterm[0])
+        if lenname == 0:
+            continue
+        if lenname < len(IMAGENAME):
+            if not taskterm[0] == IMAGENAME[:lenname]:
+                continue
+        #key还是可以显示全的
+        if key in task:
             PID = task.split()[1]
             try:
                 TimeECHO(f"getpid_win:{task}")
@@ -936,12 +954,13 @@ class DQWheel:
             hour = hour + minu/60.0+sec/60.0/60.0
         startclock = (startclock+24) % 24
         endclock = (endclock+24) % 24
-        # 不跨越午夜的情况
+        
+        # 不跨越午夜的情况[6,23]
         if startclock <= endclock:
             left = 0 if startclock <= hour <= endclock else self.left_hour(startclock, hour)
-        # 跨越午夜的情况
+        # 跨越午夜的情况[23,6], 即[6,23]不对战
         else:
-            left = 0 if hour >= startclock or hour <= endclock else self.left_hour(startclock, hour)
+            left = self.left_hour(startclock, hour) if endclock < hour < startclock else 0
         return left
 
     def left_hour(self, endtime=24, hour=None):
@@ -1028,40 +1047,58 @@ class deviceOB:
         if "ios" in self.设备类型:
             self.客户端 = "ios"
         elif "win" in self.控制端 and "127.0.0.1" in self.LINK:
-            # 是否使用BlueStacks, 容易卡adb
-            if os.path.exists("C:\\Program Files\\BlueStacks_nxt"):# and False:
+            # 可以通过cmd控制模拟器: f"start /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance {instance}" (windows通用，不运行期间可彻底关闭模拟器，省电)
+            # 也可以adb reboot控制模拟器(安卓通用，但是BlueStack模拟器不支持)
+            # 通过是否运行多开管理，来判断是否使用模拟器
+            # LD模拟器支持adb reboot重启模拟器
+            BluePID = 0
+            LdPID = 0
+            # 模拟器启动后的窗口的名字
+            self.win_WindowsName = []
+            # 模拟器内部的名字(快捷方式中可以查看到)
+            self.win_InstanceName = []
+            if os.path.exists(os.path.join(BlueStackdir,"HD-MultiInstanceManager.exe")):
+                BluePID=getpid_win(IMAGENAME="HD-MultiInstanceManager.exe",key="BlueStacks")
+            if os.path.exists(os.path.join(LDPlayerdir,"dnmultiplayer.exe")):
+                 LdPID=getpid_win(IMAGENAME="dnmultiplayer.exe",key="dnmultiplayer")
+            if BluePID > 0:#
                 self.客户端 = "win_BlueStacks"
-                # 如果创建了Bluestack, 则默认的ID是["",1,2,3,4,5,...]
-                # 如果中途删除了[2],则ID会是["",1,3,4,5,...]
-                # 这里需要根据实际的电脑进行更改
                 Instance = ["", "1", "2", "3", "4", "5"]
-                # 虚拟机的名字前缀
-                self.BlueStacksWindows = []
-                self.BlueStacksInstance = []
                 for i in Instance:
                     if len(i) == 0:
-                        self.BlueStacksWindows.append(f"BlueStacks App Player")
+                        self.win_WindowsName.append(f"BlueStacks App Player")
                         # 引擎, Nougat64,Nougat32,Pi64
-                        self.BlueStacksInstance.append(f"Nougat32")
+                        self.win_InstanceName.append(f"--instance Nougat32")
                     else:
-                        self.BlueStacksWindows.append(f"BlueStacks App Player {i}")
-                        self.BlueStacksInstance.append(f"Nougat32_{i}")
-            else:  # 模拟器地址，目前测试雷电模拟器通过
-                self.客户端 = "win_模拟器"
+                        self.win_WindowsName.append(f"BlueStacks App Player {i}")
+                        self.win_InstanceName.append(f"--instance Nougat32_{i}")
+                #
+            elif LdPID > 0:#
+                self.客户端 = "win_LD"
+                # LD多开模拟器的ID, 通过添加桌面快捷方式可以获取
+                Instance = ["0", "1", "2", "3", "4", "5"]
+                for i in Instance:
+                    self.win_InstanceName.append(f"index={i}")
+                    if i == "0":
+                        self.win_WindowsName.append(f"雷电模拟器")
+                    else:
+                        self.win_WindowsName.append(f"雷电模拟器-{i}")
+                # LDPlayer 也支持 self.客户端="FULL_ADB" 的模式
+                # 但是需要提前开启模拟器
+            else:
+                # self.客户端="FULL_ADB
+                # 利用adb reboot控制，但是在一些机器上会卡住或者直接关机
+                #
+                self.客户端 = "RemoteAndroid"
+                # 暂时通过 adb disconnect的方式控制
         elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
             if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
                 self.客户端 = "lin_docker"
         elif len(self.LINKport) > 0:  # 通过网络访问的安卓设备
-            # 虽然adb -s 192.168.192.10:5555 reboot 支持一些机器的重启
-            # 但是一些机器重启后就不会开机了，例如docker
-            # 有些机器 adb reboot后会直接卡住， 例如BlueStack模拟器
-            # 暂时通过 adb disconnect的方式控制
             self.客户端 = "RemoteAndroid"
         else:
             self.客户端 = "USBAndroid"
         #
-        # 设备ID,用于控制设备重启关闭省电等,为docker和虚拟机使用
-        self.设备ID = None
         self.mynode = mynode
         self.prefix = f"({self.mynode})"
         self.totalnode = totalnode
@@ -1129,12 +1166,15 @@ class deviceOB:
                 TimeErr(self.prefix+": tidevice list 无法找到IOS设备重启失败")
                 return False
         # android
-        elif self.客户端 == "win_BlueStacks":  # BlueStack虚拟机
-            instance = self.BlueStacksInstance[self.mynode]
-            command.append(f"start /MIN C:\Progra~1\BlueStacks_nxt\HD-Player.exe --instance {instance}")
-        elif self.客户端 == "win_模拟器":
+        elif self.客户端 == "win_BlueStacks":
+            instance = self.win_InstanceName[self.mynode]
+            command.append(os.path.join(BlueStackdir,"HD-Player.exe")+" "+instance)
+        elif self.客户端 == "win_LD":
+            instance = self.win_InstanceName[self.mynode]
+            command.append(os.path.join(LDPlayerdir,"dnplayer.exe")+" "+instance)
+        elif self.客户端 == "FULL_ADB":
             # 通过reboot的方式可以实现重启和解决资源的效果
-            command.append(f" {self.adb_path} connect "+self.LINKURL)
+            command.append(f"{self.adb_path} connect "+self.LINKURL)
             command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
         elif self.客户端 == "lin_docker":
             虚拟机ID = f"androidcontain{self.mynode}"
@@ -1171,17 +1211,29 @@ class deviceOB:
                 TimeECHO(self.prefix+f"当前模式无法关闭IOS")
                 return False
         # android
-        elif self.客户端 == "win_BlueStacks":  # BlueStack虚拟机
+        elif self.客户端 == "win_BlueStacks":
             # 尝试获取PID
-            PID = getpid_win(IMAGENAME="HD-Player.exe", key=self.BlueStacksWindows[self.mynode])
+            PID = getpid_win(IMAGENAME="HD-Player.exe", key=self.win_WindowsName[self.mynode])
             # BlueStacks App Player 3
             if PID > 0:
                 command.append(f'taskkill /F /FI "PID eq {str(PID)}"')
             else:  # 关闭所有虚拟机，暂时用不到
                 command.append('taskkill /f /im HD-Player.exe')
-        elif self.客户端 == "win_模拟器":
+        elif self.客户端 == "win_LD":
+            # 尝试获取PID
+            PID = getpid_win(IMAGENAME="dnplayer.exe", key=self.win_WindowsName[self.mynode])
+            if PID > 0:
+                command.append(f'taskkill /F /FI "PID eq {str(PID)}"')
+            else:
+                # 关闭所有虚拟机，暂时用不到
+                #command.append('taskkill /f /im dnplayer.exe')
+                # 通过reboot的方式可以实现重启和解决资源的效果
+                # LDPlayer支持adb reboot,👍
+                command.append(f"{self.adb_path} connect "+self.LINKURL)
+                command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+        elif self.客户端 == "FULL_ADB":
             # 通过reboot的方式可以实现重启和解决资源的效果
-            command.append(f" {self.adb_path} connect "+self.LINKURL)
+            command.append(f"{self.adb_path} connect "+self.LINKURL)
             command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
         elif self.客户端 == "lin_docker":
             虚拟机ID = f"androidcontain{self.mynode}"
@@ -4382,17 +4434,19 @@ class auto_airtest:
         if len(LINK_dict) == 0:
             LINK_dict = {}
             if "android" in self.设备类型:
-                LINK_dict[0] = "Android:///"+"127.0.0.1:"+str(5555)
-                LINK_dict[1] = "Android:///"+"127.0.0.1:"+str(5565)
-                LINK_dict[2] = "Android:///"+"127.0.0.1:"+str(5575)
-                LINK_dict[3] = "Android:///"+"127.0.0.1:"+str(5585)
-                LINK_dict[4] = "Android:///"+"127.0.0.1:"+str(5595)
+                # BlueStack的端口, 自己创建的docker的端口
+                for i in range(10):
+                    LINK_dict[i] = "Android:///"+"127.0.0.1:"+str(5555+i*10)
+                # LD模拟器端口
+                LdPID = 0
+                if os.path.exists(os.path.join(LDPlayerdir,"dnmultiplayer.exe")):
+                     LdPID=getpid_win(IMAGENAME="dnmultiplayer.exe",key="dnmultiplayer")
+                if LdPID > 0:
+                    for i in range(10):
+                        LINK_dict[i] = "Android:///"+"127.0.0.1:"+str(5555+i*2)                    
             else:
-                LINK_dict[0] = "ios:///http://"+"192.168.12.130:8100"
-                LINK_dict[1] = "ios:///http://"+"192.168.12.130:8101"
-                LINK_dict[2] = "ios:///http://"+"192.168.12.130:8102"
-                LINK_dict[3] = "ios:///http://"+"192.168.12.130:8103"
-                LINK_dict[4] = "ios:///http://"+"192.168.12.130:8104"
+                for i in range(10):
+                    LINK_dict[i] = "ios:///http://"+"192.168.12.130:"+str(8100+i)
             if self.debug:
                 # 当在这里手动指定Link时,自动进行修正
                 # docker容器

@@ -1,14 +1,21 @@
 # 客户端推荐
-windows模拟器
-* Bluestack, 目前支持打开关闭Bluestack更省电. 
-* * 兼容hyper-v(Pie 64bit).  
-* * [推荐]不兼容hyper-v的**Nougat模式**更省电，适合不用开wsl的笔记本, 而且adb的端口也不会变
-* [推荐]LDPlayer等模拟器
-* * 目前通过`adb reboot`实现设备管理，还是费一点电
+windows模拟器,LDPlayer模拟器和Bluestack模拟器都挺好的，本身支持的功能也差不多。
+* [推荐]LDPlayer模拟器
+* * 因为LDPlayer有绿色免安装版，代码调试时遇到的问题最少，因此更推荐。
+* * **不兼容hyper-v(wsl)**, 多开也有省电模式，cmd启动比较简单
+* * 界面本土化很好，删除旧的虚拟机后，**新建的虚拟机会使用旧虚拟机的端口和编号，代码不用调整**
+* * 中文的教程和帮助很多, 如[虚拟机如何运行安卓模拟器](https://help.ldmnq.com/docs/XSPpJg)
+* Bluestack模拟器
+* * 不兼容hyper-v(wsl)的**Nougat模式**更省电，适合不用开wsl的笔记本, adb的端口固定[5555,5565,5575,...]
+* * **兼容hyper-v(wsl)**的Pie 64bit, 可以运行，adb端口会变，功耗较高
+* * 删除复制的虚拟机后，新建虚拟机的编号不会使用旧的编号，会导致adb端口变化，如[5555,5575,5585]。需要修改代码`LINK_dict[i]=`或者重装虚拟机
+* 其他模拟器
+* * 目前不进行设备管理
+* * 可以在代码设置为通过`adb reboot`管理，但是不同的模拟器对adb reboot的支持不同，需要自己测试
 
 Linux 容器
 * ~~使用[remote-android](https://github.com/remote-android/)~~, 支持arm服务器、openwrt路由器
-** 20240704 今天王者更新后，会检测wifi连接情况，容器没有wifi和数据，王者认为断网不让打开，暂时无法使用
+* * 20240704 王者更新后，会检测wifi连接情况，容器没有wifi和数据，王者认为断网不让打开，暂时无法使用
 
 Mac未发现合适的
 
@@ -21,6 +28,12 @@ Mac未发现合适的
 # 运行方法
 * [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
 * 如果你的默认设备不是`127.0.0.1:5555`,可以修改`object.py`中的`auto_airtest`函数中的`LINK_dict[0]=`，或者通过下面终端的方式指定手机的ip和端口
+* 如果使用BlueStack或者LDPlayer模拟器，填入他们的路径可以支持关闭、启动模拟器的功能
+```
+BlueStackdir="C:\Program Files\BlueStacks_nxt"
+LDPlayerdir="D:\GreenSoft\LDPlayer"
+```
+* 使用BlueStack或者LDPlayer模拟器组队模式，提前打开多个模拟器或者打开对应软件的多开管理器
 
 ## 使用AirTest软件运行
 * 下载地址[AirTest](https://airtest.netease.com/)
@@ -41,6 +54,9 @@ Mac未发现合适的
 ```
 python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  airtest
 python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  pathos
+python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  subprocess
+# 可选，针对windows平台ctrl+c杀不死python任务设计
+python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  keyboard
 ```
 
 #### 控制端的修改
@@ -63,21 +79,9 @@ Mac
 chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
 ```
 
-#### [**可以不改**]代码修改
-**20240702更新可以跳过此节**
-* 本程序通过修改start(package="package")为start(package="package --put-syskeys 0")暂时解决了这个问题，可以不用修改代码, 但是建议修改
-
-下面为历史信息：使用start_app启动安卓软件的各种坑
-- 方式1(monkey). `start_app(package_name)`, 需要修改Airtest的代码添加`--pct-syskeys 0`
-- 方式2(am start). `start_app(package_name, activity)`<br>
-获得Activity的方法`adb -s 127.0.0.1:5565 shell dumpsys package com.tencent.tmgp.sgame`有一个Activity Resolver Table
-<br> Airtest代码中是 `adb -s 127.0.0.1:5565  shell am start -n package_name/package_name.activity`
-<br>可并不是所有的app的启动都遵循这一原则,所以如果相同方式2，还是要修改Airtest的代码，变为`package_name/activity`
-
-* ~~本脚本已针对WZRY和WZYD，使用`start_app("com.tencent.gamehelper.smoba","","SGameActivity")`的方式打开程序，不会报错~~
-* **综合上述原因，采取方式1**, 按照[https://cndaqiang.github.io/2023/11/10/MobileAuto/](https://cndaqiang.github.io/2023/11/10/MobileAuto/), 添加`--pct-syskeys 0`
-
 ### 使用终端运行
+* windows控制端, 推荐替换下面命令中的`object.py`为`run.py`
+
 ```
 python -u object.py 2>&1 | tee result
 ```

@@ -34,8 +34,8 @@
 
 |  客户端 | 控制端  | 客户端控制  |
 | ------------ | ------------ | ------------ |
-| BlueStack |  Windows | 打开、关闭、重启模拟器  |
-| 本地Android模拟器/USB线连接的手机 |  Windows | 重启安卓系统  |
+| BlueStack/**LDPlayer** |  Windows | 打开、关闭、重启模拟器  |
+| USB线连接的手机 |  Windows | 重启安卓系统  |
 | Docker  | Linux  | 打开、关闭、重启容器  |
 | IOS  | Mac  | tidevice重连、重启IOS  |
 | 远程/无线Android设备  | ALL  | adb重新连接  |
