@@ -13,7 +13,7 @@ windows模拟器,LDPlayer模拟器和Bluestack模拟器都挺好的，本身支�
 * * Pie 64bit引擎, **可以和WSL兼容**，adb端口会变，功耗较高
 * * 禁用广告的方法删除`C:\ProgramData\BlueStacks_nxt\Engine\Nougat32_X\Promotions`文件夹的内容，并设置Everyone的权限为禁止
 * * 缺点: 删除复制的虚拟机后，新建虚拟机的编号不会使用旧的编号，会导致adb端口变化，如[5555,5575,5585]。需要修改代码`LINK_dict[i]=`或者重装虚拟机
-* * 缺点: 开机界面游戏广告，容易误差
+* * 缺点: 开机界面游戏广告，容易误触
 * 其他模拟器
 * * 目前不进行设备管理
 * * 可以在代码设置为通过`adb reboot`管理，但是不同的模拟器对adb reboot的支持不同，需要自己测试
