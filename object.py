@@ -463,7 +463,6 @@ class DQWheel:
             return False
         else:
             if time.time()-self.timedict[timekey] > limit:
-                TimeECHO(self.prefix+f"[{timekey}]>{limit}s")
                 self.timedict[timekey] = time.time()
                 return True
             else:
@@ -2012,7 +2011,7 @@ class wzry_figure:
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708829601719.png", record_pos=(0.001, -0.22), resolution=(960, 540)))
-        self.房主头像 = Template(r"tpl1714917935714.png", record_pos=(0.354, -0.163), resolution=(960, 540), target_pos=9)
+        self.房主头像 = Template(r"tpl1716782981770.png", record_pos=(0.354, -0.164), resolution=(960, 540), target_pos=9)
         self.房主房间 = Template(r"tpl1700284856473.png", record_pos=(0.312, -0.17), resolution=(1136, 640), target_pos=2)
         #
         # 头像数据
@@ -2161,6 +2160,7 @@ class wzry_task:
         self.备战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+3+shiftnode) % 分路长度]
         #
         # 礼包设置
+        self.强制领取礼包 = True
         self.王者营地礼包 = True
         self.玉镖夺魁签到 = False
         # 刷新礼包的领取计时
@@ -3904,9 +3904,9 @@ class wzry_task:
                 self.当前界面 = "未知"
         #
         if 对战中:
-            TimeECHO(self.prefix+"判断对战:正在对战")
+            TimeECHO(self.prefix+" 判断对战:正在对战")
         if not 对战中:
-            TimeECHO(self.prefix+"判断对战:没有对战")
+            TimeECHO(self.prefix+" 判断对战:没有对战")
         if not 处理 or not 对战中:
             return 对战中
         #
@@ -4223,7 +4223,7 @@ class wzry_task:
                 # 在第二天的时候（新的一天=True）就不会执行这个命令了
                 if not 新的一天 and leftmin > 60:
                     TimeECHO(self.prefix+"夜间停止刷游戏前领取礼包")
-                    self.每日礼包(强制领取=True)
+                    self.每日礼包(强制领取=self.强制领取礼包)
                     # 关闭APP并SLEEP等待下一个时间周期
                     self.APPOB.关闭APP()
                 新的一天 = True

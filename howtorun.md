@@ -1,15 +1,19 @@
 # 客户端推荐
 windows模拟器,LDPlayer模拟器和Bluestack模拟器都挺好的，本身支持的功能也差不多。
-* [推荐]LDPlayer模拟器
-* * 因为LDPlayer有绿色免安装版，代码调试时遇到的问题最少，因此更推荐。
+* LDPlayer模拟器
+* * LDPlayer有绿色免安装版。
 * * **不兼容hyper-v(wsl)**, 多开也有省电模式，cmd启动比较简单
 * * 界面本土化很好，删除旧的虚拟机后，**新建的虚拟机会使用旧虚拟机的端口和编号，代码不用调整**
 * * 中文的教程和帮助很多, 如[虚拟机如何运行安卓模拟器](https://help.ldmnq.com/docs/XSPpJg)
 * * 缺点: 多开时,只有多开的虚拟机支持5帧省电,主虚拟机还是30帧以上, 综合功耗较高
+* * 缺点：用了好几天，突然提示显卡驱动有问题，解决问题的方案是自动下载360驱动
 * Bluestack模拟器
+* * 非常稳定
 * * Nougat引擎(32 or 64), **windows平台模拟器中最省电流畅的**，adb的端口固定[5555,5565,5575,...]
 * * Pie 64bit引擎, **可以和WSL兼容**，adb端口会变，功耗较高
+* * 禁用广告的方法删除`C:\ProgramData\BlueStacks_nxt\Engine\Nougat32_X\Promotions`文件夹的内容，并设置Everyone的权限为禁止
 * * 缺点: 删除复制的虚拟机后，新建虚拟机的编号不会使用旧的编号，会导致adb端口变化，如[5555,5575,5585]。需要修改代码`LINK_dict[i]=`或者重装虚拟机
+* * 缺点: 开机界面游戏广告，容易误差
 * 其他模拟器
 * * 目前不进行设备管理
 * * 可以在代码设置为通过`adb reboot`管理，但是不同的模拟器对adb reboot的支持不同，需要自己测试
@@ -82,6 +86,7 @@ chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/an
 
 ### 使用终端运行
 * windows控制端, 推荐替换下面命令中的`object.py`为`run.py`
+* windows单账户可以点击`run.bat`运行
 
 ```
 python -u object.py 2>&1 | tee result
@@ -137,17 +142,14 @@ python -u object.py n 1 # n > 4
 | `self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"` |不修改代码和重启程序, 修改对战过程中使用的英雄, 内容见 `WZRY.node.重新设置英雄.py` , 通过控制 `savepos` 来决定是否更新字典  |用户创建 |
 | `sself.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"` |因为各种原因账户退出后, 程序自动创建, 若存在该文件则等待10min, 直到用户删除 |程序自动生成删除/用户创建删除 |
 | `var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt"` | 存储很多图片坐标点的文件, 减少图片识别时间, 删除后重新识别 | 程序自动生成|
-| `self.prefix+"六国远征.txt"` |每日自动创建, 如存在该文件则进行相关计算, 计算完成后删除该文件|程序自动生成/用户创建
-| `self.prefix+"武道大会.txt"` |每日自动创建, 如存在该文件则进行相关计算, 计算完成后删除该文件|程序自动生成/用户创建
 | `self.玉镖夺魁签到=os.path.exists("玉镖夺魁签到.txt")` |是否进行玉镖夺魁, 定期的活动|程序自动生成/用户创建
 | `self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"` |是否领取每日的免费商城礼包, 领完删除|程序自动生成删除/用户创建
 | `self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"` | 存在则在礼包结束后进行KPL观赛并领取赛事战令经验, 刷KPL战令, 可将数字填入该文件定义观赛时长 | 程序自动生成
-| `NeedRebarrier.txt` |多进程运行时, 强制跳过当前所有任务, 进行统一的barrier. 即使多进程模式已经处于独立组队模式，这一文件也强制让所有进程进行一次barrier|程序出错自动生成/用户创建|
+| `self.辅助同步文件 = "NeedRebarrier.txt"` | 同步工具, 单个进程出错创建所有进程重新初始化 | 程序自动生成/用户创建
 | `self.prefix+"NeedRebarrier.txt"` |本进程跳过所有任务, 回到循环开头, 重新初始化 |  程序出错自动生成/用户创建 |
 | `self.WZRYPIDFILE = f"WZRY.{self.mynode}.PID.txt"` |给本次运行的进程定义一个ID, 如果有新的进程也操纵这个设备, 则结束本进程 |程序自动生成|
 | `self.独立同步文件 = self.prefix+"NeedRebarrier.txt"` | 同步工具, 单个进程出错重新初始化 | 程序自动生成/用户创建
 |`self.图片更新FILE = "WZRY.图片更新.txt"`| 王者特殊活动时,大厅、对战、开始游戏等按钮会发生变化,用此文件更新，你可以按照自己[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059),我在一些活动时也会[更新图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/8) | 用户创建|
-| `self.辅助同步文件 = "NeedRebarrier.txt"` | 同步工具, 单个进程出错创建所有进程重新初始化 | 程序自动生成/用户创建
 | `self.营地初始化FILE=prefix+".初始化.txt"=(mynode)王者营地.初始化.txt` | 王者营地领取礼物前注入代码, 适合临时活动[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059)| 用户创建
 | `self.营地需要登录FILE = prefix+".营地需要登录.txt"` | 营地账户推出后生成, 存在次文件不领取营地礼包 | 程序自动生成删除/用户创建删除
 | `self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成, 用户删除|
