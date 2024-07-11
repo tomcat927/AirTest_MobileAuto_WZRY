@@ -44,8 +44,8 @@ eastern_eight_offset = timedelta(hours=8)
 # 创建一个时区对象
 eastern_eight_tz = timezone(eastern_eight_offset)
 # ? 设置,虚拟机,android docker, iphone, etc,主要进行设备的连接和重启
-BlueStackdir="C:\Program Files\BlueStacks_nxt"
-LDPlayerdir="D:\GreenSoft\LDPlayer"
+BlueStackdir = "C:\Program Files\BlueStacks_nxt"
+LDPlayerdir = "D:\GreenSoft\LDPlayer"
 
 # 获取当前的运行信息, 有的客户端有bug
 AirtestIDE = "AirtestIDE" in sys.executable
@@ -119,8 +119,8 @@ def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False
         if not quiet:
             TimeECHO(prefix+"sysrun:"+i_command)
         try:
-            #result = [os.system(i_command), f"run_command({i_command})"]
-            #os.system的容易卡，各种命令兼容性也不好，subprocess.Popen可以直接填windows快捷方式里的内容
+            # result = [os.system(i_command), f"run_command({i_command})"]
+            # os.system的容易卡，各种命令兼容性也不好，subprocess.Popen可以直接填windows快捷方式里的内容
             process = subprocess.Popen(i_command)
             result = [0, str(process)]
             # 运行成功的结果会直接输出的
@@ -191,14 +191,14 @@ def getpid_win(IMAGENAME="HD-Player.exe", key="BlueStacks App Player 0"):
         taskterm = task.split()
         if len(taskterm) < 3:
             continue
-        #IMAGENAME如果太长了会显示不全，因此不能直接IMAGENAME in task
-        lenname=len(taskterm[0])
+        # IMAGENAME如果太长了会显示不全，因此不能直接IMAGENAME in task
+        lenname = len(taskterm[0])
         if lenname == 0:
             continue
         if lenname < len(IMAGENAME):
             if not taskterm[0] == IMAGENAME[:lenname]:
                 continue
-        #key还是可以显示全的
+        # key还是可以显示全的
         if key in task:
             PID = task.split()[1]
             try:
@@ -463,7 +463,6 @@ class DQWheel:
             return False
         else:
             if time.time()-self.timedict[timekey] > limit:
-                TimeECHO(self.prefix+f"[{timekey}]>{limit}s")
                 self.timedict[timekey] = time.time()
                 return True
             else:
@@ -487,7 +486,31 @@ class DQWheel:
         else:
             TimeECHO(self.prefix+"不存在["+filename+"]")
             return False
-        return False
+
+    def removefiles(self, dir=".", head="", body="", foot=""):
+        l_head = len(head)
+        l_body = len(body)
+        l_foot = len(foot)
+        if l_head+l_body+l_foot == 0:
+            return True
+        for name in os.listdir(dir):
+            isname = True
+            if len(name) < max(l_head, l_body, l_foot):
+                continue
+            # 必须三个条件都满足才能删除
+            if l_head > 0:
+                if not head == name[:l_head]:
+                    continue
+            if l_body > 0:
+                if not body in name:
+                    continue
+            if l_foot > 0:
+                if not foot == name[-l_foot:]:
+                    continue
+            #
+            if isname:
+                self.removefile(os.path.join(dir, name))
+        return True
 
     def touchfile(self, filename, content=""):
         TimeECHO(self.prefix+f"touchfile[{filename}]")
@@ -954,7 +977,7 @@ class DQWheel:
             hour = hour + minu/60.0+sec/60.0/60.0
         startclock = (startclock+24) % 24
         endclock = (endclock+24) % 24
-        
+
         # 不跨越午夜的情况[6,23]
         if startclock <= endclock:
             left = 0 if startclock <= hour <= endclock else self.left_hour(startclock, hour)
@@ -1057,11 +1080,11 @@ class deviceOB:
             self.win_WindowsName = []
             # 模拟器内部的名字(快捷方式中可以查看到)
             self.win_InstanceName = []
-            if os.path.exists(os.path.join(BlueStackdir,"HD-MultiInstanceManager.exe")):
-                BluePID=getpid_win(IMAGENAME="HD-MultiInstanceManager.exe",key="BlueStacks")
-            if os.path.exists(os.path.join(LDPlayerdir,"dnmultiplayer.exe")):
-                 LdPID=getpid_win(IMAGENAME="dnmultiplayer.exe",key="dnmultiplayer")
-            if BluePID > 0:#
+            if os.path.exists(os.path.join(BlueStackdir, "HD-MultiInstanceManager.exe")):
+                BluePID = getpid_win(IMAGENAME="HD-MultiInstanceManager.exe", key="BlueStacks")
+            if os.path.exists(os.path.join(LDPlayerdir, "dnmultiplayer.exe")):
+                LdPID = getpid_win(IMAGENAME="dnmultiplayer.exe", key="dnmultiplayer")
+            if BluePID > 0:
                 self.客户端 = "win_BlueStacks"
                 Instance = ["", "1", "2", "3", "4", "5"]
                 for i in Instance:
@@ -1073,7 +1096,7 @@ class deviceOB:
                         self.win_WindowsName.append(f"BlueStacks App Player {i}")
                         self.win_InstanceName.append(f"--instance Nougat32_{i}")
                 #
-            elif LdPID > 0:#
+            elif LdPID > 0:
                 self.客户端 = "win_LD"
                 # LD多开模拟器的ID, 通过添加桌面快捷方式可以获取
                 Instance = ["0", "1", "2", "3", "4", "5"]
@@ -1168,10 +1191,10 @@ class deviceOB:
         # android
         elif self.客户端 == "win_BlueStacks":
             instance = self.win_InstanceName[self.mynode]
-            command.append(os.path.join(BlueStackdir,"HD-Player.exe")+" "+instance)
+            command.append(os.path.join(BlueStackdir, "HD-Player.exe")+" "+instance)
         elif self.客户端 == "win_LD":
             instance = self.win_InstanceName[self.mynode]
-            command.append(os.path.join(LDPlayerdir,"dnplayer.exe")+" "+instance)
+            command.append(os.path.join(LDPlayerdir, "dnplayer.exe")+" "+instance)
         elif self.客户端 == "FULL_ADB":
             # 通过reboot的方式可以实现重启和解决资源的效果
             command.append(f"{self.adb_path} connect "+self.LINKURL)
@@ -1226,7 +1249,7 @@ class deviceOB:
                 command.append(f'taskkill /F /FI "PID eq {str(PID)}"')
             else:
                 # 关闭所有虚拟机，暂时用不到
-                #command.append('taskkill /f /im dnplayer.exe')
+                # command.append('taskkill /f /im dnplayer.exe')
                 # 通过reboot的方式可以实现重启和解决资源的效果
                 # LDPlayer支持adb reboot,👍
                 command.append(f"{self.adb_path} connect "+self.LINKURL)
@@ -1916,10 +1939,8 @@ class wzry_figure:
         # 一些图库, 后期使用图片更新
         self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
-        self.大厅对战图标 = Template(r"tpl1719454669981.png", record_pos=(-0.242, 0.145), resolution=(960, 540))
-        self.大厅对战图标2 = Template(r"tpl1689666004542.png", record_pos=(-0.102, 0.145), resolution=(960, 540), threshold=0.9)
+        self.大厅对战图标 =  Template(r"tpl1720656866551.png", record_pos=(-0.107, 0.135), resolution=(960, 540))
         self.大厅万象天工 = Template(r"tpl1719454683770.png", record_pos=(0.232, 0.144), resolution=(960, 540))
-        self.大厅万象天工2 = Template(r"tpl1693660085537.png", record_pos=(0.259, 0.142), resolution=(960, 540), threshold=0.9)
         self.大厅排位赛 = Template(r"tpl1720065349345.png", record_pos=(0.102, 0.144), resolution=(960, 540))
         self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
         # 开始图标和登录图标等很接近, 不要用于房间判断
@@ -1931,8 +1952,6 @@ class wzry_figure:
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅万象天工)
-        # self.大厅元素.append(self.大厅对战图标2)
-        # self.大厅元素.append(self.大厅万象天工2)
         self.房间元素 = []
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
@@ -2012,7 +2031,7 @@ class wzry_figure:
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708826597289.png", record_pos=(0.002, -0.219), resolution=(960, 540)))
         self.房间翻页活动元素.append(Template(r"tpl1708829601719.png", record_pos=(0.001, -0.22), resolution=(960, 540)))
-        self.房主头像 = Template(r"tpl1714917935714.png", record_pos=(0.354, -0.163), resolution=(960, 540), target_pos=9)
+        self.房主头像 = Template(r"tpl1716782981770.png", record_pos=(0.354, -0.164), resolution=(960, 540), target_pos=9)
         self.房主房间 = Template(r"tpl1700284856473.png", record_pos=(0.312, -0.17), resolution=(1136, 640), target_pos=2)
         #
         # 头像数据
@@ -2161,6 +2180,7 @@ class wzry_task:
         self.备战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+3+shiftnode) % 分路长度]
         #
         # 礼包设置
+        self.强制领取礼包 = True
         self.王者营地礼包 = True
         self.玉镖夺魁签到 = False
         # 刷新礼包的领取计时
@@ -3904,9 +3924,9 @@ class wzry_task:
                 self.当前界面 = "未知"
         #
         if 对战中:
-            TimeECHO(self.prefix+"判断对战:正在对战")
+            TimeECHO(self.prefix+" 判断对战:正在对战")
         if not 对战中:
-            TimeECHO(self.prefix+"判断对战:没有对战")
+            TimeECHO(self.prefix+" 判断对战:没有对战")
         if not 处理 or not 对战中:
             return 对战中
         #
@@ -4223,20 +4243,32 @@ class wzry_task:
                 # 在第二天的时候（新的一天=True）就不会执行这个命令了
                 if not 新的一天 and leftmin > 60:
                     TimeECHO(self.prefix+"夜间停止刷游戏前领取礼包")
-                    self.每日礼包(强制领取=True)
+                    self.每日礼包(强制领取=self.强制领取礼包)
                     # 关闭APP并SLEEP等待下一个时间周期
                     self.APPOB.关闭APP()
                 新的一天 = True
                 #
                 # 避免还存在其他进行没有同步完成的情况
+                head = ".tmp.night."
+                foot = ".txt"
+                upfile = f"{head}{self.myPID}.{self.mynode-1}.{foot}"
+                dnfile = f"{head}{self.myPID}.{self.mynode}.{foot}"
+                fifile = f"{head}{self.myPID}.{self.totalnode_bak-1}.{foot}"
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if leftmin > 60 and self.totalnode_bak > 1:
                     self.APPOB.关闭APP()
-                    for i in range(6):
-                        TimeECHO(self.prefix+"夜间已关闭APP, 检测是否有多账户同步残留")
+                    self.Tool.removefile(upfile)
+                    self.Tool.removefile(fifile)
+                    self.Tool.removefiles(head=head, body=f".{self.mynode}.", foot=foot)
+                    for itmp in range(12):
+                        TimeECHO(self.prefix+f"夜间已关闭APP, 检测是否有多账户同步残留.{itmp}")
+                        if self.mynode == 0 or os.path.exists(upfile):
+                            self.Tool.touchfile(dnfile)
+                        if os.path.exists(fifile):
+                            break
                         if self.Tool.存在同步文件():
                             break
-                        sleep(10*60)
+                        sleep(5*60)
                 #
                 # 计算休息时间
                 TimeECHO(self.prefix+"准备休息")
@@ -4438,11 +4470,11 @@ class auto_airtest:
                     LINK_dict[i] = "Android:///"+"127.0.0.1:"+str(5555+i*10)
                 # LD模拟器端口
                 LdPID = 0
-                if os.path.exists(os.path.join(LDPlayerdir,"dnmultiplayer.exe")):
-                     LdPID=getpid_win(IMAGENAME="dnmultiplayer.exe",key="dnmultiplayer")
+                if os.path.exists(os.path.join(LDPlayerdir, "dnmultiplayer.exe")):
+                    LdPID = getpid_win(IMAGENAME="dnmultiplayer.exe", key="dnmultiplayer")
                 if LdPID > 0:
                     for i in range(10):
-                        LINK_dict[i] = "Android:///"+"127.0.0.1:"+str(5555+i*2)                    
+                        LINK_dict[i] = "Android:///"+"127.0.0.1:"+str(5555+i*2)
             else:
                 for i in range(10):
                     LINK_dict[i] = "ios:///http://"+"192.168.12.130:"+str(8100+i)
@@ -4521,11 +4553,11 @@ if __name__ == "__main__":
         auto_airtest(mynode, totalnode, 设备类型)
     else:
         def multi_start(args):
-            auto_airtest(mynode=args[0],totalnode=args[1],设备类型=args[2])
+            auto_airtest(mynode=args[0], totalnode=args[1], 设备类型=args[2])
             return 0
         from pathos import multiprocessing
         m_process = totalnode
-        m_cpu = [[i,totalnode,设备类型] for i in range(0, m_process)]
+        m_cpu = [[i, totalnode, 设备类型] for i in range(0, m_process)]
         if __name__ == '__main__':
             p = multiprocessing.Pool(m_process)
             out = p.map_async(multi_start, m_cpu).get()
