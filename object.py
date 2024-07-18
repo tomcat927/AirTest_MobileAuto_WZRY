@@ -1939,7 +1939,7 @@ class wzry_figure:
         # 一些图库, 后期使用图片更新
         self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
-        self.大厅对战图标 =  Template(r"tpl1720656866551.png", record_pos=(-0.107, 0.135), resolution=(960, 540))
+        self.大厅对战图标 = Template(r"tpl1720656866551.png", record_pos=(-0.107, 0.135), resolution=(960, 540))
         self.大厅万象天工 = Template(r"tpl1719454683770.png", record_pos=(0.232, 0.144), resolution=(960, 540))
         self.大厅排位赛 = Template(r"tpl1720065349345.png", record_pos=(0.102, 0.144), resolution=(960, 540))
         self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
@@ -2056,6 +2056,9 @@ class wzry_figure:
         self.参战英雄线路_dict[5] = Template(r"tpl1689665577871.png", record_pos=(0.183, -0.26), resolution=(960, 540))
         self.参战英雄头像_dict[5] = self.英雄_太乙
         #
+        #
+        # 礼包图库
+        self.战令入口 = Template(r"tpl1721266385770.png", record_pos=(0.343, -0.105), resolution=(960, 540))
         # ------------------------------------------------------------------------------
         self.图片更新FILE = "WZRY.图片更新.txt"
         run_class_command(self=self, prefix=self.prefix, command=self.Tool.readfile(self.图片更新FILE))
@@ -3594,7 +3597,6 @@ class wzry_task:
         # 每日任务
         TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
         # @todo, 用抢先服确定这里没有问题
-        战令入口 = Template(r"tpl1703756544792.png", record_pos=(0.461, -0.017), resolution=(960, 540))
         赛季任务界面 = []
         赛季任务界面.append(Template(r"tpl1703756264588.png", record_pos=(-0.407, -0.255), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1703756272809.png", record_pos=(0.373, 0.11), resolution=(960, 540)))
@@ -3606,7 +3608,7 @@ class wzry_task:
         任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
         确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
         self.进入大厅()
-        self.Tool.existsTHENtouch(战令入口, "战令入口", savepos=True)
+        self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True)
         sleep(15)
         进入战令界面 = False
         进入战令界面, 赛季任务界面 = self.Tool.存在任一张图(赛季任务界面, "赛季任务界面")
