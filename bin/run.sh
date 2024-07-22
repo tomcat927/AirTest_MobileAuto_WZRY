@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 cat result >> result.bak.txt
 if [ $1 ]
 then

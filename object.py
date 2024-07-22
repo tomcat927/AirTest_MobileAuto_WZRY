@@ -1378,8 +1378,8 @@ class wzyd_libao:
         self.社区界面图标 = Template(r"tpl1717046076553.png", record_pos=(-0.007, 0.759), resolution=(540, 960))
         self.每日福利图标 = Template(r"tpl1699872219891.png", record_pos=(-0.198, -0.026), resolution=(540, 960))
         self.一键领取按钮 = Template(r"tpl1706338731419.png", record_pos=(0.328, -0.365), resolution=(540, 960))
-        self.赛事入口 = Template(r"tpl1717046009399.png", record_pos=(-0.269, -0.804), resolution=(540, 960), target_pos=6)
-        self.资讯入口 = Template(r"tpl1717046009399.png", record_pos=(-0.269, -0.804), resolution=(540, 960))
+        self.赛事入口 = Template(r"tpl1717046009399.png", record_pos=(-0.269, -0.804), resolution=(540, 960), threshold=0.9, target_pos=6)
+        self.资讯入口 = Template(r"tpl1717046009399.png", record_pos=(-0.269, -0.804), resolution=(540, 960), threshold=0.9)
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
         self.营地大厅元素 = []

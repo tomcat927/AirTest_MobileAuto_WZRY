@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir -p .pngtmp
 rm .pngtmp/*
 #mv tpl*.png assets/
