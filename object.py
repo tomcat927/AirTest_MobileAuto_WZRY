@@ -19,6 +19,7 @@ import numpy as np
 import random
 import traceback
 import subprocess
+import shlex
 # 重写函数#
 from airtest.core.api import connect_device, sleep
 from airtest.core.api import exists as exists_o
@@ -107,21 +108,28 @@ def getstatusoutput(*args, **kwargs):
 def run_command(command=[], sleeptime=20,  prefix="", quiet=False, must_ok=False):
     """
      执行命令
+     统一采用subprocess.Popen(["exec","para","para2","..."])
     """
     exit_code_o = 0
     command_step = 0
     # 获得运行的结果
     for i_command in command:
+        if len(i_command) < 1:
+            continue
         # 去掉所有的空白符号看是否还有剩余命令
-        trim_insert = i_command.strip()
+        trim_insert = shlex.join(i_command).strip()
         if len(trim_insert) < 1:
             continue
         if not quiet:
-            TimeECHO(prefix+"sysrun:"+i_command)
+            TimeECHO(prefix+"sysrun:"+trim_insert)
+        #
         try:
-            # result = [os.system(i_command), f"run_command({i_command})"]
             # os.system的容易卡，各种命令兼容性也不好，subprocess.Popen可以直接填windows快捷方式里的内容
-            process = subprocess.Popen(i_command)
+            # shell用于支持$(cat )等命令, 并且只能用一个字符串
+            if len(i_command) == 1:
+                process = subprocess.Popen(i_command[0], shell=True)
+            else:
+                process = subprocess.Popen(i_command)
             result = [0, str(process)]
             # 运行成功的结果会直接输出的
         except:
@@ -180,12 +188,17 @@ def getpid_win(IMAGENAME="HD-Player.exe", key="BlueStacks App Player 0"):
     if sys.platform.lower() != "win32":
         return 0
     try:
-        tasklist = os.popen(f'tasklist -FI "IMAGENAME eq {IMAGENAME}" /V')
+        command = ["tasklist", "-FI", f"IMAGENAME eq {IMAGENAME}", "/V"]
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        output, _ = process.communicate()
+        # 使用 'utf-8' 编码解析输出
+        cont = output.decode('utf-8', errors='ignore').splitlines()
+        # cont = os.popen(f'tasklist -FI "IMAGENAME eq {IMAGENAME}" /V').readlines()
     except:
         TimeECHO(f"getpid_win({IMAGENAME}) error"+"-"*10)
         traceback.print_exc()
         TimeECHO(f"getpid_win({IMAGENAME}) error"+"-"*10)
-    cont = tasklist.readlines()
+        return 0
     PID = 0
     for task in cont:
         taskterm = task.split()
@@ -1091,10 +1104,10 @@ class deviceOB:
                     if len(i) == 0:
                         self.win_WindowsName.append(f"BlueStacks App Player")
                         # 引擎, Nougat64,Nougat32,Pi64
-                        self.win_InstanceName.append(f"--instance Nougat32")
+                        self.win_InstanceName.append(f"Nougat32")
                     else:
                         self.win_WindowsName.append(f"BlueStacks App Player {i}")
-                        self.win_InstanceName.append(f"--instance Nougat32_{i}")
+                        self.win_InstanceName.append(f"Nougat32_{i}")
                 #
             elif LdPID > 0:
                 self.客户端 = "win_LD"
@@ -1183,7 +1196,8 @@ class deviceOB:
                 # tidevice不支持企业签名的WDA
                 self.LINKport = str(int(self.LINKport)+1)
                 self.LINK = self.LINKhead+":"+self.LINKport
-                command.append(f"tidevice $(cat para.txt) wdaproxy -B  com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner --port {self.LINKport} > tidevice.result.txt 2 > &1 &")
+                # @todo, 此命令没有经过测试
+                command.append([f"tidevice $(cat para.txt) wdaproxy -B  com.facebook.WebDriverAgentRunner.cndaqiang.xctrunner --port {self.LINKport} > tidevice.result.txt 2 > &1 &"])
                 sleep(20)
             else:
                 TimeErr(self.prefix+": tidevice list 无法找到IOS设备重启失败")
@@ -1191,23 +1205,23 @@ class deviceOB:
         # android
         elif self.客户端 == "win_BlueStacks":
             instance = self.win_InstanceName[self.mynode]
-            command.append(os.path.join(BlueStackdir, "HD-Player.exe")+" "+instance)
+            command.append([os.path.join(BlueStackdir, "HD-Player.exe"), "--instance", instance])
         elif self.客户端 == "win_LD":
             instance = self.win_InstanceName[self.mynode]
-            command.append(os.path.join(LDPlayerdir, "dnplayer.exe")+" "+instance)
+            command.append([os.path.join(LDPlayerdir, "dnplayer.exe"), instance])
         elif self.客户端 == "FULL_ADB":
             # 通过reboot的方式可以实现重启和解决资源的效果
-            command.append(f"{self.adb_path} connect "+self.LINKURL)
-            command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+            command.append([self.adb_path, "connect", self.LINKURL])
+            command.append([self.adb_path, "-s", self.LINKURL, "reboot"])
         elif self.客户端 == "lin_docker":
             虚拟机ID = f"androidcontain{self.mynode}"
-            command.append(f"docker restart {虚拟机ID}")
+            command.append(["docker", "restart", 虚拟机ID])
         elif self.客户端 == "RemoteAndroid":
-            command.append(f"{self.adb_path} connect "+self.LINKURL)
+            command.append([self.adb_path, "connect", self.LINKURL])
         elif self.客户端 == "USBAndroid":
             result = getstatusoutput("adb devices")
             if self.LINKURL in result[1]:
-                command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+                command.append([self.adb_path, "-s", self.LINKURL, "reboot"])
             else:
                 TimeECHO(self.prefix+f"没有找到USB设备{self.LINKURL}\n"+result[1])
                 return False
@@ -1229,7 +1243,7 @@ class deviceOB:
         if self.客户端 == "ios":
             if "mac" in self.控制端:
                 TimeECHO(self.prefix+f"测试本地IOS关闭中")
-                command.append("tidevice reboot")
+                command.append(["tidevice", "reboot"])
             else:
                 TimeECHO(self.prefix+f"当前模式无法关闭IOS")
                 return False
@@ -1239,34 +1253,34 @@ class deviceOB:
             PID = getpid_win(IMAGENAME="HD-Player.exe", key=self.win_WindowsName[self.mynode])
             # BlueStacks App Player 3
             if PID > 0:
-                command.append(f'taskkill /F /FI "PID eq {str(PID)}"')
+                command.append(["taskkill", "/F", "/FI", f"PID eq {str(PID)}"])
             else:  # 关闭所有虚拟机，暂时用不到
-                command.append('taskkill /f /im HD-Player.exe')
+                command.append(["taskkill", "/F", "/IM", "HD-Player.exe"])
         elif self.客户端 == "win_LD":
             # 尝试获取PID
             PID = getpid_win(IMAGENAME="dnplayer.exe", key=self.win_WindowsName[self.mynode])
             if PID > 0:
-                command.append(f'taskkill /F /FI "PID eq {str(PID)}"')
+                command.append(["taskkill", "/F", "/FI", f"PID eq {str(PID)}"])
             else:
                 # 关闭所有虚拟机，暂时用不到
                 # command.append('taskkill /f /im dnplayer.exe')
                 # 通过reboot的方式可以实现重启和解决资源的效果
                 # LDPlayer支持adb reboot,👍
-                command.append(f"{self.adb_path} connect "+self.LINKURL)
-                command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+                command.append([self.adb_path, "connect", self.LINKURL])
+                command.append([self.adb_path, "-s", self.LINKURL, "reboot"])
         elif self.客户端 == "FULL_ADB":
             # 通过reboot的方式可以实现重启和解决资源的效果
-            command.append(f"{self.adb_path} connect "+self.LINKURL)
-            command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+            command.append([self.adb_path, "connect", self.LINKURL])
+            command.append([self.adb_path, "-s", self.LINKURL, "reboot"])
         elif self.客户端 == "lin_docker":
             虚拟机ID = f"androidcontain{self.mynode}"
-            command.append(f"docker stop {虚拟机ID}")
+            command.append(["docker", "stop", 虚拟机ID])
         elif self.客户端 == "RemoteAndroid":
-            command.append(f"{self.adb_path} disconnect "+self.LINKURL)
+            command.append([self.adb_path, "disconnect", self.LINKURL])
         elif self.客户端 == "USBAndroid":
             result = getstatusoutput("adb devices")
             if self.LINKURL in result[1]:
-                command.append(f"{self.adb_path} -s "+self.LINKURL+" reboot")
+                command.append([self.adb_path, "-s", self.LINKURL, "reboot"])
             else:
                 TimeECHO(self.prefix+f"没有找到USB设备{self.LINKURL}\n"+result[1])
                 return False
