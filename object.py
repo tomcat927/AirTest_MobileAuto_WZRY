@@ -709,7 +709,7 @@ class DQWheel:
                 seen.add(item.filepath)
         return unique_elements
 
-    def 存在任一张图(self, array, strinfo=""):
+    def 存在任一张图(self, array, strinfo="", savepos=False):
         array = self.uniq_Template_array(array)
         判断元素集合 = array
         strinfo = strinfo if len(strinfo) > 0 else "图片"
@@ -721,10 +721,13 @@ class DQWheel:
         length = len(判断元素集合)
         for idx, i in enumerate(判断元素集合):
             TimeECHO(self.prefix+f"{strinfo}({idx+1}/{length}):{i}")
-            if exists(i, prefix=self.prefix):
+            pos = exists(i, prefix=self.prefix)
+            if pos:
                 TimeECHO(self.prefix+f"{strinfo}成功:{i}")
                 # 交换元素位置
                 判断元素集合[0], 判断元素集合[idx] = 判断元素集合[idx], 判断元素集合[0]
+                if savepos:
+                    self.var_dict[strinfo] = pos
                 return True, 判断元素集合
         return False, 判断元素集合
 
@@ -2023,7 +2026,14 @@ class wzry_figure:
         self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
         self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
         self.王者登录关闭按钮.append(Template(r"tpl1719742718808.png", record_pos=(0.394, -0.241), resolution=(960, 540)))
-        #
+        # 返回图标
+        self.返回按钮 = []
+        self.返回按钮.append(Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540)))
+        self.返回按钮.append(Template(r"tpl1707399262936.png", record_pos=(-0.478, -0.267), resolution=(960, 540)))
+        self.返回按钮.append(Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540)))
+        self.返回按钮.append(Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9))
+        self.返回按钮.append(Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540)))
+
         self.战绩页面元素 = []
         self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
@@ -2200,6 +2210,7 @@ class wzry_task:
         self.强制领取礼包 = True
         self.王者营地礼包 = True
         self.玉镖夺魁签到 = False
+        self.每日任务礼包 = True
         # 刷新礼包的领取计时
         self.王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, 初始化检查=False)
         self.每日礼包()
@@ -2489,6 +2500,9 @@ class wzry_task:
             self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
         回归挑战 = Template(r"tpl1699680234401.png", record_pos=(0.314, 0.12), resolution=(1136, 640))
         self.Tool.existsTHENtouch(回归挑战, "不进行回归挑战")
+        存在返回按钮, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, "登录返回按钮", savepos=True)
+        if 存在返回按钮:
+            self.Tool.existsTHENtouch(self.图片.返回按钮[0], "登录返回按钮", savepos=True)
         self.关闭按钮()
         if self.判断大厅中():
             return True
@@ -3174,7 +3188,11 @@ class wzry_task:
                 if self.商城免费礼包():
                     self.Tool.removefile(self.免费商城礼包FILE)
             #
-            self.每日礼包_每日任务()
+            # 由于王者营地也可以领战令经验, 如果在这里把战令经验领到上限，营地的经验就不能领了
+            # 所以加个控制参数决定是否领取
+            if self.每日任务礼包:
+                self.每日礼包_每日任务()
+            # 以前的活动
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
@@ -3610,7 +3628,6 @@ class wzry_task:
         #
         # 每日任务
         TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
-        # @todo, 用抢先服确定这里没有问题
         赛季任务界面 = []
         赛季任务界面.append(Template(r"tpl1703756264588.png", record_pos=(-0.407, -0.255), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1703756272809.png", record_pos=(0.373, 0.11), resolution=(960, 540)))
@@ -3690,14 +3707,6 @@ class wzry_task:
         self.Tool.LoopTouch(确定按钮, "确定按钮")
         self.关闭按钮()
         self.确定按钮()
-        #
-        # 由于王者营地也可以领战令经验, 如果在这里把战令经验领到上限，营地的经验就不能领了,所以周5之后再领取
-        weekday = self.Tool.time_getweek()
-        if weekday < 5:
-            TimeECHO(self.prefix+f"周六统一领取战令经验,先领取营地的经验")
-            self.Tool.LoopTouch(返回, "返回")
-            self.确定按钮()
-            return True
         #
         # 新赛季增加的领取入口
         本周任务 = Template(r"tpl1703755716888.png", record_pos=(-0.175, -0.192), resolution=(960, 540))
@@ -3940,9 +3949,9 @@ class wzry_task:
                 self.当前界面 = "未知"
         #
         if 对战中:
-            TimeECHO(self.prefix+" 判断对战:正在对战")
+            TimeECHO(self.prefix+"判断对战:正在对战")
         if not 对战中:
-            TimeECHO(self.prefix+" 判断对战:没有对战")
+            TimeECHO(self.prefix+"判断对战:没有对战")
         if not 处理 or not 对战中:
             return 对战中
         #
