@@ -2033,6 +2033,21 @@ class wzry_figure:
         self.返回按钮.append(Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540)))
         self.返回按钮.append(Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9))
         self.返回按钮.append(Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540)))
+        # 确定按钮
+        # 不同模块的确定按钮位置不同，把record_pos相同的统一替换一下，其他的先不处理了
+        self.蓝色确定按钮 = []
+        self.蓝色确定按钮.append(Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1694487498294.png", record_pos=(-0.097, 0.24), resolution=(960, 540)))
+        #
+        self.金色确定按钮 = []
+        self.金色确定按钮.append(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)))
+        self.金色确定按钮.append(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)))
+        self.金色确定按钮.append(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)))
+        self.金色确定按钮.append(Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540)))
 
         self.战绩页面元素 = []
         self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
@@ -2241,10 +2256,10 @@ class wzry_task:
 
     def 确定按钮(self):
         确定按钮 = []
-        确定按钮.append(Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540)))
-        确定按钮.append(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)))
-        确定按钮.append(Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540)))
-        确定按钮.append(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8))
+        for i in self.图片.蓝色确定按钮:
+            确定按钮.append(i)
+        for i in self.图片.金色确定按钮:
+            确定按钮.append(i)
         for i in 确定按钮:
             self.Tool.existsTHENtouch(i, f"确定{i}", savepos=False)
 
@@ -2503,6 +2518,10 @@ class wzry_task:
         存在返回按钮, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, "登录返回按钮", savepos=True)
         if 存在返回按钮:
             self.Tool.existsTHENtouch(self.图片.返回按钮[0], "登录返回按钮", savepos=True)
+            存在登录蓝色确定按钮, self.图片.蓝色确定按钮 = self.Tool.存在任一张图(self.图片.蓝色确定按钮, "登录蓝色确定按钮", savepos=True)
+            if 存在登录蓝色确定按钮:
+                self.Tool.existsTHENtouch(self.图片.蓝色确定按钮[0], "登录蓝色确定按钮", savepos=True)
+        #
         self.关闭按钮()
         if self.判断大厅中():
             return True
@@ -3452,7 +3471,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         # 碎片
         if self.Tool.existsTHENtouch(Template(r"tpl1700454908937.png", record_pos=(0.039, 0.004), resolution=(960, 540)), "皮肤碎片兑换"):
@@ -3461,7 +3480,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         # 碎片
         if self.Tool.existsTHENtouch(Template(r"tpl1700454935340.png", record_pos=(-0.28, 0.153), resolution=(960, 540)), "英雄碎片兑换"):
@@ -3470,7 +3489,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         #########################
         # 下面的宝箱和碎片性价比不高,由于我的账户友情币已经非常多了,可以兑换,用于换铭文和钻石
@@ -3482,7 +3501,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         返回图标 = Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540))
         # 皮肤宝箱
@@ -3637,7 +3656,7 @@ class wzry_task:
         赛季任务界面.append(Template(r"tpl1706543240746.png", record_pos=(0.352, 0.183), resolution=(960, 540)))
         任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
         任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
-        确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
+        确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         self.进入大厅()
         self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True)
         sleep(15)
@@ -3843,7 +3862,7 @@ class wzry_task:
         一键领奖 = Template(r"tpl1694442066106.png", record_pos=(-0.134, 0.033), resolution=(960, 540))
         去领取 = Template(r"tpl1694442088041.png", record_pos=(-0.135, 0.107), resolution=(960, 540))
         收下 = Template(r"tpl1694442103573.png", record_pos=(-0.006, 0.181), resolution=(960, 540))
-        确定 = Template(r"tpl1694442122665.png", record_pos=(-0.003, 0.165), resolution=(960, 540))
+        确定 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         返回 = Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540))
         能力测试关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
         #
@@ -4100,7 +4119,7 @@ class wzry_task:
     def 健康系统(self):
         if exists(Template(r"tpl1689666921933.png", record_pos=(0.122, -0.104), resolution=(960, 540))):
             TimeECHO(self.prefix+"您已禁赛")
-            确定 = Template(r"tpl1701171103293.png", record_pos=(-0.004, 0.081), resolution=(1136, 640))
+            确定 = Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540))
             self.Tool.existsTHENtouch(确定, self.prefix+"确定禁赛")
             return True
         return False
