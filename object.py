@@ -1125,11 +1125,7 @@ class deviceOB:
                 # LDPlayer 也支持 self.客户端="FULL_ADB" 的模式
                 # 但是需要提前开启模拟器
             else:
-                # self.客户端="FULL_ADB
-                # 利用adb reboot控制，但是在一些机器上会卡住或者直接关机
-                #
                 self.客户端 = "RemoteAndroid"
-                # 暂时通过 adb disconnect的方式控制
         elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
             if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
                 self.客户端 = "lin_docker"
@@ -1220,7 +1216,10 @@ class deviceOB:
             虚拟机ID = f"androidcontain{self.mynode}"
             command.append(["docker", "restart", 虚拟机ID])
         elif self.客户端 == "RemoteAndroid":
+            # 热重启系统
             command.append([self.adb_path, "connect", self.LINKURL])
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "stop"])
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "start"])
         elif self.客户端 == "USBAndroid":
             result = getstatusoutput("adb devices")
             if self.LINKURL in result[1]:
@@ -1279,6 +1278,9 @@ class deviceOB:
             虚拟机ID = f"androidcontain{self.mynode}"
             command.append(["docker", "stop", 虚拟机ID])
         elif self.客户端 == "RemoteAndroid":
+            # 热重启系统
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "stop"])
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "start"])
             command.append([self.adb_path, "disconnect", self.LINKURL])
         elif self.客户端 == "USBAndroid":
             result = getstatusoutput("adb devices")
