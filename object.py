@@ -709,7 +709,7 @@ class DQWheel:
                 seen.add(item.filepath)
         return unique_elements
 
-    def 存在任一张图(self, array, strinfo=""):
+    def 存在任一张图(self, array, strinfo="", savepos=False):
         array = self.uniq_Template_array(array)
         判断元素集合 = array
         strinfo = strinfo if len(strinfo) > 0 else "图片"
@@ -721,10 +721,13 @@ class DQWheel:
         length = len(判断元素集合)
         for idx, i in enumerate(判断元素集合):
             TimeECHO(self.prefix+f"{strinfo}({idx+1}/{length}):{i}")
-            if exists(i, prefix=self.prefix):
+            pos = exists(i, prefix=self.prefix)
+            if pos:
                 TimeECHO(self.prefix+f"{strinfo}成功:{i}")
                 # 交换元素位置
                 判断元素集合[0], 判断元素集合[idx] = 判断元素集合[idx], 判断元素集合[0]
+                if savepos:
+                    self.var_dict[strinfo] = pos
                 return True, 判断元素集合
         return False, 判断元素集合
 
@@ -1122,11 +1125,7 @@ class deviceOB:
                 # LDPlayer 也支持 self.客户端="FULL_ADB" 的模式
                 # 但是需要提前开启模拟器
             else:
-                # self.客户端="FULL_ADB
-                # 利用adb reboot控制，但是在一些机器上会卡住或者直接关机
-                #
                 self.客户端 = "RemoteAndroid"
-                # 暂时通过 adb disconnect的方式控制
         elif "linux" in self.控制端 and "127.0.0.1" in self.LINK:  # Linux + docker
             if os.path.exists("/home/cndaqiang/builddocker/redroid/8arm0"):
                 self.客户端 = "lin_docker"
@@ -1217,7 +1216,10 @@ class deviceOB:
             虚拟机ID = f"androidcontain{self.mynode}"
             command.append(["docker", "restart", 虚拟机ID])
         elif self.客户端 == "RemoteAndroid":
+            # 热重启系统
             command.append([self.adb_path, "connect", self.LINKURL])
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "stop"])
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "start"])
         elif self.客户端 == "USBAndroid":
             result = getstatusoutput("adb devices")
             if self.LINKURL in result[1]:
@@ -1276,6 +1278,9 @@ class deviceOB:
             虚拟机ID = f"androidcontain{self.mynode}"
             command.append(["docker", "stop", 虚拟机ID])
         elif self.客户端 == "RemoteAndroid":
+            # 热重启系统
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "stop"])
+            command.append([self.adb_path, "-s", self.LINKURL, "shell", "start"])
             command.append([self.adb_path, "disconnect", self.LINKURL])
         elif self.客户端 == "USBAndroid":
             result = getstatusoutput("adb devices")
@@ -2023,7 +2028,29 @@ class wzry_figure:
         self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
         self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
         self.王者登录关闭按钮.append(Template(r"tpl1719742718808.png", record_pos=(0.394, -0.241), resolution=(960, 540)))
+        # 返回图标
+        self.返回按钮 = []
+        self.返回按钮.append(Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540)))
+        self.返回按钮.append(Template(r"tpl1707399262936.png", record_pos=(-0.478, -0.267), resolution=(960, 540)))
+        self.返回按钮.append(Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540)))
+        self.返回按钮.append(Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9))
+        self.返回按钮.append(Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540)))
+        # 确定按钮
+        # 不同模块的确定按钮位置不同，把record_pos相同的统一替换一下，其他的先不处理了
+        self.蓝色确定按钮 = []
+        self.蓝色确定按钮.append(Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1705069645193.png", record_pos=(-0.105, 0.165), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)))
+        self.蓝色确定按钮.append(Template(r"tpl1694487498294.png", record_pos=(-0.097, 0.24), resolution=(960, 540)))
         #
+        self.金色确定按钮 = []
+        self.金色确定按钮.append(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)))
+        self.金色确定按钮.append(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)))
+        self.金色确定按钮.append(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)))
+        self.金色确定按钮.append(Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540)))
+
         self.战绩页面元素 = []
         self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
@@ -2200,6 +2227,7 @@ class wzry_task:
         self.强制领取礼包 = True
         self.王者营地礼包 = True
         self.玉镖夺魁签到 = False
+        self.每日任务礼包 = True
         # 刷新礼包的领取计时
         self.王者营地 = wzyd_libao(prefix=str(self.mynode), 设备类型=self.移动端.设备类型, 初始化检查=False)
         self.每日礼包()
@@ -2230,10 +2258,10 @@ class wzry_task:
 
     def 确定按钮(self):
         确定按钮 = []
-        确定按钮.append(Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540)))
-        确定按钮.append(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)))
-        确定按钮.append(Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540)))
-        确定按钮.append(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8))
+        for i in self.图片.蓝色确定按钮:
+            确定按钮.append(i)
+        for i in self.图片.金色确定按钮:
+            确定按钮.append(i)
         for i in 确定按钮:
             self.Tool.existsTHENtouch(i, f"确定{i}", savepos=False)
 
@@ -2489,6 +2517,13 @@ class wzry_task:
             self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
         回归挑战 = Template(r"tpl1699680234401.png", record_pos=(0.314, 0.12), resolution=(1136, 640))
         self.Tool.existsTHENtouch(回归挑战, "不进行回归挑战")
+        存在返回按钮, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, "登录返回按钮", savepos=True)
+        if 存在返回按钮:
+            self.Tool.existsTHENtouch(self.图片.返回按钮[0], "登录返回按钮", savepos=True)
+            存在登录蓝色确定按钮, self.图片.蓝色确定按钮 = self.Tool.存在任一张图(self.图片.蓝色确定按钮, "登录蓝色确定按钮", savepos=True)
+            if 存在登录蓝色确定按钮:
+                self.Tool.existsTHENtouch(self.图片.蓝色确定按钮[0], "登录蓝色确定按钮", savepos=True)
+        #
         self.关闭按钮()
         if self.判断大厅中():
             return True
@@ -3174,7 +3209,11 @@ class wzry_task:
                 if self.商城免费礼包():
                     self.Tool.removefile(self.免费商城礼包FILE)
             #
-            self.每日礼包_每日任务()
+            # 由于王者营地也可以领战令经验, 如果在这里把战令经验领到上限，营地的经验就不能领了
+            # 所以加个控制参数决定是否领取
+            if self.每日任务礼包:
+                self.每日礼包_每日任务()
+            # 以前的活动
             self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
@@ -3434,7 +3473,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         # 碎片
         if self.Tool.existsTHENtouch(Template(r"tpl1700454908937.png", record_pos=(0.039, 0.004), resolution=(960, 540)), "皮肤碎片兑换"):
@@ -3443,7 +3482,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         # 碎片
         if self.Tool.existsTHENtouch(Template(r"tpl1700454935340.png", record_pos=(-0.28, 0.153), resolution=(960, 540)), "英雄碎片兑换"):
@@ -3452,7 +3491,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         #########################
         # 下面的宝箱和碎片性价比不高,由于我的账户友情币已经非常多了,可以兑换,用于换铭文和钻石
@@ -3464,7 +3503,7 @@ class wzry_task:
                 sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454883635.png", record_pos=(0.098, 0.118), resolution=(960, 540)), "金色确定兑换"):
                 sleep(5)
-            if self.Tool.existsTHENtouch(Template(r"tpl1700454897119.png", record_pos=(0.0, 0.164), resolution=(960, 540)), "蓝色确定兑换"):
+            if self.Tool.existsTHENtouch(Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
         返回图标 = Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540))
         # 皮肤宝箱
@@ -3610,7 +3649,6 @@ class wzry_task:
         #
         # 每日任务
         TimeECHO(self.prefix+f"领任务礼包:每日任务{times}")
-        # @todo, 用抢先服确定这里没有问题
         赛季任务界面 = []
         赛季任务界面.append(Template(r"tpl1703756264588.png", record_pos=(-0.407, -0.255), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1703756272809.png", record_pos=(0.373, 0.11), resolution=(960, 540)))
@@ -3620,7 +3658,7 @@ class wzry_task:
         赛季任务界面.append(Template(r"tpl1706543240746.png", record_pos=(0.352, 0.183), resolution=(960, 540)))
         任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
         任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
-        确定按钮 = Template(r"tpl1693194657793.png", record_pos=(0.001, 0.164), resolution=(960, 540))
+        确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         self.进入大厅()
         self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True)
         sleep(15)
@@ -3690,14 +3728,6 @@ class wzry_task:
         self.Tool.LoopTouch(确定按钮, "确定按钮")
         self.关闭按钮()
         self.确定按钮()
-        #
-        # 由于王者营地也可以领战令经验, 如果在这里把战令经验领到上限，营地的经验就不能领了,所以周5之后再领取
-        weekday = self.Tool.time_getweek()
-        if weekday < 5:
-            TimeECHO(self.prefix+f"周六统一领取战令经验,先领取营地的经验")
-            self.Tool.LoopTouch(返回, "返回")
-            self.确定按钮()
-            return True
         #
         # 新赛季增加的领取入口
         本周任务 = Template(r"tpl1703755716888.png", record_pos=(-0.175, -0.192), resolution=(960, 540))
@@ -3834,7 +3864,7 @@ class wzry_task:
         一键领奖 = Template(r"tpl1694442066106.png", record_pos=(-0.134, 0.033), resolution=(960, 540))
         去领取 = Template(r"tpl1694442088041.png", record_pos=(-0.135, 0.107), resolution=(960, 540))
         收下 = Template(r"tpl1694442103573.png", record_pos=(-0.006, 0.181), resolution=(960, 540))
-        确定 = Template(r"tpl1694442122665.png", record_pos=(-0.003, 0.165), resolution=(960, 540))
+        确定 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         返回 = Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540))
         能力测试关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
         #
@@ -3940,9 +3970,9 @@ class wzry_task:
                 self.当前界面 = "未知"
         #
         if 对战中:
-            TimeECHO(self.prefix+" 判断对战:正在对战")
+            TimeECHO(self.prefix+"判断对战:正在对战")
         if not 对战中:
-            TimeECHO(self.prefix+" 判断对战:没有对战")
+            TimeECHO(self.prefix+"判断对战:没有对战")
         if not 处理 or not 对战中:
             return 对战中
         #
@@ -4091,7 +4121,7 @@ class wzry_task:
     def 健康系统(self):
         if exists(Template(r"tpl1689666921933.png", record_pos=(0.122, -0.104), resolution=(960, 540))):
             TimeECHO(self.prefix+"您已禁赛")
-            确定 = Template(r"tpl1701171103293.png", record_pos=(-0.004, 0.081), resolution=(1136, 640))
+            确定 = Template(r"tpl1693660628972.png", record_pos=(-0.003, 0.118), resolution=(960, 540))
             self.Tool.existsTHENtouch(确定, self.prefix+"确定禁赛")
             return True
         return False
