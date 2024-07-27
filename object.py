@@ -81,6 +81,10 @@ def TimeErr(info="None"):
 
 
 def fun_name(level=1):
+    """
+    def b()
+        fun_name(1) == "b"
+    """
     import inspect
     fun = inspect.currentframe()
     ilevel = 0
@@ -95,9 +99,20 @@ def fun_name(level=1):
     except:
         return f"not found fun_name({ilevel})"
 
+
+def funs_name(level=2):
+    i = level
+    content = fun_name(i)
+    while i < 10:
+        i = i+1
+        try:
+            content = content+"."+fun_name(i)
+        except:
+            break
+    return content
+
+
 # 如果命令需要等待打开的程序关闭, 这个命令很容易卡住
-
-
 def getstatusoutput(*args, **kwargs):
     try:
         return subprocess.getstatusoutput(*args, **kwargs)
@@ -567,7 +582,7 @@ class DQWheel:
             return [""]
 
     #
-    def touch同步文件(self, 同步文件=""):
+    def touch同步文件(self, 同步文件="", content=""):
         if len(同步文件) > 1:
             同步文件 = 同步文件
         else:
@@ -575,9 +590,10 @@ class DQWheel:
         if self.存在同步文件(同步文件):
             TimeECHO(f"{self.prefix}不再创建[{同步文件}]")
             return True
+        content = self.prefix+":"+funs_name() if len(content) == 0 else content
         TimeECHO(f">{self.prefix}"*10)
         TimeECHO(self.prefix+f"创建同步文件[{同步文件}]")
-        self.touchfile(同步文件)
+        self.touchfile(同步文件, content)
         TimeECHO(f"<{self.prefix}"*10)
         # 该文件不添加到列表,仅在成功同步后才删除
         # self.filelist.append(self.辅助同步文件)
@@ -792,7 +808,7 @@ class DQWheel:
     # 这仅针对辅助模式,因此同步文件取self.辅助同步文件
 
     def 必须同步等待成功(self, mynode, totalnode, 同步文件="", sleeptime=60*5):
-        同步文件 = 同步文件 if len(同步文件) > 1 else self.辅助同步文件
+        同步文件 = 同步文件 if len(同步文件) > 1 else self.辅助同步文件+funs_name()+".txt"
         if totalnode < 2:
             self.removefile(同步文件)
             return True
@@ -880,6 +896,9 @@ class DQWheel:
                 # 开始通信循环
                 主辅通信成功 = False
                 for sleeploop in np.arange(60*5):
+                    if not os.path.exists(同步文件):
+                        TimeECHO(self.prefix+f"不存在同步文件{同步文件},退出")
+                        return True
                     if self.readstopfile():
                         return
                     if not os.path.exists(lockfile):
@@ -899,12 +918,15 @@ class DQWheel:
             else:
                 同步成功 = False
                 # 辅助节点,找到特定,就循环5分钟
-                myrandom = str(-100)
+                myrandom = "initial"
                 myrandom_new = myrandom
                 lockfile = f".tmp.barrier.{myrandom}.{i}.{name}.in.txt"
                 TimeECHO(self.prefix+f":进行同步判定{i}")
                 sleeploop = 0
                 for sleeploop in np.arange(60*5*(totalnode-1)):
+                    if not os.path.exists(同步文件):
+                        TimeECHO(self.prefix+f"不存在同步文件{同步文件},退出")
+                        return True
                     if self.readstopfile():
                         return
                     # 主辅通信循环
@@ -917,7 +939,7 @@ class DQWheel:
                         lockfile = f".tmp.barrier.{myrandom}.{i}.{name}.in.txt"
                         sleep(10)
                         主辅通信成功 = self.removefile(lockfile)
-                    if not 主辅通信成功 and len(myrandom) > 0:
+                    if not 主辅通信成功 and myrandom != "initial":
                         TimeECHO(prefix+f"还存在{lockfile}")
                         主辅通信成功 = self.removefile(lockfile)
                     # 避免存在旧文件没有删除的情况,这里不断读取å
