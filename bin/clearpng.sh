@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-mkdir -p .pngtmp
-rm .pngtmp/*
-#mv tpl*.png assets/
-for i in $(grep -Eo 'tpl[[:alnum:]_]*.png' object.py)
+#.pngtmp作为备用目录,以及活动更新图片目录,不参与仓库同步
+if [ ! -d .pngtmp ]; then mkdir -p .pngtmp; fi
+mv assets/* .pngtmp/
+for i in $(grep -Eo 'tpl[[:alnum:]_]*.png' wzry.py)
 do
-#cp ../WZRY_AirtestIDE_emulator/$i .
-#cp ../IOS/$i .
-cp assets/$i .pngtmp/
-done
-#echo rm tpl*png
-rm assets/tpl*png
+cp .pngtmp/$i assets/
 #echo cp .pngtmp/* .
-cp .pngtmp/* assets/
+done

@@ -1,131 +1,100 @@
-# 客户端推荐
-windows模拟器,LDPlayer模拟器和Bluestack模拟器都挺好的，本身支持的功能也差不多。
-* LDPlayer模拟器
-* * LDPlayer有绿色免安装版。
-* * **不兼容hyper-v(wsl)**, 多开也有省电模式，cmd启动比较简单
-* * 界面本土化很好，删除旧的虚拟机后，**新建的虚拟机会使用旧虚拟机的端口和编号，代码不用调整**
-* * 中文的教程和帮助很多, 如[虚拟机如何运行安卓模拟器](https://help.ldmnq.com/docs/XSPpJg)
-* * 缺点: 多开时,只有多开的虚拟机支持5帧省电,主虚拟机还是30帧以上, 综合功耗较高
-* * 缺点：用了好几天，突然提示显卡驱动有问题，解决问题的方案是自动下载360驱动
-* Bluestack模拟器
-* * 非常稳定
-* * Nougat引擎(32 or 64), **windows平台模拟器中最省电流畅的**，adb的端口固定[5555,5565,5575,...]
-* * Pie 64bit引擎, **可以和WSL兼容**，adb端口会变，功耗较高
-* * 禁用广告的方法删除`C:\ProgramData\BlueStacks_nxt\Engine\Nougat32_X\Promotions`文件夹的内容，并设置Everyone的权限为禁止
-* * 缺点: 删除复制的虚拟机后，新建虚拟机的编号不会使用旧的编号，会导致adb端口变化，如[5555,5575,5585]。需要修改代码`LINK_dict[i]=`或者重装虚拟机
-* * 缺点: 开机界面游戏广告，容易误触
-* 其他模拟器
-* * 目前不进行设备管理
-* * 可以在代码设置为通过`adb reboot`管理，但是不同的模拟器对adb reboot的支持不同，需要自己测试
-
-Linux 容器
-* ~~使用[remote-android](https://github.com/remote-android/)~~, 支持arm服务器、openwrt路由器
-* * 20240704 王者更新后，会检测wifi连接情况，容器没有wifi和数据，王者认为断网不让打开，暂时无法使用
-
-Mac未发现合适的
-
-移动设备
-* Android
-* IOS(测试通过 15.8, 16.2)
-* IOS端搭建和后续更新和学习AirTest也许会在这里[Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
-
-
 # 运行方法
-* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
-* 如果你的默认设备不是`127.0.0.1:5555`,可以修改`object.py`中的`auto_airtest`函数中的`LINK_dict[0]=`，或者通过下面终端的方式指定手机的ip和端口
-* 如果使用BlueStack或者LDPlayer模拟器，填入他们的路径可以支持关闭、启动模拟器的功能
+## 准备工作
+### 依赖
 ```
-BlueStackdir="C:\Program Files\BlueStacks_nxt"
-LDPlayerdir="D:\GreenSoft\LDPlayer"
+python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  airtest_mobileauto
+# 单脚本控制多进程需要
+python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  pathos
 ```
-* 使用BlueStack或者LDPlayer模拟器组队模式，提前打开多个模拟器或者打开对应软件的多开管理器
 
-## 使用AirTest软件运行
-* 下载地址[AirTest](https://airtest.netease.com/)
-* 安装模拟器，并在模拟器上安装游戏APP，开启ADB调试，建议分辨率选960x540.
-* * 其他分辨率本脚本也可以运行。
-* 用AirTest直接打开object.py进点运行
+### 控制端的修改
+- **Windows无需修改**
+- **Linux和Mac上airtest提供的adb可能无法使用,需要修改**
+
+```
+#Linux(ARM)
+cndaqiang@oracle:~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux$ mv adb adb.bak
+cndaqiang@oracle:~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux$ ln -s /usr/bin/adb .
+#Mac
+chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
+```
+### 移动端的建议
+* 建议分辨率选960x540, 其他分辨率也可以运行
+
+
+### 下载本代码并配置
+
+* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
+* 如果你的默认设备不是`127.0.0.1:5555`,可以修改`wzry.py`中的`auto_airtest`函数中的`LINK_dict[0]=`，或者通过下面终端的方式指定手机的ip和端口。如果你有多个设备并希望进行组队，自行阅读`wzry.py`。
+* [可选]对于BlueStack和LDPlayer模拟器，脚本支持支持关闭、启动模拟器的功能, 替换`site-packages\airtest_mobileauto\control.py`中的
+`BlueStackdir`或`LDPlayerdir`即可。此外，还需要再脚本启动前，打开模拟器的多开管理器。
+* [可选]如果是`960x540`的分辨率，可以解压我的字典[example/字典.分路.android.var_dict_N.zip](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/raw/master/example/%E5%AD%97%E5%85%B8.%E5%88%86%E8%B7%AF.android.var_dict_N.zip)进行加速。详情阅读源代码与[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13#issuecomment-2205392546)
+
+
+## [推荐] 使用终端运行
+### a) Linux/Mac/Windows平台
+* 单设备 `python -u wzry.py`
+* n个设备`python -u wzry.py -n`
+* 按照实际情况修改`run.bat`, windows平台也可以双击`run.bat`运行
+
+### b) 自定义设备
+```
+#无线ADB调试设备
+python -u wzry.py "LINK=Android:///127.0.0.1:5555"
+#usb直连的设备
+python -u wzry.py "LINK=Android:///4e86ac13"
+```
+
+### c) 调试模式
+```
+# 单设备
+python -u wzry.py n 1 # n > 4
+# n个设备
+python -u wzry.py   0   n
+python -u wzry.py   1   n
+#...
+python -u wzry.py (n-1) n
+```
+
+
+## [不推荐]使用AirTestIDE软件运行
+* **可以单账户运行，但不推荐, 我只用AirTestIDE修改脚本的图片资源**
+* 下载地址[AirTestIDE](https://airtest.netease.com/), 配置python的路径
+* 用AirTest直接打开wzry.py进点运行
 
 ![Alt text](doc/LDplayer.png)
 ![Alt text](doc/airtestguirun.png)
 
-## [推荐]使用命令行运行
-### 控制端
 
-测试稳定平台: Windows/MacOS/Linux(x86)/Linux(aarch64)
+## 一些实例和运行截图
+* 重装了Windows系统, 记录了全新安装python+雷电模拟器使用本脚本控制王者荣耀的详细过程[Windows全新安装python、依赖+雷电模拟器](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1901771876)
+* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
+* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
+* [Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
 
-#### python依赖
+### 使用MacOS系统控制Iphone和Andriod容器进行组队人机对战
+![Alt text](doc/image.png)
 
-```
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  airtest
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  pathos
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  subprocess
-# 可选，针对windows平台ctrl+c杀不死python任务设计
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  keyboard
-```
+### 控制(0)账户进行模拟战,(1)账户正常5v5人机
+![Alt text](doc/monizhan.png)
 
-#### 控制端的修改
-Linux
+### 雷电模拟器:启动多开模拟器、多开组队
+![Alt text](doc/LDPlayer_zudui.png)
 
-```
-sudo apt-get install libgl1-mesa-glx
-```
+### BlueStack模拟器:启动多开模拟器、多开组队
+![Alt text](doc/Blue_zudui.png)
 
-Linux(ARM)
 
-```
-cndaqiang@oracle:~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux$ mv adb adb.bak
-cndaqiang@oracle:~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux$ ln -s /usr/bin/adb .
-```
 
-Mac
 
-```
-chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
-```
-
-### 使用终端运行
-* windows控制端, 推荐替换下面命令中的`object.py`为`run.py`
-* windows单账户可以点击`run.bat`运行
-
-```
-python -u object.py 2>&1 | tee result
-```
-指定设备运行
-```
-#无线ADB调试设备
-python -u object.py "LINK=Android:///127.0.0.1:5555"
-#usb直连的设备
-python -u object.py "LINK=Android:///4e86ac13"
-```
-
-n个进程模式
-
-```
-python -u object.py -n 2>&1 | tee result
-```
-
-分散执行n进程模式(适合调试报错)
-
-```
-#每个终端执行
-python -u object.py   0   n
-python -u object.py   1   n
-#...
-python -u object.py (n-1) n
-```
-debug模式
-```
-python -u object.py n 1 # n > 4
-```
-
-# 文件控制
-**通过在代码目录创建一些文件来动态调整代码的运行模式，可以实现自动切换分路、选择熟练度最低的英雄，进行王者模拟战等操作**
+# 高级功能
+* **通过在代码目录创建一些文件来动态调整代码的运行模式，可以实现自动切换分路、选择熟练度最低的英雄，进行王者模拟战等操作**
+* [文件控制运行示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13)
 
 ## 文件控制说明
-
 - 控制文件 `txt` 不参与仓库同步, 使用[实例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3)
 - **注：所有文件都默认采用UTF8格式编码**
+- 以最新代码为准, 下面的内容仅供参考。
 
 | 文件  | 功能  | 备注  |
 | :------------: | :------------: | :------------: |
@@ -153,41 +122,3 @@ python -u object.py n 1 # n > 4
 | `self.营地初始化FILE=prefix+".初始化.txt"=(mynode)王者营地.初始化.txt` | 王者营地领取礼物前注入代码, 适合临时活动[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059)| 用户创建
 | `self.营地需要登录FILE = prefix+".营地需要登录.txt"` | 营地账户推出后生成, 存在次文件不领取营地礼包 | 程序自动生成删除/用户创建删除
 | `self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成, 用户删除|
-
-
-### 文件控制运行示例
-[文件控制脚本功能](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13)
-
-
-
-# 备注
-## 刷王者的一些经验
-
-* 双号组队每周金币获取上限约9105
-* - 5v5和模拟战共用金币上限(0/4100)
-* - ~~六国远征、武道大会的金币不受前面限制平均(`(10个*6国*4次+5个*10局大会)*7天~2030`)~~
-* - 每日礼包(`挑战35*5*7+日任务150*7+周任务700~2975`)
-* - 信誉分影响金币上限
-* 如何快速获取货币:
-* - ~~六国远征、武道大会速度最快~~
-* - 触摸形式的5v5人机耗时但是金币也远大于挂机
-* - 模拟战也出现过即使最后一名, 金币也很多的情况
-* 模拟战等模式账户之前没有进行过/新赛季, 自己提前操作一下, 避免有变动
-* 自己手打**能力测试**时, 胜利/金牌可以获得600金币.不受每周金币获取限制
-* * 胜利方式: 选英雄走游走, 出肉. 刷阵营, 让对吗中路游走是奕星. 张良等弱势英雄, 对面不能有太多控制(甄姬).
-* * 对战难度是最近两个赛季的最高段位, 所以掉段位后手打
-
-## 一些调试截图
-### 使用MacOS系统控制Iphone和Andriod容器进行组队人机对战
-![Alt text](doc/image.png)
-
-### 控制(0)账户进行模拟战,(1)账户正常5v5人机
-![Alt text](doc/monizhan.png)
-
-### 雷电模拟器:启动多开模拟器、多开组队
-![Alt text](doc/LDPlayer_zudui.png)
-
-### BlueStack模拟器:启动多开模拟器、多开组队
-![Alt text](doc/Blue_zudui.png)
-
-
