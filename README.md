@@ -5,9 +5,6 @@
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)
 
 ### 运行方式
-```
-python run.py
-```
 更多细节见:[**Howto**](howtorun.md)
 
 ### 功能

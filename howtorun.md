@@ -2,7 +2,7 @@
 ## 准备工作
 * [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
 * 如果最近WZRY有特殊活动，图标有变化，可以看看我是否提供了[资源更新包](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/8)。<br>或者自己使用AirTestIDE修改对应的图片。
-* 安装依赖
+* 安装/升级依赖
 ```
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple  
 ```
