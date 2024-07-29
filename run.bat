@@ -1,3 +1,1 @@
-@echo off
-chcp 65001
-%USERPROFILE%\AppData\Local\anaconda3\python.exe wzry.py  %*
+%USERPROFILE%\AppData\Local\anaconda3\python.exe wzry.py  config.in

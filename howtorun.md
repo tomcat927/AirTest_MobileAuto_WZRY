@@ -1,124 +1,151 @@
 # 运行方法
 ## 准备工作
-### 依赖
-```
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  airtest_mobileauto
-# 单脚本控制多进程需要
-python -m pip  install -i https://pypi.tuna.tsinghua.edu.cn/simple  pathos
-```
-
-### 控制端的修改
-- **Windows无需修改**
-- **Linux和Mac上airtest提供的adb可能无法使用,需要修改**
-
-```
-#Linux(ARM)
-cndaqiang@oracle:~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux$ mv adb adb.bak
-cndaqiang@oracle:~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux$ ln -s /usr/bin/adb .
-#Mac
-chmod +x /Users/cndaqiang/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
-```
-### 移动端的建议
-* 建议分辨率选960x540, 其他分辨率也可以运行
-
-
-### 下载本代码并配置
-
 * [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
-* 如果你的默认设备不是`127.0.0.1:5555`,可以修改`wzry.py`中的`auto_airtest`函数中的`LINK_dict[0]=`，或者通过下面终端的方式指定手机的ip和端口。如果你有多个设备并希望进行组队，自行阅读`wzry.py`。
-* [可选]对于BlueStack和LDPlayer模拟器，脚本支持支持关闭、启动模拟器的功能, 替换`site-packages\airtest_mobileauto\control.py`中的
-`BlueStackdir`或`LDPlayerdir`即可。此外，还需要再脚本启动前，打开模拟器的多开管理器。
-* [可选]如果是`960x540`的分辨率，可以解压我的字典[example/字典.分路.android.var_dict_N.zip](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/raw/master/example/%E5%AD%97%E5%85%B8.%E5%88%86%E8%B7%AF.android.var_dict_N.zip)进行加速。详情阅读源代码与[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13#issuecomment-2205392546)
-
-
-## [推荐] 使用终端运行
-### a) Linux/Mac/Windows平台
-* 单设备 `python -u wzry.py`
-* n个设备`python -u wzry.py -n`
-* 按照实际情况修改`run.bat`, windows平台也可以双击`run.bat`运行
-
-### b) 自定义设备
+* 如果最近WZRY有特殊活动，图标有变化，可以看看我是否提供了[资源更新包](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/8)。<br>或者自己使用AirTestIDE修改对应的图片。
+* 安装依赖
 ```
-#无线ADB调试设备
-python -u wzry.py "LINK=Android:///127.0.0.1:5555"
-#usb直连的设备
-python -u wzry.py "LINK=Android:///4e86ac13"
+python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple  
 ```
-
-### c) 调试模式
+* **注**: ARM设备以及Mac上airtest提供的adb可能没有可执行权限，需要修改
 ```
-# 单设备
-python -u wzry.py n 1 # n > 4
-# n个设备
-python -u wzry.py   0   n
-python -u wzry.py   1   n
-#...
-python -u wzry.py (n-1) n
+#具体路劲根据你的环境修改
+#Linux(ARM)
+cd ~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux
+mv adb adb.bak
+ln -s /usr/bin/adb .
+#Mac
+chmod +x ~/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
 ```
-
-
-## [不推荐]使用AirTestIDE软件运行
-* **可以单账户运行，但不推荐, 我只用AirTestIDE修改脚本的图片资源**
-* 下载地址[AirTestIDE](https://airtest.netease.com/), 配置python的路径
-* 用AirTest直接打开wzry.py进点运行
-
+* 开启模拟器/手机的ADB调试。
+* * 建议采用`960x540`的分辨率，这样可以解压我的字典[example/字典.分路.android.var_dict_N.zip](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/raw/master/example/%E5%AD%97%E5%85%B8.%E5%88%86%E8%B7%AF.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13#issuecomment-2205392546)。你自己去生成字典也是可以的。
 ![Alt text](doc/LDplayer.png)
+
+
+## 运行方式
+### 终端运行
+```
+python -u wzry.py 配置文件
+```
+其中配置文件可以省略，默认单进程控制`127.0.0.1:5555`的安卓设备。
+配置文件支持的控制参数见[airtest-mobileauto](https://pypi.org/project/airtest-mobileauto/)，下面是一些配置文件示例
+
+* 控制usb连接的安卓手机
+```
+[client]
+LINK_dict = {
+    0: "Android:///4e86ac13"}
+```
+
+* 控制无线连接的安卓手机
+```
+[client]
+LINK_dict = {
+    0: "Android:///192.168.192.10:5555"}
+```
+
+* 控制两个安卓设备组队
+```
+[client]
+totalnode = 2
+# 多进程配置
+multiprocessing = True
+LINK_dict = {
+    0: "Android:///192.168.192.10:5555",
+    1: "Android:///4e86ac13"}
+```
+
+* 控制BlueStacks模拟器多开组队
+```
+[client]
+totalnode = 2
+# 不设置BlueStackdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
+BlueStackdir = "C:\Program Files\BlueStacks_nxt"
+# 多进程配置
+multiprocessing = True
+LINK_dict = {
+    0: "Android:///127.0.0.1:5555",
+    1: "Android:///127.0.0.1:5565"}
+```
+
+* 控制LDPlayer模拟器多开组队
+```
+[client]
+# 节点配置
+totalnode = 2
+# 不设置LDPlayerdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
+LDPlayerdir = "D:\GreenSoft\LDPlayer"
+# 多进程配置
+multiprocessing = True
+LINK_dict = {
+    0: "Android:///127.0.0.1:5555",
+    1: "Android:///127.0.0.1:5557"}
+```
+
+* Linux控制docker容器多开组队
+```
+# 节点配置
+totalnode = 3
+# 不设置dockercontain，脚本也可以正常运行。设置后支持容器的操作，7*24h运行时更省电
+# 我的容器名字为androidcontainX, X=0,1,2,..., 所以这里这样定义
+dockercontain="androidcontain"
+# 多进程配置
+multiprocessing = True
+LINK_dict = {
+    0: "Android:///127.0.0.1:5555",
+    1: "Android:///127.0.0.1:5565",
+    2: "Android:///127.0.0.1:5575"
+    }
+```
+
+### 使用AirTestIDE软件运行
+* **不推荐, 我只用AirTestIDE修改脚本的图片资源**
+* 下载地址[AirTestIDE](https://airtest.netease.com/), 配置python的路径
+* 用AirTest直接打开wzry.py
+* 如果要修改配置参数，请阅读wzry.py.
+* 点击运行
+
 ![Alt text](doc/airtestguirun.png)
 
-
-## 一些实例和运行截图
-* 重装了Windows系统, 记录了全新安装python+雷电模拟器使用本脚本控制王者荣耀的详细过程[Windows全新安装python、依赖+雷电模拟器](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1901771876)
-* [图形化控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890969863)
-* [全终端控制单台小米手机示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/5#issuecomment-1890967828)
-* [Android/IOS移动平台自动化脚本(基于AirTest)](https://cndaqiang.github.io/2023/11/10/MobileAuto/)
-
-### 使用MacOS系统控制Iphone和Andriod容器进行组队人机对战
-![Alt text](doc/image.png)
-
-### 控制(0)账户进行模拟战,(1)账户正常5v5人机
-![Alt text](doc/monizhan.png)
-
-### 雷电模拟器:启动多开模拟器、多开组队
-![Alt text](doc/LDPlayer_zudui.png)
-
-### BlueStack模拟器:启动多开模拟器、多开组队
-![Alt text](doc/Blue_zudui.png)
 
 
 
 
 # 高级功能
 * **通过在代码目录创建一些文件来动态调整代码的运行模式，可以实现自动切换分路、选择熟练度最低的英雄，进行王者模拟战等操作**
-* [文件控制运行示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13)
-
-## 文件控制说明
-- 控制文件 `txt` 不参与仓库同步, 使用[实例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3)
+* 控制文件 `txt` 不参与仓库同步, [文件控制运行示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13)
 - **注：所有文件都默认采用UTF8格式编码**
 - 以最新代码为准, 下面的内容仅供参考。
 
-| 文件  | 功能  | 备注  |
-| :------------: | :------------: | :------------: |
-| `self.结束游戏FILE="WZRY.ENDGAME.txt"` | 本局结束后关闭WZRYAPP, 同时结束对战循环  | 用户创建  |
-| `self.SLEEPFILE="WZRY.SLEEP.txt"` |  本局结束后 `sleep(5min)` 直到该文件被删除, 用于暂停代码, 手动进行抽奖领礼包  | 用户创建   |
-| `self.触摸对战FILE="WZRY.TOUCH.txt"` |在对战过程中尝试移动英雄和平A, 通过非挂机的检测判断金币更多. 注: 若前两行存在数字，则移动方向为对应数字 |用户创建 |
-| `self.标准模式触摸对战FILE="WZRY.标准模式TOUCH.txt" ` |使用标准模式对战, 并在对战过程中尝试移动英雄和平A, 用于满足一些任务对标准人机对战非挂机的检测判断 |用户创建 |
-| `self.临时组队FILE="WZRY.组队.txt"` | 仅适用于并行组队模式, 现在代码中组队模式仅在每天的前几个小时, 后面如果还想组队又不想重跑程序，可以通过创建该文件恢复组队模式| 用户创建|
-| `self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"` | 仅适用于并行组队模式, 如果某个账户被顶掉, 则关闭组队功能| 程序自动生成删除/用户创建删除|
-| `self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"` | 存在则进行青铜人机, 不存在则进行星耀人机|程序自动生成/用户创建
-| `self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"` | 存在则进行标准人机, 不存在则进行快速人机|用户创建
-| `self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"` | 仅适用于王者荣耀循环对战的开头插入任意自己想添加的代码, 例如更新图片的定义如`self.图片 = wzry_figure(prefix=self.prefix, Tool=self.Tool)`. 亦可在这里强制进行一些计算| 用户创建|
-| `self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"` | 在对战循环前再次修改配置, 初始化和对战前还是会自动计算相关参数, 这里强制覆盖提高自由度| 用户创建|
-| `self.重新设置英雄FILE=f"WZRY.{self.mynode}.重新设置英雄.txt"` |不修改代码和重启程序, 修改对战过程中使用的英雄, 内容见 `WZRY.node.重新设置英雄.py` , 通过控制 `savepos` 来决定是否更新字典  |用户创建 |
-| `sself.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"` |因为各种原因账户退出后, 程序自动创建, 若存在该文件则等待10min, 直到用户删除 |程序自动生成删除/用户创建删除 |
-| `var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt"` | 存储很多图片坐标点的文件, 减少图片识别时间, 删除后重新识别 | 程序自动生成|
-| `self.玉镖夺魁签到=os.path.exists("玉镖夺魁签到.txt")` |是否进行玉镖夺魁, 定期的活动|程序自动生成/用户创建
-| `self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"` |是否领取每日的免费商城礼包, 领完删除|程序自动生成删除/用户创建
-| `self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"` | 存在则在礼包结束后进行KPL观赛并领取赛事战令经验, 刷KPL战令, 可将数字填入该文件定义观赛时长 | 程序自动生成
-| `self.辅助同步文件 = "NeedRebarrier.txt"` | 同步工具, 单个进程出错创建所有进程重新初始化 | 程序自动生成/用户创建
-| `self.prefix+"NeedRebarrier.txt"` |本进程跳过所有任务, 回到循环开头, 重新初始化 |  程序出错自动生成/用户创建 |
-| `self.WZRYPIDFILE = f"WZRY.{self.mynode}.PID.txt"` |给本次运行的进程定义一个ID, 如果有新的进程也操纵这个设备, 则结束本进程 |程序自动生成|
-| `self.独立同步文件 = self.prefix+"NeedRebarrier.txt"` | 同步工具, 单个进程出错重新初始化 | 程序自动生成/用户创建
-|`self.图片更新FILE = "WZRY.图片更新.txt"`| 王者特殊活动时,大厅、对战、开始游戏等按钮会发生变化,用此文件更新，你可以按照自己[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059),我在一些活动时也会[更新图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/8) | 用户创建|
-| `self.营地初始化FILE=prefix+".初始化.txt"=(mynode)王者营地.初始化.txt` | 王者营地领取礼物前注入代码, 适合临时活动[修改图标](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/3#issuecomment-1926446059)| 用户创建
-| `self.营地需要登录FILE = prefix+".营地需要登录.txt"` | 营地账户推出后生成, 存在次文件不领取营地礼包 | 程序自动生成删除/用户创建删除
-| `self.prefix+"重新登录体验服.txt"` | 营地需要定期重新登录才可以兑换礼包| 程序生成, 用户删除|
+## 注入命令
+```
+self.prefix = f"({self.mynode})"
+self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
+self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
+self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
+```
+
+## 控制参数
+控制参数可以用上面注入命令的方式，也可以根据这些文件进行识别
+```
+self.结束游戏FILE = "WZRY.ENDGAME.txt"
+self.SLEEPFILE = "WZRY.SLEEP.txt"
+self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
+self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+self.临时组队FILE = "WZRY.组队.txt"
+```
+
+
+## 更新资源
+```
+self.图片更新FILE = "WZRY.图片更新.txt"
+```
+
+## 程序内部控制
+```
+self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
+self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
+self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
+self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
+```

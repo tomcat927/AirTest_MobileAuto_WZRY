@@ -1,12 +1,16 @@
 ## 王者荣耀脚本
+基于[AirTest](https://airtest.netease.com/)和[airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto)的王者荣耀日活脚本。
 
 ![GitHub forks](https://img.shields.io/github/forks/cndaqiang/AirTest_MobileAuto_WZRY?color=60c5ba&style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/AirTest_MobileAuto_WZRY?color=ffd700&style=for-the-badge)
 
-### 💻 运行方式
-🌟[**Howto**](howtorun.md)
+### 运行方式
+```
+python run.py
+```
+更多细节见:[**Howto**](howtorun.md)
 
-### Features
+### 功能
 
 * 全部自动化操作
 * - 自动开关机
@@ -46,7 +50,7 @@
 
 ## 致谢
 
-* ❤️ 本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目, 是我学习AirTest脚本的主要参考.
+* 本脚本大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目, 是我学习AirTest脚本最早的资料.
 * 本脚本的历史版本[WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11), [WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
 
 ## Star History

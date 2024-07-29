@@ -1,0 +1,22 @@
+[client]
+# 仅在单进程时有效
+mynode = 1
+# 多进程时，多进程的数目
+totalnode = 2
+
+# 多进程配置
+multiprocessing = True
+#BlueStackdir = "C:\Program Files\BlueStacks_nxt"
+#LDPlayerdir = "D:\GreenSoft\LDPlayer"
+#dockercontain="androidcontain"
+# LINK_dict 配置，这里使用 JSON 格式存储字典
+LINK_dict = {
+    0: "Android:///192.168.192.10:5555",
+    1: "Android:///192.168.192.10:5565",
+    2: "Android:///127.0.0.1:5555"}
+
+#
+[control]
+prefix="ttt"
+logger_level=0
+outputnode=0
