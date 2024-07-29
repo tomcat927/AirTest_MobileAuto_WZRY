@@ -4,7 +4,7 @@
 * 如果最近WZRY有特殊活动，图标有变化，可以看看我是否提供了[资源更新包](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/8)。<br>或者自己使用AirTestIDE修改对应的图片。
 * 安装/升级依赖
 ```
-python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple  
+python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple  --upgrade
 ```
 * **注**: ARM设备以及Mac上airtest提供的adb可能没有可执行权限，需要修改
 ```
@@ -86,12 +86,15 @@ LINK_dict = {
 # 节点配置
 totalnode = 3
 # 不设置dockercontain，脚本也可以正常运行。设置后支持容器的操作，7*24h运行时更省电
-# 我的容器名字为androidcontainX, X=0,1,2,..., 所以这里这样定义
-dockercontain="androidcontain"
+dockercontain = {
+    0: "androidcontain0.high",
+    1: "androidcontain1"}
+    2: "androidcontain2"}
+
 # 多进程配置
 multiprocessing = True
 LINK_dict = {
-    0: "Android:///127.0.0.1:5555",
+    0: "Android:///127.0.0.1:15555",
     1: "Android:///127.0.0.1:5565",
     2: "Android:///127.0.0.1:5575"
     }
