@@ -8,10 +8,13 @@ totalnode = 2
 multiprocessing = True
 #BlueStackdir = "C:\Program Files\BlueStacks_nxt"
 #LDPlayerdir = "D:\GreenSoft\LDPlayer"
-#dockercontain="androidcontain"
+#dockercontain = {
+#  0: "androidcontain0.high",
+#  1: "androidcontain1",
+#  2: "androidcontain2"}
 # LINK_dict 配置，这里使用 JSON 格式存储字典
 LINK_dict = {
-    0: "Android:///192.168.192.10:5555",
+    0: "Android:///192.168.192.10:15555",
     1: "Android:///192.168.192.10:5565",
     2: "Android:///127.0.0.1:5555"}
 
@@ -19,4 +22,5 @@ LINK_dict = {
 [control]
 prefix="ttt"
 logger_level=0
-outputnode=0
+#outputnode=0
+figdir=assets
