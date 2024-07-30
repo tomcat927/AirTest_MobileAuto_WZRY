@@ -18,14 +18,8 @@ except ImportError:
     except:
         print("安装失败")
         exit(1)
-
 import sys
 import os
-current_file_path = os.path.abspath(__file__)
-current_dir = os.path.dirname(current_file_path)
-# 假设静态图片文件夹
-static_dir = os.path.join(current_dir, 'assets')
-Settings.figdir = static_dir
 from wzyd import wzyd_libao
 
 
