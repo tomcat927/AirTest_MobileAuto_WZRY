@@ -1,7 +1,7 @@
 # 运行方法
 ## 准备工作
-* [下载最最新代码](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/releases)
-* 如果最近WZRY有特殊活动，图标有变化，可以看看我是否提供了[资源更新包](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/8)。<br>或者自己使用AirTestIDE修改对应的图片。
+* [下载最最新代码](releases)
+* 如果最近WZRY有特殊活动，图标有变化，可以看看我是否提供了[资源更新包](issues/8)。<br>或者自己使用AirTestIDE修改对应的图片。
 * 安装/升级依赖
 ```
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple  --upgrade
@@ -17,7 +17,7 @@ ln -s /usr/bin/adb .
 chmod +x ~/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
 ```
 * 开启模拟器/手机的ADB调试。
-* * 建议采用`960x540`的分辨率，这样可以解压我的字典[example/字典.分路.android.var_dict_N.zip](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/raw/master/example/%E5%AD%97%E5%85%B8.%E5%88%86%E8%B7%AF.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13#issuecomment-2205392546)。你自己去生成字典也是可以的。
+* * 建议采用`960x540`的分辨率，这样可以解压我的字典[example/字典.分路.android.var_dict_N.zip](raw/master/example/%E5%AD%97%E5%85%B8.%E5%88%86%E8%B7%AF.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](issues/13#issuecomment-2205392546)。你自己去生成字典也是可以的。
 ![Alt text](doc/LDplayer.png)
 
 
@@ -47,7 +47,6 @@ LINK_dict = {
 ```
 [client]
 totalnode = 2
-# 多进程配置
 multiprocessing = True
 LINK_dict = {
     0: "Android:///192.168.192.10:5555",
@@ -60,7 +59,6 @@ LINK_dict = {
 totalnode = 2
 # 不设置BlueStackdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
 BlueStackdir = "C:\Program Files\BlueStacks_nxt"
-# 多进程配置
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:5555",
@@ -74,7 +72,6 @@ LINK_dict = {
 totalnode = 2
 # 不设置LDPlayerdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
 LDPlayerdir = "D:\GreenSoft\LDPlayer"
-# 多进程配置
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:5555",
@@ -90,8 +87,6 @@ dockercontain = {
     0: "androidcontain0.high",
     1: "androidcontain1"}
     2: "androidcontain2"}
-
-# 多进程配置
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:15555",
@@ -115,7 +110,7 @@ LINK_dict = {
 
 # 高级功能
 * **通过在代码目录创建一些文件来动态调整代码的运行模式，可以实现自动切换分路、选择熟练度最低的英雄，进行王者模拟战等操作**
-* 控制文件 `txt` 不参与仓库同步, [文件控制运行示例](https://github.com/cndaqiang/AirTest_MobileAuto_WZRY/issues/13)
+* 控制文件 `txt` 不参与仓库同步, [文件控制运行示例](issues/13)
 - **注：所有文件都默认采用UTF8格式编码**
 - 以最新代码为准, 下面的内容仅供参考。
 
