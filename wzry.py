@@ -2630,7 +2630,7 @@ if __name__ == "__main__":
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
-    #
+    #如果使用AirTestIDE运行此脚本，在此处指定config_file=config文件
     #task_manager = TaskManager(config_file, None, None)
     task_manager = TaskManager(config_file, wzry_task, 'RUN')
     try:

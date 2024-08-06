@@ -58,7 +58,7 @@ LINK_dict = {
 [client]
 totalnode = 2
 # 不设置BlueStackdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
-BlueStackdir = "C:\Program Files\BlueStacks_nxt"
+BlueStackdir = C:\Program Files\BlueStacks_nxt
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:5555",
@@ -71,7 +71,7 @@ LINK_dict = {
 # 节点配置
 totalnode = 2
 # 不设置LDPlayerdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
-LDPlayerdir = "D:\GreenSoft\LDPlayer"
+LDPlayerdir = D:\GreenSoft\LDPlayer
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:5555",
