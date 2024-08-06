@@ -6,8 +6,9 @@ totalnode = 2
 
 # 多进程配置
 multiprocessing = True
-#BlueStackdir = "C:\Program Files\BlueStacks_nxt"
-#LDPlayerdir = "D:\GreenSoft\LDPlayer"
+#默认读入字符串, 不要添加引号
+#BlueStackdir = C:\Program Files\BlueStacks_nxt
+#LDPlayerdir = D:\GreenSoft\LDPlayer
 #dockercontain = {
 #  0: "androidcontain0.high",
 #  1: "androidcontain1",
