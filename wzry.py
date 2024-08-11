@@ -92,6 +92,10 @@ class wzry_figure:
         self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
         self.进入5v5匹配 = Template(r"tpl1689666019941.png", record_pos=(-0.401, 0.098), resolution=(960, 540))
         self.进入人机匹配 = Template(r"tpl1689666034409.png", record_pos=(0.056, 0.087), resolution=(960, 540))
+        # 回忆礼册
+        self.大厅回忆礼册 = Template(r"tpl1723334115249.png", record_pos=(0.206, 0.244), resolution=(960, 540))
+        self.礼册记忆碎片 = Template(r"tpl1723334128219.png", record_pos=(0.355, 0.222), resolution=(960, 540))
+
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), threshold=0.9))
@@ -1359,6 +1363,8 @@ class wzry_task:
                 self.玉镖夺魁()
             else:
                 TimeECHO("暂时不进行玉镖夺魁")
+            # 回忆礼册. 不知道这个礼包会存在多久
+            self.回忆礼册()
             # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
             self.每日礼包_邮件礼包()
             self.每日礼包_妲己礼物()
@@ -1402,6 +1408,48 @@ class wzry_task:
         self.Tool.existsTHENtouch(Template(r"tpl1700403218837.png", record_pos=(0.098, 0.117), resolution=(960, 540)), "确定")
         sleep(10)
         return
+
+    def 回忆礼册(self, times=0):
+        self.进入大厅()
+        # 本函数作为快速礼包的模板
+        # 其他函数都可以借鉴此函数的开头进行优化@todo
+        times = times+1
+        savepos = True
+        if times > 10:
+            return False
+        elif times < 4:  # 1,2,3
+            savepos = True
+        else:
+            savepos = False
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅回忆礼册", "礼册记忆碎片"])):
+                del self.Tool.var_dict[delstr]
+        if not self.Tool.existsTHENtouch(self.图片.大厅回忆礼册, "大厅回忆礼册", savepos=savepos):
+            return self.回忆礼册(times)
+        sleep(2)
+        if not self.Tool.existsTHENtouch(self.图片.礼册记忆碎片, "礼册记忆碎片", savepos=savepos):
+            return self.回忆礼册(times)
+        sleep(2)
+        金色一键领取 = Template(r"tpl1723334141060.png", record_pos=(0.294, 0.198), resolution=(960, 540))
+        灰色一键领取 = Template(r"tpl1723334811624.png", record_pos=(0.295, 0.2), resolution=(960, 540))
+        pos = exists(金色一键领取)
+        if not pos:
+            if not exists(灰色一键领取):
+                TimeECHO(f"{fun_name}.没检测到界面,{times}+1")
+                return self.回忆礼册(times)
+        self.Tool.var_dict["回忆礼册领取按钮"] = pos
+        self.Tool.existsTHENtouch(金色一键领取, "回忆礼册领取按钮", savepos=True)
+        # .....
+        # 下面的其实不用领取，手动去背包里领取也是可以的，因此下面的代码没进行充分测试
+        self.确定按钮()  # 只有一个蓝色确定按钮，这个函数会遍历确定按钮，会拖慢一点点速度，但是10s内能结束，因此不优化了
+        自动升级 = Template(r"tpl1723334201064.png", record_pos=(0.38, -0.242), resolution=(960, 540))
+        self.Tool.LoopTouch(自动升级, "礼册.自动升级", loop=12, savepos=False)
+        self.确定按钮()
+        关闭按钮 = Template(r"tpl1723334229790.png", record_pos=(0.361, -0.194), resolution=(960, 540))
+        返回按钮 = Template(r"tpl1723334241957.png", record_pos=(-0.439, -0.25), resolution=(960, 540))
+        self.Tool.existsTHENtouch(关闭按钮, "回忆礼册关闭按钮", savepos=True)
+        self.Tool.existsTHENtouch(返回按钮, "回忆礼册返回按钮", savepos=True)
+        return
+
     # @todo,其他活动一键领取
 
     def 商城免费礼包(self, times=1):
