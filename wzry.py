@@ -86,13 +86,19 @@ class wzry_figure:
         # 一些图库, 后期使用图片更新
         self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
-        self.大厅对战图标 = Template(r"tpl1720656866551.png", record_pos=(-0.107, 0.135), resolution=(960, 540))
-        self.大厅万象天工 = Template(r"tpl1719454683770.png", record_pos=(0.232, 0.144), resolution=(960, 540))
-        self.大厅排位赛 = Template(r"tpl1720065349345.png", record_pos=(0.102, 0.144), resolution=(960, 540))
+        self.大厅对战图标 = Template(r"tpl1723219359665.png", record_pos=(-0.122, 0.133), resolution=(960, 540))
+        self.大厅万象天工 = Template(r"tpl1723219381063.png", record_pos=(0.243, 0.14), resolution=(960, 540))
+        self.大厅排位赛 = Template(r"tpl1723219371045.png", record_pos=(0.127, 0.127), resolution=(960, 540))
         self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
+        self.进入5v5匹配 = Template(r"tpl1689666019941.png", record_pos=(-0.401, 0.098), resolution=(960, 540))
+        self.进入人机匹配 = Template(r"tpl1689666034409.png", record_pos=(0.056, 0.087), resolution=(960, 540))
+        # 回忆礼册
+        self.大厅回忆礼册 = Template(r"tpl1723334115249.png", record_pos=(0.206, 0.244), resolution=(960, 540))
+        self.礼册记忆碎片 = Template(r"tpl1723334128219.png", record_pos=(0.355, 0.222), resolution=(960, 540))
+
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
-        self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540),threshold=0.9))
+        self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), threshold=0.9))
         # 新年活动结束时,替换一个常规的取消准备按钮
         self.房间中的取消按钮图标 = []
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
@@ -439,7 +445,7 @@ class wzry_task:
         else:
             if self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=False):
                 TimeECHO(f"进入大厅超时退出,更新图片资源库")
-                self.图片 = wzry_figure( Tool=self.Tool)
+                self.图片 = wzry_figure(Tool=self.Tool)
                 TimeErr("进入大厅超时退出,创建同步文件")
                 if self.组队模式:
                     self.Tool.touch同步文件(self.Tool.辅助同步文件)
@@ -554,7 +560,7 @@ class wzry_task:
         TimeECHO(f"登录游戏{times}")
         if self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=False):
             TimeErr("登录游戏超时返回,更新图片资源库")
-            self.图片 = wzry_figure( Tool=self.Tool)
+            self.图片 = wzry_figure(Tool=self.Tool)
         #
         if exists(self.图片.网络不可用):
             TimeErr("网络不可用:需要重启设备")
@@ -722,19 +728,33 @@ class wzry_task:
             return True
         TimeECHO(f"进入大厅,开始{fun_name(1)}")
         if times == 1:
-            self.Tool.timelimit(timekey=f"单人进入人机匹配房间", limit=60*10, init=True)
+            self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=True)
+        if self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=False):
+            TimeErr(":单人进入人机匹配房间超时,touch同步文件")
+            if self.组队模式:
+                self.Tool.touch同步文件(self.Tool.辅助同步文件)
+            else:
+                self.Tool.touch同步文件(self.Tool.独立同步文件)
+            return True
         #
         times = times+1
-        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=False):
-            TimeErr("找不到大厅对战图标")
+        savepos = True
+        if times < 5:  # 2,3,4
+            savepos = True
+        else:
+            savepos = False
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷", "进入人机匹配"])):
+                del self.Tool.var_dict[delstr]
+        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=savepos):
             return self.单人进入人机匹配房间(times)
+        sleep(2)
+        if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=savepos):
+            return self.单人进入人机匹配房间(times)
+        sleep(2)
+        if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=savepos):
+            return self.单人进入人机匹配房间(times)
+        sleep(2)
         #
-        if not self.Tool.existsTHENtouch(Template(r"tpl1689666019941.png", record_pos=(-0.401, 0.098), resolution=(960, 540)), "5v5王者峡谷", savepos=False):
-            return self.单人进入人机匹配房间(times)
-        sleep(2)
-        if not self.Tool.existsTHENtouch(Template(r"tpl1689666034409.png", record_pos=(0.056, 0.087), resolution=(960, 540)), "人机", savepos=False):
-            return self.单人进入人机匹配房间(times)
-        sleep(2)
         # 暂时不修改 self.选择人机模式=False
         # 不在这里根据青铜段位文件判断,而是在上层调用之前设置self.青铜段位
         段位key = "青铜段位" if self.青铜段位 else "星耀段位"
@@ -799,13 +819,6 @@ class wzry_task:
                 sleep(20)
                 if self.Tool.existsTHENtouch(开始练习, "开始练习"):
                     sleep(10)
-                if self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=False):
-                    TimeErr(":单人进入人机匹配房间超时,touch同步文件")
-                    if self.组队模式:
-                        self.Tool.touch同步文件(self.Tool.辅助同步文件)
-                    else:
-                        self.Tool.touch同步文件(self.Tool.独立同步文件)
-                    return True
             return self.单人进入人机匹配房间(times)
         return True
 
@@ -1350,6 +1363,8 @@ class wzry_task:
                 self.玉镖夺魁()
             else:
                 TimeECHO("暂时不进行玉镖夺魁")
+            # 回忆礼册. 不知道这个礼包会存在多久
+            self.回忆礼册()
             # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
             self.每日礼包_邮件礼包()
             self.每日礼包_妲己礼物()
@@ -1393,6 +1408,48 @@ class wzry_task:
         self.Tool.existsTHENtouch(Template(r"tpl1700403218837.png", record_pos=(0.098, 0.117), resolution=(960, 540)), "确定")
         sleep(10)
         return
+
+    def 回忆礼册(self, times=0):
+        self.进入大厅()
+        # 本函数作为快速礼包的模板
+        # 其他函数都可以借鉴此函数的开头进行优化@todo
+        times = times+1
+        savepos = True
+        if times > 10:
+            return False
+        elif times < 4:  # 1,2,3
+            savepos = True
+        else:
+            savepos = False
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅回忆礼册", "礼册记忆碎片"])):
+                del self.Tool.var_dict[delstr]
+        if not self.Tool.existsTHENtouch(self.图片.大厅回忆礼册, "大厅回忆礼册", savepos=savepos):
+            return self.回忆礼册(times)
+        sleep(2)
+        if not self.Tool.existsTHENtouch(self.图片.礼册记忆碎片, "礼册记忆碎片", savepos=savepos):
+            return self.回忆礼册(times)
+        sleep(2)
+        金色一键领取 = Template(r"tpl1723334141060.png", record_pos=(0.294, 0.198), resolution=(960, 540))
+        灰色一键领取 = Template(r"tpl1723334811624.png", record_pos=(0.295, 0.2), resolution=(960, 540))
+        pos = exists(金色一键领取)
+        if not pos:
+            if not exists(灰色一键领取):
+                TimeECHO(f"{fun_name}.没检测到界面,{times}+1")
+                return self.回忆礼册(times)
+        self.Tool.var_dict["回忆礼册领取按钮"] = pos
+        self.Tool.existsTHENtouch(金色一键领取, "回忆礼册领取按钮", savepos=True)
+        # .....
+        # 下面的其实不用领取，手动去背包里领取也是可以的，因此下面的代码没进行充分测试
+        self.确定按钮()  # 只有一个蓝色确定按钮，这个函数会遍历确定按钮，会拖慢一点点速度，但是10s内能结束，因此不优化了
+        自动升级 = Template(r"tpl1723334201064.png", record_pos=(0.38, -0.242), resolution=(960, 540))
+        self.Tool.LoopTouch(自动升级, "礼册.自动升级", loop=12, savepos=False)
+        self.确定按钮()
+        关闭按钮 = Template(r"tpl1723334229790.png", record_pos=(0.361, -0.194), resolution=(960, 540))
+        返回按钮 = Template(r"tpl1723334241957.png", record_pos=(-0.439, -0.25), resolution=(960, 540))
+        self.Tool.existsTHENtouch(关闭按钮, "回忆礼册关闭按钮", savepos=True)
+        self.Tool.existsTHENtouch(返回按钮, "回忆礼册返回按钮", savepos=True)
+        return
+
     # @todo,其他活动一键领取
 
     def 商城免费礼包(self, times=1):
@@ -2332,6 +2389,7 @@ class wzry_task:
         if self.房主:
             TimeECHO("<-"*10)
         #
+
     def RUN(self):  # 程序入口
         新的一天 = False
         while True:
@@ -2348,7 +2406,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # >>> 设备状态调整
             if self.Tool.存在同步文件():
-                self.图片 = wzry_figure( Tool=self.Tool)
+                self.图片 = wzry_figure(Tool=self.Tool)
             # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里同意处理
             if not self.check_run_status():
                 #
@@ -2484,7 +2542,7 @@ class wzry_task:
                     self.totalnode = self.totalnode_bak
                     self.Tool.touch同步文件()
                 # 更新图片
-                self.图片 = wzry_figure( Tool=self.Tool)
+                self.图片 = wzry_figure(Tool=self.Tool)
                 # 更新时间戳，不然容易，第一天刚开局同步出错直接去领礼包了
                 self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
                 self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
@@ -2603,7 +2661,7 @@ class wzry_task:
             self.本循环参数.printinfo()
             if not self.本循环参数.compare(self.上循环参数):
                 TimeECHO(f"上步计算参数不同,回到大厅重新初始化")
-                self.图片 = wzry_figure( Tool=self.Tool)
+                self.图片 = wzry_figure(Tool=self.Tool)
                 self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
@@ -2630,8 +2688,8 @@ if __name__ == "__main__":
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
-    #如果使用AirTestIDE运行此脚本，在此处指定config_file=config文件
-    #task_manager = TaskManager(config_file, None, None)
+    # 如果使用AirTestIDE运行此脚本，在此处指定config_file=config文件
+    # task_manager = TaskManager(config_file, None, None)
     task_manager = TaskManager(config_file, wzry_task, 'RUN')
     try:
         task_manager.execute()
@@ -2642,8 +2700,8 @@ if __name__ == "__main__":
         traceback.print_exc()
         # 这里可以放置清理代码
         logger.info("Cleaning up and exiting.")
-        #sys.exit()  # 确保程序退出
+        # sys.exit()  # 确保程序退出
     # 后面不能再跟其他指令，特别是exit()
     # 后面的命令会与task_manager.execute()中的多进程同时执行
 
-#sleep(50)
+# sleep(50)
