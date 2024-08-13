@@ -1120,8 +1120,8 @@ class wzry_task:
         while True:
             if not self.check_run_status():
                 return True
-            addtime = 60*15 if self.本循环参数.标准模式 else 0
-            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*15 + addtime, init=False):
+            addtime = 60*10 if self.本循环参数.标准模式 else 0
+            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 TimeErr("结束人机匹配时间超时")
                 if self.组队模式:
                     TimeErr("结束人机匹配时间超时 and 组队touch同步文件")
@@ -1130,7 +1130,6 @@ class wzry_task:
                 else:
                     self.Tool.touch同步文件(self.Tool.独立同步文件)
                     return
-                return self.进入大厅()
             加速对战 = False
             if self.触摸对战:
                 加速对战 = True
@@ -2620,6 +2619,8 @@ class wzry_task:
                     self.组队模式 = False
                     self.totalnode = 1
                     self.Tool.totalnode = 1
+                    # 避免时间差导致的时间判断失误
+                    self.Tool.touchfile(self.无法进行组队FILE, content=单人原因+组队原因)
             # ------------------------------------------------------------------------------
             # 运行前统一变量
             self.组队模式 = self.totalnode > 1
