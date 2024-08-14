@@ -170,8 +170,11 @@ class wzyd_libao:
         去直播间 = Template(r"tpl1717046024359.png", record_pos=(0.033, 0.119), resolution=(540, 960))
         for i in range(5):
             if self.Tool.existsTHENtouch(去直播间, "去直播间图标"):
-                sleep(50)
+                sleep(120)
                 return True
+            if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
+                TimeECHO(f"{keystr}{times}超时退出")
+                return False
         TimeECHO(f"没进入直播间")
         return self.营地任务_观看赛事(times)
 
@@ -256,14 +259,17 @@ class wzyd_libao:
             TimeECHO(f"找不到资讯入口图标")
             return self.营地任务_浏览资讯(times)
         点赞图标 = Template(r"tpl1717046512030.png", record_pos=(0.424, 0.02), resolution=(540, 960))
+        评论区 = Template(r"tpl1723599264627.png", record_pos=(0.115, 0.717), resolution=(540, 960))
         pos = self.Tool.var_dict["资讯入口图标"]
         # 开始滑动点赞
-        for i in range(100):
+        for i in range(180):
             sleep(1)
             if self.Tool.existsTHENtouch(点赞图标, "点赞图标", savepos=False):
                 sleep(0.5)
             else:
                 sleep(1)
+                if i % 15 == 0:
+                    self.Tool.existsTHENtouch(评论区, "评论区图标", savepos=False)
             TimeECHO(f"浏览资讯中{i}")
             swipe(pos, vector=[0.0, -0.5])
             if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
@@ -332,8 +338,16 @@ class wzyd_libao:
                 return self.营地战令经验(times)
         战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
         self.Tool.existsTHENtouch(战令任务, "战令任务", savepos=True)
+        sleep(10)
         一键领取 = Template(r"tpl1715610610922.png", record_pos=(0.337, -0.18), resolution=(540, 960))
         self.Tool.existsTHENtouch(一键领取, "一键领取战令经验", savepos=True)
+        sleep(5)
+        pos = exists(一键领取)
+        if pos:
+            TimeECHO("仍检测到一键领取战令经验，更新坐标中")
+            self.Tool.var_dict["一键领取战令经验"] = pos
+            self.Tool.existsTHENtouch(一键领取, "一键领取战令经验", savepos=True)
+            sleep(10)
 
     def 体验服礼物(self, times=1):
         #
@@ -527,5 +541,3 @@ class wzyd_libao:
         touch(奖励位置)
         self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
         self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
-
-
