@@ -260,8 +260,13 @@ class wzyd_libao:
             return self.营地任务_浏览资讯(times)
         点赞图标 = Template(r"tpl1717046512030.png", record_pos=(0.424, 0.02), resolution=(540, 960))
         评论区 = Template(r"tpl1723599264627.png", record_pos=(0.115, 0.717), resolution=(540, 960))
-        pos = self.Tool.var_dict["资讯入口图标"]
+        资讯页面元素 = [点赞图标, 评论区]
+        存在, 资讯页面元素 = self.Tool.存在任一张图(资讯页面元素, "营地.资讯页面元素")
+        if not 存在 and times < 4:
+            del self.Tool.var_dict["资讯入口图标"]
+            return self.营地任务_浏览资讯(times)
         # 开始滑动点赞
+        pos = self.Tool.var_dict["资讯入口图标"]
         for i in range(180):
             sleep(1)
             if self.Tool.existsTHENtouch(点赞图标, "点赞图标", savepos=False):
