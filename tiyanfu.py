@@ -156,9 +156,9 @@ class tiyanfu():
             leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
             if leftmin > 0:
                 TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
-                sleep(min(leftmin, 60)*60)
                 self.APPOB.关闭APP()
                 self.移动端.关闭设备()
+                sleep(min(leftmin, 60)*60)
                 continue
             times = times+1
             TimeECHO("="*10)
