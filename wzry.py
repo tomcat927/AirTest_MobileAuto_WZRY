@@ -568,7 +568,7 @@ class wzry_task:
             self.移动端.重启设备(10)
             if self.组队模式:
                 TimeErr("需要重启设备:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                self.Tool.touch同步文件(self.Tool.辅助同步文件,content=self.prefix+"需要重启设备:创建同步文件")
             else:
                 TimeECHO("需要重启设备:创建单节点同步")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
@@ -616,7 +616,7 @@ class wzry_task:
             #
             if self.组队模式:
                 TimeErr("需要重新登录:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                self.Tool.touch同步文件(self.Tool.辅助同步文件,content=self.prefix+"需要重新登录:创建同步文件")
             else:
                 TimeECHO("需要重新登录:创建单节点同步")
                 self.APPOB.重启APP(10*60)
@@ -2473,7 +2473,7 @@ class wzry_task:
             # 服务器5点刷新礼包和信誉积分等
             startclock = self.对战时间[0]
             endclock = self.对战时间[1]
-            while self.Tool.hour_in_span(startclock, endclock) > 0:
+            while self.Tool.hour_in_span(startclock, endclock) > 0 and not 新的一天:
                 if os.path.exists(self.只战一天FILE):
                     TimeECHO("="*20)
                     TimeECHO("只战一天, 领取礼包后退出")

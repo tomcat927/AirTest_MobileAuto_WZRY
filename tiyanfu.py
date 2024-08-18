@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+##################################
+# Author : cndaqiang             #
+# Update : 2024-08-18            #
+# Build  : 2024-08-18            #
+# What   : 更新登录体验服         #
+##################################
+try:
+    from airtest_mobileauto.control import *
+except ImportError:
+    print("模块[airtest_mobileauto]不存在, 尝试安装")
+    import pip
+
+    try:
+        pip.main(['install', 'airtest_mobileauto', '-i', 'https://pypi.tuna.tsinghua.edu.cn/simple'])
+    except:
+        print("安装失败")
+        exit(1)
+import sys
+
+
+class tiyanfu():
+    def __init__(self):
+        # device
+        self.mynode = Settings.mynode
+        self.totalnode = Settings.totalnode
+        self.LINK = Settings.LINK_dict[Settings.mynode]
+        self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
+        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.txt",
+                            mynode=self.mynode, totalnode=self.totalnode)
+        #
+        self.组队模式 = self.totalnode > 1
+        self.房主 = self.mynode == 0 or self.totalnode == 1
+        # prefix, 还用于创建读取一些特定的控制文件/代码
+        # prefix, 用于区分不同进程的字典文件中的图片位置，因为不同账户的位置可能又差异
+        self.prefix = f"({self.mynode})"
+        #
+        self.设备类型 = self.移动端.设备类型
+        self.APPID = "com.tencent.tmgp.sgamece"
+        self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
+        #
+        self.体验服初始化FILE = f"WZRY.ce.{self.mynode}.临时初始化.txt"
+        #
+        self.timelimit = 60*60*2.0
+        # 更新时间
+        self.对战时间 = [0.1, 23.9]
+
+    def run(self, times=0):
+        if not connect_status():
+            self.移动端.连接设备()
+        if times == 0:
+            self.Tool.timelimit(timekey="登录体验服", limit=self.timelimit, init=True)
+        if self.Tool.timelimit(timekey="登录体验服", limit=self.timelimit, init=False):
+            TimeECHO("登录体验服超时")
+            return
+        times = times + 1
+        self.APPOB.打开APP()
+        if times > 10 and times % 10 == 8:
+            self.APPOB.重启APP()
+        if times > 10 and times % 5 == 4:
+            self.APPOB.重启APP()
+
+        #
+        waittime = 10
+        # ------------------------------------------------------------------------------
+        run_class_command(self=self, command=self.Tool.readfile(self.体验服初始化FILE))
+        # ------------------------------------------------------------------------------
+        #
+        极简下载 = Template(r"tpl1723551085244.png", record_pos=(-0.008, -0.096), resolution=(960, 540), target_pos=6)
+        确定按钮 = Template(r"tpl1723551187946.png", record_pos=(-0.003, 0.122), resolution=(960, 540))
+        if self.Tool.existsTHENtouch(极简下载, "极简下载", savepos=False):
+            self.Tool.existsTHENtouch(确定按钮, "确定按钮", savepos=False)
+            sleep(waittime)
+        if self.Tool.existsTHENtouch(确定按钮, "确定按钮", savepos=False):
+            sleep(waittime)
+        #
+        退出更新图标 = Template(r"tpl1723551006031.png", record_pos=(-0.036, 0.196), resolution=(960, 540))
+        更新图标 = Template(r"tpl1723551024328.png", record_pos=(0.059, 0.199), resolution=(960, 540))
+        if exists(退出更新图标):
+            TimeECHO("检测到更新图标")
+            self.Tool.existsTHENtouch(更新图标, "更新图标", savepos=True)
+            sleep(waittime)
+        self.Tool.existsTHENtouch(更新图标, "更新图标", savepos=False)
+        # 更新中
+        更新中 = Template(r"tpl1723959879694.png", record_pos=(-0.358, 0.244), resolution=(960, 540))
+        if exists(更新中):
+            TimeECHO("正在更新中....")
+            sleep(waittime)
+        #
+        确定重启 = Template(r"tpl1723960034528.png", record_pos=(-0.001, 0.116), resolution=(960, 540))
+        if self.Tool.existsTHENtouch(确定重启, "体验服.确定重启", savepos=False):
+            TimeECHO("确定重启")
+            sleep(waittime)
+        #
+        self.安装元素 = []
+        self.安装元素.append(Template(r"tpl1723551109493.png", record_pos=(-0.349, -0.202), resolution=(960, 540)))
+        self.安装元素.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540)))
+        self.安装元素.append(Template(r"tpl1723551138518.png", record_pos=(-0.001, -0.033), resolution=(960, 540)))
+        self.安装元素.append(Template(r"tpl1723973068687.png", record_pos=(-0.017, -0.175), resolution=(960, 540)))
+        确定安装9 = Template(r"tpl1723973081723.png", record_pos=(-0.002, 0.157), resolution=(960, 540), target_pos=8)
+        安装界面, self.安装元素 = self.Tool.存在任一张图(self.安装元素, "体验服.安装元素")
+        确定安装 = Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6)
+        if 安装界面:
+            self.Tool.existsTHENtouch(确定安装, "确定安装", savepos=True)
+            self.Tool.existsTHENtouch(确定安装9, "确定安装9", savepos=True)
+            sleep(waittime)
+            self.APPOB.重启APP()
+        #
+        #
+        关闭界面 = Template(r"tpl1723551215061.png", record_pos=(0.323, -0.202), resolution=(960, 540))
+        关闭按钮 = Template(r"tpl1723551244924.png", record_pos=(0.425, -0.205), resolution=(960, 540))
+        if exists(关闭界面):
+            self.Tool.existsTHENtouch(关闭按钮, "关闭按钮", savepos=True)
+        self.Tool.existsTHENtouch(关闭按钮, "其他关闭按钮", savepos=False)
+        #
+        self.登录元素 = []
+        self.登录元素.append(Template(r"tpl1723551454028.png", record_pos=(0.0, -0.005), resolution=(960, 540)))
+        self.登录元素.append(Template(r"tpl1723960220809.png", record_pos=(-0.002, 0.128), resolution=(960, 540)))
+        self.登录元素.append(Template(r"tpl1723960588665.png", record_pos=(-0.107, 0.159), resolution=(960, 540)))
+        登录协议, self.登录元素 = self.Tool.存在任一张图(self.登录元素, "体验服.登录元素")
+        if 登录协议:
+            TimeECHO("检测到登录协议")
+            self.Tool.touchfile(f"WZRY.ce.{self.mynode}.重新登录.txt")
+            # 5 分钟后不行就退出
+            self.Tool.timedict["登录体验服"] = min(self.Tool.timedict["登录体验服"], time.time()-self.timelimit+60*5)
+        确定协议 = Template(r"tpl1723961775100.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
+        同意协议 = Template(r"tpl1723968991405.png", record_pos=(0.061, 0.097), resolution=(960, 540))
+        self.Tool.existsTHENtouch(确定协议, "确定协议", savepos=False)
+        self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=False)
+        #
+        开始游戏 = Template(r"tpl1723551226168.png", record_pos=(-0.003, 0.155), resolution=(960, 540))
+        if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
+            TimeECHO("检测到开始游戏")
+            sleep(waittime)
+        #
+        self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
+        #
+        self.大厅元素 = []
+        self.大厅元素.append(Template(r"tpl1723551269026.png", record_pos=(0.455, 0.203), resolution=(960, 540)))
+        self.大厅元素.append(Template(r"tpl1723551278162.png", record_pos=(-0.003, 0.142), resolution=(960, 540)))
+        self.大厅元素.append(Template(r"tpl1723551299495.png", record_pos=(-0.461, -0.249), resolution=(960, 540)))
+        self.大厅元素.append(Template(r"tpl1723551309461.png", record_pos=(0.354, -0.252), resolution=(960, 540)))
+        大厅中, self.大厅元素 = self.Tool.存在任一张图(self.大厅元素, "体验服.大厅元素")
+        if 大厅中:
+            return True
+        else:
+            return self.run(times)
+
+    def looprun(self, times=0):
+        times = times + 1
+        startclock = self.对战时间[0]
+        endclock = self.对战时间[1]
+        while True:
+            leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
+            if leftmin > 0:
+                TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
+                sleep(min(leftmin, 60)*60)
+                continue
+            times = times+1
+            TimeECHO("="*10)
+            self.run()
+            self.APPOB.关闭APP()
+            self.移动端.关闭设备()
+
+
+if __name__ == "__main__":
+    config_file = ""
+    if len(sys.argv) > 1:
+        config_file = str(sys.argv[1])
+    Settings.Config(config_file)
+    ce = tiyanfu()
+    ce.run()
+    ce.looprun()
+    exit()
