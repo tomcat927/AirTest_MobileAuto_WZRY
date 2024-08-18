@@ -45,7 +45,7 @@ class tiyanfu():
         #
         self.timelimit = 60*60*2.0
         # 更新时间
-        self.对战时间 = [0.1, 23.9]
+        self.对战时间 = [3.0, 4.0]
 
     def run(self, times=0):
         if not connect_status():
