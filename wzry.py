@@ -349,6 +349,7 @@ class wzry_task:
         self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
         self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
         self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
+        self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后领每日商城礼包
         self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
         # self.Tool.removefile(self.触摸对战FILE)
@@ -568,7 +569,7 @@ class wzry_task:
             self.移动端.重启设备(10)
             if self.组队模式:
                 TimeErr("需要重启设备:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件,content=self.prefix+"需要重启设备:创建同步文件")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=self.prefix+"需要重启设备:创建同步文件")
             else:
                 TimeECHO("需要重启设备:创建单节点同步")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
@@ -616,7 +617,7 @@ class wzry_task:
             #
             if self.组队模式:
                 TimeErr("需要重新登录:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件,content=self.prefix+"需要重新登录:创建同步文件")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=self.prefix+"需要重新登录:创建同步文件")
             else:
                 TimeECHO("需要重新登录:创建单节点同步")
                 self.APPOB.重启APP(10*60)
@@ -1336,6 +1337,8 @@ class wzry_task:
         if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
             self.每日礼包_王者营地()
         #
+        if os.path.exists(self.更新体验服FILE):
+            self.更新体验服FILE()
 
     def 王者礼包(self):
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
@@ -2076,6 +2079,15 @@ class wzry_task:
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
         return True
+        #
+
+    def 体验服更新(self):
+        from tiyanfu import tiyanfu
+        ce = tiyanfu()
+        ce.run()
+        ce.APPOB.关闭APP()
+        return True
+
 # 状态判断
 
     def 判断大厅中(self):
