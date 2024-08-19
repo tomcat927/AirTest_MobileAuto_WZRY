@@ -89,7 +89,7 @@ class tiyanfu():
             TimeECHO("正在更新中....")
             sleep(waittime)
         #
-        确定重启 = Template(r"tpl1723960034528.png", record_pos=(-0.001, 0.116), resolution=(960, 540))
+        确定重启 = Template(r"tpl1723960034528.png", record_pos=(-0.001, 0.116), resolution=(960, 540), threshold=0.9)
         if self.Tool.existsTHENtouch(确定重启, "体验服.确定重启", savepos=False):
             TimeECHO("确定重启")
             sleep(waittime)
@@ -99,12 +99,14 @@ class tiyanfu():
         self.安装元素.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540)))
         self.安装元素.append(Template(r"tpl1723551138518.png", record_pos=(-0.001, -0.033), resolution=(960, 540)))
         self.安装元素.append(Template(r"tpl1723973068687.png", record_pos=(-0.017, -0.175), resolution=(960, 540)))
-        确定安装9 = Template(r"tpl1723973081723.png", record_pos=(-0.002, 0.157), resolution=(960, 540), target_pos=8)
+        self.安装按钮 = []
+        self.安装按钮.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6))
+        self.安装按钮.append(Template(r"tpl1723993720207.png", record_pos=(-0.001, 0.18), resolution=(960, 540)))
+
         安装界面, self.安装元素 = self.Tool.存在任一张图(self.安装元素, "体验服.安装元素")
-        确定安装 = Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6)
         if 安装界面:
-            self.Tool.existsTHENtouch(确定安装, "确定安装", savepos=True)
-            self.Tool.existsTHENtouch(确定安装9, "确定安装9", savepos=True)
+            for i in self.安装按钮:
+                self.Tool.existsTHENtouch(i, f"安装按钮{i}", savepos=False)
             sleep(waittime)
             self.APPOB.重启APP()
         #
@@ -157,8 +159,7 @@ class tiyanfu():
             if leftmin > 0:
                 TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
                 self.APPOB.关闭APP()
-                self.移动端.关闭设备()
-                sleep(min(leftmin, 60)*60)
+                self.移动端.重启设备(leftmin*60)
                 continue
             times = times+1
             TimeECHO("="*10)
