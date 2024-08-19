@@ -1338,7 +1338,7 @@ class wzry_task:
             self.每日礼包_王者营地()
         #
         if os.path.exists(self.更新体验服FILE):
-            self.更新体验服FILE()
+            self.体验服更新()
 
     def 王者礼包(self):
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
