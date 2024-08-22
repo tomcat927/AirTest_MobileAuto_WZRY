@@ -1580,19 +1580,13 @@ class wzry_task:
         夺魁页面元素.append(Template(r"tpl1724316089651.png", record_pos=(0.274, -0.045), resolution=(960, 540)))
         存在夺魁页面, 夺魁页面元素 = self.Tool.存在任一张图(夺魁页面元素, "夺魁页面")
         if not 存在夺魁页面:
-            # 随机点击
-            TimeECHO(f"玉镖夺魁: 随机点击")
-            for randomstr in list(self.Tool.var_dict.keys())[:5]:
-                self.Tool.existsTHENtouch(玉镖夺魁入口, randomstr, savepos=True)
-                sleep(2)
+            self.Tool.LoopTouch(玉镖夺魁入口, "玉镖夺魁入口", savepos=True, loop=5)
         #
-        if not self.Tool.existsTHENtouch(玉镖夺魁入口, "玉镖夺魁入口", savepos=True):
-            return self.玉镖夺魁(times)
         存在夺魁页面, 夺魁页面元素 = self.Tool.存在任一张图(夺魁页面元素, "夺魁页面")
         if not 存在夺魁页面:
             return self.玉镖夺魁(times)
         # 王者本次更新，会自动领取，不用手动点击加号
-        TimeECHO("开始签到夺标")
+        TimeECHO("开始领夺魁币")
         #
         领取加号 = []
         领取加号.append(Template(r"tpl1700803174309.png", record_pos=(0.227, -0.21), resolution=(960, 540), target_pos=2))
