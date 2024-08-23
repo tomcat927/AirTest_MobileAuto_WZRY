@@ -2068,7 +2068,10 @@ class wzry_task:
             else:
                 TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
                 return True
-
+        elif self.当前界面 == "房间中":
+            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在大厅状态")
+                return False
         存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
         #
         if 存在:
@@ -2089,6 +2092,10 @@ class wzry_task:
             else:
                 TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
                 return True
+        elif self.当前界面 == "对战中":
+            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在房间状态")
+                return False
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         if 存在:
             # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
@@ -2131,6 +2138,10 @@ class wzry_task:
             else:
                 TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
                 对战中 = True
+        elif self.当前界面 == "大厅中":
+            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在对战状态")
+                return False
         if not 对战中:
             对战中, self.图片.对战图片元素 = self.Tool.存在任一张图(self.图片.对战图片元素, "对战图片元素")
             if 对战中:
