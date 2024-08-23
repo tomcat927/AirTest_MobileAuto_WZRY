@@ -1327,6 +1327,7 @@ class wzry_task:
         if 强制领取:
             self.Tool.timedict["领游戏礼包"] = 0
             self.Tool.timedict["领营地礼包"] = 0
+            self.Tool.timedict["体验服更新"] = 0
         #
         # 王者APP礼包
         self.王者礼包()
@@ -2045,11 +2046,17 @@ class wzry_task:
         #
 
     def 体验服更新(self):
-        from tiyanfu import tiyanfu
-        ce = tiyanfu()
-        ce.run()
-        ce.APPOB.关闭APP()
-        return True
+        if self.Tool.timelimit("体验服更新", limit=60*60*3, init=False):
+            self.APPOB.关闭APP()
+            from tiyanfu import tiyanfu
+            ce = tiyanfu()
+            ce.run()
+            ce.APPOB.关闭APP()
+            self.APPOB.打开APP()
+            return True
+        else:
+            TimeECHO("时间太短,暂时不体验服更新")
+            return False
 
 # 状态判断
 
@@ -2542,6 +2549,7 @@ class wzry_task:
                 # 更新时间戳，不然容易，第一天刚开局同步出错直接去领礼包了
                 self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
                 self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
+                self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
                 continue
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了

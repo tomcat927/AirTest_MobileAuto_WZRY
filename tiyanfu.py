@@ -134,8 +134,10 @@ class tiyanfu():
         #
         开始游戏 = Template(r"tpl1723551226168.png", record_pos=(-0.003, 0.155), resolution=(960, 540))
         if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
-            TimeECHO("检测到开始游戏")
             sleep(waittime)
+        if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
+            TimeECHO("还存在开始游戏，有可能体验服正在更新")
+            return False
         #
         self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
         #
