@@ -327,6 +327,10 @@ class wzyd_libao:
         战令入口 = Template(r"tpl1715609828196.png", record_pos=(0.209, -0.004), resolution=(540, 960))
         self.Tool.existsTHENtouch(战令入口, "战令入口", savepos=True)
         sleep(10)
+        重新登录 = Template(r"tpl1724463208462.png", record_pos=(0.0, -0.035), resolution=(540, 960))
+        if self.Tool.existsTHENtouch(重新登录, "重新登录"):
+            self.Tool.touchfile("重新登录营地战令.txt")
+            return
         #
         战令页面元素 = []
         战令页面元素.append(Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960)))
