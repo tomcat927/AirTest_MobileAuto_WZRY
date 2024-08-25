@@ -302,15 +302,6 @@ class wzry_task:
             sleep(self.mynode*5)
             self.Tool.touch同步文件(self.Tool.辅助同步文件)
             self.Tool.必须同步等待成功(self.mynode, self.totalnode, sleeptime=10)
-        # 检查连接状态以及退出
-        if self.totalnode_bak > 1:
-            if self.Tool.readstopfile():  # 这个只在多节点运行时会创建
-                self.Tool.stoptask()
-                return  # 就是结束
-        else:
-            if not connect_status():
-                TimeErr("连接不上设备. 退出")
-                return
         #
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
         #
