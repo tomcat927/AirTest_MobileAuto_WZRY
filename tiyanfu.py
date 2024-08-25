@@ -57,8 +57,6 @@ class tiyanfu():
             return
         times = times + 1
         self.APPOB.打开APP()
-        if times > 10 and times % 10 == 8:
-            self.APPOB.重启APP()
         if times > 10 and times % 5 == 4:
             self.APPOB.重启APP()
 
@@ -93,15 +91,20 @@ class tiyanfu():
         if self.Tool.existsTHENtouch(确定重启, "体验服.确定重启", savepos=False):
             TimeECHO("确定重启")
             sleep(waittime)
-        #
+        # MuMu模拟器的安装元素
+        MuMu安装 = Template(r"tpl1724563572426.png", record_pos=(-0.013, -0.005), resolution=(960, 540), target_pos=7)
         self.安装元素 = []
         self.安装元素.append(Template(r"tpl1723551109493.png", record_pos=(-0.349, -0.202), resolution=(960, 540)))
         self.安装元素.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540)))
         self.安装元素.append(Template(r"tpl1723551138518.png", record_pos=(-0.001, -0.033), resolution=(960, 540)))
         self.安装元素.append(Template(r"tpl1723973068687.png", record_pos=(-0.017, -0.175), resolution=(960, 540)))
+        self.安装元素.append(Template(r"tpl1724466523208.png", record_pos=(-0.005, -0.161), resolution=(960, 540)))
+        self.安装元素.append(MuMu安装)
         self.安装按钮 = []
         self.安装按钮.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6))
         self.安装按钮.append(Template(r"tpl1723993720207.png", record_pos=(-0.001, 0.18), resolution=(960, 540)))
+        self.安装按钮.append(Template(r"tpl1724466528191.png", record_pos=(0.075, 0.237), resolution=(960, 540)))
+        self.安装按钮.append(MuMu安装)
 
         安装界面, self.安装元素 = self.Tool.存在任一张图(self.安装元素, "体验服.安装元素")
         if 安装界面:
