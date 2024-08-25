@@ -2423,17 +2423,13 @@ class wzry_task:
                         self.APPOB.关闭APP()
                     # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在readstopfile）
                     self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode_bak,
-                                       同步文件=self.Tool.辅助同步文件, sleeptime=60*5)
+                                       同步文件=self.Tool.辅助同步文件, sleeptime=30)
                     if self.Tool.readstopfile():
                         self.Tool.stoptask()
                         return True
                 else:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
-                #
-                if not connect_status():
-                    sleep(60)
-                    continue
                 # 重置完成
                 if not self.组队模式:
                     if not self.王者营地礼包:
@@ -2442,7 +2438,10 @@ class wzry_task:
                         self.每日礼包_王者营地()
                 self.APPOB.重启APP(sleeptime=self.mynode*10+60)
                 self.登录游戏()
-            self.Tool.removefile(self.Tool.独立同步文件)
+                # 最后一次校验
+                if not self.check_run_status():
+                    sleep(20)
+                    continue
             #
             if os.path.exists(self.结束游戏FILE):
                 TimeECHO(f"检测到{self.结束游戏FILE}, stop")
