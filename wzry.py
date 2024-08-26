@@ -443,11 +443,12 @@ class wzry_task:
             if self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=False):
                 TimeECHO(f"进入大厅超时退出,更新图片资源库")
                 self.图片 = wzry_figure(Tool=self.Tool)
-                TimeErr("进入大厅超时退出,创建同步文件")
+                content = "进入大厅超时退出,创建同步文件"
+                TimeErr(content)
                 if self.组队模式:
-                    self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                    self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
                 else:
-                    self.Tool.touch同步文件(self.Tool.独立同步文件)
+                    self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
                 self.APPOB.重启APP(10)
                 return False
         # 次数上限
@@ -779,13 +780,14 @@ class wzry_task:
         sleep(10)
         禁赛提示 = Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
         if exists(禁赛提示):
-            TimeECHO("禁赛提示无法进行匹配")
+            content = "禁赛提示无法进行匹配"
+            TimeECHO(content)
             self.APPOB.重启APP(10)
             if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
                 return True
             else:
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
                 return True
         #
         # 段位限制
@@ -2302,11 +2304,13 @@ class wzry_task:
         if self.健康系统():
             self.APPOB.关闭APP()
             if self.组队模式:
-                TimeErr("组队情况检测到健康系统,所以touch同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                content = "组队情况检测到健康系统,所以touch同步文件"
+                TimeErr(content)
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
             else:
-                TimeErr("组队情况检测到健康系统,所以touch独立同步文件")
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+                content = "单人情况检测到健康系统,所以touch同步文件"
+                TimeErr(content)
+                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
                 self.APPOB.重启APP(60*5)
             return True
         else:
@@ -2315,9 +2319,10 @@ class wzry_task:
     def check_run_status(self):
         #
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
+            content = f"[{funs_name()}]失败:存在[{self.Tool.独立同步文件}]"
             if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
-            TimeECHO(f"[{funs_name()}]失败:存在[{self.Tool.独立同步文件}]")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+            TimeECHO(content)
             return False
         if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):
             TimeECHO(f"[{funs_name()}]:存在[{self.Tool.辅助同步文件}]")
@@ -2329,10 +2334,11 @@ class wzry_task:
             if connect_status():
                 return True
             # 单人模式创建同步文件后等待,组队模式则让全体返回
-            self.Tool.touch同步文件(self.Tool.独立同步文件)
+            content = f"[{funs_name()}]失败:无法connect"
+            self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
             if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
-            TimeECHO(f"[{funs_name()}]失败:无法connect")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+            TimeECHO(content)
             return False
         else:
             return True
@@ -2422,8 +2428,10 @@ class wzry_task:
                     if os.path.exists(self.Tool.辅助同步文件):
                         self.APPOB.关闭APP()
                     # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在readstopfile）
+                    content = self.Tool.readfile(self.Tool.辅助同步文件)[0]
+                    sleeptime = 5*60 if "健康系统" in content else 10
                     self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode_bak,
-                                       同步文件=self.Tool.辅助同步文件, sleeptime=30)
+                                       同步文件=self.Tool.辅助同步文件, sleeptime=sleeptime)
                     if self.Tool.readstopfile():
                         self.Tool.stoptask()
                         return True
