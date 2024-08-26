@@ -166,7 +166,7 @@ class tiyanfu():
             if leftmin > 0:
                 TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
                 self.APPOB.关闭APP()
-                self.移动端.重启设备(leftmin*60)
+                self.移动端.重启重连设备(leftmin*60)
                 continue
             times = times+1
             TimeECHO("="*10)

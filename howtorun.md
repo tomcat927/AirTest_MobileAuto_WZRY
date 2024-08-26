@@ -155,7 +155,6 @@ self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
 控制参数可以用上面注入命令的方式，也可以根据这些文件进行识别
 
 ```
-self.结束游戏FILE = "WZRY.ENDGAME.txt"
 self.只战一天FILE = "WZRY.oneday.txt" #对战只循环一天, 可使用系统的自动化任务指定运行的时间
 self.SLEEPFILE = "WZRY.SLEEP.txt"
 self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
@@ -163,6 +162,7 @@ self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该
 self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
 self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
 self.临时组队FILE = "WZRY.组队.txt"
+self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
 ```
 
 ## 更新资源

@@ -300,7 +300,7 @@ class wzry_task:
         # 强制同步
         if self.totalnode_bak > 1:
             sleep(self.mynode*5)
-            self.Tool.touch同步文件(self.Tool.辅助同步文件)
+            self.Tool.touch同步文件(self.Tool.辅助同步文件, "初始化强制同步")
             self.Tool.必须同步等待成功(self.mynode, self.totalnode, sleeptime=10)
         #
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
@@ -329,7 +329,6 @@ class wzry_task:
         self.对战结束返回房间 = True
         self.无法进行组队 = False
         # 对应的控制文件
-        self.结束游戏FILE = "WZRY.ENDGAME.txt"
         self.只战一天FILE = "WZRY.oneday.txt"
         self.SLEEPFILE = "WZRY.SLEEP.txt"
         self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
@@ -345,10 +344,8 @@ class wzry_task:
         self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
         self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
         self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后领每日商城礼包
-        self.Tool.removefile(self.结束游戏FILE)
         self.Tool.removefile(self.SLEEPFILE)
-        # self.Tool.removefile(self.触摸对战FILE)
-        # self.Tool.removefile(self.临时组队FILE)
+        self.Tool.removefile(self.无法进行组队FILE)
         # 这里的图片主要是一些图片列表，例如所有的大厅元素
         # 以及一些核心，公共的图片
         self.图片 = wzry_figure(Tool=self.Tool)
@@ -455,7 +452,7 @@ class wzry_task:
         if times % 4 == 0:
             # 新赛季频繁提示资源损坏，次数太多进不去，就重启设备：
             if times > 4:
-                self.移动端.重启设备(10)
+                self.移动端.重启重连设备(10)
             self.APPOB.重启APP(10)
             self.登录游戏()
         times = times+1
@@ -562,7 +559,7 @@ class wzry_task:
         #
         if exists(self.图片.网络不可用):
             TimeErr("网络不可用:需要重启设备")
-            self.移动端.重启设备(10)
+            self.移动端.重启重连设备(10)
             if self.组队模式:
                 TimeErr("需要重启设备:创建同步文件")
                 self.Tool.touch同步文件(self.Tool.辅助同步文件, content=self.prefix+"需要重启设备:创建同步文件")
@@ -943,7 +940,7 @@ class wzry_task:
             sleep(30)
             if self.判断大厅中():
                 TimeECHO("模拟战: 进入万象天工失败, 重启设备")
-                self.APPOB.重启APP()
+                self.APPOB.重启重连设备()
                 self.登录游戏()
                 return self.单人进入人机匹配房间_模拟战(times)
         #
@@ -1557,7 +1554,7 @@ class wzry_task:
         #
         self.进入大厅()
         if "大厅祈愿" not in self.Tool.var_dict.keys():
-            存在大厅祈愿, self.图片.大厅祈愿 = self.Tool.存在任一张图(self.图片.大厅祈愿, "大厅祈愿")
+            存在大厅祈愿, self.图片.大厅祈愿 = self.Tool.存在任一张图(self.图片.大厅祈愿, "大厅祈愿", savepos=True)
             if not 存在大厅祈愿:
                 TimeECHO(f"玉镖夺魁: 找不到祈愿入口")
                 return self.玉镖夺魁(times)
@@ -2175,7 +2172,7 @@ class wzry_task:
                 if 装备poskey in self.Tool.var_dict.keys():
                     装备pos = self.Tool.var_dict[装备poskey]
                 else:
-                    存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, "装备S元素")
+                    存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
                     装备 = self.图片.装备S[0]
                     if 存在装备图标:
                         self.Tool.existsTHENtouch(装备, 装备poskey, savepos=True)
@@ -2184,7 +2181,7 @@ class wzry_task:
                 if 移动poskey in self.Tool.var_dict.keys():
                     移动pos = self.Tool.var_dict[移动poskey]
                 else:
-                    存在移动图标, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, "移动S元素")
+                    存在移动图标, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, 移动poskey, savepos=True)
                     移动 = self.图片.移动S[0]
                     if 存在移动图标:
                         self.Tool.existsTHENtouch(移动, 移动poskey, savepos=True)
@@ -2193,7 +2190,7 @@ class wzry_task:
                 if 普攻poskey in self.Tool.var_dict.keys():
                     普攻pos = self.Tool.var_dict[普攻poskey]
                 else:
-                    存在普攻图标, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, "普攻S元素")
+                    存在普攻图标, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, 普攻poskey, savepos=True)
                     普攻 = self.图片.普攻S[0]
                     if 存在普攻图标:
                         self.Tool.existsTHENtouch(普攻, 普攻poskey, savepos=True)
@@ -2379,7 +2376,18 @@ class wzry_task:
         if self.房主:
             TimeECHO("<-"*10)
         #
+    #
 
+    def END(self, content=""):  # 立刻结束
+        TimeECHO("立刻结束程序END")
+        self.Tool.touchstopfile(content)
+        if self.totalnode_bak > 1:  # 让其他节点抓紧结束
+            self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+        self.APPOB.关闭APP()
+        self.移动端.关闭设备()
+        return
+
+    #
     def RUN(self):  # 程序入口
         新的一天 = False
         if os.path.exists(self.只战一天FILE):
@@ -2402,6 +2410,12 @@ class wzry_task:
             run_class_command(self=self, command=self.Tool.readfile(self.临时初始化FILE))
             # ------------------------------------------------------------------------------
             # >>> 设备状态调整
+            if self.Tool.stopnow():
+                return self.END()
+            if os.path.exists(self.无法进行组队FILE):
+                self.组队模式 = False
+                self.totalnode = 1
+            #
             if self.Tool.存在同步文件():
                 self.图片 = wzry_figure(Tool=self.Tool)
             # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里同意处理
@@ -2415,10 +2429,7 @@ class wzry_task:
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                         content = "连接不上设备. 所有节点全部准备终止"
                         TimeErr(content)
-                        self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
-                        self.Tool.touchfile(self.无法进行组队FILE)
-                        self.Tool.stoptask()
-                        self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+                        return self.END(content)
                     else:
                         TimeErr("连接不上设备. 退出")
                     return True
@@ -2427,14 +2438,16 @@ class wzry_task:
                 if self.totalnode_bak > 1:
                     if os.path.exists(self.Tool.辅助同步文件):
                         self.APPOB.关闭APP()
-                    # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在readstopfile）
+                    # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在stopfile）
                     content = self.Tool.readfile(self.Tool.辅助同步文件)[0]
+                    TimeECHO(f"辅助同步内容:{content}")
                     sleeptime = 5*60 if "健康系统" in content else 10
                     self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode_bak,
-                                       同步文件=self.Tool.辅助同步文件, sleeptime=sleeptime)
-                    if self.Tool.readstopfile():
-                        self.Tool.stoptask()
-                        return True
+                                       同步文件=self.Tool.辅助同步文件, 不再同步=self.无法进行组队FILE,
+                                       sleeptime=sleeptime)
+                    if os.path.exists(self.无法进行组队FILE):
+                        self.组队模式 = False
+                        self.totalnode = 1
                 else:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
@@ -2451,10 +2464,8 @@ class wzry_task:
                     sleep(20)
                     continue
             #
-            if os.path.exists(self.结束游戏FILE):
-                TimeECHO(f"检测到{self.结束游戏FILE}, stop")
-                self.APPOB.关闭APP()
-                return
+            if self.Tool.stopnow():
+                return self.END()
             #
             while os.path.exists(self.SLEEPFILE):
                 TimeECHO(f"检测到{self.SLEEPFILE}, sleep(5min)")
@@ -2475,6 +2486,8 @@ class wzry_task:
                     TimeECHO("="*20)
                     return
                 #
+                # 万一其他节点因为bug卡在barrier,这里让他们别卡了
+                self.Tool.touchfile(self.无法进行组队FILE)
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if leftmin < 10:
@@ -2493,11 +2506,11 @@ class wzry_task:
                 新的一天 = True
                 #
                 # 避免还存在其他进行没有同步完成的情况
-                head = ".tmp.night."
-                foot = ".txt"
-                upfile = f"{head}{self.myPID}.{self.mynode-1}.{foot}"
-                dnfile = f"{head}{self.myPID}.{self.mynode}.{foot}"
-                fifile = f"{head}{self.myPID}.{self.totalnode_bak-1}.{foot}"
+                head = ".tmp.night"
+                foot = "txt"
+                upfile = f"{head}.{self.myPID}.{self.mynode-1}.{foot}"
+                dnfile = f"{head}.{self.myPID}.{self.mynode}.{foot}"
+                fifile = f"{head}.{self.myPID}.{self.totalnode_bak-1}.{foot}"
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 if leftmin > 60 and self.totalnode_bak > 1:
                     self.APPOB.关闭APP()
