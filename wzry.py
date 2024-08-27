@@ -109,6 +109,7 @@ class wzry_figure:
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅万象天工)
+        self.大厅元素.append(self.大厅排位赛)
         self.房间元素 = []
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
@@ -333,7 +334,7 @@ class wzry_task:
         # 图片初始化，这里的图片主要是一些图片列表，例如所有的大厅元素
         self.图片 = wzry_figure(Tool=self.Tool)
         分路长度 = len(self.图片.参战英雄线路_dict)
-        self.shiftnode = 0 if init else self.对战模式
+        self.shiftnode = 0 if init else self.shiftnode
         self.参战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+0+self.shiftnode) % 分路长度]
         self.参战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+0+self.shiftnode) % 分路长度]
         self.备战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+3+self.shiftnode) % 分路长度]
@@ -355,7 +356,7 @@ class wzry_task:
         self.组队模式 = self.totalnode > 1
         self.房主 = self.mynode == 0 or self.totalnode == 1
         self.对战模式 = "5v5匹配" if init else self.对战模式
-        self.对战时间 = [0.1, 23.9] if init else self.对战模式
+        self.对战时间 = [0.1, 23.9] if init else self.对战时间
         self.限时组队时间 = 23 if init else self.限时组队时间
         self.runstep = 0 if init else self.runstep
         self.jinristep = 0
@@ -415,6 +416,9 @@ class wzry_task:
         # 这个循环仅作为识别关闭按钮位置的循环
         # 主要用于: self.进入大厅时遇到的复杂的关闭按钮()
         self.图片.王者登录关闭按钮 = self.Tool.uniq_Template_array(self.图片.王者登录关闭按钮)
+        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
+        if not 存在:
+            return
         for i in self.图片.王者登录关闭按钮:
             keyindex = f"王者登陆关闭按钮{i}"
             # if keyindex in self.Tool.var_dict.keys(): continue
