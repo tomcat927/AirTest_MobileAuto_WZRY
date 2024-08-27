@@ -468,6 +468,7 @@ class wzry_task:
                 return False
         times = times+1
         TimeECHO(f"尝试进入大厅{times}")
+        self.APPOB.打开APP()
         if self.判断大厅中():
             return True
         # 次数上限
@@ -484,8 +485,8 @@ class wzry_task:
             关闭配件不支持 = Template(r"tpl1701523677678.png", record_pos=(-0.004, 0.051), resolution=(1136, 640))
             if exists(配件不支持):
                 self.Tool.existsTHENtouch(关闭配件不支持, "关闭配件不支持")
-        if self.判断大厅中():
-            return True
+            if self.判断大厅中():
+                return True
         if self.判断对战中():
             处理对战 = "模拟战" in self.对战模式
             if self.触摸对战:
@@ -516,8 +517,8 @@ class wzry_task:
         显示设置 = Template(r"tpl1694359268612.png", record_pos=(-0.002, 0.12), resolution=(960, 540))
         if exists(显示设置):
             self.Tool.existsTHENtouch(Template(r"tpl1694359275922.png", record_pos=(-0.113, 0.124), resolution=(960, 540)))
-        if self.判断大厅中():
-            return True
+            if self.判断大厅中():
+                return True
         #
         if not self.check_run_status():
             return True
@@ -529,10 +530,10 @@ class wzry_task:
         self.确定按钮()
         if exists(Template(r"tpl1693886922690.png", record_pos=(-0.005, 0.114), resolution=(960, 540))):
             self.Tool.existsTHENtouch(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)), "确定按钮")
-        if self.判断大厅中():
-            return True
-        if not self.check_run_status():
-            return True
+            if self.判断大厅中():
+                return True
+            if not self.check_run_status():
+                return True
         # 邀请
         if exists(Template(r"tpl1692951548745.png", record_pos=(0.005, 0.084), resolution=(960, 540))):
             关闭邀请 = Template(r"tpl1692951558377.png", record_pos=(0.253, -0.147), resolution=(960, 540), threshold=0.9)
@@ -643,6 +644,8 @@ class wzry_task:
             TimeECHO("关闭家长莫模式")
             touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
             sleep(5)
+        if self.判断大厅中():
+            return True
         # 现在打开可能会放一段视频，怎么跳过呢？使用0.1的精度测试一下.利用历史记录了
         随意点击 = self.图片.登录界面开始游戏图标
         self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
@@ -2486,6 +2489,7 @@ class wzry_task:
                     if os.path.exists(self.无法进行组队FILE):
                         self.组队模式 = False
                         self.totalnode = 1
+                        self.Tool.removefile(self.Tool.辅助同步文件)
                 else:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
