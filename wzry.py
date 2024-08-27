@@ -958,7 +958,7 @@ class wzry_task:
             sleep(30)
             if self.判断大厅中():
                 TimeECHO("模拟战: 进入万象天工失败, 重启设备")
-                self.APPOB.重启重连设备()
+                self.APPOB.重启APP()
                 self.登录游戏()
                 return self.单人进入人机匹配房间_模拟战(times)
         #
