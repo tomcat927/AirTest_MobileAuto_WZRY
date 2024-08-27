@@ -575,14 +575,14 @@ class wzry_task:
         TimeECHO(f"登录游戏{times}")
         #
         if exists(self.图片.网络不可用):
-            TimeErr("网络不可用:需要重启设备")
-            self.移动端.重启重连设备(10)
+            TimeErr("网络不可用,取消登录,需要重启设备")
             if self.组队模式:
                 TimeErr("需要重启设备:创建同步文件")
                 self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode})需要重启设备:创建同步文件")
             else:
                 TimeECHO("需要重启设备:创建单节点同步")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
+            return True
         # 更新公告
         if not self.check_run_status():
             return True
@@ -654,13 +654,19 @@ class wzry_task:
             return True
         #
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
+            检测到登录界面 = True
             sleep(10)
+        #
+        # ..................................................................................
+        # 第一次万一已经登录过了
+        if not 检测到登录界面 and times > 1:
+            return self.登录游戏(times, 检测到登录界面)
+        # ..................................................................................
         #
         # 健康系统直接重新同步
         if self.健康系统_常用命令():
             return True
         # 动态下载资源提示
-
         回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
         if exists(回归礼物):
             self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
@@ -672,7 +678,6 @@ class wzry_task:
             存在登录蓝色确定按钮, self.图片.蓝色确定按钮 = self.Tool.存在任一张图(self.图片.蓝色确定按钮, "登录蓝色确定按钮", savepos=True)
             if 存在登录蓝色确定按钮:
                 self.Tool.existsTHENtouch(self.图片.蓝色确定按钮[0], "登录蓝色确定按钮", savepos=True)
-        #
         self.关闭按钮()
         if self.判断大厅中():
             return True
