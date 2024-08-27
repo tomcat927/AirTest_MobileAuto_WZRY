@@ -447,9 +447,8 @@ class wzry_task:
         存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
         return 存在
 
-    def 进入大厅(self, times=1):
-        TimeECHO(f"尝试进入大厅{times}")
-        if times == 1:
+    def 进入大厅(self, times=0):
+        if times == 0:
             self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=True)
         else:
             if self.Tool.timelimit(timekey="进入大厅", limit=60*30, init=False):
@@ -463,14 +462,15 @@ class wzry_task:
                     self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
                 self.APPOB.重启APP(10)
                 return False
-        # 次数上限
-        if times % 4 == 0:
-            # 新赛季频繁提示资源损坏，次数太多进不去，就重启设备：
-            if times > 4:
-                self.移动端.重启重连设备(10)
-            self.APPOB.重启APP(10)
-            self.登录游戏()
         times = times+1
+        TimeECHO(f"尝试进入大厅{times}")
+        # 次数上限
+        if times % 4 == 3:
+            # 新赛季频繁提示资源损坏，次数太多进不去，就重启设备：
+            self.APPOB.重启APP(10)
+            if not self.登录游戏():
+                self.APPOB.重启APP(10)
+                return self.进入大厅(times)
         #
         if not self.check_run_status():
             return True
@@ -495,7 +495,9 @@ class wzry_task:
             self.结束人机匹配()
         #
         if exists(self.图片.登录界面开始游戏图标):
-            self.登录游戏()
+            if not self.登录游戏():
+                self.APPOB.重启APP(10)
+                return self.进入大厅(times)
         self.网络优化()
         # 各种异常，异常图标,比如网速不佳、画面设置、
         self.Tool.existsTHENtouch(Template(r"tpl1692951507865.png", record_pos=(-0.106, 0.12), resolution=(960, 540), threshold=0.9), "关闭画面设置")
@@ -541,7 +543,12 @@ class wzry_task:
             return True
         #
         self.APPOB.重启APP()
-        self.登录游戏()
+        if not self.登录游戏():
+            self.APPOB.重启APP(10)
+            return self.进入大厅(times)
+        #
+        if self.判断大厅中():
+            return True
         if not self.check_run_status():
             return True
         #
@@ -549,22 +556,30 @@ class wzry_task:
         if self.健康系统_常用命令():
             return True
 
-    def 登录游戏(self, times=1, 检测到登录界面=False):
-        if times == 1:
+    def 登录游戏(self, times=0, 检测到登录界面=False):
+        if times == 0:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
         times = times+1
         if not connect_status():
             self.Tool.touch同步文件(self.Tool.独立同步文件)
             return False
-        if times > 2 and not 检测到登录界面:
-            TimeErr(f"登录游戏:{times}次没有检测到登录界面,返回")
-        if times > 5:
-            TimeErr(f"登录游戏:{times}次登录成功,返回")
+        if times > 1 and not 检测到登录界面:
+            TimeErr(f"登录游戏:{times}次没有检测到登录界面")
+        #
+        if times % 4 == 3 or times > 4 or self.Tool.timelimit(timekey="登录游戏", limit=60*10, init=False):
+            TimeErr(f"登录游戏:{times}次登录失败,重启设备")
+            self.移动端.重启重连设备(10)
+            self.APPOB.重启APP()
+            self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
+            检测到登录界面 = False
+        elif times % 4 == 2 and not 检测到登录界面:
+            self.APPOB.重启APP()
+            检测到登录界面 = False
+        #
+        if times > 6:
+            TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
         TimeECHO(f"登录游戏{times}")
-        if self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=False):
-            TimeErr("登录游戏超时返回,更新图片资源库")
-            self.图片 = wzry_figure(Tool=self.Tool)
         #
         if exists(self.图片.网络不可用):
             TimeErr("网络不可用:需要重启设备")
