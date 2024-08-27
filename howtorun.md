@@ -142,40 +142,30 @@ LINK_dict = {
 * **注：所有文件都默认采用UTF8格式编码**
 * 以最新代码为准, 下面的内容仅供参考。
 
-## 注入命令
 
+## 控制参数
+控制参数决定软件的运行模式
+```
+self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
+self.今日休战FILE = "WZRY.tomorrow.txt"  # 今天不打了，明天开始，适合于离开办公室时运行脚本，但是不要执行任何命令，明天早上开始执行
+self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
+self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+self.临时组队FILE = "WZRY.组队.txt"
+self.玉镖夺魁签到FILE = "玉镖夺魁签到.txt"
+self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
+self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
+self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后登录体验服领取体验币
+```
+
+## 注入命令
+也可以通过python命令，直接修改计算参数和控制
 ```
 self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
 self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
 self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
 ```
 
-## 控制参数
-
-控制参数可以用上面注入命令的方式，也可以根据这些文件进行识别
-
-```
-self.只战一天FILE = "WZRY.oneday.txt" #对战只循环一天, 可使用系统的自动化任务指定运行的时间
-self.SLEEPFILE = "WZRY.SLEEP.txt"
-self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
-self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-self.临时组队FILE = "WZRY.组队.txt"
-self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
-```
-
 ## 更新资源
-
 ```
 self.图片更新FILE = "WZRY.图片更新.txt"
-```
-
-## 程序内部控制
-
-```
-self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
-self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
-self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
-self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
 ```

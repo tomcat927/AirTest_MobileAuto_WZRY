@@ -31,26 +31,26 @@ class wzry_runinfo:
         self.组队模式 = False
         self.房主 = True
         self.对战模式 = "5v5匹配"
+        self.对战时间 = [5.0, 23]
         self.限时组队时间 = 7
         self.runstep = -1
         self.jinristep = -1
         self.青铜段位 = False
         self.标准模式 = False
         self.触摸对战 = False
-        self.标准触摸对战 = False
 
     def printinfo(self):
         TimeECHO(f"RUNINFO")
         TimeECHO(f"\t 组队模式 = {str(self.组队模式)}")
         TimeECHO(f"\t 房主 = {str(self.房主)}")
         TimeECHO(f"\t 对战模式 = {str(self.对战模式)}")
-        TimeECHO(f"\t 限时组队时间 = {str(self.限时组队时间)}")
+        TimeECHO(f"\t 对战时间 = [{str(self.对战时间[0])},{str(self.对战时间[1])}]")
+        TimeECHO(f"\t 限时组队时间 = {str(round(self.限时组队时间,2))}")
         TimeECHO(f"\t runstep = {str(self.runstep)}")
         TimeECHO(f"\t jinristep = {str(self.jinristep)}")
         TimeECHO(f"\t 青铜段位 = {str(self.青铜段位)}")
         TimeECHO(f"\t 标准模式 = {str(self.标准模式)}")
         TimeECHO(f"\t 触摸对战 = {str(self.触摸对战)}")
-        TimeECHO(f"\t 标准触摸对战 = {str(self.标准触摸对战)}")
 
     def compare(self, other):
         if self.组队模式 != other.组队模式:
@@ -249,54 +249,38 @@ class wzry_task:
     # 需要传递中文时,由于精简后无法输入中文,在shell中建
     # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
 
-    def __init__(self, 对战模式="5v5匹配", shiftnode=0, debug=False, 限时组队时间=7):
+    def __init__(self):
         # device
         self.mynode = Settings.mynode
         self.totalnode = Settings.totalnode
+        self.totalnode_bak = self.totalnode
         self.LINK = Settings.LINK_dict[Settings.mynode]
+        #
+        # ------------------------------------------------------------------------------
+        # deviceOB
         self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
-        #
-        self.组队模式 = self.totalnode > 1
-        self.房主 = self.mynode == 0 or self.totalnode == 1
-        # prefix, 还用于创建读取一些特定的控制文件/代码
-        # prefix, 用于区分不同进程的字典文件中的图片位置，因为不同账户的位置可能又差异
-        self.prefix = f"({self.mynode})"
-        #
+        # APPOB
         self.设备类型 = self.移动端.设备类型
         self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
-        #
-        self.对战模式 = 对战模式  # "5v5匹配" or "王者模拟战"
-        self.debug = debug  # 本地调试模式,加速,测试所有功能
-        TimeECHO(f"对战模式:{self.对战模式}")
-        #
-        self.对战时间 = [5.1, 23]  # 单位hour,对战时间取N.m是为了让程序在N点时启动领取昨日没领完的礼包
-        # 当hour小于此数字时才是组队模式
-        self.限时组队时间 = 限时组队时间
-        self.totalnode_bak = self.totalnode
-        #
-        self.本循环参数 = wzry_runinfo()
-        self.上循环参数 = wzry_runinfo()
-
-        # <难度3蓝色,4紫色,5红色
-        self.选择英雄 = True
-        #
+        # Tool
         self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt",
-                            mynode=self.mynode, totalnode=self.totalnode, 容器优化=self.移动端.容器优化)
-        # 如果所有节点都清理文件会影响下面的同步等待的执行
+                            mynode=self.mynode, totalnode=self.totalnode)
+        self.房主 = self.mynode == 0 or self.totalnode == 1
         if self.房主:
             self.Tool.init_clean()
+        #
         # ------------------------------------------------------------------------------
         # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
         # 然后多节点进行同步后
-        # 再统一退出
+        # 再统一PID
         if not connect_status():
             self.移动端.连接设备()
             if not self.移动端.device:
                 TimeErr("连接不上设备. 待同步后退出")
                 if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                     self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
-        # ------------------------------------------------------------------------------
+        #
         # 强制同步
         if self.totalnode_bak > 1:
             sleep(self.mynode*5)
@@ -313,73 +297,104 @@ class wzry_task:
         self.Tool.touchfile(self.WZRYPIDFILE, content=self.myPID)
         TimeECHO(f": 本次运行PID:[{self.myPID}]")
         #
-        self.runstep = 0
+        # ------------------------------------------------------------------------------
+        # 对应的控制文件和参数的初始化
+        self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
+        self.今日休战FILE = "WZRY.tomorrow.txt"  # 今天不打了，明天开始，适合于离开办公室时运行脚本，但是不要执行任何命令，明天早上开始执行
+        self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
+        self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+        self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+        self.临时组队FILE = "WZRY.组队.txt"
+        self.玉镖夺魁签到FILE = "玉镖夺魁签到.txt"
+        self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
+        self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
+        self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后登录体验服领取体验币
+        # 注入命令的文件
+        self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
+        self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
+        self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
+        # 初始化需要删除的文件 or 内部文件
+        self.SLEEPFILE = "WZRY.SLEEP.txt"
+        self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
+        self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
+        self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
+        #
+        self.初始化(init=True)
+        # 自定义参数可以通过self.设置参数() 插入
+
+    #
+    # 从__init_摘过来的一些初始化命令，适用于每天的初始化
+    def 初始化(self, init=False):
+        # 清空文件
+        self.Tool.removefile(self.SLEEPFILE)
+        self.Tool.removefile(self.无法进行组队FILE)
+        self.Tool.removefile(self.青铜段位FILE)
+        self.Tool.removefile(self.重新登录FILE)
+        # 图片初始化，这里的图片主要是一些图片列表，例如所有的大厅元素
+        self.图片 = wzry_figure(Tool=self.Tool)
+        分路长度 = len(self.图片.参战英雄线路_dict)
+        self.shiftnode = 0 if init else self.对战模式
+        self.参战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+0+self.shiftnode) % 分路长度]
+        self.参战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+0+self.shiftnode) % 分路长度]
+        self.备战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+3+self.shiftnode) % 分路长度]
+        self.备战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+3+self.shiftnode) % 分路长度]
+        # 礼包初始化
+        self.每日礼包(初始化=True)
+        #
+        # 开发测试的参数
+        self.WZ新功能 = True    # 测试稳定版代码使用, 适用于赛季初，不同版本账户的功能界面不同时采用
+        self.debug = False if init else self.debug  # 测试开发版代码时使用
+        # 其他参数
+        self.totalnode = self.totalnode_bak
+        self.选择人机模式 = True  # 是否根据计算参数选择5v5的人机模式，不然就采用上一次的模式
+        self.选择英雄 = True    # 是否根据参数选择英雄，不然就选择上一次使用的英雄
+        self.对战结束返回房间 = True
+        self.无法进行组队 = False
+        #
+        # 参数列表初始化
+        self.组队模式 = self.totalnode > 1
+        self.房主 = self.mynode == 0 or self.totalnode == 1
+        self.对战模式 = "5v5匹配" if init else self.对战模式
+        self.对战时间 = [0.1, 23.9] if init else self.对战模式
+        self.限时组队时间 = 23 if init else self.限时组队时间
+        self.runstep = 0 if init else self.runstep
         self.jinristep = 0
+        self.青铜段位 = False
+        self.标准模式 = False
+        self.触摸对战 = False
+        # 备份参数，用于比较计算参数是否发生变化
+        self.本循环参数 = wzry_runinfo()
+        self.上循环参数 = wzry_runinfo()
+        self.构建循环参数(self.本循环参数)
+        self.构建循环参数(self.上循环参数)
+        #
+        # 某些加速模块的初始化
         # 如果已经判断在房间中了,短时间内执行相关函数，不再进行判断
         self.当前界面 = "未知"
         self.Tool.timelimit(timekey="当前界面", init=True)
 
-        # 控制参数
-        self.选择人机模式 = True
-        self.青铜段位 = False
-        self.标准模式 = False
-        self.触摸对战 = False
-        self.标准触摸对战 = False
-        self.WZ新功能 = True
-        self.对战结束返回房间 = True
-        self.无法进行组队 = False
-        # 对应的控制文件
-        self.只战一天FILE = "WZRY.oneday.txt"
-        self.SLEEPFILE = "WZRY.SLEEP.txt"
-        self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
-        self.标准模式触摸对战FILE = "WZRY.标准模式TOUCH.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-        self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-        self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-        self.临时组队FILE = "WZRY.组队.txt"
-        self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
-        self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
-        self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
-        self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
-        self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
-        self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
-        self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
-        self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后领每日商城礼包
-        self.Tool.removefile(self.SLEEPFILE)
-        self.Tool.removefile(self.无法进行组队FILE)
-        # 这里的图片主要是一些图片列表，例如所有的大厅元素
-        # 以及一些核心，公共的图片
-        self.图片 = wzry_figure(Tool=self.Tool)
-        分路长度 = len(self.图片.参战英雄线路_dict)
-        self.参战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+0+shiftnode) % 分路长度]
-        self.参战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+0+shiftnode) % 分路长度]
-        self.备战英雄线路 = self.图片.参战英雄线路_dict[(self.mynode+3+shiftnode) % 分路长度]
-        self.备战英雄头像 = self.图片.参战英雄头像_dict[(self.mynode+3+shiftnode) % 分路长度]
+    # 用不到，当二次开发调用wzry_task时, 可在init后，设置这个设置参数
+    def 设置参数(self, **kwargs):
+        if not kwargs:
+            return
         #
-        # 礼包设置
-        self.强制领取礼包 = True
-        self.王者营地礼包 = True
-        self.玉镖夺魁签到 = False
-        self.每日任务礼包 = True
-        # 刷新礼包的领取计时
-        self.王者营地 = wzyd_libao(设备类型=self.移动端.设备类型, 初始化检查=False)
-        self.每日礼包()
-        self.Tool.touchfile(self.免费商城礼包FILE)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        self.构建循环参数(self.本循环参数)
 
     # 保存运行信息
     def 构建循环参数(self, runinfo=None):
         if runinfo == None:
             runinfo = wzry_runinfo()
-        runinfo.组队模式 = self.组队模式
-        runinfo.房主 = self.房主
-        runinfo.对战模式 = self.对战模式
-        runinfo.限时组队时间 = self.限时组队时间
-        runinfo.runstep = self.runstep
-        runinfo.jinristep = self.jinristep
-        runinfo.青铜段位 = self.青铜段位
-        runinfo.标准模式 = self.标准模式
-        runinfo.触摸对战 = self.触摸对战
-        runinfo.标准触摸对战 = self.标准触摸对战
-        return runinfo
+        # 定义要复制的属性列表
+        attributes = [
+            '组队模式', '房主', '对战模式', '对战时间', '限时组队时间',
+            'runstep', 'jinristep', '青铜段位', '标准模式',
+            '触摸对战'
+        ]
+        # 使用 getattr 和 setattr 循环设置属性
+        for attr in attributes:
+            setattr(runinfo, attr, getattr(self, attr))
 
     # 网络优化提示
     def 网络优化(self):
@@ -468,15 +483,9 @@ class wzry_task:
             return True
         if self.判断对战中():
             处理对战 = "模拟战" in self.对战模式
-            if self.debug:
-                处理对战 = True
             if self.触摸对战:
                 处理对战 = True
             while self.判断对战中(处理对战):
-                if self.debug:
-                    TimeECHO("尝试进入大厅:对战中,直接重启APP")
-                    self.APPOB.重启APP(30)
-                    self.登录游戏()  # cndaqiang: debug专用
                 TimeECHO("尝试进入大厅:对战sleep")
                 sleep(15)  # sleep太久容易死
                 if self.Tool.timelimit(timekey="结束对战", limit=60*15, init=False):
@@ -562,7 +571,7 @@ class wzry_task:
             self.移动端.重启重连设备(10)
             if self.组队模式:
                 TimeErr("需要重启设备:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=self.prefix+"需要重启设备:创建同步文件")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode})需要重启设备:创建同步文件")
             else:
                 TimeECHO("需要重启设备:创建单节点同步")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
@@ -610,7 +619,7 @@ class wzry_task:
             #
             if self.组队模式:
                 TimeErr("需要重新登录:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=self.prefix+"需要重新登录:创建同步文件")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode})需要重新登录:创建同步文件")
             else:
                 TimeECHO("需要重新登录:创建单节点同步")
                 self.APPOB.重启APP(10*60)
@@ -746,8 +755,6 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
         sleep(2)
         #
-        # 暂时不修改 self.选择人机模式=False
-        # 不在这里根据青铜段位文件判断,而是在上层调用之前设置self.青铜段位
         段位key = "青铜段位" if self.青铜段位 else "星耀段位"
         if self.选择人机模式:
             TimeECHO("选择对战模式")
@@ -756,8 +763,6 @@ class wzry_task:
             匹配模式["快速模式"] = Template(r"tpl1689666057241.png", record_pos=(-0.308, -0.024), resolution=(960, 540))
             key = "快速模式"
             if self.标准模式:
-                key = "标准模式"
-            if self.标准触摸对战:
                 key = "标准模式"
             if not self.Tool.existsTHENtouch(匹配模式[key], key):
                 return self.单人进入人机匹配房间(times)
@@ -1086,8 +1091,6 @@ class wzry_task:
             else:
                 break
             if self.Tool.timelimit(timekey="加载游戏", limit=60*10, init=False):
-                if self.Tool.容器优化:
-                    break
                 TimeECHO("加载时间过长.....重启APP")
                 self.APPOB.重启APP(10)
                 self.登录游戏()
@@ -1310,7 +1313,21 @@ class wzry_task:
                 return
     #
 
-    def 每日礼包(self, 强制领取=False):
+    def 每日礼包(self, 强制领取=False, 初始化=False):
+        #
+        if 初始化:
+            # 刷新礼包的领取计时
+            self.王者营地 = wzyd_libao(设备类型=self.移动端.设备类型, 初始化检查=False)
+            self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
+            self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
+            self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
+            self.强制领取礼包 = True
+            self.王者营地礼包 = False  # 设为False则下次领营地时会自动判断
+            self.玉镖夺魁签到 = os.path.exists(self.玉镖夺魁签到FILE)
+            self.每日任务礼包 = True
+            self.Tool.touchfile(self.免费商城礼包FILE)
+            return
+        #
         if not self.check_run_status():
             return True
         #
@@ -1322,10 +1339,9 @@ class wzry_task:
         # 王者APP礼包
         self.王者礼包()
         #
-        # 营地礼包
-        if not self.王者营地礼包:
-            self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-        if self.王者营地礼包 and not self.组队模式:  # 组队时不打开王者营地,不同的节点进度不同
+        #
+        # 非组队模式或者强制领取时领取营地礼包
+        if 强制领取 or not self.组队模式:
             self.每日礼包_王者营地()
         #
         if os.path.exists(self.更新体验服FILE):
@@ -1352,7 +1368,6 @@ class wzry_task:
             if self.每日任务礼包:
                 self.每日礼包_每日任务()
             # 以前的活动
-            self.玉镖夺魁签到 = os.path.exists("玉镖夺魁签到.txt")
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
             else:
@@ -1698,6 +1713,13 @@ class wzry_task:
             self.APPOB.打开APP()
             return 初始化成功
         #
+        # 这里是为了筛选，营地是否可以正常进行
+        if not self.王者营地礼包:
+            self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
+        if not self.王者营地礼包:
+            TimeECHO(f"[{fun_name(1)}]营地礼包初始化失败，无法领取营地礼包")
+            return
+        #
         if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
             TimeECHO("时间太短,暂时不领取营地礼包")
             return False
@@ -1710,6 +1732,7 @@ class wzry_task:
             TimeECHO("王者营地礼包领取成功")
         else:
             TimeErr("王者营地礼包领取失败")
+            self.王者营地礼包 = False
         self.王者营地.STOP()  # 杀掉后台,提高王者、WDA活性
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
         #
@@ -2155,9 +2178,9 @@ class wzry_task:
         装备pos = False
         移动pos = False
         普攻pos = False
-        装备poskey = "装备pos"+self.prefix
-        移动poskey = "移动pos"+self.prefix
-        普攻poskey = "普攻pos"+self.prefix
+        装备poskey = f"装备pos({self.mynode})"
+        移动poskey = f"移动pos({self.mynode})"
+        普攻poskey = f"普攻pos({self.mynode})"
         # 不同账户出装位置不同,避免点击错误, 可以删除装备位置
         if 装备poskey in self.Tool.var_dict.keys():
             del self.Tool.var_dict[装备poskey]
@@ -2356,11 +2379,9 @@ class wzry_task:
         if not self.check_run_status():
             return
         加速对战 = False
-        if self.debug:
-            加速对战 = True
         if "模拟战" in self.对战模式:
             加速对战 = True
-        if self.标准触摸对战:
+        if self.触摸对战:
             加速对战 = True
         if self.判断对战中(加速对战):
             sleep(30)
@@ -2382,7 +2403,7 @@ class wzry_task:
         TimeECHO("立刻结束程序END")
         self.Tool.touchstopfile(content)
         if self.totalnode_bak > 1:  # 让其他节点抓紧结束
-            self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+            self.Tool.touchfile(self.无法进行组队FILE, content=content)
         self.APPOB.关闭APP()
         self.移动端.关闭设备()
         return
@@ -2432,7 +2453,7 @@ class wzry_task:
                         return self.END(content)
                     else:
                         TimeErr("连接不上设备. 退出")
-                    return True
+                        return True
                 #
                 # 如果个人能连上，检测是否有组队情况存在同步文件
                 if self.totalnode_bak > 1:
@@ -2453,10 +2474,7 @@ class wzry_task:
                 self.Tool.removefile(self.Tool.独立同步文件)
                 # 重置完成
                 if not self.组队模式:
-                    if not self.王者营地礼包:
-                        self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-                    if self.王者营地礼包:
-                        self.每日礼包_王者营地()
+                    self.每日礼包_王者营地()
                 self.APPOB.重启APP(sleeptime=self.mynode*10+60)
                 self.登录游戏()
                 # 最后一次校验
@@ -2476,34 +2494,34 @@ class wzry_task:
             startclock = self.对战时间[0]
             endclock = self.对战时间[1]
             while self.Tool.hour_in_span(startclock, endclock) > 0 and not 新的一天:
-                if os.path.exists(self.只战一天FILE):
+                # 万一其他节点因为bug卡在barrier,这里让他们别卡了
+                self.组队模式 = False
+                self.Tool.touchfile(self.无法进行组队FILE)
+                只战一天 = os.path.exists(self.只战一天FILE)
+                今日休战 = os.path.exists(self.今日休战FILE)
+                #
+                if 只战一天:
                     TimeECHO("="*20)
                     TimeECHO("只战一天, 领取礼包后退出")
                     self.Tool.touchfile(self.只战一天FILE, content=str(self.runstep))
                     self.每日礼包(强制领取=self.强制领取礼包)
-                    self.APPOB.关闭APP()
-                    self.移动端.关闭设备()
-                    TimeECHO("="*20)
-                    return
+                    return self.END("只战一天")
                 #
-                # 万一其他节点因为bug卡在barrier,这里让他们别卡了
-                self.Tool.touchfile(self.无法进行组队FILE)
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
-                if leftmin < 10:
+                新的一天 = True
+                #
+                if 今日休战:
+                    TimeECHO("今日休战，明天再战")
+                elif leftmin > 60:
+                    TimeECHO("夜间停止刷游戏前领取礼包")
+                    self.每日礼包(强制领取=self.强制领取礼包)
+                    self.APPOB.关闭APP()
+                elif leftmin < 10:
                     TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
                     sleep(leftmin*60)
                     新的一天 = True
                     continue
-                #
-                # 这里仅领礼包
-                # 在第二天的时候（新的一天=True）就不会执行这个命令了
-                if not 新的一天 and leftmin > 60:
-                    TimeECHO("夜间停止刷游戏前领取礼包")
-                    self.每日礼包(强制领取=self.强制领取礼包)
-                    # 关闭APP并SLEEP等待下一个时间周期
-                    self.APPOB.关闭APP()
-                新的一天 = True
                 #
                 # 避免还存在其他进行没有同步完成的情况
                 head = ".tmp.night"
@@ -2517,61 +2535,39 @@ class wzry_task:
                     self.Tool.removefile(upfile)
                     self.Tool.removefile(fifile)
                     self.Tool.removefiles(head=head, body=f".{self.mynode}.", foot=foot)
-                    for itmp in range(12):
+                    looptime = range(1, 11)
+                    timescale = 60.0/sum(looptime)
+                    for itmp in looptime:
                         TimeECHO(f"夜间已关闭APP, 检测是否有多账户同步残留.{itmp}")
                         if self.mynode == 0 or os.path.exists(upfile):
                             self.Tool.touchfile(dnfile)
                         if os.path.exists(fifile):
                             break
-                        if self.Tool.存在同步文件():
-                            break
-                        sleep(5*60)
+                        sleep(itmp*timescale*60)
                 #
                 # 计算休息时间
                 TimeECHO("准备休息")
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
-                if self.移动端.容器优化:
-                    leftmin = leftmin+self.mynode*1  # 这里的单位是分钟,每个node别差别太大
+                leftmin = leftmin+self.mynode*1.0  # 这里的单位是分钟,每个node别差别太大
                 TimeECHO("预计等待%d min ~ %3.2f h" % (leftmin, leftmin/60.0))
-                if self.debug:
-                    leftmin = 0.5
-                if leftmin > 60:
-                    self.APPOB.重启APP(leftmin*60)
-                else:
-                    sleep(leftmin*60)
+                self.APPOB.关闭APP()
+                self.移动端.重启重连设备(leftmin*60)
+                # 其他
+                self.Tool.removefile(self.今日休战FILE)
                 #
             if 新的一天:
                 TimeECHO(">>>>>>>>>>>>>>>新的一天>>>>>>>>>>>>>>>>>>>>")
                 新的一天 = False
                 if not connect_status():
                     self.移动端.连接设备()
-                self.jinristep = 0
-                self.WZ新功能 = True
-                self.本循环参数 = wzry_runinfo()
-                self.上循环参数 = wzry_runinfo()
-                self.选择人机模式 = True
-                self.青铜段位 = False
-                # 因为免费商城礼包每天只领取一次
-                self.Tool.touchfile(self.免费商城礼包FILE)
-                # 营地礼包初始化
-                self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-                self.Tool.removefile(self.青铜段位FILE)
-                self.Tool.removefile(self.重新登录FILE)
-                self.Tool.removefile(self.无法进行组队FILE)
+                # 参数、礼包、图片、文件等的初始化
+                self.初始化(init=False)
                 if self.totalnode_bak > 1:
                     TimeECHO(":新的一天创建同步文件进行初次校准")
-                    self.totalnode = self.totalnode_bak
                     self.Tool.touch同步文件(content="新的一天初始化")
-                    # 创建同步文件后，会自动重启APP与登录游戏
                 else:
                     self.APPOB.重启APP(20)
                     self.登录游戏()
-                # 更新图片
-                self.图片 = wzry_figure(Tool=self.Tool)
-                # 更新时间戳，不然容易，第一天刚开局同步出错直接去领礼包了
-                self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
-                self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
-                self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
                 continue
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
@@ -2653,7 +2649,6 @@ class wzry_task:
                 self.青铜段位 = os.path.exists(self.青铜段位FILE)
                 self.标准模式 = os.path.exists(self.标准模式FILE)
                 self.触摸对战 = os.path.exists(self.触摸对战FILE)
-                self.标准触摸对战 = os.path.exists(self.标准模式触摸对战FILE)
                 if self.组队模式 and not self.青铜段位:
                     TimeECHO(f"组队时采用青铜段位")
                     self.青铜段位 = True
@@ -2662,25 +2657,14 @@ class wzry_task:
                     if self.触摸对战:
                         TimeECHO(f"非青铜局不模拟人手触摸")
                         self.触摸对战 = False
-                    if self.标准触摸对战:
-                        TimeECHO(f"非青铜局不进行标准模式的人手触摸")
-                        self.标准触摸对战 = False
             if "5v5排位" == self.对战模式:
                 self.触摸对战 = os.path.exists(self.触摸对战FILE)
+                if self.触摸对战:
+                    TimeECHO(f"这是5v5排位, 小心你的信誉分啊喂")
+                    TimeECHO(f"5v5的游戏被你完成4v5了, 会被系统检测到的")
             # ------------------------------------------------------------------------------
             # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.对战前插入FILE",
             run_class_command(self=self, command=self.Tool.readfile(self.对战前插入FILE))
-            if "5v5匹配" == self.对战模式 or "5v5排位" == self.对战模式:
-                if self.标准触摸对战:
-                    self.标准模式 = True
-                    self.触摸对战 = True
-                if self.触摸对战:
-                    TimeECHO(f"本局对战:模拟人手触摸")
-                if self.标准模式 and "5v5匹配" == self.对战模式:
-                    TimeECHO(f"本局对战:使用标准模式")
-                if "5v5排位" == self.对战模式:
-                    TimeECHO(f"这是5v5排位, 小心你的信誉分啊喂")
-                    TimeECHO(f"5v5的游戏被你完成4v5了, 会被系统检测到的")
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
             # 后续程序的控制，仍采用 self.触摸对战等参数
