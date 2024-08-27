@@ -460,13 +460,14 @@ class wzry_task:
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
                 else:
                     self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
-                self.APPOB.重启APP(10)
+                    self.APPOB.重启APP(10)
                 return False
         times = times+1
         TimeECHO(f"尝试进入大厅{times}")
+        if self.判断大厅中():
+            return True
         # 次数上限
         if times % 4 == 3:
-            # 新赛季频繁提示资源损坏，次数太多进不去，就重启设备：
             self.APPOB.重启APP(10)
             if not self.登录游戏():
                 self.APPOB.重启APP(10)
@@ -539,22 +540,14 @@ class wzry_task:
         #
         if self.判断大厅中():
             return True
-        if not self.check_run_status():
-            return True
         #
-        self.APPOB.重启APP()
-        if not self.登录游戏():
-            self.APPOB.重启APP(10)
-            return self.进入大厅(times)
-        #
-        if self.判断大厅中():
-            return True
         if not self.check_run_status():
             return True
         #
         # 健康系统直接重新同步
         if self.健康系统_常用命令():
             return True
+        return self.进入大厅(times)
 
     def 登录游戏(self, times=0, 检测到登录界面=False):
         if times == 0:
