@@ -56,6 +56,7 @@ class tiyanfu():
             TimeECHO("登录体验服超时")
             return
         times = times + 1
+        TimeECHO(f"体验服更新中{times}")
         self.APPOB.打开APP()
         if times > 10 and times % 5 == 4:
             self.APPOB.重启APP()
@@ -100,13 +101,13 @@ class tiyanfu():
         self.安装元素.append(Template(r"tpl1723973068687.png", record_pos=(-0.017, -0.175), resolution=(960, 540)))
         self.安装元素.append(Template(r"tpl1724466523208.png", record_pos=(-0.005, -0.161), resolution=(960, 540)))
         self.安装元素.append(MuMu安装)
-        self.安装元素.append(Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540)))
+        self.安装元素.append(Template(r"tpl1724936641621.png", record_pos=(-0.142, -0.033), resolution=(960, 540)))
         self.安装按钮 = []
         self.安装按钮.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6))
         self.安装按钮.append(Template(r"tpl1723993720207.png", record_pos=(-0.001, 0.18), resolution=(960, 540)))
         self.安装按钮.append(Template(r"tpl1724466528191.png", record_pos=(0.075, 0.237), resolution=(960, 540)))
         self.安装按钮.append(MuMu安装)
-        self.安装按钮.append(Template(r"tpl1719742718808.png", record_pos=(0.394, -0.241), resolution=(960, 540)))
+        self.安装按钮.append(Template(r"tpl1724936646196.png", record_pos=(0.209, 0.051), resolution=(960, 540)))
 
         安装界面, self.安装元素 = self.Tool.存在任一张图(self.安装元素, "体验服.安装元素")
         if 安装界面:

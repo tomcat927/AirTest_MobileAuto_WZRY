@@ -139,8 +139,6 @@ class wzry_figure:
             self.对战图片元素.append(i)
         for i in self.移动S:
             self.对战图片元素.append(i)
-        # for i in self.装备S:
-        #     self.对战图片元素.append(i)
         self.对战图片元素.append(Template(r"tpl1719546803645.png", record_pos=(-0.005, 0.223), resolution=(960, 540)))
         #
         self.友方血条 = []
@@ -2092,6 +2090,8 @@ class wzry_task:
         if 存在:
             self.当前界面 == "战绩页面"
             self.Tool.timelimit(timekey="当前界面", init=True)
+        else:
+            self.当前界面 = "未知"
         return 存在
 
     def 判断大厅中(self):

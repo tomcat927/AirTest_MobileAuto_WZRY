@@ -298,6 +298,9 @@ class wzyd_libao:
             if 存在:
                 self.Tool.existsTHENtouch(点赞图标[0], "营地.点赞图标", savepos=True)
                 sleep(0.5)
+                if i % 15 == 0:
+                    swipe(pos, vector=[0.0, 0.5])
+                    self.Tool.existsTHENtouch(评论区, "评论区图标", savepos=False)
             else:
                 sleep(1)
                 if i % 15 == 0:
