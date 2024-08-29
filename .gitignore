@@ -1,4 +1,5 @@
 ./*.in
+*.txt
 untitled.air
 *.bak
 .vscode
@@ -17,7 +18,6 @@ result*
 __pycache__/
 *.py[cod]
 *$py.class
-*.txt
 
 # C extensions
 *.so

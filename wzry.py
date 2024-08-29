@@ -411,7 +411,7 @@ class wzry_task:
         for i in self.图片.金色确定按钮:
             确定按钮.append(i)
         确定按钮 = self.Tool.uniq_Template_array(确定按钮)
-        存在,  确定按钮 = self.Tool.存在任一张图(确定按钮, "确定按钮")
+        存在, 确定按钮 = self.Tool.存在任一张图(确定按钮, "确定按钮")
         if not 存在:
             return
         for i in 确定按钮:
@@ -1606,8 +1606,8 @@ class wzry_task:
                 del self.Tool.var_dict[delstr]
         #
         self.进入大厅()
-        del self.Tool.var_dict["大厅祈愿"]
         if "大厅祈愿" not in self.Tool.var_dict.keys():
+            # savepos 如果找到会自动替换上一次的字典
             存在大厅祈愿, self.图片.大厅祈愿 = self.Tool.存在任一张图(self.图片.大厅祈愿, "大厅祈愿", savepos=True)
             if not 存在大厅祈愿:
                 TimeECHO(f"玉镖夺魁: 找不到祈愿入口")
