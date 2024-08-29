@@ -563,9 +563,8 @@ class wzry_task:
         if times == 0:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
         times = times+1
-        if not connect_status():
-            self.Tool.touch同步文件(self.Tool.独立同步文件)
-            return False
+        if not self.check_run_status():
+            return True
         if times > 1 and not 检测到登录界面:
             TimeErr(f"登录游戏:{times}次没有检测到登录界面")
         #
@@ -593,9 +592,6 @@ class wzry_task:
             else:
                 TimeECHO("需要重启设备:创建单节点同步")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
-            return True
-        #
-        if not self.check_run_status():
             return True
         if self.判断大厅中():
             return True
@@ -662,10 +658,8 @@ class wzry_task:
             if self.判断大厅中():
                 return True
         else:
-            # 现在打开可能会放一段视频，利用历史记录跳过
-            # 这个随意点击也为了让界面换一下，误入对战没事，可以返回按钮回来
-            随意点击 = self.图片.登录界面开始游戏图标
-            self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
+            # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
+            touch((2, 2))
         #
         取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
         关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
@@ -759,9 +753,11 @@ class wzry_task:
         TimeECHO(f"首先进入人机匹配房间{times}")
         if self.判断对战中():
             self.结束人机匹配()
+            if self.判断房间中(处理=False):
+                return True
+        #
         if self.判断房间中():
             return True
-        #
         self.进入大厅()
         #
         if not self.check_run_status():
@@ -861,6 +857,8 @@ class wzry_task:
         #
         if self.判断对战中():
             self.结束人机匹配()
+            if self.判断房间中(处理=False):
+                return True
         if self.判断房间中():
             return True
         #
@@ -1269,7 +1267,7 @@ class wzry_task:
                     sleep(10)
                 # 万一返回房间后来一堆提示
                 self.网络优化()
-                if self.判断房间中():
+                if self.判断房间中(处理=False):
                     return
             else:
                 if self.Tool.existsTHENtouch(Template(r"tpl1689667243845.png", record_pos=(-0.082, 0.221), resolution=(960, 540), threshold=0.9), "返回大厅"):
@@ -1319,13 +1317,11 @@ class wzry_task:
             if self.判断大厅中():
                 return
             # 为了避免识别错误，加一个强制点击的命令
-            keystr = "任意点击_monizhan"
-            if keystr not in self.Tool.var_dict.keys():
-                if "随意点击k" in self.Tool.var_dict.keys():
-                    self.Tool.var_dict[keystr] = self.Tool.var_dict["随意点击k"]
-            if keystr in self.Tool.var_dict.keys():
-                任意点击_monizhan = Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))
-                self.Tool.existsTHENtouch(任意点击_monizhan, "任意点击_monizhan", savepos=True)
+            任意点击_monizhan = [Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))]
+            存在, 任意点击_monizhan = self.Tool.存在任一张图(任意点击_monizhan, "任意点击_monizhan", savepos=True)
+            if not 存在:
+                self.Tool.var_dict["任意点击_monizhan"] = (2, 2)
+            self.Tool.existsTHENtouch(任意点击_monizhan[0], "任意点击_monizhan", savepos=True)
             #
             if self.Tool.existsTHENtouch(Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))):
                 TimeECHO("继续1")
@@ -1458,12 +1454,10 @@ class wzry_task:
         # 本函数作为快速礼包的模板
         # 其他函数都可以借鉴此函数的开头进行优化@todo
         times = times+1
-        savepos = True
         if times > 10:
             return False
         elif times > 4:  # 1,2,3
-            if not connect_status():
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+            if not self.check_run_status():
                 return False
             for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅回忆礼册", "礼册记忆碎片"])):
                 del self.Tool.var_dict[delstr]
@@ -1477,13 +1471,12 @@ class wzry_task:
         sleep(2)
         金色一键领取 = Template(r"tpl1723334141060.png", record_pos=(0.294, 0.198), resolution=(960, 540))
         灰色一键领取 = Template(r"tpl1723334811624.png", record_pos=(0.295, 0.2), resolution=(960, 540))
-        pos = exists(金色一键领取)
-        if not pos:
-            if not exists(灰色一键领取):
-                TimeECHO(f"{fun_name}.没检测到界面,{times}+1")
-                return self.回忆礼册(times)
-        self.Tool.var_dict["回忆礼册领取按钮"] = pos
-        self.Tool.existsTHENtouch(金色一键领取, "回忆礼册领取按钮", savepos=True)
+        一键领取 = [金色一键领取, 灰色一键领取]
+        存在, 一键领取 = self.Tool.存在任一张图(一键领取, "礼册.一键领取", savepos=True)
+        if not 存在:
+            TimeECHO(f"{fun_name}.没检测到界面,{times}+1")
+            return self.回忆礼册(times)
+        self.Tool.existsTHENtouch(一键领取[0], "礼册.一键领取", savepos=True)
         # .....
         # 下面的其实不用领取，手动去背包里领取也是可以的，因此下面的代码没进行充分测试
         self.确定按钮()  # 只有一个蓝色确定按钮，这个函数会遍历确定按钮，会拖慢一点点速度，但是10s内能结束，因此不优化了
@@ -1504,7 +1497,7 @@ class wzry_task:
             return True
         #
         if times % 4 == 3:
-            if not connect_status():
+            if not self.check_run_status():
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
                 return False
         if times > 10:
@@ -1543,20 +1536,17 @@ class wzry_task:
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
         找到商城入口 = False
-        for i in range(len(商城入口)):
-            TimeECHO(f"寻找商城入口{i}")
-            找到商城入口 = self.Tool.existsTHENtouch(商城入口[i], "商城入口", savepos=True)
-            if 找到商城入口:
-                break
+        找到商城入口, 商城入口 = self.Tool.存在任一张图(商城入口, f"{fun_name(1)}商城入口", savepos=True)
         if not 找到商城入口:
             TimeECHO(f"无法找到商城入口")
             TimeECHO(f"按照960x540的分辨率强制设定坐标")
-            self.Tool.var_dict["商城入口"] = (925, 114)
-            return self.商城免费礼包(times=times)
+            self.Tool.var_dict[f"{fun_name(1)}商城入口"] = (925, 114)
+        self.Tool.existsTHENtouch(商城入口[0], f"{fun_name(1)}商城入口", savepos=True)
         sleep(30)
         进入商城界面 = False
         # 注：如果实在无法识别，这里手动点击到促销界面，让程序savepos记住促销的位置
         for i in range(len(商城界面)):
+            # 如果促销入口识别错了，手动 del self.Tool.var_dict["促销入口"] 掉
             self.Tool.existsTHENtouch(促销入口, f"新促销入口", savepos=True)
             sleep(20)
             TimeECHO(f"检测商城界面中...{i}")
@@ -1568,12 +1558,8 @@ class wzry_task:
         if not 进入商城界面:
             TimeECHO(f"未检测到商城界面, 重新进入商城")
             self.Tool.LoopTouch(返回, "返回")
-            if "商城入口" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["商城入口"]
+            del self.Tool.var_dict[f"{fun_name(1)}商城入口"]
             TimeECHO("如果实在无法识别，手动点击到促销界面，让程序savepos记住促销的位置")
-            # 如果识别错了，可以用下面的命令删除
-            # if "促销入口" in self.Tool.var_dict.keys():
-            #    del self.Tool.var_dict["促销入口"]
             return self.商城免费礼包(times=times)
         #
         领取成功 = False
@@ -1599,8 +1585,7 @@ class wzry_task:
         if times > 10:
             return False
         elif times > 4:  # 1,2,3
-            if not connect_status():
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+            if not self.check_run_status():
                 return False
             for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅祈愿", "玉镖夺魁入口"])):
                 del self.Tool.var_dict[delstr]
@@ -1628,10 +1613,10 @@ class wzry_task:
         存在夺魁页面, 夺魁页面元素 = self.Tool.存在任一张图(夺魁页面元素, "夺魁页面")
         if not 存在夺魁页面:
             self.Tool.LoopTouch(玉镖夺魁入口, "玉镖夺魁入口", savepos=True, loop=5)
-        #
-        存在夺魁页面, 夺魁页面元素 = self.Tool.存在任一张图(夺魁页面元素, "夺魁页面")
-        if not 存在夺魁页面:
-            return self.玉镖夺魁(times)
+            #
+            存在夺魁页面, 夺魁页面元素 = self.Tool.存在任一张图(夺魁页面元素, "夺魁页面")
+            if not 存在夺魁页面:
+                return self.玉镖夺魁(times)
         # 王者本次更新，会自动领取，不用手动点击加号
         TimeECHO("开始领夺魁币")
         #
@@ -1790,10 +1775,6 @@ class wzry_task:
             if self.Tool.timelimit(timekey="KPL每日观赛", limit=观赛时长, init=False):
                 TimeErr("KPL每日观赛超时")
                 return False
-        if times % 4 == 3:
-            if not connect_status():
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
-                return False
         if times > 100:
             return False
         times = times+1
@@ -1846,10 +1827,6 @@ class wzry_task:
         else:
             if self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=False):
                 TimeErr("领任务礼包超时")
-                return False
-        if times % 4 == 3:
-            if not connect_status():
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
                 return False
         if times > 10:
             return False
@@ -1976,10 +1953,6 @@ class wzry_task:
             if self.Tool.timelimit(timekey="领邮件礼包", limit=60*5, init=False):
                 TimeErr("领任务礼包超时")
                 return False
-        if times % 4 == 3:
-            if not connect_status():
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
-                return False
         if times > 10:
             return False
         #
@@ -2055,10 +2028,6 @@ class wzry_task:
         else:
             if self.Tool.timelimit(timekey="领任务礼包", limit=60*5, init=False):
                 TimeErr("领任务礼包超时")
-                return False
-        if times % 4 == 3:
-            if not connect_status():
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
                 return False
         if times > 10:
             return False
@@ -2244,31 +2213,31 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 return True
             if not 装备pos:
-                if 装备poskey in self.Tool.var_dict.keys():
+                # 每一次尝试采用新的位置
+                存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
+                if 存在装备图标:
                     装备pos = self.Tool.var_dict[装备poskey]
-                else:
-                    存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
-                    装备 = self.图片.装备S[0]
-                    if 存在装备图标:
-                        self.Tool.existsTHENtouch(装备, 装备poskey, savepos=True)
+                # 如果找不到，就看看历史上使用的哪个位置
+                elif 装备poskey in self.Tool.var_dict.keys():
+                    装备pos = self.Tool.var_dict[装备poskey]
             #
             if not 移动pos:
-                if 移动poskey in self.Tool.var_dict.keys():
+                # 每一次尝试采用新的位置
+                存在移动图标, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, 移动poskey, savepos=True)
+                if 存在移动图标:
                     移动pos = self.Tool.var_dict[移动poskey]
-                else:
-                    存在移动图标, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, 移动poskey, savepos=True)
-                    移动 = self.图片.移动S[0]
-                    if 存在移动图标:
-                        self.Tool.existsTHENtouch(移动, 移动poskey, savepos=True)
+                # 如果找不到，就看看历史上使用的哪个位置
+                elif 移动poskey in self.Tool.var_dict.keys():
+                    移动pos = self.Tool.var_dict[移动poskey]
             #
             if not 普攻pos:
-                if 普攻poskey in self.Tool.var_dict.keys():
+                # 每一次尝试采用新的位置
+                存在普攻图标, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, 普攻poskey, savepos=True)
+                if 存在普攻图标:
                     普攻pos = self.Tool.var_dict[普攻poskey]
-                else:
-                    存在普攻图标, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, 普攻poskey, savepos=True)
-                    普攻 = self.图片.普攻S[0]
-                    if 存在普攻图标:
-                        self.Tool.existsTHENtouch(普攻, 普攻poskey, savepos=True)
+                # 如果找不到，就看看历史上使用的哪个位置
+                elif 普攻poskey in self.Tool.var_dict.keys():
+                    普攻pos = self.Tool.var_dict[普攻poskey]
             #
             if 装备pos:
                 touch(装备pos)
@@ -2390,6 +2359,8 @@ class wzry_task:
 
     def check_run_status(self):
         #
+        self.组队模式 = self.组队模式 and not os.path.exists(self.无法进行组队FILE)
+        #
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
             content = f"[{funs_name()}]失败:存在[{self.Tool.独立同步文件}]"
             if self.组队模式:
@@ -2403,19 +2374,20 @@ class wzry_task:
         if not connect_status():
             # 尝试连接一下,还不行就同步吧
             self.移动端.连接设备(times=1, timesMax=2)
-            if connect_status():
-                return True
-            # 单人模式创建同步文件后等待,组队模式则让全体返回
-            content = f"[{funs_name()}]失败:无法connect"
-            self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
-            if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
-            TimeECHO(content)
-            return False
-        else:
-            return True
+            if not connect_status():
+                # 单人模式创建同步文件后等待,组队模式则让全体返回
+                content = f"[{funs_name()}]失败:无法connect"
+                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
+                if self.组队模式:
+                    self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+                TimeECHO(content)
+                return False
+        #
+        return True
+
 
 # 开始运行
+
     def 进行人机匹配对战循环(self):
         # 初始化
         if not self.check_run_status():
@@ -2491,7 +2463,7 @@ class wzry_task:
             #
             if self.Tool.存在同步文件():
                 self.图片 = wzry_figure(Tool=self.Tool)
-            # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里同意处理
+            # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里统一处理
             if not self.check_run_status():
                 #
                 if not connect_status():
