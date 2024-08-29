@@ -225,7 +225,8 @@ class wzyd_libao:
                 存在, 营地圈子 = self.Tool.存在任一张图(营地圈子, "营地.营地圈子")
                 continue
         if not 进入小组:
-            TimeECHO(f"找不到互助小组圈子")
+            TimeECHO(f"请加入以下圈子之一: 王者问答圈|皮肤交流圈|峡谷互助小组")
+            TimeECHO(f"如果仍无法找到圈子，可能是营地版本不同，需要修改: 营地圈子.append()")
             return self.营地任务_圈子签到(times)
         圈子签到图标 = Template(r"tpl1717046286604.png", record_pos=(0.393, -0.3), resolution=(540, 960))
         签到成功图标 = Template(r"tpl1717047898461.png", record_pos=(-0.004, 0.237), resolution=(540, 960))
@@ -302,23 +303,23 @@ class wzyd_libao:
                 return
         return
 
-    def 营地战令经验(self, times=1):
+    def 营地战令经验(self, times=0):
         #
         # 第一次，需要手动点击一下，开启战令
         if self.Tool.存在同步文件():
             return True
         #
-        if times == 1:
+        if times == 0:
             self.Tool.timelimit(timekey="营地战令经验", limit=60*5, init=True)
         else:
             if self.Tool.timelimit(timekey="营地战令经验", limit=60*5, init=False):
                 TimeECHO(f"营地战令经验{times}超时退出")
                 return False
         #
+        times = times+1
         TimeECHO(f"营地战令经验{times}")
         self.APPOB.重启APP(10)
         sleep(10)
-        times = times+1
         if times % 4 == 3:
             if not connect_status():
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
@@ -352,21 +353,32 @@ class wzyd_libao:
             self.Tool.touchfile("重新登录营地战令.txt")
             return
         #
+        战令任务 = []
+        战令任务.append(Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960)))
+        战令任务.append(Template(r"tpl1724905564530.png", record_pos=(-0.23, -0.694), resolution=(540, 960)))
         战令页面元素 = []
         战令页面元素.append(Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960)))
         战令页面元素.append(Template(r"tpl1716804327622.png", record_pos=(0.0, 0.156), resolution=(540, 960)))
         战令页面元素.append(Template(r"tpl1716804333697.png", record_pos=(0.352, 0.739), resolution=(540, 960)))
-        战令页面元素.append(Template(r"tpl1716804348346.png", record_pos=(-0.281, -0.7), resolution=(540, 960)))
-        战令页面元素.append(Template(r"tpl1716804366593.png", record_pos=(-0.083, 0.543), resolution=(540, 960)))
+        for i in 战令任务:
+            战令页面元素.append(i)
+        #
         存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
-        if not 存在:
+        # 如果3次都没找到，就不管了，强制点下去
+        if not 存在 and times < 4:
             sleep(20)
             存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
             if not 存在:
                 TimeECHO(f"没找到战令页面")
                 return self.营地战令经验(times)
-        战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
-        self.Tool.existsTHENtouch(战令任务, "战令任务", savepos=True)
+
+        if "营地.战令任务" not in self.Tool.var_dict.keys():
+            存在, 战令任务 = self.Tool.存在任一张图(战令任务, "营地.战令任务", savepos=True)
+            if not 存在:
+                TimeECHO(f"没找到战令任务页面,按照960x540的分辨率强制点击战令任务")
+                # 这里是绝对坐标，不适用于其他分辨率的情况
+                self.Tool.var_dict["营地.战令任务"] = (148, 108)
+        self.Tool.existsTHENtouch(战令任务[0], "营地.战令任务", savepos=True)
         sleep(10)
         一键领取 = Template(r"tpl1715610610922.png", record_pos=(0.337, -0.18), resolution=(540, 960))
         self.Tool.existsTHENtouch(一键领取, "一键领取战令经验", savepos=True)

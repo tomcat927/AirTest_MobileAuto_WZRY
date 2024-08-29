@@ -99,8 +99,8 @@ class wzry_figure:
         #
         self.大厅祈愿 = []
         self.大厅祈愿.append(Template(r"tpl1724317603873.png", record_pos=(0.443, -0.105), resolution=(960, 540)))
-        self.大厅祈愿.append(Template(r"tpl1724316019439.png", record_pos=(0.444, -0.107), resolution=(960, 540)))
-        self.大厅祈愿.append(Template(r"tpl1724317814073.png", record_pos=(0.442, -0.103), resolution=(960, 540)))
+        # 这种活动图标总在变，直接写死成绝对坐标来避免识别
+        #
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), threshold=0.9))
@@ -607,12 +607,14 @@ class wzry_task:
             for igengxin in np.arange(30):
                 TimeECHO("更新中%d" % (igengxin))
                 关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
+                金色确定 = Template(r"tpl1692946738054.png", record_pos=(-0.002, 0.116), resolution=(960, 540), threshold=0.9)
                 if self.Tool.existsTHENtouch(关闭更新, "关闭更新", savepos=False):
                     sleep(10)
+                    self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=True)
                     break
                 if exists(Template(r"tpl1692946702006.png", record_pos=(-0.009, -0.014), resolution=(960, 540), threshold=0.9)):
                     TimeECHO("更新完成")
-                    touch(Template(r"tpl1692946738054.png", record_pos=(-0.002, 0.116), resolution=(960, 540), threshold=0.9))
+                    self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=True)
                     sleep(60)
                     break
                 elif not exists(更新公告):
@@ -621,18 +623,18 @@ class wzry_task:
                 if exists(Template(r"tpl1692952266315.png", record_pos=(-0.411, 0.266), resolution=(960, 540), threshold=0.9)):
                     TimeECHO("正在下载资源包")
                 sleep(60)
+                self.确定按钮()
+        同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
         if exists(Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)):
             检测到登录界面 = True
+            self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=True)
             TimeECHO("同意游戏")
-            touch(Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9))
-
         #
-        用户协议同意 = Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540), threshold=0.9)
-        if self.Tool.existsTHENtouch(用户协议同意, "用户协议同意"):
+        if self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=False):
             检测到登录界面 = True
-        # 这里需要重新登录了
+        #
+        # 这里是账户被退出的界面，需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
-            检测到登录界面 = True
             TimeECHO("需要重新登录")
             #
             self.Tool.touchfile(self.重新登录FILE)
@@ -1548,6 +1550,8 @@ class wzry_task:
                 break
         if not 找到商城入口:
             TimeECHO(f"无法找到商城入口")
+            TimeECHO(f"按照960x540的分辨率强制设定坐标")
+            self.Tool.var_dict["商城入口"] = (925, 114)
             return self.商城免费礼包(times=times)
         sleep(30)
         进入商城界面 = False
@@ -1602,11 +1606,14 @@ class wzry_task:
                 del self.Tool.var_dict[delstr]
         #
         self.进入大厅()
+        del self.Tool.var_dict["大厅祈愿"]
         if "大厅祈愿" not in self.Tool.var_dict.keys():
             存在大厅祈愿, self.图片.大厅祈愿 = self.Tool.存在任一张图(self.图片.大厅祈愿, "大厅祈愿", savepos=True)
             if not 存在大厅祈愿:
                 TimeECHO(f"玉镖夺魁: 找不到祈愿入口")
-                return self.玉镖夺魁(times)
+                TimeECHO(f"按照960x540的分辨率强制设定坐标")
+                # 这里是绝对坐标，不适用于其他分辨率的情况
+                self.Tool.var_dict["大厅祈愿"] = (905, 168)
         if not self.Tool.existsTHENtouch(self.图片.大厅祈愿[0], "大厅祈愿", savepos=True):
             return self.玉镖夺魁(times)
         sleep(10)

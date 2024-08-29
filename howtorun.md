@@ -23,7 +23,8 @@ chmod +x ~/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/ad
 ```
 
 * 开启模拟器/手机的ADB调试。
-* * 建议采用`960x540`的分辨率，这样可以解压我的字典[example/字典. 分路.android.var_dict_N.zip](example/字典. 分路.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)。你自己去生成字典也是可以的。
+* * 建议采用`960x540`的分辨率`dpi=160`，脚本内部有额外的加速命令，也可以利用我的[example/字典. 分路.android.var_dict_N.zip](example/字典. 分路.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)。
+* * 其他分辨率也可以运行，代码会自动生成你的字典文件`android.var_dict_mynode.txt`，执行速度会越来越快。但是有些活动图标在不同的分辨率上显示效果不同，可能无法识别成功，需要你去修改代码。
 
 ![Alt text](doc/LDplayer.png)
 
@@ -66,6 +67,7 @@ LINK_dict = {
 ```
 
 * 控制BlueStacks模拟器多开组队
+* * 注: BlueStacks模拟的ADB端口是`5555+10*i`
 
 ```
 [client]
@@ -79,6 +81,7 @@ LINK_dict = {
 ```
 
 * 控制LDPlayer模拟器多开组队
+* * 注: LDPlayer模拟的ADB端口是`5555+2*i`
 
 ```
 [client]
@@ -94,7 +97,7 @@ LINK_dict = {
 
 16448 16384+32 16416
 * MuMu模拟器多开组队
-* * **注: MuMu模拟的ADB端口是`16384+32*i`**
+* * 注: MuMu模拟的ADB端口是`16384+32*i`
 
 ```
 [client]
