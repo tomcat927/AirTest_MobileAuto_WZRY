@@ -3,7 +3,6 @@
 基于[AirTest](https://airtest.netease.com/)和[airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto)的王者荣耀日活脚本。
 
 ![GitHub forks](https://img.shields.io/github/forks/cndaqiang/WZRY?color=60c5ba&style=for-the-badge)
-
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/WZRY?color=ffd700&style=for-the-badge)
 
 ### 运行方式
