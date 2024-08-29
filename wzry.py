@@ -70,6 +70,7 @@ class wzry_runinfo:
                     return True
                 else:
                     TimeECHO(f"RUNINFO:标准模式变化->{str(self.标准模式)}")
+                    return False
             else:
                 TimeECHO(f"RUNINFO:青铜段位变化->{str(self.青铜段位)}")
                 return False
@@ -409,6 +410,10 @@ class wzry_task:
             确定按钮.append(i)
         for i in self.图片.金色确定按钮:
             确定按钮.append(i)
+        确定按钮 = self.Tool.uniq_Template_array(确定按钮)
+        存在,  确定按钮 = self.Tool.存在任一张图(确定按钮, "确定按钮")
+        if not 存在:
+            return
         for i in 确定按钮:
             self.Tool.existsTHENtouch(i, f"确定{i}", savepos=False)
 
@@ -428,8 +433,12 @@ class wzry_task:
                 self.Tool.existsTHENtouch(i, keyindex, savepos=True)
             else:
                 TimeECHO("未识别到"+keyindex)
+        #
+        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
+        if not 存在:
+            return
         for i in self.图片.王者登录关闭按钮:
-            self.Tool.LoopTouch(i, f"关闭按钮{i}", loop=3, savepos=False)
+            self.Tool.LoopTouch(i, f"王者登录关闭按钮{i}", loop=3, savepos=False)
     #
 
     def 进入大厅时遇到的复杂的关闭按钮(self):
@@ -446,10 +455,6 @@ class wzry_task:
                 return True
         return False
         #
-
-    def 判断战绩页面(self):
-        存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
-        return 存在
 
     def 进入大厅(self, times=0):
         if times == 0:
@@ -578,6 +583,7 @@ class wzry_task:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
         TimeECHO(f"登录游戏{times}")
+        self.APPOB.打开APP()
         #
         if exists(self.图片.网络不可用):
             TimeErr("网络不可用,取消登录,需要重启设备")
@@ -588,9 +594,13 @@ class wzry_task:
                 TimeECHO("需要重启设备:创建单节点同步")
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
             return True
-        # 更新公告
+        #
         if not self.check_run_status():
             return True
+        if self.判断大厅中():
+            return True
+        #
+        # 更新公告
         更新公告 = Template(r"tpl1692946575591.png", record_pos=(0.103, -0.235), resolution=(960, 540), threshold=0.9)
         if exists(更新公告):
             检测到登录界面 = True
@@ -615,8 +625,7 @@ class wzry_task:
             检测到登录界面 = True
             TimeECHO("同意游戏")
             touch(Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9))
-        if self.判断大厅中():
-            return True
+
         #
         用户协议同意 = Template(r"tpl1692952132065.png", record_pos=(0.062, 0.099), resolution=(960, 540), threshold=0.9)
         if self.Tool.existsTHENtouch(用户协议同意, "用户协议同意"):
@@ -641,14 +650,20 @@ class wzry_task:
         #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
             检测到登录界面 = True
-            TimeECHO("关闭家长莫模式")
+            TimeECHO("关闭家长模式")
             touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
             sleep(5)
-        if self.判断大厅中():
-            return True
-        # 现在打开可能会放一段视频，怎么跳过呢？使用0.1的精度测试一下.利用历史记录了
-        随意点击 = self.图片.登录界面开始游戏图标
-        self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
+        #
+        if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
+            检测到登录界面 = True
+            sleep(10)
+            if self.判断大厅中():
+                return True
+        else:
+            # 现在打开可能会放一段视频，利用历史记录跳过
+            # 这个随意点击也为了让界面换一下，误入对战没事，可以返回按钮回来
+            随意点击 = self.图片.登录界面开始游戏图标
+            self.Tool.existsTHENtouch(随意点击, "随意点击k", savepos=True)
         #
         取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
         关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
@@ -657,38 +672,42 @@ class wzry_task:
         self.关闭按钮()
         self.Tool.existsTHENtouch(取消, "取消按钮")
         self.Tool.existsTHENtouch(关闭, "关闭按钮")
-        if self.判断大厅中():
-            return True
         #
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             检测到登录界面 = True
             sleep(10)
+            self.关闭按钮()
+        if self.判断大厅中():
+            return True
         #
         # ..................................................................................
         # 第一次万一已经登录过了
         if not 检测到登录界面 and times > 1:
             return self.登录游戏(times, 检测到登录界面)
         # ..................................................................................
+        # 下面是点击登录之后的一些处理
         #
         # 健康系统直接重新同步
         if self.健康系统_常用命令():
             return True
+        havetouch = False
         # 动态下载资源提示
         回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
         if exists(回归礼物):
+            havetouch = True
             self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
         回归挑战 = Template(r"tpl1699680234401.png", record_pos=(0.314, 0.12), resolution=(1136, 640))
         self.Tool.existsTHENtouch(回归挑战, "不进行回归挑战")
         存在返回按钮, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, "登录返回按钮", savepos=True)
         if 存在返回按钮:
+            havetouch = True
             self.Tool.existsTHENtouch(self.图片.返回按钮[0], "登录返回按钮", savepos=True)
-            存在登录蓝色确定按钮, self.图片.蓝色确定按钮 = self.Tool.存在任一张图(self.图片.蓝色确定按钮, "登录蓝色确定按钮", savepos=True)
-            if 存在登录蓝色确定按钮:
-                self.Tool.existsTHENtouch(self.图片.蓝色确定按钮[0], "登录蓝色确定按钮", savepos=True)
-        self.关闭按钮()
-        if self.判断大厅中():
+            self.确定按钮()
+        #
+        if havetouch and self.判断大厅中():
             return True
         #
+        self.关闭按钮()
         self.网络优化()
         # 各种异常，异常图标,比如网速不佳、画面设置、
         self.Tool.existsTHENtouch(Template(r"tpl1692951507865.png", record_pos=(-0.106, 0.12), resolution=(960, 540), threshold=0.9), "关闭画面设置")
@@ -700,8 +719,6 @@ class wzry_task:
         动态下载资源 = Template(r"tpl1697785792245.png", record_pos=(-0.004, -0.009), resolution=(960, 540))
         if exists(动态下载资源):
             self.Tool.existsTHENtouch(取消, "取消按钮")
-        if self.判断大厅中():
-            return True
         self.Tool.existsTHENtouch(取消, "取消按钮")
         # 活动界面
         self.进入大厅时遇到的复杂的关闭按钮()
@@ -715,14 +732,11 @@ class wzry_task:
             self.Tool.existsTHENtouch(取消, "取消按钮")
             self.进入大厅时遇到的复杂的关闭按钮()
             self.网络优化()
-            self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False)
             if self.判断大厅中():
                 return True
             else:
                 sleep(10)
         #
-        if self.判断大厅中():
-            return True
         return self.登录游戏(times, 检测到登录界面)
 
     def 单人进入人机匹配房间(self, times=1):
@@ -2092,6 +2106,17 @@ class wzry_task:
             return False
 
 # 状态判断
+    def 判断战绩页面(self):
+        if not self.Tool.timelimit(timekey="当前界面", limit=60*2, init=False):
+            if self.当前界面 in ["房间中", "大厅中"]:
+                TimeECHO(f"判断战绩页面: 采用历史的判断结果判定当前处在:{self.当前界面}")
+                return False
+        #
+        存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
+        if 存在:
+            self.当前界面 == "战绩页面"
+            self.Tool.timelimit(timekey="当前界面", init=True)
+        return 存在
 
     def 判断大厅中(self):
         #
