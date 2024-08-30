@@ -442,7 +442,16 @@ class wzyd_libao:
         奖励兑换图标 = Template(r"tpl1704381904053.png", record_pos=(-0.209, -0.026), resolution=(540, 960))
         self.Tool.existsTHENtouch(奖励兑换图标, "体验服奖励兑换图标", savepos=True)
         sleep(5)
+        正在进入 = Template(r"tpl1725004412475.png", record_pos=(-0.004, -0.776), resolution=(540, 960))
         奖励兑换网页图标 = Template(r"tpl1704381965060.png", rgb=True, target_pos=7, record_pos=(0.243, -0.496), resolution=(540, 960))
+        for i in range(10):
+            if exists(正在进入):
+                TimeECHO("正在进入体验服中....")
+                sleep(6*1.5)  # 1.5分钟
+            else:
+                sleep(5)
+            if exists(奖励兑换网页图标):
+                break
         if not self.Tool.existsTHENtouch(奖励兑换网页图标, "奖励兑换网页图标", savepos=False):
             sleep(20)
             if not self.Tool.existsTHENtouch(奖励兑换网页图标, "奖励兑换网页图标", savepos=False):
