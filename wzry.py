@@ -2096,14 +2096,15 @@ class wzry_task:
         战绩元素 = self.图片.战绩页面元素[0]
         元素集合 = [大厅元素, 房间元素, 对战元素, 战绩元素]
         # 极端时间内不重复判断
-        if not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
+        if "quick判断界面" in self.timedict.keys() and not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
             if self.当前界面 in ["大厅中", "房间中", "对战中", "战绩页面"]:
                 return self.当前界面
+        #
         存在, 元素集合 = self.Tool.存在任一张图(元素集合, f"{funs_name(2)}.quick判断界面")
-        self.Tool.timelimit(timekey="quick判断界面", limit=10, init=True)
         if not 存在:
             return "未知"
         #
+        self.Tool.timelimit(timekey="quick判断界面", limit=10, init=True)
         # 存在的情况下，可以快速出结果
         if 元素集合[0] == 大厅元素:
             self.当前界面 = "大厅中"
