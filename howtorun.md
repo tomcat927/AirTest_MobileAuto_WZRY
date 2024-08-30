@@ -109,6 +109,12 @@ multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:16384",
     1: "Android:///127.0.0.1:16416"}
+#
+[control]
+#将运行日志输出到文件，适合于监控windows的计划任务
+logfile={
+    0: "result.0.txt",
+    1: "result.1.txt"}
 ```
 
 * Linux控制docker容器多开组队
@@ -171,4 +177,25 @@ self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
 ## 更新资源
 ```
 self.图片更新FILE = "WZRY.图片更新.txt"
+```
+
+
+# 其他补充
+## 关于windows平台的计划任务
+* [**推荐**]`只在用户登录时运行`
+* * 启动脚本时会跳出窗口，可以自动打开模拟器,和正常执行脚本相同。
+* * 锁屏之后还可以执行，可以正常启动模拟器 
+* `不管用户是否登录都要运行`
+* * 需要输入密码，启动脚本时不会跳出窗口，可以自动打开模拟器。
+* * 多开器，和用户界面以及任务管理器无论怎么找都找不到模拟器的进程。无法限制模拟器只用的资源。
+* * 脚本和其他ADB工具可以调试这些隐藏的模拟器。
+### 配置示例
+![](doc/crontab_win.png)
+
+## Linux计划任务示例
+```
+50 4 * * * pkill -f 'wzry.py'
+51 4 * * * /usr/lib/android-sdk/platform-tools/adb kill-server
+0 5 * * * cd /home/cndaqiang/soft/AirTest_MobileAuto_WZRY && /bin/bash run.sh
+50 8 * * 1-5 pkill -f 'wzry.py'
 ```

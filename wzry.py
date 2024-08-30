@@ -772,16 +772,15 @@ class wzry_task:
             return True
         #
         times = times+1
-        if times > 5:  # 2,3,4
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷", "进入人机匹配"])):
-                del self.Tool.var_dict[delstr]
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
             return self.单人进入人机匹配房间(times)
         sleep(2)
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
             return self.单人进入人机匹配房间(times)
         sleep(2)
-        if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=True):
+        if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
+            del self.Tool.var_dict["大厅对战"]
+            del self.Tool.var_dict["5v5王者峡谷"]
             return self.单人进入人机匹配房间(times)
         sleep(2)
         #
@@ -2080,7 +2079,51 @@ class wzry_task:
             return False
 
 # 状态判断
+    #
+    def quick判断界面(self):
+        """
+        # 适合图片元素很多的情况，比如战绩页面、对战页面、房间页面
+        #
+        if self.quick判断界面() in [ "大厅中", "房间中", "对战中", "战绩页面"]:
+            return False
+        #
+        """
+        # 取出最容易的元素进行初筛
+        # 这里的0都是被筛选过的元素
+        大厅元素 = self.图片.大厅元素[0]
+        房间元素 = self.图片.房间元素[0]
+        对战元素 = self.图片.对战图片元素[0]
+        战绩元素 = self.图片.战绩页面元素[0]
+        元素集合 = [大厅元素, 房间元素, 对战元素, 战绩元素]
+        # 极端时间内不重复判断
+        if not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
+            if self.当前界面 in ["大厅中", "房间中", "对战中", "战绩页面"]:
+                return self.当前界面
+        存在, 元素集合 = self.Tool.存在任一张图(元素集合, f"{funs_name(2)}.quick判断界面")
+        self.Tool.timelimit(timekey="quick判断界面", limit=10, init=True)
+        if not 存在:
+            return "未知"
+        #
+        # 存在的情况下，可以快速出结果
+        if 元素集合[0] == 大厅元素:
+            self.当前界面 = "大厅中"
+        elif 元素集合[0] == 房间元素:
+            self.当前界面 = "房间中"
+        elif 元素集合[0] == 对战元素:
+            self.当前界面 = "对战中"
+        elif 元素集合[0] == 战绩元素:
+            self.当前界面 = "战绩页面"
+        self.Tool.timelimit(timekey="当前界面", limit=60*2, init=True)
+        TimeECHO(f"{fun_name(2)}.quick判断界面:{self.当前界面}")
+        return self.当前界面
+        #
+    #
+
     def 判断战绩页面(self):
+        #
+        if self.quick判断界面() in ["大厅中", "房间中", "对战中"]:
+            return False
+        #
         if not self.Tool.timelimit(timekey="当前界面", limit=60*2, init=False):
             if self.当前界面 in ["房间中", "大厅中"]:
                 TimeECHO(f"判断战绩页面: 采用历史的判断结果判定当前处在:{self.当前界面}")
@@ -2119,6 +2162,9 @@ class wzry_task:
         return 存在
 
     def 判断房间中(self, 处理=True):
+        #
+        if self.quick判断界面() in ["大厅中", "对战中", "战绩页面"]:
+            return False
         #
         if self.当前界面 == "房间中":
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
@@ -2164,6 +2210,9 @@ class wzry_task:
     def 判断对战中(self, 处理=False):
         if "模拟战" in self.对战模式:
             return self.判断对战中_模拟战(处理)
+        #
+        if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
+            return False
         #
         对战中 = False
         if self.当前界面 == "对战中":
@@ -2296,6 +2345,10 @@ class wzry_task:
         return True
 
     def 判断对战中_模拟战(self, 处理=False):
+        #
+        if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
+            return False
+        #
         正在对战 = False
         #
         对战中 = False
