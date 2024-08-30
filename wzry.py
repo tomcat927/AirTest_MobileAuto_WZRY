@@ -2096,11 +2096,13 @@ class wzry_task:
         战绩元素 = self.图片.战绩页面元素[0]
         元素集合 = [大厅元素, 房间元素, 对战元素, 战绩元素]
         # 极端时间内不重复判断
-        if "quick判断界面" in self.timedict.keys() and not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
+        if "quick判断界面" in self.Tool.timedict.keys() and not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
             if self.当前界面 in ["大厅中", "房间中", "对战中", "战绩页面"]:
                 return self.当前界面
+            else:
+                return "未知"
         #
-        存在, 元素集合 = self.Tool.存在任一张图(元素集合, f"{funs_name(2)}.quick判断界面")
+        存在, 元素集合 = self.Tool.存在任一张图(元素集合, f"{fun_name(2)}.quick判断界面")
         if not 存在:
             return "未知"
         #
@@ -2494,7 +2496,6 @@ class wzry_task:
                 self.runstep = int(self.Tool.readfile(self.只战一天FILE)[0].strip())
             except:
                 self.Tool.touchfile(self.只战一天FILE, content=str(self.runstep))
-            新的一天 = True
         while True:
             # ------------------------------------------------------------------------------
             # 检测是否出现控制冲突,双脚本情况
@@ -2504,7 +2505,6 @@ class wzry_task:
                 if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
                 return True
-            #
             # ------------------------------------------------------------------------------
             run_class_command(self=self, command=self.Tool.readfile(self.临时初始化FILE))
             # ------------------------------------------------------------------------------
@@ -2514,10 +2514,29 @@ class wzry_task:
             if os.path.exists(self.无法进行组队FILE):
                 self.组队模式 = False
                 self.totalnode = 1
+            # ------------------------------------------------------------------------------
             #
+            if 新的一天:
+                TimeECHO(">>>>>>>>>>>>>>>新的一天>>>>>>>>>>>>>>>>>>>>")
+                新的一天 = False
+                if not connect_status():
+                    self.移动端.连接设备()
+                # 参数、礼包、图片、文件等的初始化
+                self.初始化(init=False)
+                if self.totalnode_bak > 1:
+                    TimeECHO(":新的一天创建同步文件进行初次校准")
+                    # 因为创建了同步文件之后，其他进程就会停下来
+                    # **因此新一天的初始化命令必须放在前面处理同步的前面**
+                    # 否则，其他进程就会进入到同步状态
+                    # 同步之后再进入新的一天初始化，再同步，就有很多时间上的浪费
+                    self.Tool.touch同步文件(content="新的一天初始化")
+                else:
+                    self.APPOB.重启APP(20)
+                    self.登录游戏()
+            # ------------------------------------------------------------------------------
+            # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里统一处理
             if self.Tool.存在同步文件():
                 self.图片 = wzry_figure(Tool=self.Tool)
-            # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里统一处理
             if not self.check_run_status():
                 #
                 if not connect_status():
@@ -2599,7 +2618,6 @@ class wzry_task:
                 elif leftmin < 10:
                     TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
                     sleep(leftmin*60)
-                    新的一天 = True
                     continue
                 #
                 # 避免还存在其他进行没有同步完成的情况
@@ -2633,21 +2651,6 @@ class wzry_task:
                 self.移动端.重启重连设备(leftmin*60)
                 # 其他
                 self.Tool.removefile(self.今日休战FILE)
-                #
-            if 新的一天:
-                TimeECHO(">>>>>>>>>>>>>>>新的一天>>>>>>>>>>>>>>>>>>>>")
-                新的一天 = False
-                if not connect_status():
-                    self.移动端.连接设备()
-                # 参数、礼包、图片、文件等的初始化
-                self.初始化(init=False)
-                if self.totalnode_bak > 1:
-                    TimeECHO(":新的一天创建同步文件进行初次校准")
-                    self.Tool.touch同步文件(content="新的一天初始化")
-                else:
-                    self.APPOB.重启APP(20)
-                    self.登录游戏()
-                continue
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             #
