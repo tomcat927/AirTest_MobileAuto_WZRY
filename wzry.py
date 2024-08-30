@@ -2095,7 +2095,10 @@ class wzry_task:
         对战元素 = self.图片.对战图片元素[0]
         战绩元素 = self.图片.战绩页面元素[0]
         元素集合 = [大厅元素, 房间元素, 对战元素, 战绩元素]
-        # 极端时间内不重复判断
+        if self.当前界面 == "对战中":
+            元素集合 = [对战元素, 战绩元素, 大厅元素, 房间元素]
+        #
+        # 极短时间内不重复判断
         if "quick判断界面" in self.Tool.timedict.keys() and not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
             if self.当前界面 in ["大厅中", "房间中", "对战中", "战绩页面"]:
                 return self.当前界面
