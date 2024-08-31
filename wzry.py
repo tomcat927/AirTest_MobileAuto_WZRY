@@ -579,13 +579,14 @@ class wzry_task:
         self.APPOB.打开APP()
         #
         if exists(self.图片.网络不可用):
-            TimeErr("网络不可用,取消登录,需要重启设备")
+            content = "网络不可用,取消登录,需要重启设备"
+            TimeErr(content)
             if self.组队模式:
                 TimeErr("需要重启设备:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode})需要重启设备:创建同步文件")
+                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode}){fun_name(1)}.{content}")
             else:
                 TimeECHO("需要重启设备:创建单节点同步")
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
             return True
         if self.判断大厅中():
             return True
@@ -636,7 +637,6 @@ class wzry_task:
                 self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode})需要重新登录:创建同步文件")
             else:
                 TimeECHO("需要重新登录:创建单节点同步")
-                self.重启APP_acce(10*60)
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
             return True
         #
@@ -1162,10 +1162,9 @@ class wzry_task:
                 if self.组队模式:
                     TimeErr("结束人机匹配时间超时 and 组队touch同步文件")
                     self.Tool.touch同步文件(self.Tool.辅助同步文件)
-                    return
                 else:
                     self.Tool.touch同步文件(self.Tool.独立同步文件)
-                    return
+                return
             加速对战 = False
             if self.触摸对战:
                 加速对战 = True
@@ -2425,15 +2424,12 @@ class wzry_task:
     def 健康系统_常用命令(self):
         if self.健康系统():
             self.APPOB.关闭APP()
+            content = "检测到健康系统"
+            TimeErr(content)
             if self.组队模式:
-                content = "组队情况检测到健康系统,所以touch同步文件"
-                TimeErr(content)
                 self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
             else:
-                content = "单人情况检测到健康系统,所以touch同步文件"
-                TimeErr(content)
                 self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
-                self.重启APP_acce(60*5)
             return True
         else:
             return False
@@ -2458,9 +2454,10 @@ class wzry_task:
             if not connect_status():
                 # 单人模式创建同步文件后等待,组队模式则让全体返回
                 content = f"[{funs_name()}]失败:无法connect"
-                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
                 if self.组队模式:
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+                else:
+                    self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
                 TimeECHO(content)
                 return False
         #
@@ -2532,9 +2529,11 @@ class wzry_task:
 
     def END(self, content=""):  # 立刻结束
         TimeECHO("立刻结束程序END")
-        self.Tool.touchstopfile(content)
         if self.totalnode_bak > 1:  # 让其他节点抓紧结束
             self.Tool.touchfile(self.无法进行组队FILE, content=content)
+            self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+            # 这条命令一出，将强制结束所有的进程
+            self.Tool.touchstopfile(content)
         self.APPOB.关闭APP()
         self.移动端.关闭设备()
         return
@@ -2603,12 +2602,12 @@ class wzry_task:
                         TimeErr("连接不上设备. 退出")
                         return True
                 #
+                content = self.Tool.readfile(self.Tool.辅助同步文件)[0]+self.Tool.readfile(self.Tool.独立同步文件)[0]
+                TimeECHO(f"开始处理同步内容,同步原因:{content}")
+                self.APPOB.关闭APP()
                 # 如果个人能连上，检测是否有组队情况存在同步文件
                 if self.totalnode_bak > 1:
-                    if os.path.exists(self.Tool.辅助同步文件):
-                        self.APPOB.关闭APP()
                     # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在stopfile）
-                    content = self.Tool.readfile(self.Tool.辅助同步文件)[0]
                     TimeECHO(f"辅助同步内容:{content}")
                     sleeptime = 5*60 if "健康系统" in content else 10
                     self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode_bak,
@@ -2617,12 +2616,14 @@ class wzry_task:
                     if os.path.exists(self.无法进行组队FILE):
                         self.组队模式 = False
                         self.totalnode = 1
+                        # 在创建self.Tool.辅助同步文件时，会自动创建self.Tool.独立同步文件
+                        # 所以删除self.Tool.辅助同步文件没有问题
                         self.Tool.removefile(self.Tool.辅助同步文件)
                 else:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
                 # 重置完成
-                if not self.组队模式:
+                if not self.组队模式 and "健康系统" in content:
                     self.每日礼包_王者营地()
                 self.重启APP_acce(sleeptime=self.mynode*10)
                 self.登录游戏()
@@ -2654,7 +2655,7 @@ class wzry_task:
                     TimeECHO("只战一天, 领取礼包后退出")
                     self.Tool.touchfile(self.只战一天FILE, content=str(self.runstep))
                     self.每日礼包(强制领取=self.强制领取礼包)
-                    return self.END("只战一天")
+                    return True
                 #
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
