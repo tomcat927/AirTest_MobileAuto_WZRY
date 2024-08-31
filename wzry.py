@@ -132,7 +132,8 @@ class wzry_figure:
         self.普攻S.append(Template(r"tpl1719547004757.png", record_pos=(0.365, 0.198), resolution=(960, 540)))
         #
         self.装备S.append(Template(r"tpl1709220117102.png", record_pos=(0.401, -0.198), resolution=(960, 540)))
-        self.装备S.append(Template(r"tpl1719546874415.png", record_pos=(-0.403, -0.057), resolution=(960, 540)))
+        self.装备S.append(Template(r"tpl1725075714801.png", record_pos=(0.398, -0.203), resolution=(960, 540)))
+        self.装备S.append(Template(r"tpl1725076266344.png", record_pos=(0.399, -0.198), resolution=(960, 540)))
         #
         self.对战图片元素 = [self.钱袋]
         for i in self.普攻S[:1]:
