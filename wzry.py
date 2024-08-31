@@ -2270,9 +2270,6 @@ class wzry_task:
         装备poskey = f"装备pos({self.mynode})"
         移动poskey = f"移动pos({self.mynode})"
         普攻poskey = f"普攻pos({self.mynode})"
-        # 不同账户出装位置不同,避免点击错误, 可以删除装备位置
-        if 装备poskey in self.Tool.var_dict.keys():
-            del self.Tool.var_dict[装备poskey]
         # 开始模拟人手点击
         while self.判断对战中(处理=False):
             TimeECHO("加速对战中:对战按钮")
@@ -2280,6 +2277,9 @@ class wzry_task:
                 self.check_run_status()
             if self.Tool.存在同步文件():
                 return True
+            # 不同账户出装位置不同, 这里随机识别一次，更新未位置
+            if random.randint(1, 5) == 1:
+                装备pos = False
             if not 装备pos:
                 # 每一次尝试采用新的位置
                 存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
