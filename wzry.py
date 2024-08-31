@@ -2066,12 +2066,12 @@ class wzry_task:
 
     def 体验服更新(self):
         if self.Tool.timelimit("体验服更新", limit=60*60*3, init=False):
+            TimeECHO("体验服更新中")
             self.APPOB.关闭APP()
             from tiyanfu import tiyanfu
             ce = tiyanfu()
             ce.run()
             ce.APPOB.关闭APP()
-            self.APPOB.打开APP()
             return True
         else:
             TimeECHO("时间太短,暂时不体验服更新")
@@ -2532,8 +2532,6 @@ class wzry_task:
         if self.totalnode_bak > 1:  # 让其他节点抓紧结束
             self.Tool.touchfile(self.无法进行组队FILE, content=content)
             self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
-            # 这条命令一出，将强制结束所有的进程
-            self.Tool.touchstopfile(content)
         self.APPOB.关闭APP()
         self.移动端.关闭设备()
         return
@@ -2597,6 +2595,8 @@ class wzry_task:
                     if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                         content = "连接不上设备. 所有节点全部准备终止"
                         TimeErr(content)
+                        # 这条命令一出，将强制结束所有的进程
+                        self.Tool.touchstopfile(content)
                         return self.END(content)
                     else:
                         TimeErr("连接不上设备. 退出")
@@ -2655,7 +2655,7 @@ class wzry_task:
                     TimeECHO("只战一天, 领取礼包后退出")
                     self.Tool.touchfile(self.只战一天FILE, content=str(self.runstep))
                     self.每日礼包(强制领取=self.强制领取礼包)
-                    return True
+                    return self.END(content)
                 #
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
