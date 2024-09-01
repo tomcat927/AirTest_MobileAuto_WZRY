@@ -373,6 +373,7 @@ class wzry_task:
         # 某些加速模块的初始化
         # 如果已经判断在房间中了,短时间内执行相关函数，不再进行判断
         self.当前界面 = "未知"
+        self.当前状态 = "未知"  # ["对战","礼包"] # 根据状态, 减少一些界面的判断，只在主函数中进行设备，避免子函数设置带来的混乱
         self.Tool.timelimit(timekey="当前界面", init=True)
 
     # 用不到，当二次开发调用wzry_task时, 可在init后，设置这个设置参数
@@ -472,8 +473,7 @@ class wzry_task:
             return True
         # 次数上限
         if times % 4 == 3:
-            self.重启APP_acce(10)
-            if not self.登录游戏():
+            if not self.重启并登录(10):
                 self.重启APP_acce(10)
                 return self.进入大厅(times)
         #
@@ -580,13 +580,7 @@ class wzry_task:
         #
         if exists(self.图片.网络不可用):
             content = "网络不可用,取消登录,需要重启设备"
-            TimeErr(content)
-            if self.组队模式:
-                TimeErr("需要重启设备:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode}){fun_name(1)}.{content}")
-            else:
-                TimeECHO("需要重启设备:创建单节点同步")
-                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
+            self.创建同步文件(content)
             return True
         if self.判断大厅中():
             return True
@@ -626,18 +620,12 @@ class wzry_task:
         #
         # 这里是账户被退出的界面，需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
-            TimeECHO("需要重新登录")
-            #
             self.Tool.touchfile(self.重新登录FILE)
             if self.totalnode_bak > 1:
                 self.Tool.touchfile(self.无法进行组队FILE)
             #
-            if self.组队模式:
-                TimeErr("需要重新登录:创建同步文件")
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=f"({self.mynode})需要重新登录:创建同步文件")
-            else:
-                TimeECHO("需要重新登录:创建单节点同步")
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+            self.创建同步文件("需要重新登录")
+            #
             return True
         #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
@@ -760,11 +748,8 @@ class wzry_task:
         if times == 0:
             self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=True)
         if self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=False):
-            TimeErr(":单人进入人机匹配房间超时,touch同步文件")
-            if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件)
-            else:
-                self.Tool.touch同步文件(self.Tool.独立同步文件)
+            content = "单人进入人机匹配房间超时"
+            self.创建同步文件(content)
             return True
         #
         times = times+1
@@ -809,14 +794,7 @@ class wzry_task:
         禁赛提示 = Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
         if exists(禁赛提示):
             content = "禁赛提示无法进行匹配"
-            TimeECHO(content)
-            self.重启APP_acce(10)
-            if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
-                return True
-            else:
-                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
-                return True
+            return self.创建同步文件(content)
         #
         # 段位限制
         if not self.青铜段位:  # 其他段位有次数限制
@@ -911,8 +889,7 @@ class wzry_task:
             self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=True)
             while not 找到取消按钮:
                 if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=False):
-                    TimeErr("辅助进房超时退出")
-                    self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                    self.Tool.touch同步文件(self.Tool.辅助同步文件, "辅助进房超时退出")
                     break
                 if not self.check_run_status():
                     TimeErr("辅助进房失败")
@@ -1077,9 +1054,7 @@ class wzry_task:
             #
             if "模拟战" in self.对战模式:
                 if 队友确认5v5匹配:
-                    TimeErr(":模拟战误入5v5?")
-                    if self.组队模式:
-                        self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                    self.创建同步文件("模拟战误入5v5?")
                     return
                 队友确认匹配 = False
                 if 自己曾经确定过匹配:
@@ -1133,10 +1108,8 @@ class wzry_task:
             else:
                 break
             if self.Tool.timelimit(timekey="加载游戏", limit=60*10, init=False):
-                TimeECHO("加载时间过长.....重启APP")
-                self.重启APP_acce(10)
-                self.登录游戏()
-                return False
+                content = "加载游戏时间过长.....创建同步文件"
+                return self.创建同步文件(content)
         #
         关闭技能介绍1 = Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540))
         关闭技能介绍2 = Template(r"tpl1700918628072.png", record_pos=(-0.059, 0.211), resolution=(960, 540))
@@ -1158,13 +1131,8 @@ class wzry_task:
                 return True
             addtime = 60*10 if self.本循环参数.标准模式 else 0
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
-                TimeErr("结束人机匹配时间超时")
-                if self.组队模式:
-                    TimeErr("结束人机匹配时间超时 and 组队touch同步文件")
-                    self.Tool.touch同步文件(self.Tool.辅助同步文件)
-                else:
-                    self.Tool.touch同步文件(self.Tool.独立同步文件)
-                return
+                content = "结束人机匹配时间超时"
+                return self.创建同步文件(content)
             加速对战 = False
             if self.触摸对战:
                 加速对战 = True
@@ -2357,8 +2325,7 @@ class wzry_task:
             #
             if self.Tool.timelimit(timekey="endgame", limit=60*30, init=False):
                 TimeErr("对战中游戏时间过长,重启游戏")  # 存在对战的时间超过20min,大概率卡死了
-                self.重启APP_acce(10)
-                self.登录游戏()
+                self.重启并登录(10)
                 self.进入大厅()
                 return False
         return True
@@ -2425,12 +2392,7 @@ class wzry_task:
         if self.健康系统():
             self.APPOB.关闭APP()
             content = "检测到健康系统"
-            TimeErr(content)
-            if self.组队模式:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
-            else:
-                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
-            return True
+            return self.创建同步文件(content)
         else:
             return False
 
@@ -2454,11 +2416,7 @@ class wzry_task:
             if not connect_status():
                 # 单人模式创建同步文件后等待,组队模式则让全体返回
                 content = f"[{funs_name()}]失败:无法connect"
-                if self.组队模式:
-                    self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
-                else:
-                    self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
-                TimeECHO(content)
+                self.创建同步文件(content)
                 return False
         #
         return True
@@ -2475,10 +2433,7 @@ class wzry_task:
             self.Tool.timelimit(timekey=f"{fun_name(2)}", limit=timelimit, init=True)
         elif self.Tool.timelimit(timekey=f"{fun_name(2)}", limit=timelimit, init=False) or istep > nstep:
             content = f"{content}...........超时"
-            if self.组队模式 and touch同步:
-                self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
-            elif touch同步:
-                self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
+            self.创建同步文件(content)
             return True
         TimeECHO(content)
         return False
@@ -2489,6 +2444,30 @@ class wzry_task:
         self.当前界面 = "登录界面"
         self.Tool.timelimit(timekey="当前界面", limit=60*2, init=True)
         return True
+    #
+
+    def 重启并登录(self, sleeptime=0):
+        bakstate = self.当前状态
+        self.当前状态 = "重新启动"
+        self.重启APP_acce(sleeptime=sleeptime)
+        result = self.登录游戏()
+        self.当前状态 = bakstate
+        return result
+    #
+
+    def 创建同步文件(self, content=""):
+        """
+        * 遇到问题,需要重启程序时,统一创建同步文件，而不是立即重启
+        * 在主函数的开头，如果存在同步文件，则重启手机
+        """
+        content = f"{fun_name(2)}:{content}" if len(content) > 0 else f"{funs_name()}.创建同步文件"
+        TimeECHO(content)
+        if self.组队模式:
+            self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
+            return True
+        else:
+            self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
+            return True
 
 # 开始运行
 
@@ -2496,6 +2475,7 @@ class wzry_task:
         # 初始化
         if not self.check_run_status():
             return
+        #
         if self.房主:
             TimeECHO("人机匹配对战循环:"+"->"*10)
         # 进入房间
@@ -2517,6 +2497,7 @@ class wzry_task:
             return
         # 结束对战
         self.结束人机匹配()
+        #
         if not self.check_run_status():
             return
         #
@@ -2527,11 +2508,23 @@ class wzry_task:
         #
     #
 
-    def END(self, content=""):  # 立刻结束
+    def STOP(self, content=""):
+        """
+        #立刻结束所有进程
+        """
+        self.END(content)
+        self.Tool.touchstopfile(content)
+        self.创建同步文件(content)
+    #
+    #
+
+    def END(self, content=""):
+        """
+        # 立刻结束本进程
+        """
         TimeECHO("立刻结束程序END")
         if self.totalnode_bak > 1:  # 让其他节点抓紧结束
             self.Tool.touchfile(self.无法进行组队FILE, content=content)
-            self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
         self.APPOB.关闭APP()
         self.移动端.关闭设备()
         return
@@ -2545,6 +2538,7 @@ class wzry_task:
             except:
                 self.Tool.touchfile(self.只战一天FILE, content=str(self.runstep))
         while True:
+            self.当前状态 = "状态检查"
             # ------------------------------------------------------------------------------
             # 检测是否出现控制冲突,双脚本情况
             if self.myPID != self.Tool.readfile(self.WZRYPIDFILE)[0].strip():
@@ -2579,8 +2573,7 @@ class wzry_task:
                     # 同步之后再进入新的一天初始化，再同步，就有很多时间上的浪费
                     self.Tool.touch同步文件(content="新的一天初始化")
                 else:
-                    self.重启APP_acce(20)
-                    self.登录游戏()
+                    self.重启并登录(20)
             # ------------------------------------------------------------------------------
             # 健康系统禁赛、系统卡住、连接失败等原因导致check_run_status不通过，这里统一处理
             if self.Tool.存在同步文件():
@@ -2596,8 +2589,7 @@ class wzry_task:
                         content = "连接不上设备. 所有节点全部准备终止"
                         TimeErr(content)
                         # 这条命令一出，将强制结束所有的进程
-                        self.Tool.touchstopfile(content)
-                        return self.END(content)
+                        return self.STOP(content)
                     else:
                         TimeErr("连接不上设备. 退出")
                         return True
@@ -2625,8 +2617,7 @@ class wzry_task:
                 # 重置完成
                 if not self.组队模式 and "健康系统" in content:
                     self.每日礼包_王者营地()
-                self.重启APP_acce(sleeptime=self.mynode*10)
-                self.登录游戏()
+                self.重启并登录(sleeptime=self.mynode*10)
                 # 最后一次校验
                 if not self.check_run_status():
                     sleep(20)
@@ -2649,6 +2640,7 @@ class wzry_task:
                 self.Tool.touchfile(self.无法进行组队FILE)
                 只战一天 = os.path.exists(self.只战一天FILE)
                 今日休战 = os.path.exists(self.今日休战FILE)
+                self.当前状态 = "领取礼包"
                 #
                 if 只战一天:
                     TimeECHO("="*20)
@@ -2705,6 +2697,7 @@ class wzry_task:
                 self.Tool.removefile(self.今日休战FILE)
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
+            self.当前状态 = "状态检查"
             #
             if os.path.exists(self.重新登录FILE):
                 if self.Tool.timelimit(timekey="检测王者登录", limit=60*60*4, init=False):
@@ -2712,8 +2705,7 @@ class wzry_task:
                     self.Tool.removefile(self.重新登录FILE)
                     if self.Tool.totalnode_bak > 1:
                         self.Tool.removefile(self.无法进行组队FILE)
-                    self.重启APP_acce()
-                    self.登录游戏()
+                    self.重启并登录()
             #
             if os.path.exists(self.重新登录FILE):
                 TimeECHO("存在重新登录文件,登录后删除")
@@ -2811,6 +2803,7 @@ class wzry_task:
                 self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
+            self.当前状态 = "对战状态"
             self.APPOB.打开APP()
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------
@@ -2822,6 +2815,7 @@ class wzry_task:
                 continue
             # 礼包
             if self.runstep % 5 == 4:
+                self.当前状态 = "领取礼包"
                 self.每日礼包()
             #
             if self.移动端.实体终端 and self.Tool.timelimit("休息手机", limit=60*60, init=False):
