@@ -2076,7 +2076,9 @@ class wzry_task:
             元素集合 = [战绩元素, 房间元素, 大厅元素, 对战元素]
         #
         # 极短时间内不重复判断
-        if not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False) or not self.Tool.timelimit(timekey="当前界面", limit=10, init=False):
+        # 此处不能调用 not self.Tool.timelimit(timekey="当前界面", limit=10, init=False)
+        # 因为调用后，会立刻重置timekey="当前界面"的时间，而又没有修改self.当前界面的内容，会卡死循环
+        if not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
             return self.当前界面
         #
         存在, 元素集合 = self.Tool.存在任一张图(元素集合, f"{fun_name(2)}.quick判断界面")
@@ -2109,7 +2111,7 @@ class wzry_task:
         #
         if not self.Tool.timelimit(timekey="当前界面", limit=60*2, init=False):
             if self.当前界面 in ["房间中", "大厅中", "登录界面"]:
-                TimeECHO(f"判断战绩页面: 采用历史的判断结果判定当前处在:{self.当前界面}")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         #
         存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
@@ -2126,15 +2128,15 @@ class wzry_task:
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                 self.当前界面 == "未知"
             else:
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return True
         elif self.当前界面 == "房间中":
             if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在大厅状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         elif self.当前界面 == "登录界面":
             if not self.Tool.timelimit(timekey="当前界面", limit=20, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在大厅状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
         #
@@ -2160,15 +2162,15 @@ class wzry_task:
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                 self.当前界面 == "未知"
             else:
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return True
         elif self.当前界面 == "对战中":
             if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在房间状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         elif self.当前界面 == "登录界面":
             if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在房间状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         if 存在:
@@ -2204,7 +2206,7 @@ class wzry_task:
     def 判断对战中(self, 处理=False):
         if self.当前状态 in ["领取礼包", "重新启动"]:
             TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
-            return
+            return False
         #
         if "模拟战" in self.对战模式:
             return self.判断对战中_模拟战(处理)
@@ -2217,15 +2219,15 @@ class wzry_task:
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                 self.当前界面 == "未知"
             else:
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 对战中 = True
         elif self.当前界面 == "大厅中":
             if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在对战状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         elif self.当前界面 == "登录界面":
             if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在对战状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         if not 对战中:
             对战中, self.图片.对战图片元素 = self.Tool.存在任一张图(self.图片.对战图片元素, "对战图片元素")
@@ -2355,15 +2357,15 @@ class wzry_task:
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                 self.当前界面 == "未知"
             else:
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面}")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 对战中 = True
         elif self.当前界面 == "大厅中":
             if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在对战状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         elif self.当前界面 == "登录界面":
             if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                TimeECHO(f"采用历史的判断结果判定当前处在:{self.当前界面},不在对战状态")
+                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
         if not 对战中:
             对战中, self.图片.对战图片元素_模拟战 = self.Tool.存在任一张图(self.图片.对战图片元素_模拟战, "对战图片元素_模拟战")
