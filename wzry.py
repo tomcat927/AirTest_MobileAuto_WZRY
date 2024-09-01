@@ -861,6 +861,7 @@ class wzry_task:
             while self.Tool.existsTHENtouch(确定按钮, "不匹配被禁赛的确定按钮"):
                 sleep(20)
                 if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=30, touch同步=True):
+                    self.创建同步文件("不匹配被禁赛, 超时无法进入")
                     return True
             return self.单人进入排位房间(times)
         return True
@@ -2536,7 +2537,7 @@ class wzry_task:
         """
         # 立刻结束本进程
         """
-        TimeECHO("立刻结束程序END")
+        TimeECHO(f"立刻结束程序END.{content}")
         if self.totalnode_bak > 1:  # 让其他节点抓紧结束
             self.Tool.touchfile(self.无法进行组队FILE, content=content)
         self.APPOB.关闭APP()
@@ -2661,7 +2662,7 @@ class wzry_task:
                     TimeECHO("只战一天, 领取礼包后退出")
                     self.Tool.touchfile(self.只战一天FILE, content=str(self.runstep))
                     self.每日礼包(强制领取=self.强制领取礼包)
-                    return self.END(content)
+                    return self.END(content="只战一天,本进程结束")
                 #
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
