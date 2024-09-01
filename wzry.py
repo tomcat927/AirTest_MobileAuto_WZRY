@@ -745,9 +745,7 @@ class wzry_task:
         if not self.check_run_status():
             return True
         #
-        if times == 0:
-            self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=True)
-        if self.Tool.timelimit(timekey="单人进入人机匹配房间", limit=60*10, init=False):
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10):
             content = "单人进入人机匹配房间超时"
             self.创建同步文件(content)
             return True
@@ -820,6 +818,12 @@ class wzry_task:
                 sleep(20)
                 if self.Tool.existsTHENtouch(开始练习, "开始练习"):
                     sleep(10)
+                # 信誉分很低时，这里会被禁数十小时，此时不适合继续等待下去了
+                if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10):
+                    self.创建同步文件("不匹配被禁赛")
+                    return True
+                if not self.check_run_status():
+                    return True
             return self.单人进入人机匹配房间(times)
         return True
 
