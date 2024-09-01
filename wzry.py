@@ -373,7 +373,7 @@ class wzry_task:
         # 某些加速模块的初始化
         # 如果已经判断在房间中了,短时间内执行相关函数，不再进行判断
         self.当前界面 = "未知"
-        self.当前状态 = "未知"  # ["对战","礼包"] # 根据状态, 减少一些界面的判断，只在主函数中进行设备，避免子函数设置带来的混乱
+        self.当前状态 = "未知"  # ["领取礼包","对战状态","未知","重新启动","状态检查"] 根据状态, 减少一些界面的判断，只在主函数中进行设备，避免子函数设置带来的混乱
         self.Tool.timelimit(timekey="当前界面", init=True)
 
     # 用不到，当二次开发调用wzry_task时, 可在init后，设置这个设置参数
@@ -2095,6 +2095,9 @@ class wzry_task:
     #
 
     def 判断战绩页面(self):
+        if self.当前状态 in ["领取礼包", "重新启动"]:
+            TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
+            return False
         #
         if self.quick判断界面() in ["大厅中", "房间中", "对战中", "对战中_模拟战"]:
             return False
@@ -2141,6 +2144,9 @@ class wzry_task:
         return 存在
 
     def 判断房间中(self, 处理=True):
+        if self.当前状态 in ["重新启动"]:
+            TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
+            return
         #
         if self.quick判断界面() in ["大厅中", "对战中", "战绩页面", "对战中_模拟战"]:
             return False
@@ -2191,6 +2197,10 @@ class wzry_task:
         return 存在
 
     def 判断对战中(self, 处理=False):
+        if self.当前状态 in ["领取礼包", "重新启动"]:
+            TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
+            return
+        #
         if "模拟战" in self.对战模式:
             return self.判断对战中_模拟战(处理)
         #
