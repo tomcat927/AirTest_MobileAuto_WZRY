@@ -2076,8 +2076,14 @@ class wzry_task:
             元素集合 = [战绩元素, 房间元素, 大厅元素, 对战元素]
         #
         # 极短时间内不重复判断
-        # 此处不能调用 not self.Tool.timelimit(timekey="当前界面", limit=10, init=False)
-        # 因为调用后，会立刻重置timekey="当前界面"的时间，而又没有修改self.当前界面的内容，会卡死循环
+        # 此处不能调用 self.Tool.timelimit(timekey="当前界面", limit=10, init=False)
+        # 因为调用后，会立刻重置 self.Tool.timedict["当前界面"] ，而又没有修改 self.当前界面 的内容，会卡死循环
+        # 因此采用复制时间戳的方式
+        try:  # 直接读取字典容易错，采用try的方式
+            self.Tool.timedict["quick判断界面"] = max(self.Tool.timedict["quick判断界面"], self.Tool.timedict["当前界面"])
+        except:
+            self.Tool.timedict["quick判断界面"] = 0
+        #
         if not self.Tool.timelimit(timekey="quick判断界面", limit=10, init=False):
             return self.当前界面
         #
