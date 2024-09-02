@@ -1045,7 +1045,7 @@ class wzry_task:
                 self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=False)
             #
             if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
-                TimeErr("超时,队友未确认匹配或大概率程序卡死")
+                TimeECHO("等待队友确认匹配中")
             if self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=False):
                 TimeErr("超时太久,退出匹配")
                 return False
