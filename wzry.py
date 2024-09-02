@@ -1720,7 +1720,7 @@ class wzry_task:
         #
         if 初始化:
             初始化成功 = self.王者营地.营地初始化(初始化检查=True)
-            self.王者营地.APPOB.关闭APP()
+            self.王者营地.STOP()  # 杀掉后台,提高虚拟机的稳定性
             self.APPOB.打开APP()
             return 初始化成功
         #
@@ -1744,7 +1744,7 @@ class wzry_task:
         else:
             TimeErr("王者营地礼包领取失败")
             self.王者营地礼包 = False
-        self.王者营地.STOP()  # 杀掉后台,提高王者、WDA活性
+        self.王者营地.STOP()  # 杀掉后台,提高虚拟机的稳定性
         self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
         #
         self.APPOB.打开APP()

@@ -107,6 +107,7 @@ class wzyd_libao:
 
     def STOP(self):
         self.APPOB.关闭APP()
+        sleep(5)
     #
 
     def RUN(self):
