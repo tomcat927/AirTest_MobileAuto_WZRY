@@ -740,7 +740,6 @@ class wzry_task:
                 return True
         if self.判断房间中():
             return True
-        TimeECHO(f"进入大厅,开始{fun_name(1)}")
         self.进入大厅()
         if not self.check_run_status():
             return True
@@ -838,7 +837,6 @@ class wzry_task:
                 return True
         if self.判断房间中():
             return True
-        TimeECHO(f"进入大厅,开始{fun_name(1)}")
         self.进入大厅()
         if not self.check_run_status():
             return True
@@ -947,7 +945,6 @@ class wzry_task:
                 return True
         if self.判断房间中():
             return True
-        TimeECHO(f"进入大厅,开始{fun_name(1)}")
         self.进入大厅()
         if not self.check_run_status():
             return True
