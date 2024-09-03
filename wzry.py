@@ -1764,7 +1764,7 @@ class wzry_task:
             TimeECHO("准备进入KPL观赛入口")
             self.进入大厅()
             # 第一次识别失败时,更新观赛入口
-            self.Tool.存在任一张图([KPL观赛界面], "KPL观赛界面", savepos=True)
+            self.Tool.存在任一张图([KPL观赛入口], "KPL观赛入口", savepos=True)
             if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
                 return self.KPL每日观赛(times, 观赛时长)
             sleep(30)
