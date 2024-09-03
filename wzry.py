@@ -467,7 +467,7 @@ class wzry_task:
             return False
         #
         times = times+1
-        TimeECHO(f"尝试进入大厅{times}")
+        TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
         self.APPOB.打开APP()
         if self.判断大厅中():
             return True
@@ -575,7 +575,7 @@ class wzry_task:
         if times > 6:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
-        TimeECHO(f"登录游戏{times}")
+        TimeECHO(f"{fun_name(2)}登录游戏{times}")
         self.APPOB.打开APP()
         #
         if exists(self.图片.网络不可用):
