@@ -970,28 +970,23 @@ class wzry_task:
         任意位置继续2 = Template(r"tpl1693660165029.png", record_pos=(-0.001, 0.244), resolution=(960, 540))
         任意位置继续3 = Template(r"tpl1693660182958.png", record_pos=(-0.004, 0.25), resolution=(960, 540))
         邀请好友 = Template(r"tpl1693660666527.png", record_pos=(0.408, 0.166), resolution=(960, 540))  # 就是进入房间
-        #
-        if not self.Tool.existsTHENtouch(self.图片.大厅万象天工, "大厅万象天工", savepos=True):
-            return self.单人进入人机匹配房间_模拟战(times)
-        sleep(2)
-        if not self.Tool.existsTHENtouch(self.图片.王者模拟战图标, "王者模拟战图标", savepos=True):
-            return self.单人进入人机匹配房间_模拟战(times)
-        sleep(2)
-        #
+        # 新手要跳过教学局,自己先跳过
+        # 不要管是否识别成功，就是按，后面加一个检测，没有检测成果就是按失败了，再返回即可
+        if self.Tool.existsTHENtouch(self.图片.大厅万象天工, "大厅万象天工", savepos=True):
+            sleep(2)
+        if self.Tool.existsTHENtouch(self.图片.王者模拟战图标, "王者模拟战图标", savepos=True):
+            sleep(2)
         while self.Tool.existsTHENtouch(任意位置继续, "任意位置继续"):
             sleep(5)
         while self.Tool.existsTHENtouch(任意位置继续2, "任意位置继续"):
             sleep(5)
         while self.Tool.existsTHENtouch(任意位置继续3, "任意位置继续"):
             sleep(5)
-        #
-        # 新手要跳过教学局,自己先跳过
-        #
         pos = exists(邀请好友)
         if not pos:
             TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口")
-            del self.Tool.var_dict["大厅万象天工"]
-            del self.Tool.var_dict["王者模拟战图标"]
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅万象天工", "王者模拟战图标"])):
+                del self.Tool.var_dict[delstr]
         self.Tool.var_dict["模拟战.邀请好友"] = pos
         self.Tool.existsTHENtouch(邀请好友, "模拟战.邀请好友", savepos=True)
         if self.判断房间中(处理=False):
@@ -1082,6 +1077,7 @@ class wzry_task:
                 sleep(1)
                 self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
                 sleep(5)
+                # 这里是用savepos的好处就是那个英雄的熟练度低点哪个英雄
                 self.Tool.existsTHENtouch(self.参战英雄头像, "参战英雄头像", savepos=True)
                 sleep(1)
             # 分路重复.png
@@ -1093,13 +1089,7 @@ class wzry_task:
                     self.Tool.existsTHENtouch(self.备战英雄线路, "备战英雄线路", savepos=True)
                     self.Tool.existsTHENtouch(self.备战英雄头像, "备战英雄", savepos=True)
             # 确定英雄后一般要等待队友确定，这需要时间
-            sleep(5)
-            #   确定
-            self.Tool.existsTHENtouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定英雄", savepos=True)  # 这里是用savepos的好处就是那个英雄的熟练度低点哪个英雄
-            sleep(5)
-            # 万一是房主
-            self.Tool.existsTHENtouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定阵容", savepos=True)
-            sleep(5)
+            self.Tool.LoopTouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定英雄", loop=6, savepos=False)
         # 加载游戏界面
         加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
@@ -1588,6 +1578,8 @@ class wzry_task:
             return self.玉镖夺魁(times)
         sleep(10)
         玉镖夺魁入口 = Template(r"tpl1724316055269.png", record_pos=(-0.436, -0.154), resolution=(960, 540))
+        # 有则更新，无则用旧的
+        self.Tool.存在任一张图([玉镖夺魁入口], "玉镖夺魁入口", savepos=True)
         if not self.Tool.existsTHENtouch(玉镖夺魁入口, "玉镖夺魁入口", savepos=True):
             return self.玉镖夺魁(times)
         sleep(10)
@@ -1766,11 +1758,13 @@ class wzry_task:
         KPL观赛界面.append(Template(r"tpl1707396755590.png", record_pos=(-0.354, -0.264), resolution=(960, 540)))
         KPL观赛界面.append(Template(r"tpl1707398710560.png", record_pos=(-0.3, -0.269), resolution=(960, 540)))
         KPL观赛界面.append(KPL战令入口)
+        self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True)
         进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
         if not 进入观赛界面:
             TimeECHO("准备进入KPL观赛入口")
             self.进入大厅()
-            # 第一次识别失败时
+            # 第一次识别失败时,更新观赛入口
+            self.Tool.存在任一张图([KPL观赛界面], "KPL观赛界面", savepos=True)
             if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
                 return self.KPL每日观赛(times, 观赛时长)
             sleep(30)
