@@ -42,10 +42,15 @@ class tiyanfu():
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         #
         self.体验服初始化FILE = f"WZRY.ce.{self.mynode}.临时初始化.txt"
+        self.只战一天FILE = f"WZRY.ce.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
         #
         self.timelimit = 60*60*2.0
         # 更新时间
         self.对战时间 = [3.0, 4.0]
+
+    def end(self):
+        self.APPOB.关闭APP()
+        self.移动端.关闭设备()
 
     def run(self, times=0):
         if not connect_status():
@@ -57,10 +62,12 @@ class tiyanfu():
             return
         times = times + 1
         TimeECHO(f"体验服更新中{times}")
-        self.APPOB.打开APP()
+        # 模拟器有时候会卡掉，重启设备才能好
         if times > 10 and times % 5 == 4:
+            self.移动端.重启设备()
+        if times > 10 and times % 5 == 0:
             self.APPOB.重启APP()
-
+        self.APPOB.打开APP()
         #
         waittime = 10
         # ------------------------------------------------------------------------------
@@ -181,5 +188,8 @@ if __name__ == "__main__":
     Settings.Config(config_file)
     ce = tiyanfu()
     ce.run()
+    if os.path.exists(ce.只战一天FILE):
+        ce.end()
+        exit()
     ce.looprun()
     exit()
