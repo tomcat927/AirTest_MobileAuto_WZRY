@@ -575,7 +575,7 @@ class wzry_task:
         if times > 6:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
-        TimeECHO(f"{fun_name(2)}登录游戏{times}")
+        TimeECHO(f"{fun_name(2)}>登录游戏{times}")
         self.APPOB.打开APP()
         #
         if exists(self.图片.网络不可用):
@@ -2414,6 +2414,10 @@ class wzry_task:
         #
         self.组队模式 = self.组队模式 and not os.path.exists(self.无法进行组队FILE)
         #
+        if os.path.exists(self.重新登录FILE):
+            content = f"[{funs_name()}]失败:存在[{self.重新登录FILE}]"
+            self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
+        #
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
             content = f"[{funs_name()}]失败:存在[{self.Tool.独立同步文件}]"
             if self.组队模式:
@@ -2631,12 +2635,39 @@ class wzry_task:
                 # 重置完成
                 if not self.组队模式 and "健康系统" in content:
                     self.每日礼包_王者营地()
-                self.重启并登录(sleeptime=self.mynode*10)
-                # 最后一次校验
-                if not self.check_run_status():
-                    sleep(20)
-                    continue
-            #
+                #
+                # 检测账号登录状况
+                if os.path.exists(self.重新登录FILE):
+                    content = "存在重新登录文件"
+                    TimeECHO(content)
+                    # 让别的进程不要再执行组队代码
+                    # 同时所有进程也不再创建和检测同步文件
+                    self.组队模式 = False
+                    self.Tool.touchfile(self.无法进行组队FILE, content=content)
+                    #
+                    startclock = self.对战时间[0]
+                    endclock = self.对战时间[1]
+                    # 在对战时间内, 则尝试重新登录，或者关闭设备等待结束
+                    if self.Tool.hour_in_span(startclock, endclock) == 0:
+                        lefthour = self.Tool.hour_in_span(endclock, startclock)
+                        if lefthour >= 4:  # 剩余不到4h了，退出吧
+                            TimeECHO(f"存在[{self.重新登录FILE}],每4h重新登录一次")
+                            self.Tool.removefile(self.重新登录FILE)
+                            self.移动端.重启重连设备(4*60*60)
+                            self.重启并登录()
+                            continue
+                        else:
+                            # 关闭设备，等待对战结束，执行本程序的结束程序
+                            self.移动端.重启重连设备(lefthour*60*60)
+
+                # 不存在登录文件的情况，就正常恢复单人对战
+                else:
+                    self.重启并登录(sleeptime=self.mynode*10)
+                    # 如果账户正常，则登录
+                    if not self.check_run_status() and self.Tool.hour_in_span(startclock, endclock) == 0:
+                        sleep(20)
+                        continue
+                    #
             if self.Tool.stopnow():
                 return self.END()
             #
@@ -2712,23 +2743,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             self.当前状态 = "状态检查"
-            #
-            if os.path.exists(self.重新登录FILE):
-                if self.Tool.timelimit(timekey="检测王者登录", limit=60*60*4, init=False):
-                    TimeECHO(f"存在[{self.重新登录FILE}],重新检测登录状态")
-                    self.Tool.removefile(self.重新登录FILE)
-                    if self.Tool.totalnode_bak > 1:
-                        self.Tool.removefile(self.无法进行组队FILE)
-                    self.重启并登录()
-            #
-            if os.path.exists(self.重新登录FILE):
-                TimeECHO("存在重新登录文件,登录后删除")
-                if self.Tool.totalnode_bak > 1 and not os.path.exists(self.无法进行组队FILE):
-                    self.Tool.touchfile(self.无法进行组队FILE)
-                for i in range(10):
-                    sleep(60)
-                    if self.Tool.存在同步文件():
-                        break
+            if not self.check_run_status:
                 continue
             # ------------------------------------------------------------------------------
             # 组队模式，单人模式判断
