@@ -556,6 +556,7 @@ class wzry_task:
     def 登录游戏(self, times=0, 检测到登录界面=False):
         if times == 0:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
+            self.Tool.removefile(self.重新登录FILE)
         times = times+1
         if not self.check_run_status():
             return True
@@ -621,8 +622,6 @@ class wzry_task:
         # 这里是账户被退出的界面，需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
             self.Tool.touchfile(self.重新登录FILE)
-            if self.totalnode_bak > 1:
-                self.Tool.touchfile(self.无法进行组队FILE)
             #
             self.创建同步文件("需要重新登录")
             #
@@ -1328,35 +1327,31 @@ class wzry_task:
             self.Tool.touchfile(self.免费商城礼包FILE)
             return
         #
-        if not self.check_run_status():
-            return True
-        #
         if 强制领取:
             self.Tool.timedict["领游戏礼包"] = 0
             self.Tool.timedict["领营地礼包"] = 0
             self.Tool.timedict["体验服更新"] = 0
         #
-        # 王者APP礼包
-        self.王者礼包()
-        #
-        #
-        # 非组队模式或者强制领取时领取营地礼包
+        # 在组队的过程中，不领取营地礼包，以及更新体验服
         if 强制领取 or not self.组队模式:
             self.每日礼包_王者营地()
+            #
+            if os.path.exists(self.更新体验服FILE):
+                self.体验服更新()
         #
-        if os.path.exists(self.更新体验服FILE):
-            self.体验服更新()
+        # 王者APP礼包
+        self.王者礼包()
 
     def 王者礼包(self):
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
+            if self.check_run_status():
+                TimeECHO("领礼包时.检测状态失败, 停止领取")
+                return
             self.APPOB.打开APP()
             self.进入大厅()
             #
-            if self.Tool.存在同步文件():
-                TimeECHO("领礼包时发现同步文件, 停止领取")
-                return True
-            if os.path.exists(self.重新登录FILE):
-                TimeECHO(f"领礼包时发现{self.重新登录FILE}, 停止领取")
+            if self.check_run_status():
+                TimeECHO("领礼包时.检测状态失败, 停止领取")
                 return
             #
             if os.path.exists(self.免费商城礼包FILE):
@@ -1700,8 +1695,8 @@ class wzry_task:
     def 每日礼包_王者营地(self, 初始化=False):
         if 初始化:
             TimeECHO(f"[{fun_name(1)}]检测王者营地状态")
-        if not self.check_run_status():
-            # 连接失败，不是营地有问题，所以返回True
+        if not connect_status():
+            # 营地只要能连接服务器即可，不采用WZRY的check_run_status
             if 初始化:
                 return True
             # 单纯的领取失败
@@ -2480,6 +2475,8 @@ class wzry_task:
         """
         content = f"{fun_name(2)}:{content}" if len(content) > 0 else f"{funs_name()}.创建同步文件"
         TimeECHO(content)
+        if self.totalnode_bak > 1:
+            self.Tool.touchfile(self.无法进行组队FILE, content=content)
         if self.组队模式:
             self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
             return True
@@ -2652,7 +2649,6 @@ class wzry_task:
                         lefthour = self.Tool.hour_in_span(endclock, startclock)
                         if lefthour >= 4:  # 剩余不到4h了，退出吧
                             TimeECHO(f"存在[{self.重新登录FILE}],每4h重新登录一次")
-                            self.Tool.removefile(self.重新登录FILE)
                             self.移动端.重启重连设备(4*60*60)
                             self.重启并登录()
                             continue
