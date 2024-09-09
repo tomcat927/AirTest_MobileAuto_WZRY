@@ -1344,13 +1344,13 @@ class wzry_task:
 
     def 王者礼包(self):
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
-            if self.check_run_status():
+            if not self.check_run_status():
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
                 return
             self.APPOB.打开APP()
             self.进入大厅()
             #
-            if self.check_run_status():
+            if not self.check_run_status():
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
                 return
             #
@@ -2251,7 +2251,8 @@ class wzry_task:
         while self.判断对战中(处理=False):
             TimeECHO("加速对战中:对战按钮")
             if self.Tool.timelimit(timekey="check_run_status", limit=60, init=False):
-                self.check_run_status()
+                if not self.check_run_status():
+                    return False
             if self.Tool.存在同步文件():
                 return True
             # 不同账户出装位置不同, 这里随机识别一次，更新未位置
@@ -2411,16 +2412,18 @@ class wzry_task:
         #
         if os.path.exists(self.重新登录FILE):
             content = f"[{funs_name()}]失败:存在[{self.重新登录FILE}]"
+            TimeECHO(content)
             self.Tool.touch同步文件(self.Tool.独立同步文件, content=content)
         #
         if self.Tool.存在同步文件(self.Tool.独立同步文件):
             content = f"[{funs_name()}]失败:存在[{self.Tool.独立同步文件}]"
+            TimeECHO(content)
             if self.组队模式:
                 self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
             TimeECHO(content)
             return False
         if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件):
-            TimeECHO(f"[{funs_name()}]:存在[{self.Tool.辅助同步文件}]")
+            TimeECHO(f"[{funs_name()}]失败:存在[{self.Tool.辅助同步文件}]")
             return False
         #
         if not connect_status():
@@ -2429,6 +2432,7 @@ class wzry_task:
             if not connect_status():
                 # 单人模式创建同步文件后等待,组队模式则让全体返回
                 content = f"[{funs_name()}]失败:无法connect"
+                TimeECHO(content)
                 self.创建同步文件(content)
                 return False
         #
