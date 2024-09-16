@@ -273,21 +273,18 @@ class wzry_task:
             self.Tool.init_clean()
         #
         # ------------------------------------------------------------------------------
-        # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
-        # 然后多节点进行同步后
-        # 再统一PID
-        if not connect_status():
-            self.移动端.连接设备()
-            if not self.移动端.device:
-                TimeErr("连接不上设备. 待同步后退出")
-                if self.totalnode_bak > 1:  # 让其他节点抓紧结束
-                    self.Tool.touchstopfile(f"{self.mynode}连接不上设备")
-        #
         # 强制同步
         if self.totalnode_bak > 1:
             sleep(self.mynode*5)
             self.Tool.touch同步文件(self.Tool.辅助同步文件, "初始化强制同步")
             self.Tool.必须同步等待成功(self.mynode, self.totalnode, sleeptime=10)
+        #
+        # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
+        # 然后多节点进行同步后
+        # 再统一PID
+        if not self.移动端.device:
+            content = f"连接不上设备{self.mynode}. 所有节点全部准备终止"
+            self.STOP(content)
         #
         self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
         #
