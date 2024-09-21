@@ -269,24 +269,15 @@ class wzry_task:
         self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt",
                             mynode=self.mynode, totalnode=self.totalnode)
         self.房主 = self.mynode == 0 or self.totalnode == 1
+        # ------------------------------------------------------------------------------
+        # DQWheel 框架的初始化
         if self.房主:
             self.Tool.init_clean()
-        #
-        # ------------------------------------------------------------------------------
         # 强制同步
         if self.totalnode_bak > 1:
             sleep(self.mynode*5)
             self.Tool.touch同步文件(self.Tool.辅助同步文件, "初始化强制同步")
             self.Tool.必须同步等待成功(self.mynode, self.totalnode, sleeptime=10)
-        #
-        # 先确定每个节点是否都可以正常连接,这里不要退出,仅生成需要退出的信息和创建同步文件
-        # 然后多节点进行同步后
-        # 再统一PID
-        if not self.移动端.device:
-            content = f"连接不上设备{self.mynode}. 所有节点全部准备终止"
-            self.STOP(content)
-        #
-        self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
         #
         # 统一本次运行的PID, 避免两个脚本同时运行出现控制冲突的情况
         self.WZRYPIDFILE = f".tmp.WZRY.{self.mynode}.PID.txt"
@@ -320,6 +311,10 @@ class wzry_task:
         #
         self.初始化(init=True)
         # 自定义参数可以通过self.设置参数() 插入
+        #
+        # ------------------------------------------------------------------------------
+        # 最后确定所有设备都已同步完成
+        self.Tool.barriernode(self.mynode, self.totalnode, "WZRYinit")
 
     #
     # 从__init_摘过来的一些初始化命令，适用于每天的初始化
