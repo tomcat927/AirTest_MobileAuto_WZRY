@@ -2478,8 +2478,6 @@ class wzry_task:
         """
         content = f"{fun_name(2)}:{content}" if len(content) > 0 else f"{funs_name()}.创建同步文件"
         TimeECHO(content)
-        if self.totalnode_bak > 1:
-            self.Tool.touchfile(self.无法进行组队FILE, content=content)
         if self.组队模式:
             self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
             return True
