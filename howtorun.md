@@ -23,7 +23,7 @@ chmod +x ~/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/ad
 ```
 
 * 开启模拟器/手机的ADB调试。
-* * 建议采用`960x540`的分辨率`dpi=160`，脚本内部有额外的加速命令，也可以利用我的[example/字典. 分路.android.var_dict_N.zip](example/字典. 分路.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)。
+* * 建议采用`960x540`的分辨率`dpi=160`，脚本内部有额外的加速命令，也可以利用我的[example/字典.分路.android.var_dict_N.zip](example/字典.分路.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)。
 * * 其他分辨率也可以运行，代码会自动生成你的字典文件`android.var_dict_mynode.txt`，执行速度会越来越快。但是有些活动图标在不同的分辨率上显示效果不同，可能无法识别成功，需要你去修改代码。
 
 ![Alt text](doc/LDplayer.png)
@@ -72,7 +72,8 @@ LINK_dict = {
 ```
 [client]
 totalnode = 2
-# 不设置BlueStackdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
+# 不设置BlueStackdir，脚本也可以正常运行。
+# 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
 BlueStackdir = C:\Program Files\BlueStacks_nxt
 multiprocessing = True
 LINK_dict = {
@@ -87,7 +88,8 @@ LINK_dict = {
 [client]
 # 节点配置
 totalnode = 2
-# 不设置LDPlayerdir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
+# 不设置LDPlayerdir，脚本也可以正常运行。
+# 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
 LDPlayerdir = D:\GreenSoft\LDPlayer
 multiprocessing = True
 LINK_dict = {
@@ -102,7 +104,9 @@ LINK_dict = {
 [client]
 # 节点配置
 totalnode = 2
-# 不设置MuMudir，脚本也可以正常运行。设置后支持模拟器的操作，7*24h运行时更省电
+# 不设置MuMudir，脚本也可以正常运行。
+脚本也可以正常运行。
+# 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
 MuMudir = D:\Program Files\Netease\MuMu Player 12\shell
 multiprocessing = True
 LINK_dict = {
@@ -121,7 +125,9 @@ logfile={
 ```
 # 节点配置
 totalnode = 3
-# 不设置dockercontain，脚本也可以正常运行。设置后支持容器的操作，7*24h运行时更省电
+# 不设置dockercontain，脚本也可以正常运行。
+脚本也可以正常运行。
+# 设置后支持关闭、启动、容器等操作，7*24h运行时更省电。
 dockercontain = {
     0: "androidcontain0.high",
     1: "androidcontain1"}
