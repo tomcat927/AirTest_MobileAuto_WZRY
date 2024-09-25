@@ -195,11 +195,15 @@ class wzry_figure:
         self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699677835926.png", record_pos=(0.011, -0.134), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699677870739.png", record_pos=(-0.369, 0.085), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
+        self.结算页面元素 = []
+        self.结算页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))
+        self.结算页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))
+        self.结算页面元素.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
+        self.结算页面元素.append(Template(r"tpl1727235773717.png", record_pos=(0.458, -0.24), resolution=(960, 540)))
+        self.结算页面元素.append(Template(r"tpl1727235767022.png", record_pos=(0.028, 0.252), resolution=(960, 540)))
+        self.结算页面元素.append(Template(r"tpl1727236520434.png", record_pos=(0.103, -0.067), resolution=(960, 540)))
         #
         self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
         self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
@@ -1107,7 +1111,6 @@ class wzry_task:
         if "模拟战" in self.对战模式:
             return self.结束人机匹配_模拟战()
         self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=True)
-        jixu = False
 
         while True:
             if not self.check_run_status():
@@ -1116,109 +1119,51 @@ class wzry_task:
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
+            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
+                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
+            # 对战阶段，处理对战
             加速对战 = False
             if self.触摸对战:
                 加速对战 = True
             if self.判断对战中(加速对战):
-                jixu = False
                 sleep(30)
                 continue
+            # 已返回房间或大厅
             if self.判断房间中(处理=False):
                 return
-            if 加速对战:
-                self.判断对战中(加速对战)
             if self.判断大厅中():
                 return
-            if 加速对战:
-                self.判断对战中(加速对战)
-            每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
-            self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
-            if 加速对战:
-                self.判断对战中(加速对战)
-            确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
-            self.Tool.existsTHENtouch(确定按钮, "回归对战的奖励确定按钮|新赛季奖励按钮", savepos=False)
-            if 加速对战:
-                self.判断对战中(加速对战)
-            if exists(self.图片.返回房间按钮):
-                jixu = True
-            #
             # 健康系统直接重新同步
             if self.健康系统_常用命令():
                 return True
             #
+            # S37 更新了结算动画
+            self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
+            点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
+            存在, self.图片.结算页面元素 = self.Tool.存在任一张图(self.图片.结算页面元素, "对战.结算页面元素")
+            if 存在:
+                if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
+                    TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
+                    self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+            self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
+            #
+            # 对战结算时的弹窗
+            每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
+            self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
+            确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
+            self.Tool.LoopTouch(确定按钮, "回归对战|新赛季|友情币等奖励确定按钮", savepos=False)
+            # 奇怪的结算画面
             游戏结束了 = Template(r"tpl1694360304332.png", record_pos=(-0.011, -0.011), resolution=(960, 540))
             if exists(游戏结束了):
                 self.Tool.existsTHENtouch(Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540)))
             if not self.check_run_status():
                 return
-
-            if 加速对战:
-                self.判断对战中(加速对战)
             # 有时候会莫名进入分享界面
             if exists(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540))):
                 TimeECHO("分享界面")
                 self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540)))
-                jixu = True
                 sleep(2)
                 self.确定按钮()
-
-            # 有时候会莫名进入MVP分享界面
-            pos = exists(Template(r"tpl1689727624208.png", record_pos=(0.235, -0.125), resolution=(960, 540)))
-            if pos:
-                TimeECHO("mvp分享界面")
-                self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540)))
-                jixu = True
-                sleep(2)
-            #
-            # 都尝试一次返回
-            if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
-                sleep(2)
-                self.确定按钮()
-
-            if self.Tool.existsTHENtouch(Template(r"tpl1689667161679.png", record_pos=(-0.001, 0.226), resolution=(960, 540))):
-                TimeECHO("MVP继续")
-                jixu = True
-                sleep(2)
-
-            # 胜利页面继续
-            if self.Tool.existsTHENtouch(Template(r"tpl1689668968217.png", record_pos=(0.002, 0.226), resolution=(960, 540))):
-                TimeECHO("继续1/3")
-                jixu = True
-                sleep(2)
-            # 显示mvp继续
-            if self.Tool.existsTHENtouch(Template(r"tpl1689669015851.png", record_pos=(-0.002, 0.225), resolution=(960, 540))):
-                TimeECHO("继续2/3")
-                jixu = True
-                sleep(2)
-            if self.Tool.existsTHENtouch(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540))):
-                TimeECHO("友情积分继续2/3")
-                jixu = True
-                self.Tool.existsTHENtouch(Template(r"tpl1689669113076.png", record_pos=(-0.002, 0.179), resolution=(960, 540)))
-                sleep(2)
-            if 加速对战:
-                self.判断对战中(加速对战)
-
-            # todo, 暂时为空
-            if self.Tool.existsTHENtouch(Template(r"tpl1689670032299.png", record_pos=(-0.098, 0.217), resolution=(960, 540))):
-                TimeECHO("超神继续3/3")
-                jixu = True
-                sleep(2)
-            if self.Tool.existsTHENtouch(Template(r"tpl1692955597109.png", record_pos=(-0.095, 0.113), resolution=(960, 540))):
-                TimeECHO("网络卡顿提示")
-                jixu = True
-                sleep(2)
-            #
-            if not self.check_run_status():
-                return True
-            if 加速对战:
-                self.判断对战中(加速对战)
-            sleep(10)
-            if not jixu:
-                if self.Tool.timelimit(timekey="结束人机匹配", limit=60*2, init=False):
-                    jixu = True
-                TimeECHO("未监测到继续,sleep...")
-                sleep(20)
-                continue
             # 返回房间/大厅
             if self.对战结束返回房间:
                 if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
@@ -2106,6 +2051,8 @@ class wzry_task:
                 return False
         #
         存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
+        if not 存在:
+            存在, self.图片.结算页面元素 = self.Tool.存在任一张图(self.图片.结算页面元素, "结算页面元素")
         if 存在:
             self.当前界面 == "战绩页面"
             self.Tool.timelimit(timekey="当前界面", init=True)
