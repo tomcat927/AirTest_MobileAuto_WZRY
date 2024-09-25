@@ -55,6 +55,15 @@ LINK_dict = {
     0: "Android:///192.168.192.10:5555"}
 ```
 
+* 模拟器单开不组队
+
+```
+[client]
+mynode = 1
+LINK_dict = {
+    1: "Android:///127.0.0.1:16416"}
+```
+
 * 控制两个安卓设备组队
 
 ```
@@ -119,6 +128,7 @@ logfile={
     0: "result.0.txt",
     1: "result.1.txt"}
 ```
+
 
 * Linux控制docker容器多开组队
 
