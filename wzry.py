@@ -997,6 +997,7 @@ class wzry_task:
             return True
         #
         times = times+1
+        self.APPOB.打开APP()
         #
         self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
@@ -1119,6 +1120,7 @@ class wzry_task:
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
+            self.APPOB.打开APP()
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
                 self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
             # 对战阶段，处理对战
@@ -1187,6 +1189,7 @@ class wzry_task:
             return True
         self.Tool.timelimit(timekey="结束模拟战", limit=60*20, init=True)
         while True:
+            self.APPOB.打开APP()
             if self.Tool.timelimit(timekey="结束模拟战", limit=60*30, init=False) or self.健康系统() or self.判断大厅中():
                 TimeErr("结束游戏时间过长 OR 健康系统 OR 大厅中")
                 return self.进入大厅()
