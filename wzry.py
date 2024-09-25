@@ -1448,9 +1448,8 @@ class wzry_task:
         找到商城入口 = False
         找到商城入口, 商城入口 = self.Tool.存在任一张图(商城入口, f"{fun_name(1)}商城入口", savepos=True)
         if not 找到商城入口:
-            TimeECHO(f"无法找到商城入口")
-            TimeECHO(f"按照960x540的分辨率强制设定坐标")
-            self.Tool.var_dict[f"{fun_name(1)}商城入口"] = (925, 114)
+            TimeECHO(f"无法找到商城入口, 尝试计算坐标")
+            self.Tool.cal_record_pos(商城入口[0].record_pos, self.移动端.resolution, f"{fun_name(1)}商城入口", savepos=True)
         self.Tool.existsTHENtouch(商城入口[0], f"{fun_name(1)}商城入口", savepos=True)
         sleep(30)
         进入商城界面 = False
@@ -1510,10 +1509,8 @@ class wzry_task:
             # savepos 如果找到会自动替换上一次的字典
             存在大厅祈愿, self.图片.大厅祈愿 = self.Tool.存在任一张图(self.图片.大厅祈愿, "大厅祈愿", savepos=True)
             if not 存在大厅祈愿:
-                TimeECHO(f"玉镖夺魁: 找不到祈愿入口")
-                TimeECHO(f"按照960x540的分辨率强制设定坐标")
-                # 这里是绝对坐标，不适用于其他分辨率的情况
-                self.Tool.var_dict["大厅祈愿"] = (905, 168)
+                TimeECHO(f"玉镖夺魁: 找不到祈愿入口, 尝试计算坐标")
+                self.Tool.cal_record_pos(self.图片.大厅祈愿[0].record_pos, self.移动端.resolution, "大厅祈愿", savepos=True)
         if not self.Tool.existsTHENtouch(self.图片.大厅祈愿[0], "大厅祈愿", savepos=True):
             return self.玉镖夺魁(times)
         sleep(10)
