@@ -465,8 +465,7 @@ class wzry_task:
         #
         times = times+1
         TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
-        if self.devmode:
-            self.APPOB.前台APP(2)
+        self.APPOB.前台APP(2)
         self.APPOB.打开APP()
         if self.判断大厅中():
             return True
@@ -576,8 +575,7 @@ class wzry_task:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
         TimeECHO(f"{fun_name(2)}>登录游戏{times}")
-        if self.devmode:
-            self.APPOB.前台APP(2)
+        self.APPOB.前台APP(2)
         self.APPOB.打开APP()
         #
         if exists(self.图片.网络不可用):
@@ -2785,8 +2783,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.当前状态 = "对战状态"
-            if self.devmode:
-                self.APPOB.前台APP(2)
+            self.APPOB.前台APP(2)
             self.APPOB.打开APP()
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------
