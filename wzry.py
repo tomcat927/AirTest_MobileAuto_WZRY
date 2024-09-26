@@ -96,7 +96,8 @@ class wzry_figure:
         self.进入人机匹配 = Template(r"tpl1689666034409.png", record_pos=(0.056, 0.087), resolution=(960, 540))
         # 回忆礼册
         self.大厅回忆礼册 = Template(r"tpl1723334115249.png", record_pos=(0.206, 0.244), resolution=(960, 540))
-        self.礼册记忆碎片 = Template(r"tpl1727227611850.png", record_pos=(0.428, 0.214), resolution=(960, 540))
+        self.获取回忆之证 = Template(r"tpl1727227611850.png", record_pos=(0.428, 0.214), resolution=(960, 540))
+        self.礼册记忆碎片 = Template(r"tpl1723334128219.png", record_pos=(0.355, 0.222), resolution=(960, 540))
         #
         self.大厅祈愿 = []
         self.大厅祈愿.append(Template(r"tpl1724317603873.png", record_pos=(0.443, -0.105), resolution=(960, 540)))
@@ -341,7 +342,7 @@ class wzry_task:
         #
         # 开发测试的参数
         self.WZ新功能 = True    # 测试稳定版代码使用, 适用于赛季初，不同版本账户的功能界面不同时采用
-        self.debug = False if init else self.debug  # 测试开发版代码时使用
+        self.devmode = False if init else self.devmode  # 测试开发版代码时使用
         # 其他参数
         self.totalnode = self.totalnode_bak
         self.选择人机模式 = True  # 是否根据计算参数选择5v5的人机模式，不然就采用上一次的模式
@@ -464,6 +465,8 @@ class wzry_task:
         #
         times = times+1
         TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
+        if self.devmode:
+            self.APPOB.前台APP(2)
         self.APPOB.打开APP()
         if self.判断大厅中():
             return True
@@ -573,6 +576,8 @@ class wzry_task:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
         TimeECHO(f"{fun_name(2)}>登录游戏{times}")
+        if self.devmode:
+            self.APPOB.前台APP(2)
         self.APPOB.打开APP()
         #
         if exists(self.图片.网络不可用):
@@ -1376,7 +1381,7 @@ class wzry_task:
             return True
         #
         if times > 4:  # 1,2,3
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅回忆礼册", "礼册记忆碎片"])):
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅回忆礼册", "获取回忆之证"])):
                 del self.Tool.var_dict[delstr]
         #
         times = times+1
@@ -1385,9 +1390,12 @@ class wzry_task:
         if not self.Tool.existsTHENtouch(self.图片.大厅回忆礼册, "大厅回忆礼册", savepos=True):
             return self.回忆礼册(times)
         sleep(2)
-        if not self.Tool.existsTHENtouch(self.图片.礼册记忆碎片, "礼册记忆碎片", savepos=True):
+        if not self.Tool.existsTHENtouch(self.图片.获取回忆之证, "获取回忆之证", savepos=True):
             return self.回忆礼册(times)
         sleep(2)
+        # 如果进入唤醒界面，跳回任务界面
+        if self.Tool.existsTHENtouch(self.图片.礼册记忆碎片, "礼册记忆碎片"):
+            sleep(2)
         金色一键领取 = Template(r"tpl1727229260477.png", record_pos=(0.394, 0.219), resolution=(960, 540))
         灰色一键领取 = Template(r"tpl1727229241093.png", record_pos=(0.392, 0.219), resolution=(960, 540))
         一键领取 = [金色一键领取, 灰色一键领取]
@@ -2777,6 +2785,8 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.当前状态 = "对战状态"
+            if self.devmode:
+                self.APPOB.前台APP(2)
             self.APPOB.打开APP()
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------

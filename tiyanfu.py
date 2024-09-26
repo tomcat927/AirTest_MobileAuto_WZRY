@@ -67,6 +67,7 @@ class tiyanfu():
             self.移动端.重启设备()
         if times > 10 and times % 5 == 0:
             self.APPOB.重启APP()
+        self.APPOB.前台APP(2)
         self.APPOB.打开APP()
         #
         waittime = 10
