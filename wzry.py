@@ -639,7 +639,7 @@ class wzry_task:
                 return True
         else:
             # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
-            touch((2, 2))
+            self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
         #
         取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
         关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
