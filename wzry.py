@@ -465,8 +465,10 @@ class wzry_task:
         #
         times = times+1
         TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
-        self.APPOB.前台APP(2)
-        self.APPOB.打开APP()
+        #
+        if not self.APPOB.前台APP(2):
+            return self.进入大厅(times)
+        #
         if self.判断大厅中():
             return True
         # 次数上限
@@ -575,8 +577,8 @@ class wzry_task:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
         TimeECHO(f"{fun_name(2)}>登录游戏{times}")
-        self.APPOB.前台APP(2)
-        self.APPOB.打开APP()
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, 检测到登录界面)
         #
         if exists(self.图片.网络不可用):
             content = "网络不可用,取消登录,需要重启设备"
@@ -2745,7 +2747,12 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 TimeECHO("准备进入战斗循环中遇到同步文件返回")
                 continue
-            #
+            # ------------------------------------------------------------------------------
+            # 确保程序没有闪退
+            if not self.APPOB.前台APP(2):
+                content = "无法打开游戏, 可能闪退"
+                self.创建同步文件(content)
+                continue
             # ------------------------------------------------------------------------------
             # 计算参数设置
             self.runstep = self.runstep+1
@@ -2783,8 +2790,6 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.当前状态 = "对战状态"
-            self.APPOB.前台APP(2)
-            self.APPOB.打开APP()
             self.进行人机匹配对战循环()
             # ------------------------------------------------------------------------------
             # 如果计算过程中对参数进行了更改，这里可以记录最新的参数
