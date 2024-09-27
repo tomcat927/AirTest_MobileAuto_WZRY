@@ -114,7 +114,6 @@ LINK_dict = {
 # 节点配置
 totalnode = 2
 # 不设置MuMudir，脚本也可以正常运行。
-脚本也可以正常运行。
 # 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
 MuMudir = D:\Program Files\Netease\MuMu Player 12\shell
 multiprocessing = True
@@ -136,7 +135,6 @@ logfile={
 # 节点配置
 totalnode = 3
 # 不设置dockercontain，脚本也可以正常运行。
-脚本也可以正常运行。
 # 设置后支持关闭、启动、容器等操作，7*24h运行时更省电。
 dockercontain = {
     0: "androidcontain0.high",
