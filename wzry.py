@@ -473,8 +473,10 @@ class wzry_task:
             return True
         # 次数上限
         if times % 4 == 3:
-            if not self.重启并登录(10):
-                self.重启APP_acce(10)
+            self.重启并登录(10)
+            if self.判断大厅中():
+                return True
+            else:
                 return self.进入大厅(times)
         #
         if not self.check_run_status():
@@ -501,7 +503,6 @@ class wzry_task:
         #
         if exists(self.图片.登录界面开始游戏图标):
             if not self.登录游戏(检测到登录界面=True):
-                self.重启APP_acce(10)
                 return self.进入大厅(times)
         self.网络优化()
         # 各种异常，异常图标,比如网速不佳、画面设置、
@@ -562,16 +563,11 @@ class wzry_task:
             return True
         if times > 1 and not 检测到登录界面:
             TimeErr(f"登录游戏:{times}次没有检测到登录界面")
-        #
-        if times % 4 == 3 or times > 4 or self.Tool.timelimit(timekey="登录游戏", limit=60*10, init=False):
+        # 这里是为了避免，卡在游戏界面，定时重启一下
+        if times % 4 == 3 or self.Tool.timelimit(timekey="登录游戏", limit=60*10, init=False):
             TimeErr(f"登录游戏:{times}次登录失败,重启设备")
             self.移动端.重启重连设备(10)
-            self.重启APP_acce()
-            检测到登录界面 = True
-            self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
-        elif times % 4 == 2 and not 检测到登录界面:
-            self.重启APP_acce()
-            检测到登录界面 = True
+            检测到登录界面 = self.APPOB.前台APP(2)
         #
         if times > 6:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
