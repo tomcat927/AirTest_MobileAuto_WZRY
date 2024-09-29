@@ -2502,7 +2502,7 @@ class wzry_task:
 
     #
     def RUN(self):  # 程序入口
-        新的一天 = False
+        self.新的一天 = False
         if os.path.exists(self.只战一天FILE):
             try:
                 self.runstep = int(self.Tool.readfile(self.只战一天FILE)[0].strip())
@@ -2529,9 +2529,9 @@ class wzry_task:
                 self.totalnode = 1
             # ------------------------------------------------------------------------------
             #
-            if 新的一天:
+            if self.新的一天:
                 TimeECHO(">>>>>>>>>>>>>>>新的一天>>>>>>>>>>>>>>>>>>>>")
-                新的一天 = False
+                self.新的一天 = False
                 if not connect_status():
                     self.移动端.连接设备()
                 # 参数、礼包、图片、文件等的初始化
@@ -2631,7 +2631,7 @@ class wzry_task:
             # 服务器5点刷新礼包和信誉积分等
             startclock = self.对战时间[0]
             endclock = self.对战时间[1]
-            while self.Tool.hour_in_span(startclock, endclock) > 0 and not 新的一天:
+            while self.Tool.hour_in_span(startclock, endclock) > 0 and not self.新的一天:
                 # 万一其他节点因为bug卡在barrier,这里让他们别卡了
                 self.组队模式 = False
                 self.Tool.touchfile(self.无法进行组队FILE)
@@ -2648,7 +2648,7 @@ class wzry_task:
                 #
                 # 还有多久开始，太短则直接跳过等待了
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
-                新的一天 = True
+                self.新的一天 = True
                 #
                 if 今日休战:
                     TimeECHO("今日休战，明天再战")
@@ -2694,7 +2694,7 @@ class wzry_task:
                 self.Tool.removefile(self.今日休战FILE)
             # ------------------------------------------------------------------------------
             # 新的一天，回到开头进行初始化
-            if 新的一天:
+            if self.新的一天:
                 continue
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
