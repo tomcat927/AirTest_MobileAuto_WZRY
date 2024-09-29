@@ -175,7 +175,6 @@ BlueStackdir = C:\Program Files\BlueStacks_nxt
 BlueStack_Instance ={1: "Nougat32"}
 BlueStack_Windows = {1: "BlueStacks_multi0"}
 LINK_dict = {1: "Android:///127.0.0.1:5555"}
-BossKey = {1: [17, 16, 88]}
 [control]
 figdir=assets
 logfile={1: "result.1.txt"}
