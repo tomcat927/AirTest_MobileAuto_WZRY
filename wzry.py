@@ -2402,7 +2402,7 @@ class wzry_task:
             content = f"{content}...........超时"
             self.创建同步文件(content)
             return True
-        TimeECHO(content)
+        TimeECHO(f"{fun_name(1)}: "+content)
         return False
     #
 
