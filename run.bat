@@ -1,2 +1,2 @@
 %USERPROFILE%\AppData\Local\anaconda3\python.exe wzry.py  config.win.txt
-:: 不用windows计划任务，是因为windows的计划任务，无法启动模拟器
+REM windows计划任务的并行启动模式，适合通过品牌模拟器的多开
