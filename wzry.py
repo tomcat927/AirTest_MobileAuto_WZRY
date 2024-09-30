@@ -2594,12 +2594,16 @@ class wzry_task:
                     self.组队模式 = False
                     self.Tool.touchfile(self.无法进行组队FILE, content=content)
                     #
+                    if os.path.exists(self.只战一天FILE) and self.totalnode_bak > 1:
+                        # 这条命令一出，将强制结束所有的进程
+                        return self.STOP(content)
+                    #
                     startclock = self.对战时间[0]
                     endclock = self.对战时间[1]
                     # 在对战时间内, 则尝试重新登录，或者关闭设备等待结束
                     if self.Tool.hour_in_span(startclock, endclock) == 0:
                         lefthour = self.Tool.hour_in_span(endclock, startclock)
-                        if lefthour >= 4:  # 剩余不到4h了，退出吧
+                        if lefthour >= 4:
                             TimeECHO(f"存在[{self.重新登录FILE}],每4h重新登录一次")
                             self.移动端.重启重连设备(4*60*60)
                             self.重启并登录()
