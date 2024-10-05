@@ -101,6 +101,9 @@ class wzry_figure:
         #
         self.大厅祈愿 = []
         self.大厅祈愿.append(Template(r"tpl1724317603873.png", record_pos=(0.443, -0.105), resolution=(960, 540)))
+        self.大厅活动 = []
+        self.大厅活动.append(Template(r"tpl1728168902804.png", record_pos=(0.463, -0.025), resolution=(960, 540)))
+
         # 这种活动图标总在变，直接写死成绝对坐标来避免识别
         #
         # 开始图标和登录图标等很接近, 不要用于房间判断
@@ -1263,6 +1266,7 @@ class wzry_task:
             self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
             self.强制领取礼包 = True
             self.王者营地礼包 = False  # 设为False则下次领营地时会自动判断
+            self.活动礼包 = False
             self.祈愿礼包 = False
             self.玉镖夺魁签到 = os.path.exists(self.玉镖夺魁签到FILE)
             self.每日任务礼包 = True
@@ -1312,6 +1316,8 @@ class wzry_task:
             # 所以加个控制参数决定是否领取
             if self.每日任务礼包:
                 self.每日礼包_每日任务()
+            if self.活动礼包:
+                self.活动入口()
             if self.祈愿礼包:
                 self.祈愿入口()
             # 以前的活动
@@ -1495,6 +1501,47 @@ class wzry_task:
             TimeECHO(f"领取每日礼包失败")
         return True
 
+    def 活动入口(self, times=0):
+        # 进入活动界面，可以领取一些活动的枫叶、灯笼等，手动兑换一些钻石、积分
+        #
+        if not self.check_run_status():
+            return True
+        self.进入大厅()
+        if not self.check_run_status():
+            return True
+        #
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*5, nstep=10):
+            return True
+        #
+        if times > 4:  # 1,2,3
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅活动"])):
+                del self.Tool.var_dict[delstr]
+        #
+        times = times+1
+        #
+        if "大厅活动" not in self.Tool.var_dict.keys():
+            # savepos 如果找到会自动替换上一次的字典
+            存在大厅活动, self.图片.大厅活动 = self.Tool.存在任一张图(self.图片.大厅活动, "大厅活动", savepos=True)
+            if not 存在大厅活动:
+                TimeECHO(f"{fun_name(1)}: 找不到活动入口, 尝试计算坐标")
+                self.Tool.cal_record_pos(self.图片.大厅活动[0].record_pos, self.移动端.resolution, "大厅活动", savepos=True)
+        if not self.Tool.existsTHENtouch(self.图片.大厅活动[0], "大厅活动", savepos=True):
+            return self.祈愿入口(times)
+        sleep(10)
+        #
+        self.关闭按钮()
+        self.确定按钮()
+        #
+        # 开始随机点击活动的页面，遇到X号，则点击
+        for i in range(20, -14, -7):
+            record_pos = (-0.40, i/100.0)
+            self.Tool.touch_record_pos(record_pos, self.移动端.resolution, f"活动({i})")
+            sleep(1)
+        #
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        self.Tool.LoopTouch(返回, "返回")
+        return True
+
     def 祈愿入口(self, times=0):
         # 进入祈愿界面，可以领取一些活动的祈愿币，手动兑换一些钻石、积分
         #
@@ -1528,8 +1575,8 @@ class wzry_task:
         #
         # 开始随机点击活动的页面，遇到X号，则点击
         for i in range(25, -20, -10):
-            record_pos = (-0.44, i/100)
-            self.Tool.touch_record_pos(record_pos, self.移动端.resolution, f"祈愿活动({i/100})")
+            record_pos = (-0.44, i/100.0)
+            self.Tool.touch_record_pos(record_pos, self.移动端.resolution, f"祈愿({i/100})")
             sleep(1)
         #
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
