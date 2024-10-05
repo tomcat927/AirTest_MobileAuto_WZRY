@@ -95,7 +95,6 @@ LINK_dict = {
 
 ```
 [client]
-# 节点配置
 totalnode = 2
 # 不设置LDPlayerdir，脚本也可以正常运行。
 # 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
@@ -111,7 +110,6 @@ LINK_dict = {
 
 ```
 [client]
-# 节点配置
 totalnode = 2
 # 不设置MuMudir，脚本也可以正常运行。
 # 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
@@ -144,8 +142,7 @@ multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:15555",
     1: "Android:///127.0.0.1:5565",
-    2: "Android:///127.0.0.1:5575"
-    }
+    2: "Android:///127.0.0.1:5575"}
 ```
 
 ####  MuMu模拟器(主号)和BlueStack模拟器(小号)混合使用
