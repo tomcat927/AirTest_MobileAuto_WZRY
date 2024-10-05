@@ -458,7 +458,7 @@ class wzry_task:
         if not self.check_run_status():
             return True
         #
-        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*30, nstep=10):
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*30, nstep=10, touch同步=True):
             TimeECHO(f"进入大厅超时退出,更新图片资源库")
             self.图片 = wzry_figure(Tool=self.Tool)
             return False
@@ -740,7 +740,7 @@ class wzry_task:
         if not self.check_run_status():
             return True
         #
-        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10):
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10, touch同步=True):
             content = "单人进入人机匹配房间超时"
             self.创建同步文件(content)
             return True
@@ -814,7 +814,7 @@ class wzry_task:
                 if self.Tool.existsTHENtouch(开始练习, "开始练习"):
                     sleep(10)
                 # 信誉分很低时，这里会被禁数十小时，此时不适合继续等待下去了
-                if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10):
+                if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10, touch同步=True):
                     self.创建同步文件("不匹配被禁赛")
                     return True
                 if not self.check_run_status():
@@ -1263,6 +1263,7 @@ class wzry_task:
             self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
             self.强制领取礼包 = True
             self.王者营地礼包 = False  # 设为False则下次领营地时会自动判断
+            self.祈愿礼包 = False
             self.玉镖夺魁签到 = os.path.exists(self.玉镖夺魁签到FILE)
             self.每日任务礼包 = True
             self.Tool.touchfile(self.免费商城礼包FILE)
@@ -1311,6 +1312,8 @@ class wzry_task:
             # 所以加个控制参数决定是否领取
             if self.每日任务礼包:
                 self.每日礼包_每日任务()
+            if self.祈愿礼包:
+                self.祈愿入口()
             # 以前的活动
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
@@ -1490,6 +1493,47 @@ class wzry_task:
             return True
         if not 领取成功:
             TimeECHO(f"领取每日礼包失败")
+        return True
+
+    def 祈愿入口(self, times=0):
+        # 进入祈愿界面，可以领取一些活动的祈愿币，手动兑换一些钻石、积分
+        #
+        if not self.check_run_status():
+            return True
+        self.进入大厅()
+        if not self.check_run_status():
+            return True
+        #
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*5, nstep=10):
+            return True
+        #
+        if times > 4:  # 1,2,3
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅祈愿"])):
+                del self.Tool.var_dict[delstr]
+        #
+        times = times+1
+        #
+        if "大厅祈愿" not in self.Tool.var_dict.keys():
+            # savepos 如果找到会自动替换上一次的字典
+            存在大厅祈愿, self.图片.大厅祈愿 = self.Tool.存在任一张图(self.图片.大厅祈愿, "大厅祈愿", savepos=True)
+            if not 存在大厅祈愿:
+                TimeECHO(f"{fun_name(1)}: 找不到祈愿入口, 尝试计算坐标")
+                self.Tool.cal_record_pos(self.图片.大厅祈愿[0].record_pos, self.移动端.resolution, "大厅祈愿", savepos=True)
+        if not self.Tool.existsTHENtouch(self.图片.大厅祈愿[0], "大厅祈愿", savepos=True):
+            return self.祈愿入口(times)
+        sleep(10)
+        #
+        self.关闭按钮()
+        self.确定按钮()
+        #
+        # 开始随机点击活动的页面，遇到X号，则点击
+        for i in range(25, -20, -10):
+            record_pos = (-0.44, i/100)
+            self.Tool.touch_record_pos(record_pos, self.移动端.resolution, f"祈愿活动({i/100})")
+            sleep(1)
+        #
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        self.Tool.LoopTouch(返回, "返回")
         return True
 
     def 玉镖夺魁(self, times=0):
@@ -2400,7 +2444,10 @@ class wzry_task:
             self.Tool.timelimit(timekey=f"{fun_name(2)}", limit=timelimit, init=True)
         elif self.Tool.timelimit(timekey=f"{fun_name(2)}", limit=timelimit, init=False) or istep > nstep:
             content = f"{content}...........超时"
-            self.创建同步文件(content)
+            if touch同步:
+                self.创建同步文件(content)
+            else:
+                TimeECHO(content)
             return True
         TimeECHO(f"{fun_name(1)}: "+content)
         return False
