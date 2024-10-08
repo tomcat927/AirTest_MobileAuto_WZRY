@@ -572,12 +572,12 @@ class wzry_task:
             self.移动端.重启重连设备(10)
             检测到登录界面 = self.APPOB.前台APP(2)
         #
-        if times > 6:
+        if times > 8:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
             return False
         TimeECHO(f"{fun_name(2)}>登录游戏{times}")
         if not self.APPOB.前台APP(2):
-            return self.登录游戏(times, 检测到登录界面)
+            return self.登录游戏(times, False)
         #
         if exists(self.图片.网络不可用):
             content = "网络不可用,取消登录,需要重启设备"
@@ -653,6 +653,9 @@ class wzry_task:
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             检测到登录界面 = True
             sleep(10)
+            # 模拟器点击登陆后容易闪退
+            if not self.APPOB.前台APP(0):
+                return self.登录游戏(times, False)
             self.关闭按钮()
         if self.判断大厅中():
             return True
