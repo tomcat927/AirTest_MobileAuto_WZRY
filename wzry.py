@@ -636,12 +636,17 @@ class wzry_task:
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             检测到登录界面 = True
             sleep(10)
+            # 模拟器点击登陆后容易闪退
+            if not self.APPOB.前台APP(0):
+                return self.登录游戏(times, False)
+            # 登陆后一般会有活动需要关闭
+            self.关闭按钮()
             if self.判断大厅中():
                 return True
         else:
             # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
             self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
-        #
+        # 再检查一下登录情况
         取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
         关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
         self.Tool.existsTHENtouch(取消, "取消按钮")
@@ -2174,6 +2179,10 @@ class wzry_task:
             if not self.Tool.timelimit(timekey="当前界面", limit=20, init=False):
                 TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return False
+        #
+        if not self.APPOB.前台APP(0):
+            self.当前界面 == "未知"
+            return False
         存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
         #
         if 存在:
