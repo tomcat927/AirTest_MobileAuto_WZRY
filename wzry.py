@@ -1283,6 +1283,8 @@ class wzry_task:
             self.友情礼包_皮肤宝箱 = True
             self.友情礼包_回城宝箱 = True
             self.友情礼包_击败宝箱 = True
+            self.外置礼包_王者营地 = True
+            self.外置礼包_体验服 = os.path.exists(self.更新体验服FILE)
 
             return
         #
@@ -1293,9 +1295,10 @@ class wzry_task:
         #
         # 在组队的过程中，不领取营地礼包，以及更新体验服
         if 强制领取 or not self.组队模式:
-            self.每日礼包_王者营地()
+            if self.外置礼包_王者营地:
+                self.每日礼包_王者营地()
             #
-            if os.path.exists(self.更新体验服FILE):
+            if self.外置礼包_体验服:
                 self.体验服更新()
         #
         # 王者APP礼包
@@ -1736,19 +1739,6 @@ class wzry_task:
                 sleep(5)
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
-    def 每日礼包_王者营地(self):
-        if self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
-            TimeECHO(f"{fun_name(1)}")
-            self.APPOB.关闭APP()
-            from wzyd import wzyd_libao
-            ce = wzyd_libao()
-            ce.run()
-            ce.APPOB.关闭APP()
-            return True
-        else:
-            TimeECHO("时间太短,暂时不领营地礼包")
-            return False
-
     def KPL每日观赛(self, times=0, 观赛时长=20*60):
         # @todo,内部的timelimit
         if not self.check_run_status():
@@ -2038,10 +2028,25 @@ class wzry_task:
         self.确定按钮()
         return True
         #
+    #
+
+    def 每日礼包_王者营地(self):
+        if self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
+            TimeECHO(f"{fun_name(1)}")
+            self.APPOB.关闭APP()
+            from wzyd import wzyd_libao
+            ce = wzyd_libao()
+            ce.run()
+            ce.APPOB.关闭APP()
+            return True
+        else:
+            TimeECHO(f"时间太短,暂时不{fun_name(1)}")
+            return False
+    #
 
     def 体验服更新(self):
         if self.Tool.timelimit("体验服更新", limit=60*60*3, init=False):
-            TimeECHO("体验服更新中")
+            TimeECHO(f"{fun_name(1)}")
             self.APPOB.关闭APP()
             from tiyanfu import tiyanfu
             ce = tiyanfu()
@@ -2049,7 +2054,7 @@ class wzry_task:
             ce.APPOB.关闭APP()
             return True
         else:
-            TimeECHO("时间太短,暂时不体验服更新")
+            TimeECHO(f"时间太短,暂时不{fun_name(1)}")
             return False
 
 # 状态判断
