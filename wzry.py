@@ -20,7 +20,6 @@ except ImportError:
         exit(1)
 import sys
 import os
-from wzyd import wzyd_libao
 
 
 class wzry_runinfo:
@@ -1268,12 +1267,10 @@ class wzry_task:
         #
         if 初始化:
             # 刷新礼包的领取计时
-            self.王者营地 = wzyd_libao(设备类型=self.移动端.设备类型, 初始化检查=False)
             self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
             self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
             self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
             self.强制领取礼包 = True
-            self.王者营地礼包 = False  # 设为False则下次领营地时会自动判断
             self.活动礼包 = False
             self.祈愿礼包 = False
             self.玉镖夺魁签到 = os.path.exists(self.玉镖夺魁签到FILE)
@@ -1739,46 +1736,18 @@ class wzry_task:
                 sleep(5)
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
-    def 每日礼包_王者营地(self, 初始化=False):
-        if 初始化:
-            TimeECHO(f"[{fun_name(1)}]检测王者营地状态")
-        if not connect_status():
-            # 营地只要能连接服务器即可，不采用WZRY的check_run_status
-            if 初始化:
-                return True
-            # 单纯的领取失败
-            return False
-        #
-        if 初始化:
-            初始化成功 = self.王者营地.营地初始化(初始化检查=True)
-            self.王者营地.STOP()  # 杀掉后台,提高虚拟机的稳定性
-            self.APPOB.打开APP()
-            return 初始化成功
-        #
-        # 这里是为了筛选，营地是否可以正常进行
-        if not self.王者营地礼包:
-            self.王者营地礼包 = self.每日礼包_王者营地(初始化=True)
-        if not self.王者营地礼包:
-            TimeECHO(f"[{fun_name(1)}]营地礼包初始化失败，无法领取营地礼包")
-            return
-        #
-        if not self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
-            TimeECHO("时间太短,暂时不领取营地礼包")
-            return False
-        #
-        # 关闭王者节省内存
-        self.APPOB.关闭APP()
-        #
-        TimeECHO("王者营地礼包开始")
-        if self.王者营地.RUN():
-            TimeECHO("王者营地礼包领取成功")
+    def 每日礼包_王者营地(self):
+        if self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
+            TimeECHO(f"{fun_name(1)}")
+            self.APPOB.关闭APP()
+            from wzyd import wzyd_libao
+            ce = wzyd_libao()
+            ce.run()
+            ce.APPOB.关闭APP()
+            return True
         else:
-            TimeErr("王者营地礼包领取失败")
-            self.王者营地礼包 = False
-        self.王者营地.STOP()  # 杀掉后台,提高虚拟机的稳定性
-        self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False)
-        #
-        self.APPOB.打开APP()
+            TimeECHO("时间太短,暂时不领营地礼包")
+            return False
 
     def KPL每日观赛(self, times=0, 观赛时长=20*60):
         # @todo,内部的timelimit

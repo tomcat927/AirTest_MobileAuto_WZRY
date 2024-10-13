@@ -35,7 +35,7 @@ class tiyanfu():
         self.房主 = self.mynode == 0 or self.totalnode == 1
         # prefix, 还用于创建读取一些特定的控制文件/代码
         # prefix, 用于区分不同进程的字典文件中的图片位置，因为不同账户的位置可能又差异
-        self.prefix = f"({self.mynode})"
+        self.prefix = f"体验服.{self.mynode}"
         #
         self.设备类型 = self.移动端.设备类型
         self.APPID = "com.tencent.tmgp.sgamece"

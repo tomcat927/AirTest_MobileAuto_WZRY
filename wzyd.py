@@ -15,18 +15,37 @@ from airtest_mobileauto.control import *
 
 
 class wzyd_libao:
-    def __init__(self, 设备类型="android", Tool=None, 初始化检查=False):
+    def __init__(self):
+        # device
+        self.mynode = Settings.mynode
+        self.totalnode = Settings.totalnode
+        self.LINK = Settings.LINK_dict[Settings.mynode]
+        self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
+        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.txt",
+                            mynode=self.mynode, totalnode=self.totalnode)
+        #
+        self.组队模式 = self.totalnode > 1
+        self.房主 = self.mynode == 0 or self.totalnode == 1
+        # prefix, 还用于创建读取一些特定的控制文件/代码
+        # prefix, 用于区分不同进程的字典文件中的图片位置，因为不同账户的位置可能又差异
+        self.prefix = "王者营地"+f".{Settings.mynode}"
+        #
+        self.设备类型 = self.移动端.设备类型
+        self.IOS = "ios" in self.设备类型
+        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.gamehelper.smoba"
+        self.APPOB = appOB(APPID=self.APPID, big=False, device=self.移动端)
+        #
+        self.营地初始化FILE = f"{self.prefix}.初始化.txt"
+        self.只战一天FILE = f"wzyd.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
+        self.营地需要登录FILE = self.prefix+f".需要登录.txt"
+        #
+        self.timelimit = 60*60*0.5
+        # 更新时间
+        self.对战时间 = [3.0, 4.0]
+        #
         # 默认只创建对象, 开启初始化检查才会检查
         self.体验币成功 = False
         self.营地活动 = True
-        self.设备类型 = 设备类型
-        self.prefix = "王者营地"+f".{Settings.mynode}"
-        self.营地初始化FILE = self.prefix+f".初始化.txt"
-        self.营地需要登录FILE = self.prefix+f".需要登录.txt"
-        self.Tool = DQWheel(var_dict_file=f"{self.设备类型}.var_dict_{self.prefix}.txt") if Tool == None else Tool
-        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.gamehelper.smoba"
-        self.APPOB = appOB(APPID=self.APPID)
-        self.IOS = "ios" in self.设备类型
         #
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
@@ -48,10 +67,16 @@ class wzyd_libao:
         self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
         #
         self.初始化成功 = False
-        if 初始化检查:
-            self.初始化成功 = self.营地初始化(初始化检查=初始化检查)
-            if 初始化检查:
-                self.APPOB.关闭APP()
+
+    #
+    def end(self):
+        self.APPOB.关闭APP()
+        # self.移动端.关闭设备()
+    #
+
+    def run(self):
+        return self.RUN()
+    #
 
     def 判断营地大厅中(self):
         #
@@ -70,12 +95,18 @@ class wzyd_libao:
     # 用于更新上层调用参数,是不是领取礼包
 
     def 营地初始化(self, 初始化检查=False):
+        #
+        if not self.APPOB.HaveAPP:
+            TimeECHO(f":不存在APP{self.APPOB.APPID}")
+            return False
+        #
         # 判断网络情况
         if not connect_status():
             TimeECHO(":营地暂时无法触摸,返回")
             if 初始化检查:
                 return True
             return False
+        #
         # 打开APP
         if not self.APPOB.重启APP(10):
             TimeECHO(":营地无法打开,返回")
@@ -102,32 +133,37 @@ class wzyd_libao:
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
+            self.初始化成功 = True
         #
         return True
 
     def STOP(self):
         self.APPOB.关闭APP()
         sleep(5)
-    #
 
     def RUN(self):
         #
+        if not self.APPOB.HaveAPP:
+            TimeECHO(f":不存在APP{self.APPOB.APPID}")
+            return False
+        #
+        if not self.初始化成功:
+            self.初始化成功 = self.营地初始化(初始化检查=True)
+            if not self.初始化成功:
+                TimeECHO("营地初始化失败")
+                self.APPOB.关闭APP()
+                return False
+
         self.Tool.removefile(self.Tool.独立同步文件)
         #
         if os.path.exists(self.营地需要登录FILE):
             if self.Tool.timelimit(timekey="检测营地登录", limit=60*60*8, init=False):
                 TimeECHO(f"存在[{self.营地需要登录FILE}],重新检测登录状态")
                 self.Tool.removefile(self.营地需要登录FILE)
-                self.营地初始化(初始化检查=False)
+                self.初始化成功 = self.营地初始化(初始化检查=True)
         #
         if os.path.exists(self.营地需要登录FILE):
             TimeECHO(f"检测到{self.营地需要登录FILE}, 不领取礼包")
-            return False
-        #
-        self.初始化成功 = self.营地初始化(初始化检查=False)
-        if not self.初始化成功:
-            TimeECHO(":营地初始化失败")
-            self.APPOB.关闭APP()
             return False
         #
         self.营地任务_浏览资讯()
@@ -601,3 +637,32 @@ class wzyd_libao:
         touch(奖励位置)
         self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
         self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
+
+    def looprun(self, times=0):
+        times = times + 1
+        startclock = self.对战时间[0]
+        endclock = self.对战时间[1]
+        while True:
+            leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
+            if leftmin > 0:
+                TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
+                self.APPOB.关闭APP()
+                self.移动端.重启重连设备(leftmin*60)
+                continue
+            times = times+1
+            TimeECHO("="*10)
+            self.run()
+
+
+if __name__ == "__main__":
+    config_file = ""
+    if len(sys.argv) > 1:
+        config_file = str(sys.argv[1])
+    Settings.Config(config_file)
+    ce = wzyd_libao()
+    ce.run()
+    if os.path.exists(ce.只战一天FILE):
+        ce.end()
+        exit()
+    ce.looprun()
+    exit()
