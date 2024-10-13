@@ -71,7 +71,7 @@ class wzyd_libao:
     #
     def end(self):
         self.APPOB.关闭APP()
-        # self.移动端.关闭设备()
+        self.移动端.关闭设备()
     #
 
     def run(self):
