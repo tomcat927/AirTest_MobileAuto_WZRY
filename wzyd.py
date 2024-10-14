@@ -516,7 +516,7 @@ class wzyd_libao:
         swipe(pos, vector=[0.0, -0.5])
         碎片奖励 = Template(r"tpl1699874679212.png", record_pos=(-0.233, 0.172), resolution=(540, 960), threshold=0.9)
         奖励位置 = False
-        for i in range(10):
+        for i in range(20):
             sleep(1)
             奖励位置 = exists(碎片奖励)
             if 奖励位置:
