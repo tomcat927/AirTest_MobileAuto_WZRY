@@ -82,8 +82,12 @@ LINK_dict = {
 [client]
 totalnode = 2
 # 不设置BlueStackdir，脚本也可以正常运行。
-# 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
+# 设置后支持启动、隐藏模拟器等操作，7*24h运行时更省电。
 BlueStackdir = C:\Program Files\BlueStacks_nxt
+#BlueStack模拟器的名字,在BlueStack多开管理器中设定，该参数用于关闭模拟器
+BlueStack_Windows = {
+    0: "BlueStacks_multi0",
+    1: "BlueStacks_multi1"}
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:5555",
