@@ -1,4 +1,11 @@
 # 运行方法
+如果你在运行时遇到问题
+* 可以先在[常见问题收录](https://github.com/cndaqiang/WZRY/issues/42)中查找
+* 其次认真阅读本说明
+* 其实你读读源码`wzry.py`能解决你99%的问题
+* 友善的提出问题[issues](https://github.com/cndaqiang/WZRY/issues)
+* * 提问时，附上你的执行结果、配置文件、模拟器截图
+
 
 ## 准备工作
 
@@ -160,7 +167,7 @@ mynode = 0
 totalnode = 2
 multiprocessing = False
 MuMudir = D:\Program Files\Netease\MuMu Player 12\shell
-MuMu_Instance ={0:"0"}
+MuMu_Instance ={0: "0"}
 LINK_dict = {0: "Android:///127.0.0.1:16384"}
 [control]
 figdir=assets
