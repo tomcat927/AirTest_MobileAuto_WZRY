@@ -6,10 +6,25 @@ totalnode = 2
 
 # 多进程配置
 multiprocessing = True
-#BlueStackdir = "C:\Program Files\BlueStacks_nxt"
-#LDPlayerdir = "D:\GreenSoft\LDPlayer"
-#dockercontain="androidcontain"
-# LINK_dict 配置，这里使用 JSON 格式存储字典
+#默认读入字符串, 不要添加引号
+BlueStackdir = C:\Program Files\BlueStacks_nxt
+BlueStack_Instance = {
+    0: "Pie64_1",
+    1: "Pie64"}
+BlueStack_Windows = {
+    0: "BlueStacks1",
+    1: "BlueStacks0"}
+#
 LINK_dict = {
-    0: "Android:///192.168.192.10:5555",
-    1: "Android:///192.168.192.10:5565"}
+    0: "Android:///127.0.0.1:5565",
+    1: "Android:///127.0.0.1:5555"}
+#
+[control]
+prefix="ttt"
+logger_level=0
+#outputnode=0
+figdir=assets
+logfile={
+    0: "result.0.txt",
+    1: "result.1.txt"}
+
