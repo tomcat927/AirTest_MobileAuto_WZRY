@@ -9,29 +9,24 @@
 
 ## 准备工作
 
-* [下载最最新代码](https://github.com/cndaqiang/WZRY/releases)
-* 如果最近WZRY有特殊活动，图标有变化，可以看看我是否提供了[资源更新包](https://github.com/cndaqiang/WZRY/issues/8)。<br>或者自己使用AirTestIDE修改对应的图片。
-* 安装/升级依赖
+* [下载**最新**代码](https://github.com/cndaqiang/WZRY/releases)
+* **WZRY有特殊活动(比如周年庆)时，可以看看我是否提供了**[资源更新包](https://github.com/cndaqiang/WZRY/issues/8)。
+* * 等不急更新的，可以自己使用AirTestIDE修改对应的图片。
+* 升级依赖
 
 ```
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple  --upgrade
 ```
 
-* **注**: ARM设备以及Mac上airtest提供的adb可能没有可执行权限，需要修改
 
-```
-#具体路劲根据你的环境修改
-#Linux(ARM)
-cd ~/.local/lib/python3.10/site-packages/airtest/core/android/static/adb/linux
-mv adb adb.bak
-ln -s /usr/bin/adb .
-#Mac
-chmod +x ~/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/adb/mac/adb
-```
-
-* 开启模拟器/手机的ADB调试。
-* * 建议采用`960x540`的分辨率`dpi=160`，脚本内部有额外的加速命令，也可以利用我的[example/字典.分路.android.var_dict_N.zip](example/字典.分路.android.var_dict_N.zip)进行加速以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)。
-* * 其他分辨率也可以运行，代码会自动生成你的字典文件`android.var_dict_mynode.txt`，执行速度会越来越快。但是有些活动图标在不同的分辨率上显示效果不同，可能无法识别成功，需要你去修改代码。
+## 开启模拟器/手机的ADB调试。
+* 本脚本测试通过的[模拟器推荐](https://github.com/cndaqiang/WZRY/issues/23)
+* 建议采用**`960x540`的分辨率`dpi=160`**，脚本内部有额外的加速命令
+* * 该分辨率可以利用我的[example/字典.分路.android.var_dict_N.zip](example/字典.分路.android.var_dict_N.zip)进行加速
+* * 即复制`字典.游走.android.var_dict_N.txt`为`android.var_dict_mynode.txt`(`mynode`默认是`0`,具体解释[13](https://github.com/cndaqiang/WZRY/issues/13#issue-2381467976))
+* * 以及[自动调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)。
+* 其他分辨率也可以运行，代码会自动生成你的字典文件`android.var_dict_mynode.txt`，执行速度会越来越快。
+* * 但是有些活动图标在不同的分辨率上显示效果不同，可能无法识别成功，需要你使用AirTestIDE修改对应的图片。
 
 ![Alt text](doc/LDplayer.png)
 
@@ -43,8 +38,11 @@ chmod +x ~/anaconda3/lib/python3.11/site-packages/airtest/core/android/static/ad
 python -u wzry.py 配置文件
 ```
 
-其中配置文件可以省略，默认单进程控制 `127.0.0.1:5555` 的安卓设备。
-配置文件支持的控制参数见[airtest-mobileauto](https://pypi.org/project/airtest-mobileauto/)，下面是一些配置文件示例
+* **其中配置文件可以省略，但是不能乱写**
+* 不指定配置文件时，即直接**运行`python wzry.py`**，默认单进程控制 `127.0.0.1:5555` 的安卓设备
+* 如果要自己写配置文件，复制`config.in`到`config.win.txt`,修改后**运行`python wzry.py config.win.txt`**
+* * 下面是一些配置文件示例，足够应对各种情况。
+* * 二次开发源码，可以阅读[airtest-mobileauto](https://pypi.org/project/airtest-mobileauto/)。
 
 #### 控制usb连接的安卓手机
 
@@ -66,9 +64,9 @@ LINK_dict = {
 
 ```
 [client]
-mynode = 1
+mynode = 0
 LINK_dict = {
-    1: "Android:///127.0.0.1:16416"}
+    0: "Android:///127.0.0.1:16416"}
 ```
 
 #### 控制两个安卓设备组队
