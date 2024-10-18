@@ -45,7 +45,7 @@ python -u wzry.py 配置文件
 * * 下面是一些配置文件示例，足够应对各种情况。
 * * 二次开发源码，可以阅读[airtest-mobileauto](https://pypi.org/project/airtest-mobileauto/)。
 
-#### 控制usb连接的安卓手机
+#### 控制usb连接的安卓手机[单人模式]
 
 ```
 [client]
@@ -53,24 +53,16 @@ LINK_dict = {
     0: "Android:///4e86ac13"}
 ```
 
-#### 控制无线连接的安卓手机
+#### 控制一个模拟器/wifi连接的安卓手机上的王者账户[单人模式]
+⭐⭐**新手初次写配置文件，就用这个，适合控制一个账户**
 
 ```
 [client]
 LINK_dict = {
-    0: "Android:///192.168.192.10:5555"}
+    0: "Android:///127.0.0.1:5555"}
 ```
 
-#### 模拟器单开不组队
-
-```
-[client]
-mynode = 0
-LINK_dict = {
-    0: "Android:///127.0.0.1:16416"}
-```
-
-#### 控制两个安卓设备组队
+#### 控制两个安卓设备上的王者账户组队[双人组队模式]
 
 ```
 [client]
@@ -81,7 +73,7 @@ LINK_dict = {
     1: "Android:///4e86ac13"}
 ```
 
-####  控制BlueStacks模拟器多开组队
+####  控制两个BlueStacks模拟器上的王者账户[双人组队模式]
 * 注: BlueStacks模拟的ADB端口是`5555+10*i`
 
 ```
@@ -100,7 +92,7 @@ LINK_dict = {
     1: "Android:///127.0.0.1:5565"}
 ```
 
-####  控制LDPlayer模拟器多开组队
+####  控制两个LDPlayer模拟器上的王者账户[双人组队模式]
 * 注: LDPlayer模拟的ADB端口是`5555+2*i`
 
 ```
@@ -115,7 +107,7 @@ LINK_dict = {
     1: "Android:///127.0.0.1:5557"}
 ```
 
-####  MuMu模拟器多开组队
+####  控制两个MuMu模拟器上的王者账户[双人组队模式]
 * 注: MuMu模拟的ADB端口是`16384+32*i`
 
 ```
@@ -137,7 +129,7 @@ logfile={
 ```
 
 
-#### Linux控制docker容器多开组队
+#### Linux控制三个docker容器上的王者账户[三人组队模式]
 
 ```
 # 节点配置
@@ -155,7 +147,7 @@ LINK_dict = {
     2: "Android:///127.0.0.1:5575"}
 ```
 
-####  MuMu模拟器(主号)和BlueStack模拟器(小号)混合使用
+####  一个MuMu模拟器(主号)和一个BlueStack模拟器(小号)混合使用[双人组队模式][multiprocessing=False分离控制]
 * MuMu适合手机控制模拟器打游戏,资源消耗大, 两个MuMu同时运行容易闪退
 * BlueStack非常稳定, 作为小号的模拟器使用
 
@@ -196,7 +188,7 @@ PS D:\SoftData\git\WZRY> Start-Process -FilePath "python" -ArgumentList "wzry.py
 * **不推荐, 我只用AirTestIDE修改脚本的图片资源**
 * 下载地址[AirTestIDE](https://airtest.netease.com/), 配置python的路径
 * 用AirTest直接打开wzry.py
-* 如果要修改配置参数，请阅读wzry.py.
+* 如果要修改配置参数，更改`config_file = ""`为`config_file = "你的配置文件"`
 * 点击运行
 
 ![Alt text](doc/airtestguirun.png)
