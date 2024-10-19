@@ -4,13 +4,13 @@
 * 其次认真阅读本说明
 * 其实你读读源码`wzry.py`能解决你99%的问题
 * 友善的提出问题[issues](https://github.com/cndaqiang/WZRY/issues)
-* * 提问时，附上你的执行结果、配置文件、模拟器截图，
-* * 提示时@cndaqiang或者为项目start提醒我有人提问。
+* * 提问时，附上你的**执行结果、配置文件、运行目录、模拟器界面截图**，
+* * **提问时@cndaqiang或者为项目start提醒我有人提问。**
 
 
 ## 准备工作
 
-* [下载**最新**代码](https://github.com/cndaqiang/WZRY/releases)
+* 从Releases页面[下载**最新**代码](https://github.com/cndaqiang/WZRY/releases),不要在Code页面点击下载
 * **WZRY有特殊活动(比如周年庆)时，可以看看我是否提供了**[资源更新包](https://github.com/cndaqiang/WZRY/issues/8)。
 * * 等不急更新的，可以自己使用AirTestIDE修改对应的图片。
 * 升级依赖
