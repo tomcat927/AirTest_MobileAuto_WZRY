@@ -2895,7 +2895,7 @@ class wzry_task:
 if __name__ == "__main__":
     # 如果使用vscode/pycharm/AirTestIDE等图形界面程序运行此脚本
     # 在此处指定config_file=config文件
-    config_file = "config.win.txt"
+    config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
     # task_manager = TaskManager(config_file, None, None)
