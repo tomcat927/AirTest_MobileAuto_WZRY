@@ -45,14 +45,6 @@ python -u wzry.py 配置文件
 * * 下面是一些配置文件示例，足够应对各种情况。
 * * 二次开发源码，可以阅读[airtest-mobileauto](https://pypi.org/project/airtest-mobileauto/)。
 
-#### 控制usb连接的安卓手机[单人模式]
-
-```
-[client]
-LINK_dict = {
-    0: "Android:///4e86ac13"}
-```
-
 #### 控制一个模拟器/wifi连接的安卓手机上的王者账户[单人模式]
 ⭐⭐**新手初次写配置文件，就用这个，适合控制一个账户**
 
@@ -63,135 +55,29 @@ LINK_dict = {
 ```
 
 #### 控制两个安卓设备上的王者账户组队[双人组队模式]
+⭐⭐**新手初次尝试组队，就用这个，适合控制两个账户**
 
 ```
 [client]
 totalnode = 2
-multiprocessing = True
-LINK_dict = {
-    0: "Android:///192.168.192.10:5555",
-    1: "Android:///4e86ac13"}
-```
-
-####  控制两个BlueStacks模拟器上的王者账户[双人组队模式]
-* 注: BlueStacks模拟的ADB端口是`5555+10*i`
-
-```
-[client]
-totalnode = 2
-# 不设置BlueStackdir，脚本也可以正常运行。
-# 设置后支持启动、隐藏模拟器等操作，7*24h运行时更省电。
-BlueStackdir = C:\Program Files\BlueStacks_nxt
-#BlueStack模拟器的名字,在BlueStack多开管理器中设定，该参数用于关闭模拟器
-BlueStack_Windows = {
-    0: "BlueStacks_multi0",
-    1: "BlueStacks_multi1"}
 multiprocessing = True
 LINK_dict = {
     0: "Android:///127.0.0.1:5555",
     1: "Android:///127.0.0.1:5565"}
 ```
 
-####  控制两个LDPlayer模拟器上的王者账户[双人组队模式]
-* 注: LDPlayer模拟的ADB端口是`5555+2*i`
+#### 这是我在windows上的配置信息及解释
+* 新手初次尝试控制虚拟机的开关机组队可以参考
+[/BlueStack多开示例.pptx](doc/BlueStack多开示例.pptx)
+![](doc/BlueStack多开示例.png)
 
-```
-[client]
-totalnode = 2
-# 不设置LDPlayerdir，脚本也可以正常运行。
-# 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
-LDPlayerdir = D:\GreenSoft\LDPlayer
-multiprocessing = True
-LINK_dict = {
-    0: "Android:///127.0.0.1:5555",
-    1: "Android:///127.0.0.1:5557"}
-```
+#### 更多配置示例
+* [usb调试、雷电模拟器、MuMu模拟器、BlueStacks](doc/config.example.md)
 
-####  控制两个MuMu模拟器上的王者账户[双人组队模式]
-* 注: MuMu模拟的ADB端口是`16384+32*i`
+### 使用vscode/pycharm等软件运行
+修改`wzry.py`中的`config_file = ""`为`config_file = "你的配置文件"`，例如
+![](doc/vscode.PNG)
 
-```
-[client]
-totalnode = 2
-# 不设置MuMudir，脚本也可以正常运行。
-# 设置后支持关闭、启动、隐藏模拟器等操作，7*24h运行时更省电。
-MuMudir = D:\Program Files\Netease\MuMu Player 12\shell
-multiprocessing = True
-LINK_dict = {
-    0: "Android:///127.0.0.1:16384",
-    1: "Android:///127.0.0.1:16416"}
-#
-[control]
-#将运行日志输出到文件，适合于监控windows的计划任务
-logfile={
-    0: "result.0.txt",
-    1: "result.1.txt"}
-```
-
-
-#### Linux控制三个docker容器上的王者账户[三人组队模式]
-
-```
-# 节点配置
-totalnode = 3
-# 不设置dockercontain，脚本也可以正常运行。
-# 设置后支持关闭、启动、容器等操作，7*24h运行时更省电。
-dockercontain = {
-    0: "androidcontain0.high",
-    1: "androidcontain1"}
-    2: "androidcontain2"}
-multiprocessing = True
-LINK_dict = {
-    0: "Android:///127.0.0.1:15555",
-    1: "Android:///127.0.0.1:5565",
-    2: "Android:///127.0.0.1:5575"}
-```
-
-####  一个MuMu模拟器(主号)和一个BlueStack模拟器(小号)混合使用[双人组队模式][multiprocessing=False分离控制]
-* MuMu适合手机控制模拟器打游戏,资源消耗大, 两个MuMu同时运行容易闪退
-* BlueStack非常稳定, 作为小号的模拟器使用
-
-config.0.txt
-```
-[client]
-mynode = 0
-totalnode = 2
-multiprocessing = False
-MuMudir = D:\Program Files\Netease\MuMu Player 12\shell
-MuMu_Instance ={0: "0"}
-LINK_dict = {0: "Android:///127.0.0.1:16384"}
-[control]
-figdir=assets
-logfile={0: "result.0.txt"}
-```
-config.1.txt
-```
-[client]
-mynode = 1
-totalnode = 2
-multiprocessing = False
-BlueStackdir = C:\Program Files\BlueStacks_nxt
-BlueStack_Instance ={1: "Nougat32"}
-BlueStack_Windows = {1: "BlueStacks_multi0"}
-LINK_dict = {1: "Android:///127.0.0.1:5555"}
-[control]
-figdir=assets
-logfile={1: "result.1.txt"}
-```
-使用powershell运行示例
-```
-PS D:\SoftData\git\WZRY> Start-Process -FilePath "python" -ArgumentList "wzry.py", "config.0.txt" -NoNewWindow;Start-Process -FilePath "python" -ArgumentList "wzry.py", "config.1.txt" -NoNewWindow
-```
-
-### 使用AirTestIDE软件运行
-
-* **不推荐, 我只用AirTestIDE修改脚本的图片资源**
-* 下载地址[AirTestIDE](https://airtest.netease.com/), 配置python的路径
-* 用AirTest直接打开wzry.py
-* 如果要修改配置参数，更改`config_file = ""`为`config_file = "你的配置文件"`
-* 点击运行
-
-![Alt text](doc/airtestguirun.png)
 
 # 高级功能
 * **通过在代码目录创建一些文件来动态调整代码的运行模式，可以实现自动切换分路、选择熟练度最低的英雄，进行王者模拟战等操作**
@@ -200,22 +86,26 @@ PS D:\SoftData\git\WZRY> Start-Process -FilePath "python" -ArgumentList "wzry.py
 * 以最新代码为准, 下面的内容仅供参考。
 
 
-## 控制参数
-控制参数决定软件的运行模式
+## 控制文件
+* 存在下面的文件则开启相应的功能
 ```
-self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
-self.今日休战FILE = "WZRY.tomorrow.txt"  # 今天不打了，明天开始，适合于离开办公室时运行脚本，但是不要执行任何命令，明天早上开始执行
-self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
-self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-self.临时组队FILE = "WZRY.组队.txt"
-self.玉镖夺魁签到FILE = "玉镖夺魁签到.txt"
-self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
+self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab/Windows计划任务控制每天固定时间启动本脚本。
+self.今日休战FILE = "WZRY.tomorrow.txt"  # 今天不打了，明天开始，适合于离开办公室时运行脚本，但是不要执行任何命令，明天早上开始执行。
+self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,自动移动和平A,提高金币数量和通过挂机检测。
+self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 使用5v5标准对战模式
+self.临时组队FILE = "WZRY.组队.txt" # 在组队时间外组队
+self.玉镖夺魁签到FILE = "玉镖夺魁签到.txt" 
+self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 领每日商城礼包
 self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
-self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后登录体验服领取体验币
+self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 登录体验服领取体验币
 ```
 
 ## 注入命令
-也可以通过python命令，直接修改计算参数和控制
+* 将python指令填写到下面的文件中，直接修改程序的运行
+* 替换`{self.mynode}`为配置文件中的编号.
+* 示例example目录
+* 在线示例[文件控制脚本功能](https://github.com/cndaqiang/WZRY/issues/13)
+
 ```
 self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
 self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
