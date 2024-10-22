@@ -11,12 +11,12 @@
 
 ### 自动化功能
 
-* 自动开启关闭模拟器、容器、手机.
+* 自动开启关闭模拟器、容器、手机
 * [多开组队](https://github.com/cndaqiang/WZRY/issues/42#issuecomment-2418505810)
 * 无人值守：出错重新进行同步
-* 检测游戏闪退、模拟器关闭，重新启动王者或重启模拟器。
+* 检测游戏闪退、模拟器关闭，重新启动王者或重启模拟器
 * 健康系统自动休息启动
-* 优先星耀人机模式，次数达到上限后自动切换青铜人机。
+* 优先星耀人机模式，次数达到上限后自动切换青铜人机
 * [调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)
 * 移动和平A
 * 丰富的自定义功能
@@ -41,9 +41,9 @@
 ### 王者营地和体验服
 `wzry.py`支持自动领取相同虚拟机内部的王者营地礼包和体验币
 * 王者营地: 体验服兑换碎片礼包、每日签到、每日任务、营地币每周兑换英雄碎片、战令经验
-* - 营地的不同版本界面有差异、QQ微信登录的界面也有差异, 个别礼包可能无法识别完成。
+* - 营地的不同版本界面有差异、QQ微信登录的界面也有差异, 个别礼包可能无法识别完成
 * 更新体验服，领取体验币
-* - 注: 在Root的安卓上登录体验服，会被封号，与本脚本无关。如使用体验服的功能，请关闭模拟器的Root选项。
+* - 注: 在Root的安卓上登录体验服，会被封号，与本脚本无关。如使用体验服的功能，请关闭模拟器的Root选项
 
 王者营地礼包和体验服更新也可以独立启动、不依赖于wzry.py。手册无。运行方式:
 * `python -u wzyd.py config.ce.txt`
@@ -62,12 +62,14 @@
 * - 战令的每期任务: 20场娱乐模式, 可以用模拟战刷齐
 
 
-## 致谢
+## 相关项目
 
-* 本脚本初期大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目.
+* 本脚本初期大量参考了[WZRY_AirtestIDE@XRSec](https://github.com/XRSec/WZRY_AirtestIDE)项目
 * 本脚本的历史版本
 * * [WZRY_AirtestIDE_XiaoMi11@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_XiaoMi11)
 * * [WZRY_AirtestIDE_emulator@cndaqiang](https://github.com/cndaqiang/WZRY_AirtestIDE_emulator)
+* 同样基于[airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto)的项目
+* * [autotask_android](https://github.com/cndaqiang/autotask_android)基于安卓ADB的网站、APP签到
 
 ## Star History
 
