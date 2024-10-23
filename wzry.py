@@ -569,6 +569,8 @@ class wzry_task:
             TimeErr(f"登录游戏:{times}次登录失败,重启设备")
             self.移动端.重启重连设备(10)
             检测到登录界面 = self.APPOB.前台APP(2)
+            self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
+                resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         #
         if times > 8:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
@@ -2509,6 +2511,9 @@ class wzry_task:
         bakstate = self.当前状态
         self.当前状态 = "重新启动"
         self.重启APP_acce(sleeptime=sleeptime)
+        #
+        self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
+            resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         result = self.登录游戏()
         self.当前状态 = bakstate
         return result
