@@ -9,7 +9,7 @@
 
 
 ## 准备工作
-
+* 阅读初阶教程[WZRY.pdf](doc/WZRY.pdf)
 * 从Releases页面[下载**最新**代码](https://github.com/cndaqiang/WZRY/releases),不要在Code页面点击下载
 * **WZRY有特殊活动(比如周年庆)时，可以看看我是否提供了**[资源更新包](https://github.com/cndaqiang/WZRY/issues/8)。
 * * 等不急更新的，可以自己使用AirTestIDE修改对应的图片。
@@ -39,7 +39,7 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 python -u wzry.py 配置文件
 ```
 
-* 其中**配置文件**可以不写，但是不能乱写。(ps. 这里的**配置文件**是个文件，不是然你复制配置文件这几个字)
+* 其中**配置文件**可以不写，但是不能乱写。(ps. 这里的**配置文件**是个文件，不是复制配置文件这几个字)
 * 不指定配置文件时，即直接**运行`python wzry.py`**，默认单进程控制 `127.0.0.1:5555` 的安卓设备
 * 如果要自己写配置文件，复制`config.in`到`config.win.txt`,修改后**运行`python wzry.py config.win.txt`**
 * * 下面是一些配置文件示例，足够应对各种情况。

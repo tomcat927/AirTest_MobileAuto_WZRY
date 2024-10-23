@@ -7,18 +7,17 @@
 # Build  : 2024-08-18            #
 # What   : 更新登录体验服         #
 ##################################
+import sys
+import os
+import traceback
+
 try:
     from airtest_mobileauto.control import *
 except ImportError:
-    print("模块[airtest_mobileauto]不存在, 尝试安装")
-    import pip
-
-    try:
-        pip.main(['install', 'airtest_mobileauto', '-i', 'https://pypi.tuna.tsinghua.edu.cn/simple'])
-    except:
-        print("安装失败")
-        exit(1)
-import sys
+    traceback.print_exc()
+    print("模块[airtest_mobileauto]导入不存在, 请安装airtest_mobileauto")
+    print("python -m pip install airtest_mobileauto --upgrade")
+    from airtest_mobileauto.control import *
 
 
 class tiyanfu():
