@@ -84,6 +84,7 @@ class wzry_figure:
         # 一些图库, 后期使用图片更新
         self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
+        self.登录界面年龄提示 = Template(r"tpl1729676388436.png", record_pos=(0.382, 0.198), resolution=(960, 540))
         self.大厅对战图标 = Template(r"tpl1723219359665.png", record_pos=(-0.122, 0.133), resolution=(960, 540))
         self.大厅万象天工 = Template(r"tpl1723219381063.png", record_pos=(0.243, 0.14), resolution=(960, 540))
         self.王者模拟战图标 = Template(r"tpl1693660105012.png", record_pos=(-0.435, -0.134), resolution=(960, 540))
@@ -111,8 +112,9 @@ class wzry_figure:
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
-        self.大厅元素.append(self.大厅万象天工)
-        self.大厅元素.append(self.大厅排位赛)
+        self.大厅元素.append(Template(r"tpl1729677632444.png", record_pos=(-0.463, -0.125), resolution=(960, 540), threshold=0.95))
+        self.大厅元素.append(Template(r"tpl1729677640815.png", record_pos=(-0.461, -0.124), resolution=(960, 540), threshold=0.95))
+        #
         self.房间元素 = []
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
         self.房间元素.append(Template(r"tpl1700304317380.png", record_pos=(-0.38, -0.252), resolution=(960, 540)))
@@ -502,7 +504,7 @@ class wzry_task:
         if self.判断战绩页面():
             self.结束人机匹配()
         #
-        if exists(self.图片.登录界面开始游戏图标):
+        if exists(self.图片.登录界面开始游戏图标) or exists(self.图片.登录界面年龄提示):
             if not self.登录游戏(检测到登录界面=True):
                 return self.进入大厅(times)
         self.网络优化()
@@ -570,7 +572,7 @@ class wzry_task:
             self.移动端.重启重连设备(10)
             检测到登录界面 = self.APPOB.前台APP(2)
             self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
-                resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
+                                       resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         #
         if times > 8:
             TimeErr(f"登录游戏:{times}次登录失败,返回")
@@ -664,6 +666,11 @@ class wzry_task:
             self.关闭按钮()
         if self.判断大厅中():
             return True
+        # 适合王者活动更改登录界面图标时
+        if exists(self.图片.登录界面年龄提示):
+            检测到登录界面 = True
+            self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
+                                       resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         #
         # ..................................................................................
         # 第一次万一已经登录过了
@@ -937,6 +944,10 @@ class wzry_task:
                             TimeECHO("进入房间失败,可能是今日更新太频繁,版本不一致无法进房,需要重新登录更新")
                 else:
                     TimeECHO("未找到组队房间,检测主节点登录状态")
+                if not 找到取消按钮:
+                    TimeECHO("没有找到取消按钮，王者最近可能有活动更新了图标")
+                    TimeECHO("检查页面是否有图片更新 https://github.com/cndaqiang/WZRY/issues/8")
+                    TimeECHO("更新后可以加速匹配速度")
 
         self.Tool.barriernode(self.mynode, self.totalnode, "结束组队进房间")
         return
@@ -1015,10 +1026,8 @@ class wzry_task:
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
         #
         自己确定匹配 = False
-        loop = 0
         自己曾经确定过匹配 = False
         找到开始按钮 = False
-        找到取消按钮 = False
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         if self.房主:
             找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
@@ -1031,9 +1040,6 @@ class wzry_task:
             if not 找到开始按钮:
                 TimeECHO(f":没找到开始按钮,使用历史位置")
             self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=not 找到开始按钮)
-        else:
-            找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
-            房间中的取消按钮 = self.图片.房间中的取消按钮图标[0]
 
         while True:
             if self.Tool.存在同步文件():
@@ -2511,9 +2517,6 @@ class wzry_task:
         bakstate = self.当前状态
         self.当前状态 = "重新启动"
         self.重启APP_acce(sleeptime=sleeptime)
-        #
-        self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
-            resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         result = self.登录游戏()
         self.当前状态 = bakstate
         return result
