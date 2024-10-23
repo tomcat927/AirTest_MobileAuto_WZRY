@@ -39,7 +39,7 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 python -u wzry.py 配置文件
 ```
 
-* **其中配置文件可以省略，但是不能乱写**
+* 其中**配置文件**可以不写，但是不能乱写。(ps. 这里的**配置文件**是个文件，不是然你复制配置文件这几个字)
 * 不指定配置文件时，即直接**运行`python wzry.py`**，默认单进程控制 `127.0.0.1:5555` 的安卓设备
 * 如果要自己写配置文件，复制`config.in`到`config.win.txt`,修改后**运行`python wzry.py config.win.txt`**
 * * 下面是一些配置文件示例，足够应对各种情况。
@@ -67,6 +67,9 @@ LINK_dict = {
 ```
 
 #### 这是我在windows上的配置信息及解释
+* 我的python环境Anaconda
+* 运行脚本流程
+![](doc/anaconda.png)
 * 新手初次尝试控制虚拟机的开关机组队可以参考
 [/BlueStack多开示例.pptx](doc/BlueStack多开示例.pptx)
 ![](doc/BlueStack多开示例.png)
