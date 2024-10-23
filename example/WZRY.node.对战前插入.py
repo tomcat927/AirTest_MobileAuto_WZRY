@@ -1,9 +1,14 @@
-# 每天早上前两局，标准模式
-if self.组队模式 and self.jinristep <= 1: self.标准模式 = self.触摸对战 = True
-# 组队的时候不要赢，这样获得的战令经验不到上限，可以额外从营地领经验
-# 周日大概率是在刷友情币等项目，不要开模拟对战
-if self.组队模式 and self.Tool.time_getweek() < 6: self.触摸对战 = True
+# 每天的第一局，标准模式+触摸模式
+self.标准模式 = False
+self.触摸对战 = False
+self.jinristep <= 1: self.标准模式 = True
+self.jinristep <= 1: self.触摸对战 = True
 
+# 第三局开始不再组队
+self.jinristep >= 3: self.组队模式 = False
+self.jinristep >= 3: self.totalnode = 1
+
+# 自动选择熟练度
 字典位置文件=[]
 字典位置文件.append("字典.中路.android.var_dict_N.txt")
 字典位置文件.append("字典.打野.android.var_dict_N.txt")
@@ -18,5 +23,3 @@ dictfile=self.Tool.read_dict(字典位置文件[此步位置文件])
 for key in ["参战英雄线路","参战英雄头像"]: self.Tool.var_dict[key]=dictfile[key]
 dictfile.update(self.Tool.var_dict)
 self.Tool.save_dict(dictfile, 字典位置文件[此步位置文件])
-#批量更新字典
-#for 此步位置文件 in range(len(字典位置文件)):self.Tool.var_dict.update(self.Tool.read_dict(字典位置文件[此步位置文件]));self.Tool.save_dict(self.Tool.var_dict, 字典位置文件[此步位置文件])

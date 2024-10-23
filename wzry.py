@@ -19,6 +19,7 @@ except ImportError:
     print("python -m pip install airtest_mobileauto --upgrade")
     from airtest_mobileauto.control import *
 
+
 class wzry_runinfo:
     # 备注
     # 运行参数信息
@@ -293,24 +294,17 @@ class wzry_task:
         #
         # ------------------------------------------------------------------------------
         # 对应的控制文件和参数的初始化
-        self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
-        self.今日休战FILE = "WZRY.tomorrow.txt"  # 今天不打了，明天开始，适合于离开办公室时运行脚本，但是不要执行任何命令，明天早上开始执行
-        self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,频繁触摸,提高金币数量
-        self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-        self.临时组队FILE = "WZRY.组队.txt"
-        self.玉镖夺魁签到FILE = "玉镖夺魁签到.txt"
-        self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 检测到该文件后领每日商城礼包
-        self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
-        self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 检测到该文件后登录体验服领取体验币
+        self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接退出程序。里面记录了总对局数。
+        self.触摸对战FILE = "WZRY.TOUCH.txt"   # 在5v5的对战过程中,移动和平A。通过活动的挂机检测。
         # 注入命令的文件
-        self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
-        self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
-        self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
-        # 初始化需要删除的文件 or 内部文件
-        self.SLEEPFILE = "WZRY.SLEEP.txt"
-        self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"
-        self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 检测到该文件后该次对战使用5v5标准对战模式
-        self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"
+        self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"  # 控制脚本功能：运行时间、礼包等功能的开启关闭。
+        self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"  # 控制对局过程：快速对战、标准对战、TOUCH模式、对战分路、对战英雄
+        self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"  # 覆盖上面的设定，选择指定英雄
+        # 本程序自动生成的文件
+        self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"  # 各种原因导致的无法进行组队
+        self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 是否领取了每日商城礼包
+        self.青铜段位FILE = f"WZRY.{self.mynode}.青铜段位.txt"  # 星耀对战次数用完创建
+        self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"  # 账号下线时创建
         #
         self.初始化(init=True)
         # 自定义参数可以通过self.设置参数() 插入
@@ -323,7 +317,6 @@ class wzry_task:
     # 从__init_摘过来的一些初始化命令，适用于每天的初始化
     def 初始化(self, init=False):
         # 清空文件
-        self.Tool.removefile(self.SLEEPFILE)
         self.Tool.removefile(self.无法进行组队FILE)
         self.Tool.removefile(self.青铜段位FILE)
         self.Tool.removefile(self.重新登录FILE)
@@ -1266,12 +1259,15 @@ class wzry_task:
             self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=True)
             self.Tool.timelimit("领营地礼包", limit=60*60*3, init=True)
             self.Tool.timelimit("体验服更新", limit=60*60*3, init=True)
+            self.启动礼包功能 = False
             self.强制领取礼包 = True
             self.活动礼包 = False
             self.祈愿礼包 = False
-            self.玉镖夺魁签到 = os.path.exists(self.玉镖夺魁签到FILE)
+            self.玉镖夺魁签到 = False
             self.每日任务礼包 = True
-            self.Tool.touchfile(self.免费商城礼包FILE)
+            self.礼包功能_邮件礼包 = True
+            self.礼包功能_妲己礼物 = True
+            self.礼包功能_友情礼包 = True
             self.友情礼包_积分夺宝 = True
             self.友情礼包_皮肤碎片 = True
             self.友情礼包_英雄碎片 = True
@@ -1279,11 +1275,21 @@ class wzry_task:
             self.友情礼包_皮肤宝箱 = True
             self.友情礼包_回城宝箱 = True
             self.友情礼包_击败宝箱 = True
-            self.外置礼包_王者营地 = True
-            self.外置礼包_体验服 = os.path.exists(self.更新体验服FILE)
+            # 外置礼包，暂无手册，遇到问题，请自行调试
+            self.外置礼包_王者营地 = False
+            self.外置礼包_体验服 = False
+            # 以下礼包不再维护，如果遇到问题，请自行调试
+            self.礼包功能_战队礼包 = False
+            self.礼包功能_商城礼包 = False
+            self.礼包功能_KPL礼包 = False
+            self.Tool.touchfile(self.免费商城礼包FILE)
 
             return
         #
+        if not self.启动礼包功能:
+            TimeECHO("默认关闭礼包功能，如需启动")
+            TimeECHO(f"请添加 self.启动礼包功能=True 到 {self.临时初始化FILE} ")
+            TimeECHO(f"如果遇到问题，请自行调试，礼包功能不再持续维护。")
         if 强制领取:
             self.Tool.timedict["领游戏礼包"] = 0
             self.Tool.timedict["领营地礼包"] = 0
@@ -1312,7 +1318,7 @@ class wzry_task:
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
                 return
             #
-            if os.path.exists(self.免费商城礼包FILE):
+            if self.礼包功能_商城礼包 and os.path.exists(self.免费商城礼包FILE):
                 if self.商城免费礼包():
                     self.Tool.removefile(self.免费商城礼包FILE)
             #
@@ -1332,22 +1338,22 @@ class wzry_task:
             # 回忆礼册. 不知道这个礼包会存在多久
             self.回忆礼册()
             # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
-            self.每日礼包_邮件礼包()
-            self.每日礼包_妲己礼物()
+            if self.礼包功能_邮件礼包:
+                self.每日礼包_邮件礼包()
+            if self.礼包功能_妲己礼物:
+                self.每日礼包_妲己礼物()
             self.友情礼包()
-            self.战队礼包()
-            TimeECHO("钻石夺宝、战令(动画多,很卡)没有代码需求,攒够了一起转")
+            if self.礼包功能_战队礼包:
+                TimeECHO("战队礼包不再维护，如果遇到问题，请自行调试。")
+                self.战队礼包()
             if self.Tool.存在同步文件():
                 return True
             #
-            if os.path.exists(self.KPL每日观赛FILE):
+            if self.礼包功能_KPL礼包:
                 TimeECHO("进行KPL观赛")
+                TimeECHO("KPL礼包不再维护，如果遇到问题，请自行调试。")
                 self.进入大厅()
-                try:
-                    观赛时长 = int(self.Tool.readfile(self.KPL每日观赛FILE)[0])
-                except:
-                    traceback.print_exc()
-                    观赛时长 = 60*15
+                观赛时长 = 60*15
                 self.KPL每日观赛(times=1, 观赛时长=观赛时长)
         else:
             TimeECHO("时间太短,暂时不领取游戏礼包")
@@ -2699,9 +2705,6 @@ class wzry_task:
             if self.Tool.stopnow():
                 return self.END()
             #
-            while os.path.exists(self.SLEEPFILE):
-                TimeECHO(f"检测到{self.SLEEPFILE}, sleep(5min)")
-                sleep(60*5)
             # ------------------------------------------------------------------------------
             # 这里做一个循环的判断，夜间不自动刷任务
             # 服务器5点刷新礼包和信誉积分等
@@ -2712,7 +2715,6 @@ class wzry_task:
                 self.组队模式 = False
                 self.Tool.touchfile(self.无法进行组队FILE)
                 只战一天 = os.path.exists(self.只战一天FILE)
-                今日休战 = os.path.exists(self.今日休战FILE)
                 self.当前状态 = "领取礼包"
                 #
                 if 只战一天:
@@ -2726,9 +2728,7 @@ class wzry_task:
                 leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
                 self.新的一天 = True
                 #
-                if 今日休战:
-                    TimeECHO("今日休战，明天再战")
-                elif leftmin > 60:
+                if leftmin > 60:
                     TimeECHO("夜间停止刷游戏前领取礼包")
                     self.每日礼包(强制领取=self.强制领取礼包)
                     self.APPOB.关闭APP()
@@ -2767,7 +2767,6 @@ class wzry_task:
                 self.APPOB.关闭APP()
                 self.移动端.重启重连设备(leftmin*60)
                 # 其他
-                self.Tool.removefile(self.今日休战FILE)
             # ------------------------------------------------------------------------------
             # 新的一天，回到开头进行初始化
             if self.新的一天:
@@ -2839,7 +2838,6 @@ class wzry_task:
             self.jinristep = self.jinristep+1
             if "5v5匹配" == self.对战模式:
                 self.青铜段位 = os.path.exists(self.青铜段位FILE)
-                self.标准模式 = os.path.exists(self.标准模式FILE)
                 self.触摸对战 = os.path.exists(self.触摸对战FILE)
                 if self.组队模式 and not self.青铜段位:
                     TimeECHO(f"组队时采用青铜段位")
@@ -2909,6 +2907,3 @@ if __name__ == "__main__":
         # sys.exit()  # 确保程序退出
     # 后面不能再跟其他指令，特别是exit()
     # 后面的命令会与task_manager.execute()中的多进程同时执行
-
-# sleep(50)
-

@@ -90,29 +90,20 @@ LINK_dict = {
 
 
 ## 控制文件
-* 存在下面的文件则开启相应的功能
-```
-self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab/Windows计划任务控制每天固定时间启动本脚本。
-self.今日休战FILE = "WZRY.tomorrow.txt"  # 今天不打了，明天开始，适合于离开办公室时运行脚本，但是不要执行任何命令，明天早上开始执行。
-self.触摸对战FILE = "WZRY.TOUCH.txt"  # 在5v5的对战过程中,自动移动和平A,提高金币数量和通过挂机检测。
-self.标准模式FILE = f"WZRY.{self.mynode}.标准模式.txt"  # 使用5v5标准对战模式
-self.临时组队FILE = "WZRY.组队.txt" # 在组队时间外组队
-self.玉镖夺魁签到FILE = "玉镖夺魁签到.txt" 
-self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 领每日商城礼包
-self.KPL每日观赛FILE = f"WZRY.KPL每日观赛FILE.txt"
-self.更新体验服FILE = f"WZRY.{self.mynode}.更新体验服.txt"  # 登录体验服领取体验币
-```
+在wzry.py所在路径，创建下面的文件则开启相应的功能
+* "WZRY.oneday.txt"  # 今天执行完之后，直接退出程序。里面记录了总对局数。
+* "WZRY.TOUCH.txt"   # 在5v5的对战过程中,移动和平A。通过活动的挂机检测。
 
 ## 注入命令
-* 将python指令填写到下面的文件中，直接修改程序的运行
-* 替换`{self.mynode}`为配置文件中的编号.
-* 示例example目录
+在wzry.py所在路径，创建下面的文件则注入python指令
+* 就是标准的python语法，不支持超过一行的python语句。
+* 替换`{self.mynode}`为配置文件中的编号，详见[常见问题](https://github.com/cndaqiang/WZRY/issues/42#issuecomment-2418500316)
+* example目录有一些示例文件
 * 在线示例[文件控制脚本功能](https://github.com/cndaqiang/WZRY/issues/13)
-
 ```
-self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"
-self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"
-self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"
+"WZRY.{self.mynode}.临时初始化.txt"  # 控制脚本功能：运行时间、礼包等功能的开启关闭。
+"WZRY.{self.mynode}.对战前插入.txt"  # 控制对局过程：快速对战、标准对战、TOUCH模式、对战分路、对战英雄
+"WZRY.{self.mynode}.重新设置英雄.txt"  # 覆盖上面的设定，选择指定英雄
 ```
 
 ## 更新资源
