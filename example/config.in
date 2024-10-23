@@ -1,30 +1,6 @@
 [client]
-# 仅在单进程时有效
-mynode = 0
-# 多进程时，多进程的数目
-totalnode = 2
-
-# 多进程配置
-multiprocessing = True
-#默认读入字符串, 不要添加引号
-BlueStackdir = C:\Program Files\BlueStacks_nxt
-BlueStack_Instance = {
-    0: "Pie64_1",
-    1: "Pie64"}
-BlueStack_Windows = {
-    0: "BlueStacks1",
-    1: "BlueStacks0"}
-#
 LINK_dict = {
-    0: "Android:///127.0.0.1:5565",
-    1: "Android:///127.0.0.1:5555"}
-#
+    0: "Android:///127.0.0.1:5555"}
 [control]
-prefix="ttt"
-logger_level=0
-#outputnode=0
-figdir=assets
 logfile={
-    0: "result.0.txt",
-    1: "result.1.txt"}
-
+    0: "result.0.txt"}

@@ -35,7 +35,7 @@ python -u wzry.py 配置文件
 
 * 其中**配置文件**可以不写，但是不能乱写。(ps. 这里的**配置文件**是个文件，不是复制配置文件这几个字)
 * 不指定配置文件时，即直接**运行`python wzry.py`**，默认单进程控制 `127.0.0.1:5555` 的安卓设备
-* 如果要自己写配置文件，复制`config.in`到`config.win.txt`,修改后**运行`python wzry.py config.win.txt`**
+* 如果要自己写配置文件，复制`example/config.in`到`config.win.txt`,修改后**运行`python wzry.py config.win.txt`**
 * 下面是一些配置文件示例，足够应对各种情况。
 
 ⭐⭐**初次写配置文件，就用这个，适合控制一个账户**
