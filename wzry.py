@@ -271,8 +271,18 @@ class wzry_task:
         self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         # Tool
-        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt",
-                            mynode=self.mynode, totalnode=self.totalnode)
+        dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt"
+        # 预设的分辨率对应的触点文件
+        dictreso = f"./example/{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.bin"
+        loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
+        self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
+        if loaddict:
+            try:
+                TimeECHO(f"检测到本程序第一次运行，且分辨率为{self.移动端.resolution}, 加载预设字典中....")
+                self.Tool.var_dict = self.Tool.read_dict(dictreso)
+                self.Tool.save_dict(self.Tool.var_dict, dictfile)
+            except:
+                traceback.print_exc()
         self.房主 = self.mynode == 0 or self.totalnode == 1
         # ------------------------------------------------------------------------------
         # DQWheel 框架的初始化
