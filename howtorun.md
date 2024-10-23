@@ -3,10 +3,10 @@
 * 可以先在[常见问题收录](https://github.com/cndaqiang/WZRY/issues/42)中查找
 * 其次认真阅读本说明
 * 其实你读读源码`wzry.py`能解决你99%的问题
-* 友善的提出问题[issues](https://github.com/cndaqiang/WZRY/issues)
-* * 提问时，附上你的**执行结果、配置文件、运行目录、模拟器界面截图**，
-* * **提问时@cndaqiang或者为项目start提醒我有人提问。**
-
+* 友善的提出问题[issues](https://github.com/cndaqiang/WZRY/issues)。
+* * 附上**执行结果、配置文件、运行目录、游戏页面、模拟器设置页面、cmd/powershell/terminal/vscode/pycharm等运行界面截图**，
+* * **@cndaqiang或者为项目start加速解决问题的速度。**
+* * 请遵守[提问的礼仪](https://github.com/tvvocold/How-To-Ask-Questions-The-Smart-Way)。没人理会你的傲慢和懒惰。
 
 ## 准备工作
 * 阅读初阶教程[WZRY.pdf](doc/WZRY.pdf)
