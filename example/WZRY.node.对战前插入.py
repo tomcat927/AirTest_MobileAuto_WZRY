@@ -8,6 +8,7 @@ self.jinristep <= 1: self.触摸对战 = True
 self.jinristep >= 3: self.组队模式 = False
 self.jinristep >= 3: self.totalnode = 1
 
+
 # 自动选择熟练度
 字典位置文件=[]
 字典位置文件.append("字典.中路.android.var_dict_N.txt")

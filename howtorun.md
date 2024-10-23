@@ -46,7 +46,7 @@ python -u wzry.py 配置文件
 * * 二次开发源码，可以阅读[airtest-mobileauto](https://pypi.org/project/airtest-mobileauto/)。
 
 #### 控制一个模拟器/wifi连接的安卓手机上的王者账户[单人模式]
-⭐⭐**新手初次写配置文件，就用这个，适合控制一个账户**
+⭐⭐**初次写配置文件，就用这个，适合控制一个账户**
 
 ```
 [client]
@@ -55,7 +55,7 @@ LINK_dict = {
 ```
 
 #### 控制两个安卓设备上的王者账户组队[双人组队模式]
-⭐⭐**新手初次尝试组队，就用这个，适合控制两个账户**
+⭐⭐**初次尝试组队，就用这个，适合控制两个账户**
 
 ```
 [client]
@@ -70,8 +70,7 @@ LINK_dict = {
 * 我的python环境Anaconda
 * 运行脚本流程
 ![](doc/anaconda.png)
-* 新手初次尝试控制虚拟机的开关机组队可以参考
-[/BlueStack多开示例.pptx](doc/BlueStack多开示例.pptx)
+* 初次尝试控制虚拟机的开关机组队可以参考
 ![](doc/BlueStack多开示例.png)
 
 #### 更多配置示例
@@ -82,50 +81,29 @@ LINK_dict = {
 ![](doc/vscode.PNG)
 
 
-# 高级功能
-* **通过在代码目录创建一些文件来动态调整代码的运行模式，可以实现自动切换分路、选择熟练度最低的英雄，进行王者模拟战等操作**
-* 控制文件 `txt` 不参与仓库同步, [文件控制运行示例](https://github.com/cndaqiang/WZRY/issues/13)
-* **注：所有文件都默认采用UTF8格式编码**
-* 以最新代码为准, 下面的内容仅供参考。
+## 老手可以尝试开启的功能
+* **通过在代码目录创建一些文件来精细的操作代码的运行**
+* **注：所有文件都放在`wzry.py`所在路径，采用txt结尾，UTF8格式编码**，
 
+**控制文件**
+* `WZRY.oneday.txt`  # 今天执行完之后，直接退出程序。里面记录了总对局数。
+* `WZRY.TOUCH.txt `  # 在5v5的对战过程中,移动和平A。通过活动的挂机检测。
 
-## 控制文件
-在wzry.py所在路径，创建下面的文件则开启相应的功能
-* "WZRY.oneday.txt"  # 今天执行完之后，直接退出程序。里面记录了总对局数。
-* "WZRY.TOUCH.txt"   # 在5v5的对战过程中,移动和平A。通过活动的挂机检测。
-
-## 注入命令
-在wzry.py所在路径，创建下面的文件则注入python指令
-* 就是标准的python语法，不支持超过一行的python语句。
+**注入python命令**
+* 标准的python语法，不支持超过一行的python语句。
 * 替换`{self.mynode}`为配置文件中的编号，详见[常见问题](https://github.com/cndaqiang/WZRY/issues/42#issuecomment-2418500316)
 * example目录有一些示例文件
 * 在线示例[文件控制脚本功能](https://github.com/cndaqiang/WZRY/issues/13)
-```
-"WZRY.{self.mynode}.临时初始化.txt"  # 控制脚本功能：运行时间、礼包等功能的开启关闭。
-"WZRY.{self.mynode}.对战前插入.txt"  # 控制对局过程：快速对战、标准对战、TOUCH模式、对战分路、对战英雄
-"WZRY.{self.mynode}.重新设置英雄.txt"  # 覆盖上面的设定，选择指定英雄
-```
-
-## 更新资源
-```
-self.图片更新FILE = "WZRY.图片更新.txt"
-```
+* `WZRY.{self.mynode}.临时初始化.txt`    # 控制脚本功能：运行时间、礼包等功能的开启关闭。
+* `WZRY.{self.mynode}.对战前插入.txt`    # 控制对局过程：快速对战、标准对战、TOUCH模式、对战分路、对战英雄
+* `WZRY.{self.mynode}.重新设置英雄.txt`  # 覆盖上面的设定，选择指定英雄
 
 
-# 其他补充
-## 关于windows平台的计划任务
-* [**推荐**]`只在用户登录时运行`
-* * 启动脚本时会跳出窗口，可以自动打开模拟器,和正常执行脚本相同。
-* * 锁屏之后还可以执行，可以正常启动模拟器 
-* `不管用户是否登录都要运行`
-* * 需要输入密码，启动脚本时不会跳出窗口，可以自动打开模拟器。
-* * 多开器，和用户界面以及任务管理器无论怎么找都找不到模拟器的进程。无法限制模拟器只用的资源。
-* * 脚本和其他ADB工具可以调试这些隐藏的模拟器。
-
-### 配置示例
+## 每天定时执行脚本
+### windows平台的计划任务示例
 ![](doc/crontab_win.png)
 
-## Linux计划任务示例
+### Linux计划任务示例
 ```
 50 4 * * * pkill -f 'wzry.py'
 51 4 * * * /usr/lib/android-sdk/platform-tools/adb kill-server
