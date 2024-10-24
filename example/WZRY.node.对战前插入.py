@@ -8,6 +8,10 @@ self.jinristep <= 1: self.触摸对战 = True
 self.jinristep >= 3: self.组队模式 = False
 self.jinristep >= 3: self.totalnode = 1
 
+# 第五局开始进行模拟战
+self.对战模式 = "5v5匹配"
+self.jinristep >= 5: self.对战模式 = "模拟战"
+
 
 # 自动选择熟练度
 字典位置文件=[]

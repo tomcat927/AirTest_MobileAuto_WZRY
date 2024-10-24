@@ -989,6 +989,7 @@ class wzry_task:
         # 不要管是否识别成功，就是按，后面加一个检测，没有检测成果就是按失败了，再返回即可
         if self.Tool.existsTHENtouch(self.图片.大厅万象天工, "大厅万象天工", savepos=True):
             sleep(2)
+        self.Tool.存在任一张图([self.图片.王者模拟战图标], "王者模拟战图标", savepos=True)
         if self.Tool.existsTHENtouch(self.图片.王者模拟战图标, "王者模拟战图标", savepos=True):
             sleep(2)
         while self.Tool.existsTHENtouch(任意位置继续, "任意位置继续"):
