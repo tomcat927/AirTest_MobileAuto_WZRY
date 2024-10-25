@@ -1065,6 +1065,8 @@ class wzry_task:
                     队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
                 #
             if 队友确认匹配:
+                # 等一下，有的虚拟机他太卡了
+                sleep(2)
                 break
             else:
                 if self.Tool.timelimit(timekey="确认匹配", limit=20, init=False):
