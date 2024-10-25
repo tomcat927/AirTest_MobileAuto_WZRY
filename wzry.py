@@ -1803,7 +1803,7 @@ class wzry_task:
         return True
 
         #
-    def 每日礼包_每日任务(self, times=0, 战令领取=True):
+    def 每日礼包_每日任务(self, times=0):
         #
         if not self.check_run_status():
             return True
@@ -1817,37 +1817,30 @@ class wzry_task:
         times = times+1
         # 每日任务
         赛季任务界面 = []
-        赛季任务界面.append(Template(r"tpl1703756264588.png", record_pos=(-0.407, -0.255), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1703756272809.png", record_pos=(0.373, 0.11), resolution=(960, 540)))
-        赛季任务界面.append(Template(r"tpl1703755615130.png", record_pos=(-0.453, -0.058), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
-        赛季任务界面.append(Template(r"tpl1706543217077.png", record_pos=(-0.255, 0.174), resolution=(960, 540)))
         赛季任务界面.append(Template(r"tpl1706543240746.png", record_pos=(0.352, 0.183), resolution=(960, 540)))
+        赛季任务界面.append(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
         任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
         任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
         确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
         self.进入大厅()
-        self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True)
+        if not self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True):
+            TimeECHO(f"未找到战令入口，尝试计算入口中（仅适用于16:9屏幕）")
+            self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
         sleep(15)
-        进入战令界面 = False
-        进入战令界面, 赛季任务界面 = self.Tool.存在任一张图(赛季任务界面, "赛季任务界面")
         #
-        if not 进入战令界面 and times > 2:
+        进入战令界面, 赛季任务界面 = self.Tool.存在任一张图(赛季任务界面, "赛季任务界面元素")
+        if not 进入战令界面 and times > 1:
+            self.当前界面 == "未知"
             进入战令界面 = not self.判断大厅中()
         #
-        if not 进入战令界面:
+        if not 进入战令界面 and times % 5 == 4:
             TimeECHO(f"未检测到战令界面, 重新进入领任务礼包")
             if "战令入口" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令入口"]
-            return self.每日礼包_每日任务(times=times, 战令领取=战令领取)
+            return self.每日礼包_每日任务(times=times)
         #
-        if 战令领取:
-            TimeECHO(f"领取战令奖励测试中")
-            战令一键领取 = Template(r"tpl1703765448167.png", record_pos=(0.293, 0.11), resolution=(960, 540), target_pos=6)
-            if self.Tool.existsTHENtouch(战令一键领取, "战令一键领取", savepos=False):
-                self.Tool.LoopTouch(确定按钮, "确定按钮")
-                self.关闭按钮()
-                self.确定按钮()
         # 正常每日礼包
         一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.391, 0.224), resolution=(960, 540))
         # 新图标
@@ -1860,20 +1853,29 @@ class wzry_task:
         进入任务界面 = False
         for i in range(60):
             self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True)
+            if i > 2:
+                TimeECHO(f"战令页面更新了，你需要自己截图更新图片资源了")
+                TimeECHO(f"本程序会尝试寻找一下位置（仅适用于16:9屏幕），但不保证成功")
+                for j in range(8):
+                    record_pos = (-0.445, -0.03-j/100)
+                    self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
+                    if exists(一键领取):
+                        TimeECHO(f"更新(战令的每日任务)坐标")
+                        self.Tool.cal_record_pos(record_pos, self.移动端.resolution, f"战令的每日任务", savepos=True)
+                        break
             if exists(任务列表):
                 进入任务界面 = True
                 break
             if exists(一键领取):
                 进入任务界面 = True
                 break
-            sleep(5)
-            if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10):
-                return False
+            sleep(1)
+        #
         if not 进入任务界面:
             TimeECHO(f"未检测到任务界面, 重新进入领任务礼包")
-            if "战令的每日任务" in self.Tool.var_dict.keys():
+            if times % 5 == 4 and "战令的每日任务" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令的每日任务"]
-            return self.每日礼包_每日任务(times=times-1, 战令领取=战令领取)
+            return self.每日礼包_每日任务(times=times-1)
         #
         # 开始正式领取
         if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
@@ -2916,3 +2918,5 @@ if __name__ == "__main__":
         # sys.exit()  # 确保程序退出
     # 后面不能再跟其他指令，特别是exit()
     # 后面的命令会与task_manager.execute()中的多进程同时执行
+
+touch(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
