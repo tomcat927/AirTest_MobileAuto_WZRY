@@ -1028,10 +1028,6 @@ class wzry_task:
         self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
         #
-        自己确定匹配 = False
-        队友确认5v5匹配 = False
-        队友确认匹配 = False
-        自己曾经确定过匹配 = False
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         if self.房主:
             找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
@@ -1045,6 +1041,12 @@ class wzry_task:
             if not self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=True):
                 TimeECHO(f"历史字典中不包含的开始匹配按钮，尝试计算字典坐标")
                 self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "房间中的开始匹配按钮")
+            sleep(1)
+        else:
+            sleep(5)
+        自己确定匹配 = False
+        队友确认匹配 = False
+        自己曾经确定过匹配 = False
         while True:
             if self.Tool.存在同步文件():
                 return True
