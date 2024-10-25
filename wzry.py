@@ -107,6 +107,8 @@ class wzry_figure:
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), threshold=0.9))
+        self.确定匹配按钮 = Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8)
+        self.展开英雄列表 = Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540))
         # 新年活动结束时,替换一个常规的取消准备按钮
         self.房间中的取消按钮图标 = []
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
@@ -1027,60 +1029,46 @@ class wzry_task:
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
         #
         自己确定匹配 = False
+        队友确认5v5匹配 = False
+        队友确认匹配 = False
         自己曾经确定过匹配 = False
-        找到开始按钮 = False
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         if self.房主:
             找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
             房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
-            # 记录历史上有的匹配按钮位置,历史上就执行一次
-            if "房间中的开始匹配按钮" not in self.Tool.var_dict.keys():
-                pos = exists(房间中的开始按钮)
-                if pos:
-                    self.Tool.var_dict["房间中的开始匹配按钮"] = pos
+            #
+            # 找到新的开始匹配按钮则更新位置
+            找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "房间中的开始匹配按钮", savepos=True)
+            房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
             if not 找到开始按钮:
-                TimeECHO(f":没找到开始按钮,使用历史位置")
-            self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=not 找到开始按钮)
-
+                TimeECHO(f"房间中，没找到开始匹配按钮, 可能图标有更新，建议查看仓库。尝试使用历史字典中的开始按钮")
+            if not self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=True):
+                TimeECHO(f"历史字典中不包含的开始匹配按钮，尝试计算字典坐标")
+                self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "房间中的开始匹配按钮")
         while True:
             if self.Tool.存在同步文件():
                 return True
-            # 如果没找到就再找一次
-            if self.房主 and not 找到开始按钮:
-                找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
-                房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
-                self.Tool.existsTHENtouch(房间中的开始按钮, "房间中的开始匹配按钮", savepos=False)
-            #
-            if self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=False):
-                TimeECHO("等待队友确认匹配中")
             if self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=False):
                 TimeErr("超时太久,退出匹配")
+                self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "取消匹配")
                 return False
-            自己确定匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8), "确定匹配按钮")
-            自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
-            # if 自己确定匹配: sleep(15) #自己确定匹配后给流出时间
-            队友确认5v5匹配 = False
-            if 自己曾经确定过匹配:
-                # 该界面用于判断是都5v5匹配成功，或者模拟战是否进错了模式
-                队友确认5v5匹配 = self.Tool.existsTHENtouch(Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540)), "英雄界面检测", savepos=False)
             #
-            if "模拟战" in self.对战模式:
-                if 队友确认5v5匹配:
-                    self.创建同步文件("模拟战误入5v5?")
-                    return
-                队友确认匹配 = False
-                if 自己曾经确定过匹配:
+            自己确定匹配 = self.Tool.existsTHENtouch(self.图片.确定匹配按钮, "确定匹配按钮")
+            自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
+            if 自己曾经确定过匹配:
+                # 该界面用于判断是都匹配成功
+                if "模拟战" in self.对战模式:
                     队友确认匹配 = self.判断对战中()
-                if 队友确认匹配:
-                    TimeECHO(":队友确认匹配")
-                    return True  # 模拟战确定匹配后就结束了
                 else:
-                    TimeECHO(":队友未确认匹配")
-                    continue
-            else:
-                队友确认匹配 = 队友确认5v5匹配
+                    队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
+                #
             if 队友确认匹配:
                 break
+            else:
+                if self.Tool.timelimit(timekey="确认匹配", limit=20, init=False):
+                    TimeECHO("等待队友确认匹配中.... 强行点击确定坐标")
+                    self.Tool.touch_record_pos(self.图片.确定匹配按钮.record_pos, self.移动端.resolution, "确定匹配按钮")
+                    自己曾经确定过匹配 = True
         #
         # 选择英雄
         if self.选择英雄:
