@@ -1856,7 +1856,7 @@ class wzry_task:
             if i > 2:
                 TimeECHO(f"战令页面更新了，你需要自己截图更新图片资源了")
                 TimeECHO(f"本程序会尝试寻找一下位置（仅适用于16:9屏幕），但不保证成功")
-                for j in range(8):
+                for j in range(10):
                     record_pos = (-0.445, -0.03-j/100)
                     self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
                     if exists(一键领取):
