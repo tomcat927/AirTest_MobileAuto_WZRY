@@ -1,5 +1,6 @@
 ./*.in
 *.txt
+*.yaml
 untitled.air
 *.bak
 .vscode
