@@ -21,7 +21,7 @@ class wzyd_libao:
         self.totalnode = Settings.totalnode
         self.LINK = Settings.LINK_dict[Settings.mynode]
         self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
-        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.txt",
+        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.yaml",
                             mynode=self.mynode, totalnode=self.totalnode)
         #
         self.组队模式 = self.totalnode > 1

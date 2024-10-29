@@ -275,9 +275,9 @@ class wzry_task:
         self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.tmgp.sgame"
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         # Tool
-        dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.txt"
+        dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = f"./example/{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.bin"
+        dictreso = f"./example/{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml"
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -1886,7 +1886,7 @@ class wzry_task:
             sleep(5)
         # 这几个活跃，暂时没有找到位置，不确定是没发光的原因，还是图标变化
         # 这是使用savepos，下次换了新的领取位置记得清除这些dict
-        if self.Tool.existsTHENtouch(今日活跃, "今日活跃 ", savepos=True):
+        if self.Tool.existsTHENtouch(今日活跃, "今日活跃", savepos=True):
             self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
         if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1", savepos=True):
