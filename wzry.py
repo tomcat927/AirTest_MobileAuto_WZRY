@@ -2912,14 +2912,13 @@ if __name__ == "__main__":
     try:
         task_manager.execute()
     except KeyboardInterrupt:
-        logger.info("Caught KeyboardInterrupt, terminating processes.")
+        pass
+        TimeECHO("Caught KeyboardInterrupt, terminating processes.")
     finally:
         # 这条命令用于调试寻找错误原因
         traceback.print_exc()
         # 这里可以放置清理代码
-        logger.info("Cleaning up and exiting.")
+        TimeECHO("Cleaning up and exiting.")
         # sys.exit()  # 确保程序退出
     # 后面不能再跟其他指令，特别是exit()
     # 后面的命令会与task_manager.execute()中的多进程同时执行
-
-touch(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
