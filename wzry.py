@@ -445,6 +445,7 @@ class wzry_task:
 
     def 进入大厅时遇到的复杂的关闭按钮(self):
         self.关闭按钮()
+        sleep(2)
         if self.判断大厅中():
             return True
         TimeECHO(": 未能进入大厅,有可能有新的关闭按钮,继续尝试关闭中")
