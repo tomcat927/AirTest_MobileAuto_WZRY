@@ -1,6 +1,5 @@
 #避免windows检查说有病毒，不再同步运行脚本
-.bat
-.sh
+*.bat
 ./*.in
 *.txt
 *.yaml
