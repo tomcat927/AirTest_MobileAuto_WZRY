@@ -5,19 +5,18 @@
 ![GitHub forks](https://img.shields.io/github/forks/cndaqiang/WZRY?color=60c5ba&style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/cndaqiang/WZRY?color=ffd700&style=for-the-badge)
 
-### 运行方式
-
-更多细节见:[**Howto**](howtorun.md)
+### 最新功能介绍和使用手册
+[WZRY项目主页](https://cndaqiang.github.io/wzry.doc)
 
 ### 自动化功能
 
 * 开启关闭模拟器、容器、手机
-* [多开组队](https://github.com/cndaqiang/WZRY/issues/42#issuecomment-2418505810)
+* 多开组队
 * 无人值守：出错重新进行同步
 * 检测游戏闪退、模拟器关闭，重新启动王者或重启模拟器
 * 健康系统自动休息启动
 * 优先星耀人机模式，次数达到上限后切换青铜人机
-* [调整分路并选择熟练度最低的英雄](https://github.com/cndaqiang/WZRY/issues/13#issuecomment-2205392546)
+* 调整分路并选择熟练度最低的英雄
 * TOUCH模式(移动+平A)
 
 

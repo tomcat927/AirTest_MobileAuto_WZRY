@@ -1,6 +1,0 @@
-[client]
-LINK_dict = {
-    0: "Android:///127.0.0.1:5555"}
-[control]
-logfile={
-    0: "result.0.txt"}
