@@ -313,7 +313,6 @@ class wzry_task:
         # 注入命令的文件
         self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"  # 控制脚本功能：运行时间、礼包等功能的开启关闭。
         self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"  # 控制对局过程：快速对战、标准对战、TOUCH模式、对战分路、对战英雄
-        self.重新设置英雄FILE = f"WZRY.{self.mynode}.重新设置英雄.txt"  # 覆盖上面的设定，选择指定英雄
         # 本程序自动生成的文件
         self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"  # 各种原因导致的无法进行组队
         self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 是否领取了每日商城礼包
@@ -1077,14 +1076,11 @@ class wzry_task:
         #
         # 选择英雄
         if self.选择英雄:
-            exit_code = run_class_command(self=self, command=self.Tool.readfile(self.重新设置英雄FILE), must_ok=True)
-            if exit_code != 0:
-                sleep(1)
-                self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
-                sleep(5)
-                # 这里是用savepos的好处就是那个英雄的熟练度低点哪个英雄
-                self.Tool.existsTHENtouch(self.参战英雄头像, "参战英雄头像", savepos=True)
-                sleep(1)
+            self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
+            sleep(5)
+            # 这里是用savepos的好处就是那个英雄的熟练度低点哪个英雄
+            self.Tool.existsTHENtouch(self.参战英雄头像, "参战英雄头像", savepos=True)
+            sleep(1)
             # 分路重复.png
             if exists(Template(r"tpl1689668119154.png", record_pos=(0.0, -0.156), resolution=(960, 540))):
                 TimeECHO("分路冲突，切换英雄")
@@ -2826,16 +2822,19 @@ class wzry_task:
             # 运行前统一变量
             self.组队模式 = self.totalnode > 1
             if self.组队模式:
+                TimeECHO("组队模式, 广播变量中....")
                 self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
                 self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="jinristep")
                 # 广播一些变量，这样就不用在每个文件中都写初始化参数了
                 self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
                 #
-                TimeECHO("组队模式")
+                self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
+                if self.房主:
+                    for bcastvar in ["runstep", "jinristep", "限时组队时间", "self.myPID"]:
+                        self.Tool.removefile(f".tmp.{bcastvar}.txt")
+                #
             self.房主 = self.mynode == 0 or self.totalnode == 1
             TimeECHO(f"运行次数{self.runstep}|今日步数{self.jinristep}")
-            #
-            self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
             #
             if self.Tool.存在同步文件():
                 TimeECHO("准备进入战斗循环中遇到同步文件返回")
