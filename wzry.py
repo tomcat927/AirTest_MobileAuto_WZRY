@@ -1069,7 +1069,7 @@ class wzry_task:
                 sleep(2)
                 break
             else:
-                if self.Tool.timelimit(timekey="确认匹配", limit=20, init=False):
+                if self.Tool.timelimit(timekey="确认匹配", limit=5, init=False):
                     TimeECHO("等待队友确认匹配中.... 强行点击确定坐标")
                     self.Tool.touch_record_pos(self.图片.确定匹配按钮.record_pos, self.移动端.resolution, "确定匹配按钮")
                     自己曾经确定过匹配 = True
