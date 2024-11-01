@@ -99,29 +99,19 @@ class tiyanfu():
         if self.Tool.existsTHENtouch(确定重启, "体验服.确定重启", savepos=False):
             TimeECHO("确定重启")
             sleep(waittime)
+        # 不同版本的安卓、不同模拟器的安装界面区别较大，仅对MuMu进行适配
         # MuMu模拟器的安装元素
-        MuMu安装 = Template(r"tpl1724563572426.png", record_pos=(-0.013, -0.005), resolution=(960, 540), target_pos=7)
-        self.安装元素 = []
-        self.安装元素.append(Template(r"tpl1723551109493.png", record_pos=(-0.349, -0.202), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1723551138518.png", record_pos=(-0.001, -0.033), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1723973068687.png", record_pos=(-0.017, -0.175), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1724466523208.png", record_pos=(-0.005, -0.161), resolution=(960, 540)))
-        self.安装元素.append(MuMu安装)
-        self.安装元素.append(Template(r"tpl1724936641621.png", record_pos=(-0.142, -0.033), resolution=(960, 540)))
-        self.安装按钮 = []
-        self.安装按钮.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6))
-        self.安装按钮.append(Template(r"tpl1723993720207.png", record_pos=(-0.001, 0.18), resolution=(960, 540)))
-        self.安装按钮.append(Template(r"tpl1724466528191.png", record_pos=(0.075, 0.237), resolution=(960, 540)))
-        self.安装按钮.append(MuMu安装)
-        self.安装按钮.append(Template(r"tpl1724936646196.png", record_pos=(0.209, 0.051), resolution=(960, 540)))
+        王者图标 = Template(r"tpl1730462743001.png", record_pos=(-0.218, -0.049), resolution=(960, 540))
+        更新按钮 = Template(r"tpl1724936646196.png", record_pos=(0.209, 0.051), resolution=(960, 540))
+        self.安装元素 = [王者图标, 更新按钮]
 
         安装界面, self.安装元素 = self.Tool.存在任一张图(self.安装元素, "体验服.安装元素")
         if 安装界面:
-            for i in self.安装按钮:
-                self.Tool.existsTHENtouch(i, f"安装按钮{i}", savepos=False)
-            sleep(waittime)
-            self.APPOB.重启APP()
+            if self.Tool.existsTHENtouch(更新按钮, f"体验服.更新按钮", savepos=False):
+                sleep(waittime)
+                self.APPOB.重启APP()
+        # 体验服随便点无所谓 不用追求太逻辑和完美，就直接点以前的更新坐标
+        self.Tool.touch_record_pos(更新按钮.record_pos, self.移动端.resolution, keystr=f"体验服.更新按钮")
         #
         #
         关闭界面 = Template(r"tpl1723551215061.png", record_pos=(0.323, -0.202), resolution=(960, 540))
