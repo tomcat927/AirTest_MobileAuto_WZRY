@@ -1815,24 +1815,39 @@ class wzry_task:
         #
         times = times+1
         # 每日任务
-        赛季任务界面 = []
-        赛季任务界面.append(Template(r"tpl1703756272809.png", record_pos=(0.373, 0.11), resolution=(960, 540)))
-        赛季任务界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
-        赛季任务界面.append(Template(r"tpl1706543240746.png", record_pos=(0.352, 0.183), resolution=(960, 540)))
-        赛季任务界面.append(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
+        战令奖励界面 = []
+        战令奖励界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
+        战令奖励界面.append(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
         任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
         任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
         确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
+        # 正常每日礼包
+        一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.391, 0.224), resolution=(960, 540))
+        # 新图标
+        今日活跃 = Template(r"tpl1703758748236.png", record_pos=(-0.239, 0.233), resolution=(960, 540))
+        本周活跃1 = Template(r"tpl1703758755430.png", record_pos=(-0.075, 0.232), resolution=(960, 540))
+        本周活跃2 = Template(r"tpl1703758760425.png", record_pos=(-0.015, 0.232), resolution=(960, 540))
+        战令任务界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
+        #
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        #
         self.进入大厅()
         if not self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True):
             TimeECHO(f"未找到战令入口，尝试计算入口中（仅适用于16:9屏幕）")
             self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
         sleep(15)
+
         #
-        进入战令界面, 赛季任务界面 = self.Tool.存在任一张图(赛季任务界面, "赛季任务界面元素")
-        if not 进入战令界面 and times > 1:
+        进入战令界面, 战令奖励界面 = self.Tool.存在任一张图(战令奖励界面, "战令奖励界面元素")
+        进入任务界面 = False
+        if not 进入战令界面:
             self.当前界面 == "未知"
-            进入战令界面 = not self.判断大厅中()
+            TimeECHO("判断进入战令界面失败， 尝试进入任务界面进行再次判断")
+            sleep(10)
+            if not self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True):
+                self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
+            战令奖励界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
+            进入任务界面, 战令奖励界面 = self.Tool.存在任一张图(战令任务界面, "战令任务界面界面元素")
         #
         if not 进入战令界面 and times % 5 == 4:
             TimeECHO(f"未检测到战令界面, 重新进入领任务礼包")
@@ -1840,17 +1855,10 @@ class wzry_task:
                 del self.Tool.var_dict["战令入口"]
             return self.每日礼包_每日任务(times=times)
         #
-        # 正常每日礼包
-        一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.391, 0.224), resolution=(960, 540))
-        # 新图标
-        今日活跃 = Template(r"tpl1703758748236.png", record_pos=(-0.239, 0.233), resolution=(960, 540))
-        本周活跃1 = Template(r"tpl1703758755430.png", record_pos=(-0.075, 0.232), resolution=(960, 540))
-        本周活跃2 = Template(r"tpl1703758760425.png", record_pos=(-0.015, 0.232), resolution=(960, 540))
-        #
-        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
-        # 开始切换到任务界面,但是可能比较卡,要等
-        进入任务界面 = False
+        # 
         for i in range(60):
+            if 进入任务界面:
+                break
             self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True)
             if i > 2:
                 TimeECHO(f"战令页面更新了，你需要自己截图更新图片资源了")
@@ -1864,10 +1872,8 @@ class wzry_task:
                         break
             if exists(任务列表):
                 进入任务界面 = True
-                break
             if exists(一键领取):
                 进入任务界面 = True
-                break
             sleep(1)
         #
         if not 进入任务界面:
