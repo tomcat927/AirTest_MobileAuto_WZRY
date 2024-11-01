@@ -41,7 +41,7 @@
 
 ## 如何使用
 
-在全新的[WZRY项目主页](https://cndaqiang.github.io/wzry.doc)获得最新的功能介绍和使用手册。
+在全新的[文档页面](https://cndaqiang.github.io/wzry.doc)获得使用方法。
 
 ## 致谢
 * [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)
