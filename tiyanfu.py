@@ -27,8 +27,19 @@ class tiyanfu():
         self.totalnode = Settings.totalnode
         self.LINK = Settings.LINK_dict[Settings.mynode]
         self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
-        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.yaml",
-                            mynode=self.mynode, totalnode=self.totalnode)
+        # Tool
+        dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.yaml"
+        # 预设的分辨率对应的触点文件
+        dictreso = f"./assets/{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml"
+        loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
+        self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
+        if loaddict:
+            try:
+                TimeECHO(f"检测到本程序第一次运行，且分辨率为{self.移动端.resolution}, 加载预设字典中....")
+                self.Tool.var_dict = self.Tool.read_dict(dictreso)
+                self.Tool.save_dict(self.Tool.var_dict, dictfile)
+            except:
+                traceback.print_exc()
         #
         self.组队模式 = self.totalnode > 1
         self.房主 = self.mynode == 0 or self.totalnode == 1
