@@ -821,7 +821,7 @@ class wzry_task:
                 self.Tool.touchfile(self.青铜段位FILE)
                 if self.组队模式:
                     TimeErr("段位不合适,创建同步文件")
-                    self.Tool.touch同步文件(self.Tool.辅助同步文件)
+                    self.Tool.touch同步文件(self.Tool.辅助同步文件,"星耀段位次数用完")
                     return
                 else:
                     return self.单人进入人机匹配房间(times)
@@ -889,12 +889,8 @@ class wzry_task:
         if not self.组队模式:
             return
         TimeECHO("进入组队匹配房间")
-        # 组队时,使用青铜模式进行, 前面应该已经配置好了青铜段位,这里进一步加强青铜段位确定
         if "5v5匹配" == self.对战模式 and not self.青铜段位 and self.房主:
-            TimeECHO(":组队模式只在青铜段位进行,房主应该使用青铜段位建房间,重建房间中")
-            self.青铜段位 = True
-            self.进入大厅()
-            self.单人进入人机匹配房间()
+            TimeECHO("!!! 再次确认，正在采用星耀段位进行组队")
         # ...............................................................
         # 当多人组队模式时，这里要暂时保证是房间中，因为邀请系统还没写好
         self.Tool.barriernode(self.mynode, self.totalnode, "组队进房间")
@@ -2666,6 +2662,11 @@ class wzry_task:
                 if self.totalnode_bak > 1:
                     # 判断是否存在self.Tool.辅助同步文件，若存在必须同步成功（除非存在stopfile）
                     TimeECHO(f"辅助同步内容:{content}")
+                    if "星耀段位次数用完" in content:
+                        TimeECHO("子账户星耀次数已用完，无法继续星耀对局")
+                        self.青铜段位 = True
+                        self.Tool.touchfile(self.青铜段位FILE)
+                    #
                     sleeptime = 5*60 if "健康系统" in content else 10
                     self.Tool.必须同步等待成功(mynode=self.mynode, totalnode=self.totalnode_bak,
                                        同步文件=self.Tool.辅助同步文件, 不再同步=self.无法进行组队FILE,
@@ -2859,7 +2860,7 @@ class wzry_task:
                 self.青铜段位 = os.path.exists(self.青铜段位FILE)
                 self.触摸对战 = os.path.exists(self.触摸对战FILE)
                 if self.组队模式 and not self.青铜段位:
-                    TimeECHO(f"组队时采用青铜段位")
+                    TimeECHO(f"组队时默认采用青铜段位")
                     self.青铜段位 = True
                 # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
                 if not self.青铜段位:
