@@ -1029,6 +1029,7 @@ class wzry_task:
         #
         self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
+        self.Tool.timelimit(timekey="未检测到确认匹配", limit=60*3, init=True)
         #
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         if self.房主:
@@ -1056,6 +1057,9 @@ class wzry_task:
                 TimeErr("超时太久,退出匹配")
                 self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "取消匹配")
                 return False
+            if self.Tool.timelimit(timekey="未检测到确认匹配", limit=60*3, init=False):
+                TimeErr("没有点击到开始匹配?,再次点击")
+                self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "房间中的开始匹配按钮")
             #
             自己确定匹配 = self.Tool.existsTHENtouch(self.图片.确定匹配按钮, "确定匹配按钮")
             自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
