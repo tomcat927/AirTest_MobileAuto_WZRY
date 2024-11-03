@@ -821,7 +821,7 @@ class wzry_task:
                 self.Tool.touchfile(self.青铜段位FILE)
                 if self.组队模式:
                     TimeErr("段位不合适,创建同步文件")
-                    self.Tool.touch同步文件(self.Tool.辅助同步文件,"星耀段位次数用完")
+                    self.Tool.touch同步文件(self.Tool.辅助同步文件, "星耀段位次数用完")
                     return
                 else:
                     return self.单人进入人机匹配房间(times)
@@ -1851,13 +1851,13 @@ class wzry_task:
                 del self.Tool.var_dict["战令入口"]
             return self.每日礼包_每日任务(times=times)
         #
-        # 
-        for i in range(60):
+        #
+        for i in range(10):  # 下面的循环touch很费时，总循环不用很久
             if 进入任务界面:
                 break
             self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True)
             if i > 2:
-                TimeECHO(f"战令页面更新了，你需要自己截图更新图片资源了")
+                TimeECHO(f"[{i}]战令页面更新了，你需要自己截图更新图片资源了")
                 TimeECHO(f"本程序会尝试寻找一下位置（仅适用于16:9屏幕），但不保证成功")
                 for j in range(10):
                     record_pos = (-0.445, -0.03-j/100)
@@ -1872,9 +1872,11 @@ class wzry_task:
                 进入任务界面 = True
             sleep(1)
         #
-        if not 进入任务界面:
+        if not 进入任务界面 and times % 5 == 4:
             TimeECHO(f"未检测到任务界面, 重新进入领任务礼包")
-            if times % 5 == 4 and "战令的每日任务" in self.Tool.var_dict.keys():
+            if "战令入口" in self.Tool.var_dict.keys():
+                del self.Tool.var_dict["战令入口"]
+            if "战令的每日任务" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令的每日任务"]
             return self.每日礼包_每日任务(times=times-1)
         #
@@ -2681,7 +2683,7 @@ class wzry_task:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
                 # 重置完成
-                if not self.组队模式 and "健康系统" in content:
+                if not self.组队模式 and "健康系统" in content and self.外置礼包_王者营地:
                     self.每日礼包_王者营地()
                 #
                 # 检测账号登录状况
