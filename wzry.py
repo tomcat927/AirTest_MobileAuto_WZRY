@@ -500,8 +500,12 @@ class wzry_task:
                 if self.Tool.timelimit(timekey="结束对战", limit=60*15, init=False):
                     break
             self.结束人机匹配()
+            if self.判断大厅中():
+                return True
         if times < 2 and self.判断战绩页面():
             self.结束人机匹配()
+            if self.判断大厅中():
+                return True
         #
         # 健康系统直接重新同步
         if self.健康系统_常用命令():
@@ -512,11 +516,13 @@ class wzry_task:
         if  times < 2 and self.判断房间中():
             self.Tool.LoopTouch(返回图标, "返回图标", loop=2, savepos=False)
             self.确定按钮()
+            if self.判断大厅中():
+                return True
         # 其他返回页面
         self.Tool.LoopTouch(返回图标, "返回图标", loop=5, savepos=False)
+        self.确定按钮()
         if self.判断大厅中():
             return True
-        self.确定按钮()
         if exists(Template(r"tpl1693886922690.png", record_pos=(-0.005, 0.114), resolution=(960, 540))):
             self.Tool.existsTHENtouch(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)), "确定按钮")
             if self.判断大厅中():
@@ -550,13 +556,13 @@ class wzry_task:
             关闭邀请 = Template(r"tpl1707377671958.png", record_pos=(0.453, -0.205), resolution=(960, 540))
             self.Tool.LoopTouch(关闭邀请, "关闭友情对战推荐", loop=5, savepos=False)
         #
+        if self.判断大厅中():
+            return True
         # 登录页面
         # 这里一定要重启，不然存在登录界面识别错误，误触到别的按钮
         if exists(self.图片.登录界面开始游戏图标) or exists(self.图片.登录界面年龄提示):
             return self.重启并登录()
         #
-        if self.判断大厅中():
-            return True
         return self.进入大厅(times)
 
     def 登录游戏(self, times=0, 检测到登录界面=False):
