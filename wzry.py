@@ -473,7 +473,7 @@ class wzry_task:
         times = times+1
         TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
         # 检验程序是否启动
-        if self.APPOB.前台APP(0):
+        if not self.APPOB.前台APP(0):
            return self.登录游戏()
         #
         if not self.check_run_status():
