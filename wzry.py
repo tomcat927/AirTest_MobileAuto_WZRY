@@ -1053,12 +1053,11 @@ class wzry_task:
         while True:
             if self.Tool.存在同步文件():
                 return True
-            if self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=False):
-                TimeErr("超时太久,退出匹配")
-                self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "取消匹配")
-                return False
+            if self.Tool.timelimit(timekey="超时确认匹配", limit=60*7, init=False):
+                return self.创建同步文件("超时太久,退出匹配")
+            # 每隔3分钟，点击一次确定/取消匹配按钮
             if self.Tool.timelimit(timekey="未检测到确认匹配", limit=60*3, init=False):
-                TimeErr("没有点击到开始匹配?,再次点击")
+                TimeErr("没有找到确定匹配,再次点击")
                 self.Tool.touch_record_pos(房间中的开始按钮.record_pos, self.移动端.resolution, "房间中的开始匹配按钮")
             #
             自己确定匹配 = self.Tool.existsTHENtouch(self.图片.确定匹配按钮, "确定匹配按钮")
