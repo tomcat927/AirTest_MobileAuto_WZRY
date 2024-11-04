@@ -47,6 +47,6 @@
 * [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)
 * [Airtest Project](https://github.com/AirtestProject)
 
-## Star History
+## 访客计数
 
-[![Star History Chart](https://api.star-history.com/svg?repos=cndaqiang/WZRY&type=Date)](https://star-history.com/#cndaqiang/WZRY&Date)
+![:name](https://count.getloli.com/@wzry.doc?name=wzry.doc&theme=green&padding=6&offset=0&align=top&scale=1&pixelated=1&darkmode=auto)
