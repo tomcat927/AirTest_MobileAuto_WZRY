@@ -49,4 +49,4 @@
 
 ## 访客计数
 
-![:name](https://count.getloli.com/@wzry.doc?name=wzry.doc&theme=green&padding=6&offset=0&align=top&scale=1&pixelated=1&darkmode=auto)
+![:name](https://count.getloli.com/@wzry.cndaqiang.github?&theme=green&padding=6&offset=0&align=top&scale=1&pixelated=1&darkmode=auto)
