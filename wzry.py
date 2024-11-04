@@ -311,8 +311,8 @@ class wzry_task:
         self.只战一天FILE = "WZRY.oneday.txt"  # 今天执行完之后，直接退出程序。里面记录了总对局数。
         self.触摸对战FILE = "WZRY.TOUCH.txt"   # 在5v5的对战过程中,移动和平A。通过活动的挂机检测。
         # 注入命令的文件
-        self.临时初始化FILE = f"WZRY.{self.mynode}.临时初始化.txt"  # 控制脚本功能：运行时间、礼包等功能的开启关闭。
-        self.对战前插入FILE = f"WZRY.{self.mynode}.对战前插入.txt"  # 控制对局过程：快速对战、标准对战、TOUCH模式、对战分路、对战英雄
+        self.调试文件FILE = f"WZRY.{self.mynode}.调试文件.txt"  # debug专用。
+        self.运行模式FILE = f"WZRY.{self.mynode}.运行模式.txt"  # 控制脚本功能：快速对战、标准对战、TOUCH模式、对战分路、对战英雄、运行时间、礼包等功能的开启关闭
         # 本程序自动生成的文件
         self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"  # 各种原因导致的无法进行组队
         self.免费商城礼包FILE = f"WZRY.{self.mynode}.免费商城礼包.txt"  # 是否领取了每日商城礼包
@@ -474,7 +474,7 @@ class wzry_task:
         TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
         # 检验程序是否启动
         if not self.APPOB.前台APP(0):
-           return self.登录游戏()
+            return self.登录游戏()
         #
         if not self.check_run_status():
             return True
@@ -513,7 +513,7 @@ class wzry_task:
         # 返回图标
         返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
         # 房间
-        if  times < 2 and self.判断房间中():
+        if times < 2 and self.判断房间中():
             self.Tool.LoopTouch(返回图标, "返回图标", loop=2, savepos=False)
             self.确定按钮()
             if self.判断大厅中():
@@ -1303,7 +1303,7 @@ class wzry_task:
         #
         if not self.启动礼包功能:
             TimeECHO("默认关闭礼包功能，如需启动")
-            TimeECHO(f"请添加 self.启动礼包功能=True 到 {self.临时初始化FILE} ")
+            TimeECHO(f"请添加 self.启动礼包功能=True 到 {self.运行模式FILE} ")
             TimeECHO(f"如果遇到问题，请自行调试，礼包功能不再持续维护。")
         if 强制领取:
             self.Tool.timedict["领游戏礼包"] = 0
@@ -2590,7 +2590,6 @@ class wzry_task:
         self.Tool.touchstopfile(content)
         self.创建同步文件(content)
     #
-    #
 
     def END(self, content=""):
         """
@@ -2622,7 +2621,7 @@ class wzry_task:
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
                 return True
             # ------------------------------------------------------------------------------
-            run_class_command(self=self, command=self.Tool.readfile(self.临时初始化FILE))
+            run_class_command(self=self, command=self.Tool.readfile(self.调试文件FILE))
             # ------------------------------------------------------------------------------
             # >>> 设备状态调整
             if self.Tool.stopnow():
@@ -2734,7 +2733,20 @@ class wzry_task:
                     #
             if self.Tool.stopnow():
                 return self.END()
-            #
+            # ------------------------------------------------------------------------------
+            # 下面就是正常的循环流程了
+            self.当前状态 = "状态检查"
+            if not self.check_run_status:
+                continue
+            # ------------------------------------------------------------------------------
+            # 设置默认对战参数
+            self.runstep = self.runstep+1
+            self.jinristep = self.jinristep+1
+            self.青铜段位 = os.path.exists(self.青铜段位FILE)
+            self.触摸对战 = os.path.exists(self.触摸对战FILE)
+            # 读入自定义对战参数
+            # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.运行模式FILE"
+            run_class_command(self=self, command=self.Tool.readfile(self.运行模式FILE))
             # ------------------------------------------------------------------------------
             # 这里做一个循环的判断，夜间不自动刷任务
             # 服务器5点刷新礼包和信誉积分等
@@ -2797,18 +2809,11 @@ class wzry_task:
                 self.APPOB.关闭APP()
                 self.移动端.重启重连设备(leftmin*60)
                 # 其他
-            # ------------------------------------------------------------------------------
             # 新的一天，回到开头进行初始化
             if self.新的一天:
                 continue
             # ------------------------------------------------------------------------------
-            # 下面就是正常的循环流程了
-            self.当前状态 = "状态检查"
-            if not self.check_run_status:
-                continue
-            # ------------------------------------------------------------------------------
             # 组队模式，单人模式判断
-            # 各种原因无法组队判定
             if self.totalnode_bak > 1:
                 self.无法进行组队 = os.path.exists(self.无法进行组队FILE)
                 组队时间内 = not self.Tool.hour_in_span(startclock, self.限时组队时间) > 0
@@ -2867,28 +2872,14 @@ class wzry_task:
                 continue
             # ------------------------------------------------------------------------------
             # 计算参数设置
-            self.runstep = self.runstep+1
-            self.jinristep = self.jinristep+1
             if "5v5匹配" == self.对战模式:
-                self.青铜段位 = os.path.exists(self.青铜段位FILE)
-                self.触摸对战 = os.path.exists(self.触摸对战FILE)
                 if self.组队模式 and not self.青铜段位:
-                    TimeECHO(f"组队时默认采用青铜段位")
-                    self.青铜段位 = True
-                # 希望在青铜局时进行触摸对战,而不是占据星耀刷熟练度的机会
-                if not self.青铜段位:
-                    if self.触摸对战:
-                        TimeECHO(f"非青铜局不模拟人手触摸")
-                        self.触摸对战 = False
+                    TimeECHO(f"警告: 不建议组队模式采用星耀难度")
+                if self.触摸对战 and not self.青铜段位:
+                    TimeECHO(f"警告: 不建议星耀难度开启TOUCH模式")
             if "5v5排位" == self.对战模式:
-                self.触摸对战 = os.path.exists(self.触摸对战FILE)
-                if self.触摸对战:
-                    TimeECHO(f"这是5v5排位, 小心你的信誉分啊喂")
-                    TimeECHO(f"5v5的游戏被你完成4v5了, 会被系统检测到的")
-            # ------------------------------------------------------------------------------
-            # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.对战前插入FILE",
-            run_class_command(self=self, command=self.Tool.readfile(self.对战前插入FILE))
-            # ------------------------------------------------------------------------------
+                TimeECHO(f"这是5v5排位, 小心你的信誉分啊喂")
+                TimeECHO(f"5v5的游戏被你完成4v5了, 会被系统检测到的")
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
             # 后续程序的控制，仍采用 self.触摸对战等参数
             self.构建循环参数(self.本循环参数)
