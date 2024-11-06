@@ -24,7 +24,7 @@ class wzyd_libao:
         # Tool
         dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = f"./assets/{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml"
+        dictreso = os.path.join(Settings.figdir, f"{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml")
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
