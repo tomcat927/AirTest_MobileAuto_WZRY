@@ -604,13 +604,16 @@ class wzry_task:
                 TimeECHO("更新中%d" % (igengxin))
                 关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
                 金色确定 = Template(r"tpl1692946738054.png", record_pos=(-0.002, 0.116), resolution=(960, 540), threshold=0.9)
+                更新图标 = Template(r"tpl1723551024328.png", record_pos=(0.059, 0.199), resolution=(960, 540))
                 if self.Tool.existsTHENtouch(关闭更新, "关闭更新", savepos=False):
                     sleep(10)
-                    self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=True)
+                    if not self.Tool.existsTHENtouch(更新图标, "登录更新图标", savepos=True):
+                        self.Tool.touch_record_pos(record_pos=更新图标.record_pos, resolution=self.移动端.resolution, keystr="更新图标")
                     break
                 if exists(Template(r"tpl1692946702006.png", record_pos=(-0.009, -0.014), resolution=(960, 540), threshold=0.9)):
                     TimeECHO("更新完成")
-                    self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=True)
+                    if not self.Tool.existsTHENtouch(金色确定, "登录金色确定", savepos=True):
+                        self.Tool.touch_record_pos(record_pos=金色确定.record_pos, resolution=self.移动端.resolution, keystr="金色确定")
                     sleep(60)
                     break
                 elif not exists(更新公告):
