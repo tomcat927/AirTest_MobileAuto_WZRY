@@ -47,6 +47,6 @@
 * [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)
 * [Airtest Project](https://github.com/AirtestProject)
 
-## 访客计数
+## 贡献
 
-![:name](https://count.getloli.com/@wzry.cndaqiang.github?&theme=green&padding=6&offset=0&align=top&scale=1&pixelated=1&darkmode=auto)
+![Alt](https://repobeats.axiom.co/api/embed/e3dff17ea7d3c5e7dd3f8ce8b0fd3c09618cd7fc.svg "Repobeats analytics image")
