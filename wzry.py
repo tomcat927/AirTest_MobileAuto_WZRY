@@ -86,7 +86,7 @@ class wzry_figure:
         self.登录界面开始游戏图标 = Template(r"tpl1692947242096.png", record_pos=(-0.004, 0.158), resolution=(960, 540), threshold=0.9)
         self.登录界面年龄提示 = Template(r"tpl1729676388436.png", record_pos=(0.382, 0.198), resolution=(960, 540))
         self.大厅对战图标 = Template(r"tpl1723219359665.png", record_pos=(-0.122, 0.133), resolution=(960, 540))
-        self.大厅万象天工 = Template(r"tpl1723219381063.png", record_pos=(0.243, 0.14), resolution=(960, 540))
+        self.大厅娱乐模式 = Template(r"tpl1723219381063.png", record_pos=(0.243, 0.14), resolution=(960, 540))
         self.王者模拟战图标 = Template(r"tpl1693660105012.png", record_pos=(-0.435, -0.134), resolution=(960, 540))
         self.大厅排位赛 = Template(r"tpl1723219371045.png", record_pos=(0.127, 0.127), resolution=(960, 540))
         self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
@@ -776,8 +776,13 @@ class wzry_task:
         #
         times = times+1
         #
-        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
+        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True) and times%3 != 2:
             return self.单人进入人机匹配房间(times)
+        else:
+            # 在第2+3*i 次 计算坐标, 避免更新
+            if self.判断大厅中():
+                self.Tool.touch_record_pos(self.图片.大厅对战图标.record_pos, self.移动端.resolution, f"计算大厅对战")
+
         sleep(2)
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
             return self.单人进入人机匹配房间(times)
@@ -994,7 +999,7 @@ class wzry_task:
         邀请好友 = Template(r"tpl1693660666527.png", record_pos=(0.408, 0.166), resolution=(960, 540))  # 就是进入房间
         # 新手要跳过教学局,自己先跳过
         # 不要管是否识别成功，就是按，后面加一个检测，没有检测成果就是按失败了，再返回即可
-        if self.Tool.existsTHENtouch(self.图片.大厅万象天工, "大厅万象天工", savepos=True):
+        if self.Tool.existsTHENtouch(self.图片.大厅娱乐模式, "大厅娱乐模式", savepos=True):
             sleep(2)
         self.Tool.存在任一张图([self.图片.王者模拟战图标], "王者模拟战图标", savepos=True)
         if self.Tool.existsTHENtouch(self.图片.王者模拟战图标, "王者模拟战图标", savepos=True):
@@ -1009,7 +1014,7 @@ class wzry_task:
         存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
         if not 存在邀请好友:
             TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口, 将尝试历史入口")
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅万象天工", "王者模拟战图标"])):
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅娱乐模式", "王者模拟战图标"])):
                 del self.Tool.var_dict[delstr]
         self.Tool.existsTHENtouch(邀请好友, "模拟战.邀请好友", savepos=True)
         if self.判断房间中(处理=False):
