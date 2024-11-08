@@ -1005,12 +1005,12 @@ class wzry_task:
             sleep(5)
         while self.Tool.existsTHENtouch(任意位置继续3, "任意位置继续"):
             sleep(5)
-        pos = exists(邀请好友)
-        if not pos:
-            TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口")
+        # savepos 如果找到会自动替换上一次的字典
+        存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
+        if not 存在邀请好友:
+            TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口, 将尝试历史入口")
             for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅万象天工", "王者模拟战图标"])):
                 del self.Tool.var_dict[delstr]
-        self.Tool.var_dict["模拟战.邀请好友"] = pos
         self.Tool.existsTHENtouch(邀请好友, "模拟战.邀请好友", savepos=True)
         if self.判断房间中(处理=False):
             return True
