@@ -776,16 +776,20 @@ class wzry_task:
         #
         times = times+1
         #
-        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True) and times%3 != 2:
-            return self.单人进入人机匹配房间(times)
-        else:
-            # 在第2+3*i 次 计算坐标, 避免更新
-            if self.判断大厅中():
-                self.Tool.touch_record_pos(self.图片.大厅对战图标.record_pos, self.移动端.resolution, f"计算大厅对战")
-
+        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
+            if times % 3 != 2:
+                return self.单人进入人机匹配房间(times)
+            else:
+                # 在第2+3*i 次 计算坐标, 避免更新
+                if self.判断大厅中():
+                    self.Tool.touch_record_pos(self.图片.大厅对战图标.record_pos, self.移动端.resolution, f"计算大厅对战")
         sleep(2)
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
-            return self.单人进入人机匹配房间(times)
+            if times % 3 != 2:
+                return self.单人进入人机匹配房间(times)
+            else:
+                # 在第2+3*i 次 计算坐标, 避免更新
+                self.Tool.touch_record_pos(self.图片.进入5v5匹配.record_pos, self.移动端.resolution, f"5v5王者峡谷")
         sleep(2)
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
             del self.Tool.var_dict["大厅对战"]
