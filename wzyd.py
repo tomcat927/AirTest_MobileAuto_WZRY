@@ -47,12 +47,12 @@ class wzyd_libao:
         self.APPOB = appOB(APPID=self.APPID, big=False, device=self.移动端)
         #
         self.营地初始化FILE = f"{self.prefix}.初始化.txt"
-        self.只战一天FILE = f"wzyd.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
+        self.内置循环 = False # 是否每日循环执行此脚本
         self.营地需要登录FILE = self.prefix+f".需要登录.txt"
         #
         self.timelimit = 60*60*0.5
         # 更新时间
-        self.对战时间 = [3.0, 4.0]
+        self.对战时间 = [0.1, 23.9]
         #
         # 默认只创建对象, 开启初始化检查才会检查
         self.体验币成功 = False
@@ -672,8 +672,8 @@ if __name__ == "__main__":
     Settings.Config(config_file)
     ce = wzyd_libao()
     ce.run()
-    if os.path.exists(ce.只战一天FILE):
+    if ce.内置循环():
+        ce.looprun()
+    else:
         ce.end()
-        exit()
-    ce.looprun()
     exit()

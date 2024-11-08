@@ -52,11 +52,11 @@ class tiyanfu():
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         #
         self.体验服初始化FILE = f"WZRY.ce.{self.mynode}.临时初始化.txt"
-        self.只战一天FILE = f"WZRY.ce.oneday.txt"  # 今天执行完之后，直接结束程序。适用采用crontab等模式周期性运行脚本，而不采用本脚本自带的循环。
+        self.内置循环 = False # 是否每日循环执行此脚本
         #
         self.timelimit = 60*60*2.0
         # 更新时间
-        self.对战时间 = [3.0, 4.0]
+        self.对战时间 = [0.1, 23.9]
 
     def end(self):
         self.APPOB.关闭APP()
@@ -189,8 +189,8 @@ if __name__ == "__main__":
     Settings.Config(config_file)
     ce = tiyanfu()
     ce.run()
-    if os.path.exists(ce.只战一天FILE):
+    if ce.内置循环():
+        ce.looprun()
+    else:
         ce.end()
-        exit()
-    ce.looprun()
     exit()
