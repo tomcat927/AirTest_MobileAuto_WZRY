@@ -359,10 +359,10 @@ class wzry_task:
         self.对战模式 = "5v5匹配" if init else self.对战模式
         self.对战时间 = [0.1, 23.9] if init else self.对战时间
         self.限时组队时间 = 23 if init else self.限时组队时间
-        if "runstep" in self.Tool.var_dict.keys():
-            self.runstep = int(self.Tool.var_dict["runstep"])
+        if "运行参数.runstep" in self.Tool.var_dict.keys():
+            self.runstep = int(self.Tool.var_dict["运行参数.runstep"])
         else:
-            self.runstep = self.Tool.var_dict["runstep"] = 0
+            self.runstep = self.Tool.var_dict["运行参数.runstep"] = 0
         self.jinristep = 0
         self.青铜段位 = False
         self.标准模式 = False
@@ -378,6 +378,7 @@ class wzry_task:
         self.当前界面 = "未知"
         self.当前状态 = "未知"  # ["领取礼包","对战状态","未知","重新启动","状态检查"] 根据状态, 减少一些界面的判断，只在主函数中进行设备，避免子函数设置带来的混乱
         self.Tool.timelimit(timekey="当前界面", init=True)
+        self.Tool.save_dict(self.Tool.var_dict, self.dictfile)
 
     # 用不到，当二次开发调用wzry_task时, 可在init后，设置这个设置参数
     def 设置参数(self, **kwargs):
@@ -2875,7 +2876,7 @@ class wzry_task:
                 #
                 self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
                 #
-            self.Tool.var_dict["runstep"] = self.runstep
+            self.Tool.var_dict["运行参数.runstep"] = self.runstep
             self.Tool.save_dict(self.Tool.var_dict, self.dictfile)
             TimeECHO(f"运行次数{self.runstep}|今日步数{self.jinristep}")
             #
