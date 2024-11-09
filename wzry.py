@@ -2874,7 +2874,12 @@ class wzry_task:
             self.Tool.var_dict["运行参数.runstep"] = self.runstep
             self.Tool.save_dict(self.Tool.var_dict, self.dictfile)
             TimeECHO(f"运行次数{self.runstep}|今日步数{self.jinristep}")
-            #
+            # ------------------------------------------------------------------------------
+            # 第一次运行, 如果APP不在前台,则直接重启
+            if self.jinristep == 1 and self.APPOB.前台APP(0):
+                self.重启并登录(5)
+            # ------------------------------------------------------------------------------
+            # 校验运行状态
             if self.Tool.存在同步文件():
                 TimeECHO("准备进入战斗循环中遇到同步文件返回")
                 continue
