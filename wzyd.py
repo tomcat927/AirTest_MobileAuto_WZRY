@@ -672,7 +672,7 @@ if __name__ == "__main__":
     Settings.Config(config_file)
     ce = wzyd_libao()
     ce.run()
-    if ce.内置循环():
+    if ce.内置循环:
         ce.looprun()
     else:
         ce.end()
