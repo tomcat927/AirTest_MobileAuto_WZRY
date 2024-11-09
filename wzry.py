@@ -305,7 +305,7 @@ class wzry_task:
         self.myPID = f"{self.totalnode_bak}.{hour}{minu}{sec}"
         self.myPID = self.Tool.bcastvar(self.mynode, self.totalnode_bak, var=self.myPID, name="self.myPID")
         self.Tool.touchfile(self.WZRYPIDFILE, content=self.myPID)
-        TimeECHO(f": 本次运行PID:[{self.myPID}]")
+        TimeECHO(f"本次运行PID:[{self.myPID}]")
         #
         # ------------------------------------------------------------------------------
         # 对应的控制文件和参数的初始化
