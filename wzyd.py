@@ -15,18 +15,48 @@ from airtest_mobileauto.control import *
 
 
 class wzyd_libao:
-    def __init__(self, 设备类型="android", Tool=None, 初始化检查=False):
+    def __init__(self):
+        # device
+        self.mynode = Settings.mynode
+        self.totalnode = Settings.totalnode
+        self.LINK = Settings.LINK_dict[Settings.mynode]
+        self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
+        # Tool
+        dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.yaml"
+        # 预设的分辨率对应的触点文件
+        dictreso = os.path.join(Settings.figdir, f"{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml")
+        loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
+        self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
+        if loaddict:
+            try:
+                TimeECHO(f"检测到本程序第一次运行，且分辨率为{self.移动端.resolution}, 加载预设字典中....")
+                self.Tool.var_dict = self.Tool.read_dict(dictreso)
+                self.Tool.save_dict(self.Tool.var_dict, dictfile)
+            except:
+                traceback.print_exc()
+        #
+        self.组队模式 = self.totalnode > 1
+        self.房主 = self.mynode == 0 or self.totalnode == 1
+        # prefix, 还用于创建读取一些特定的控制文件/代码
+        # prefix, 用于区分不同进程的字典文件中的图片位置，因为不同账户的位置可能又差异
+        self.prefix = "王者营地"+f".{Settings.mynode}"
+        #
+        self.设备类型 = self.移动端.设备类型
+        self.IOS = "ios" in self.设备类型
+        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.gamehelper.smoba"
+        self.APPOB = appOB(APPID=self.APPID, big=False, device=self.移动端)
+        #
+        self.营地初始化FILE = f"{self.prefix}.初始化.txt"
+        self.内置循环 = False # 是否每日循环执行此脚本
+        self.营地需要登录FILE = self.prefix+f".需要登录.txt"
+        #
+        self.timelimit = 60*60*0.5
+        # 更新时间
+        self.对战时间 = [0.1, 23.9]
+        #
         # 默认只创建对象, 开启初始化检查才会检查
         self.体验币成功 = False
         self.营地活动 = True
-        self.设备类型 = 设备类型
-        self.prefix = "王者营地"+f".{Settings.mynode}"
-        self.营地初始化FILE = self.prefix+f".初始化.txt"
-        self.营地需要登录FILE = self.prefix+f".需要登录.txt"
-        self.Tool = DQWheel(var_dict_file=f"{self.设备类型}.var_dict_{self.prefix}.txt") if Tool == None else Tool
-        self.APPID = "com.tencent.smoba" if "ios" in self.设备类型 else "com.tencent.gamehelper.smoba"
-        self.APPOB = appOB(APPID=self.APPID)
-        self.IOS = "ios" in self.设备类型
         #
         # 这两个图标会根据活动变化,可以用下面的注入替换
         self.个人界面图标 = Template(r"tpl1699872206513.png", record_pos=(0.376, 0.724), resolution=(540, 960))
@@ -48,10 +78,16 @@ class wzyd_libao:
         self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
         #
         self.初始化成功 = False
-        if 初始化检查:
-            self.初始化成功 = self.营地初始化(初始化检查=初始化检查)
-            if 初始化检查:
-                self.APPOB.关闭APP()
+
+    #
+    def end(self):
+        self.APPOB.关闭APP()
+        self.移动端.关闭设备()
+    #
+
+    def run(self):
+        return self.RUN()
+    #
 
     def 判断营地大厅中(self):
         #
@@ -70,12 +106,18 @@ class wzyd_libao:
     # 用于更新上层调用参数,是不是领取礼包
 
     def 营地初始化(self, 初始化检查=False):
+        #
+        if not self.APPOB.HaveAPP:
+            TimeECHO(f":不存在APP{self.APPOB.APPID}")
+            return False
+        #
         # 判断网络情况
         if not connect_status():
             TimeECHO(":营地暂时无法触摸,返回")
             if 初始化检查:
                 return True
             return False
+        #
         # 打开APP
         if not self.APPOB.重启APP(10):
             TimeECHO(":营地无法打开,返回")
@@ -102,31 +144,37 @@ class wzyd_libao:
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
+            self.初始化成功 = True
         #
         return True
 
     def STOP(self):
         self.APPOB.关闭APP()
-    #
+        sleep(5)
 
     def RUN(self):
         #
+        if not self.APPOB.HaveAPP:
+            TimeECHO(f":不存在APP{self.APPOB.APPID}")
+            return False
+        #
+        if not self.初始化成功:
+            self.初始化成功 = self.营地初始化(初始化检查=True)
+            if not self.初始化成功:
+                TimeECHO("营地初始化失败")
+                self.APPOB.关闭APP()
+                return False
+
         self.Tool.removefile(self.Tool.独立同步文件)
         #
         if os.path.exists(self.营地需要登录FILE):
             if self.Tool.timelimit(timekey="检测营地登录", limit=60*60*8, init=False):
                 TimeECHO(f"存在[{self.营地需要登录FILE}],重新检测登录状态")
                 self.Tool.removefile(self.营地需要登录FILE)
-                self.营地初始化(初始化检查=False)
+                self.初始化成功 = self.营地初始化(初始化检查=True)
         #
         if os.path.exists(self.营地需要登录FILE):
             TimeECHO(f"检测到{self.营地需要登录FILE}, 不领取礼包")
-            return False
-        #
-        self.初始化成功 = self.营地初始化(初始化检查=False)
-        if not self.初始化成功:
-            TimeECHO(":营地初始化失败")
-            self.APPOB.关闭APP()
             return False
         #
         self.营地任务_浏览资讯()
@@ -210,15 +258,26 @@ class wzyd_libao:
             TimeECHO(f"找不到圈子图标")
             return self.营地任务_圈子签到(times)
         #
-        # 需要提前自己峡谷互助小组圈子
-        峡谷互助小组圈子 = Template(r"tpl1717046264179.png", record_pos=(-0.178, -0.511), resolution=(540, 960))
+        # 需要提前自己加入一些圈子
+        营地圈子 = []
+        营地圈子.append(Template(r"tpl1717046264179.png", record_pos=(-0.178, -0.511), resolution=(540, 960)))
+        营地圈子.append(Template(r"tpl1724585182506.png", record_pos=(0.02, -0.474), resolution=(540, 960)))
+        营地圈子.append(Template(r"tpl1724585186597.png", record_pos=(0.22, -0.476), resolution=(540, 960)))
         进入小组 = False
         for i in range(5):
-            if self.Tool.existsTHENtouch(峡谷互助小组圈子, "峡谷互助小组圈子"):
-                sleep(6)
-                进入小组 = True
+            进入小组 = self.Tool.existsTHENtouch(营地圈子[0], "营地.营地圈子", savepos=False)
+            if not 进入小组:
+                存在, 营地圈子 = self.Tool.存在任一张图(营地圈子, "营地.营地圈子", savepos=True)
+                if 存在:
+                    进入小组 = self.Tool.existsTHENtouch(营地圈子[0], "营地.营地圈子", savepos=True)
+            #
+            sleep(6)
+            if 进入小组:
+                break
+        #
         if not 进入小组:
-            TimeECHO(f"找不到互助小组圈子")
+            TimeECHO(f"请加入以下圈子之一: 王者问答圈|皮肤交流圈|峡谷互助小组")
+            TimeECHO(f"如果仍无法找到圈子，可能是营地版本不同，需要修改: 营地圈子.append()")
             return self.营地任务_圈子签到(times)
         圈子签到图标 = Template(r"tpl1717046286604.png", record_pos=(0.393, -0.3), resolution=(540, 960))
         签到成功图标 = Template(r"tpl1717047898461.png", record_pos=(-0.004, 0.237), resolution=(540, 960))
@@ -254,23 +313,42 @@ class wzyd_libao:
             return False
         #
         self.Tool.existsTHENtouch(self.资讯入口, "资讯入口.推荐", savepos=True)
-        资讯入口图标 = Template(r"tpl1717046344191.png", record_pos=(-0.422, -0.37), resolution=(540, 960))
-        if not self.Tool.existsTHENtouch(资讯入口图标, "资讯入口图标", savepos=True):
-            TimeECHO(f"找不到资讯入口图标")
-            return self.营地任务_浏览资讯(times)
-        点赞图标 = Template(r"tpl1717046512030.png", record_pos=(0.424, 0.02), resolution=(540, 960))
+        资讯入口图标 = []
+        资讯入口图标.append(Template(r"tpl1724584561119.png", record_pos=(-0.419, -0.433), resolution=(540, 960)))
+        资讯入口图标.append(Template(r"tpl1724681918901.png", record_pos=(-0.115, -0.213), resolution=(540, 960)))
+        if "资讯入口图标" not in self.Tool.var_dict.keys():
+            # savepos 如果找到会自动替换上一次的字典
+            存在, 资讯入口图标 = self.Tool.存在任一张图(资讯入口图标, "资讯入口图标", savepos=True)
+            if not 存在:
+                TimeECHO(f"王者营地: 资讯入口图标")
+                TimeECHO(f"按照960x540的分辨率强制设定坐标")
+                # 这里是绝对坐标，不适用于其他分辨率的情况
+                self.Tool.var_dict["资讯入口图标"] = (250, 650)
+        #
+        self.Tool.existsTHENtouch(资讯入口图标[0], "资讯入口图标", savepos=True)
+        点赞图标 = []
+        点赞图标.append(Template(r"tpl1717046512030.png", record_pos=(0.424, 0.02), resolution=(540, 960)))
+        点赞图标.append(Template(r"tpl1724681888775.png", record_pos=(0.417, -0.243), resolution=(540, 960)))
         评论区 = Template(r"tpl1723599264627.png", record_pos=(0.115, 0.717), resolution=(540, 960))
-        资讯页面元素 = [点赞图标, 评论区]
+        资讯页面元素 = [评论区]
+        for i in 点赞图标:
+            资讯页面元素.append(i)
         存在, 资讯页面元素 = self.Tool.存在任一张图(资讯页面元素, "营地.资讯页面元素")
-        if not 存在 and times < 4:
-            del self.Tool.var_dict["资讯入口图标"]
+        if not 存在:
+            if times % 4 == 3 and "资讯入口图标" in self.Tool.var_dict.keys():
+                del self.Tool.var_dict["资讯入口图标"]
             return self.营地任务_浏览资讯(times)
         # 开始滑动点赞
         pos = self.Tool.var_dict["资讯入口图标"]
         for i in range(180):
             sleep(1)
-            if self.Tool.existsTHENtouch(点赞图标, "点赞图标", savepos=False):
+            存在, 点赞图标 = self.Tool.存在任一张图(点赞图标, "营地.点赞图标", savepos=True)
+            if 存在:
+                self.Tool.existsTHENtouch(点赞图标[0], "营地.点赞图标", savepos=True)
                 sleep(0.5)
+                if i % 15 == 0:
+                    swipe(pos, vector=[0.0, 0.5])
+                    self.Tool.existsTHENtouch(评论区, "评论区图标", savepos=False)
             else:
                 sleep(1)
                 if i % 15 == 0:
@@ -282,23 +360,23 @@ class wzyd_libao:
                 return
         return
 
-    def 营地战令经验(self, times=1):
+    def 营地战令经验(self, times=0):
         #
         # 第一次，需要手动点击一下，开启战令
         if self.Tool.存在同步文件():
             return True
         #
-        if times == 1:
+        if times == 0:
             self.Tool.timelimit(timekey="营地战令经验", limit=60*5, init=True)
         else:
             if self.Tool.timelimit(timekey="营地战令经验", limit=60*5, init=False):
                 TimeECHO(f"营地战令经验{times}超时退出")
                 return False
         #
+        times = times+1
         TimeECHO(f"营地战令经验{times}")
         self.APPOB.重启APP(10)
         sleep(10)
-        times = times+1
         if times % 4 == 3:
             if not connect_status():
                 self.Tool.touch同步文件(self.Tool.独立同步文件)
@@ -327,22 +405,37 @@ class wzyd_libao:
         战令入口 = Template(r"tpl1715609828196.png", record_pos=(0.209, -0.004), resolution=(540, 960))
         self.Tool.existsTHENtouch(战令入口, "战令入口", savepos=True)
         sleep(10)
+        重新登录 = Template(r"tpl1724463208462.png", record_pos=(0.0, -0.035), resolution=(540, 960))
+        if self.Tool.existsTHENtouch(重新登录, "重新登录"):
+            self.Tool.touchfile("重新登录营地战令.txt")
+            return
         #
+        战令任务 = []
+        战令任务.append(Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960)))
+        战令任务.append(Template(r"tpl1724905564530.png", record_pos=(-0.23, -0.694), resolution=(540, 960)))
         战令页面元素 = []
         战令页面元素.append(Template(r"tpl1715609862801.png", record_pos=(0.131, 0.743), resolution=(540, 960)))
         战令页面元素.append(Template(r"tpl1716804327622.png", record_pos=(0.0, 0.156), resolution=(540, 960)))
         战令页面元素.append(Template(r"tpl1716804333697.png", record_pos=(0.352, 0.739), resolution=(540, 960)))
-        战令页面元素.append(Template(r"tpl1716804348346.png", record_pos=(-0.281, -0.7), resolution=(540, 960)))
-        战令页面元素.append(Template(r"tpl1716804366593.png", record_pos=(-0.083, 0.543), resolution=(540, 960)))
+        for i in 战令任务:
+            战令页面元素.append(i)
+        #
         存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
-        if not 存在:
+        # 如果3次都没找到，就不管了，强制点下去
+        if not 存在 and times < 4:
             sleep(20)
             存在, 战令页面元素 = self.Tool.存在任一张图(战令页面元素, "营地.战令页面元素")
             if not 存在:
                 TimeECHO(f"没找到战令页面")
                 return self.营地战令经验(times)
-        战令任务 = Template(r"tpl1715609874404.png", record_pos=(-0.25, -0.706), resolution=(540, 960))
-        self.Tool.existsTHENtouch(战令任务, "战令任务", savepos=True)
+
+        if "营地.战令任务" not in self.Tool.var_dict.keys():
+            存在, 战令任务 = self.Tool.存在任一张图(战令任务, "营地.战令任务", savepos=True)
+            if not 存在:
+                TimeECHO(f"没找到战令任务页面,按照960x540的分辨率强制点击战令任务")
+                # 这里是绝对坐标，不适用于其他分辨率的情况
+                self.Tool.var_dict["营地.战令任务"] = (148, 108)
+        self.Tool.existsTHENtouch(战令任务[0], "营地.战令任务", savepos=True)
         sleep(10)
         一键领取 = Template(r"tpl1715610610922.png", record_pos=(0.337, -0.18), resolution=(540, 960))
         self.Tool.existsTHENtouch(一键领取, "一键领取战令经验", savepos=True)
@@ -397,7 +490,16 @@ class wzyd_libao:
         奖励兑换图标 = Template(r"tpl1704381904053.png", record_pos=(-0.209, -0.026), resolution=(540, 960))
         self.Tool.existsTHENtouch(奖励兑换图标, "体验服奖励兑换图标", savepos=True)
         sleep(5)
+        正在进入 = Template(r"tpl1725004412475.png", record_pos=(-0.004, -0.776), resolution=(540, 960))
         奖励兑换网页图标 = Template(r"tpl1704381965060.png", rgb=True, target_pos=7, record_pos=(0.243, -0.496), resolution=(540, 960))
+        for i in range(10):
+            if exists(正在进入):
+                TimeECHO("正在进入体验服中....")
+                sleep(6*1.5)  # 1.5分钟
+            else:
+                sleep(5)
+            if exists(奖励兑换网页图标):
+                break
         if not self.Tool.existsTHENtouch(奖励兑换网页图标, "奖励兑换网页图标", savepos=False):
             sleep(20)
             if not self.Tool.existsTHENtouch(奖励兑换网页图标, "奖励兑换网页图标", savepos=False):
@@ -425,7 +527,7 @@ class wzyd_libao:
         swipe(pos, vector=[0.0, -0.5])
         碎片奖励 = Template(r"tpl1699874679212.png", record_pos=(-0.233, 0.172), resolution=(540, 960), threshold=0.9)
         奖励位置 = False
-        for i in range(10):
+        for i in range(20):
             sleep(1)
             奖励位置 = exists(碎片奖励)
             if 奖励位置:
@@ -546,3 +648,32 @@ class wzyd_libao:
         touch(奖励位置)
         self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
         self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
+
+    def looprun(self, times=0):
+        times = times + 1
+        startclock = self.对战时间[0]
+        endclock = self.对战时间[1]
+        while True:
+            leftmin = self.Tool.hour_in_span(startclock, endclock)*60.0
+            if leftmin > 0:
+                TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
+                self.APPOB.关闭APP()
+                self.移动端.重启重连设备(leftmin*60)
+                continue
+            times = times+1
+            TimeECHO("="*10)
+            self.run()
+
+
+if __name__ == "__main__":
+    config_file = ""
+    if len(sys.argv) > 1:
+        config_file = str(sys.argv[1])
+    Settings.Config(config_file)
+    ce = wzyd_libao()
+    ce.run()
+    if ce.内置循环:
+        ce.looprun()
+    else:
+        ce.end()
+    exit()

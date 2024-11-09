@@ -7,18 +7,17 @@
 # Build  : 2024-08-18            #
 # What   : 更新登录体验服         #
 ##################################
+import sys
+import os
+import traceback
+
 try:
     from airtest_mobileauto.control import *
 except ImportError:
-    print("模块[airtest_mobileauto]不存在, 尝试安装")
-    import pip
-
-    try:
-        pip.main(['install', 'airtest_mobileauto', '-i', 'https://pypi.tuna.tsinghua.edu.cn/simple'])
-    except:
-        print("安装失败")
-        exit(1)
-import sys
+    traceback.print_exc()
+    print("模块[airtest_mobileauto]导入不存在, 请安装airtest_mobileauto")
+    print("python -m pip install airtest_mobileauto --upgrade")
+    from airtest_mobileauto.control import *
 
 
 class tiyanfu():
@@ -28,24 +27,40 @@ class tiyanfu():
         self.totalnode = Settings.totalnode
         self.LINK = Settings.LINK_dict[Settings.mynode]
         self.移动端 = deviceOB(mynode=self.mynode, totalnode=self.totalnode, LINK=self.LINK)
-        self.Tool = DQWheel(var_dict_file=f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.txt",
-                            mynode=self.mynode, totalnode=self.totalnode)
+        # Tool
+        dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.yaml"
+        # 预设的分辨率对应的触点文件
+        dictreso = os.path.join(Settings.figdir, f"{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml")
+        loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
+        self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
+        if loaddict:
+            try:
+                TimeECHO(f"检测到本程序第一次运行，且分辨率为{self.移动端.resolution}, 加载预设字典中....")
+                self.Tool.var_dict = self.Tool.read_dict(dictreso)
+                self.Tool.save_dict(self.Tool.var_dict, dictfile)
+            except:
+                traceback.print_exc()
         #
         self.组队模式 = self.totalnode > 1
         self.房主 = self.mynode == 0 or self.totalnode == 1
         # prefix, 还用于创建读取一些特定的控制文件/代码
         # prefix, 用于区分不同进程的字典文件中的图片位置，因为不同账户的位置可能又差异
-        self.prefix = f"({self.mynode})"
+        self.prefix = f"体验服.{self.mynode}"
         #
         self.设备类型 = self.移动端.设备类型
         self.APPID = "com.tencent.tmgp.sgamece"
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         #
         self.体验服初始化FILE = f"WZRY.ce.{self.mynode}.临时初始化.txt"
+        self.内置循环 = False # 是否每日循环执行此脚本
         #
         self.timelimit = 60*60*2.0
         # 更新时间
-        self.对战时间 = [3.0, 4.0]
+        self.对战时间 = [0.1, 23.9]
+
+    def end(self):
+        self.APPOB.关闭APP()
+        self.移动端.关闭设备()
 
     def run(self, times=0):
         if not connect_status():
@@ -56,12 +71,14 @@ class tiyanfu():
             TimeECHO("登录体验服超时")
             return
         times = times + 1
-        self.APPOB.打开APP()
-        if times > 10 and times % 10 == 8:
-            self.APPOB.重启APP()
+        TimeECHO(f"体验服更新中{times}")
+        # 模拟器有时候会卡掉，重启设备才能好
         if times > 10 and times % 5 == 4:
+            self.移动端.重启设备()
+        if times > 10 and times % 5 == 0:
             self.APPOB.重启APP()
-
+        self.APPOB.前台APP(2)
+        self.APPOB.打开APP()
         #
         waittime = 10
         # ------------------------------------------------------------------------------
@@ -93,22 +110,19 @@ class tiyanfu():
         if self.Tool.existsTHENtouch(确定重启, "体验服.确定重启", savepos=False):
             TimeECHO("确定重启")
             sleep(waittime)
-        #
-        self.安装元素 = []
-        self.安装元素.append(Template(r"tpl1723551109493.png", record_pos=(-0.349, -0.202), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1723551138518.png", record_pos=(-0.001, -0.033), resolution=(960, 540)))
-        self.安装元素.append(Template(r"tpl1723973068687.png", record_pos=(-0.017, -0.175), resolution=(960, 540)))
-        self.安装按钮 = []
-        self.安装按钮.append(Template(r"tpl1723551120394.png", record_pos=(0.415, 0.243), resolution=(960, 540), target_pos=6))
-        self.安装按钮.append(Template(r"tpl1723993720207.png", record_pos=(-0.001, 0.18), resolution=(960, 540)))
+        # 不同版本的安卓、不同模拟器的安装界面区别较大，仅对MuMu进行适配
+        # MuMu模拟器的安装元素
+        王者图标 = Template(r"tpl1730462743001.png", record_pos=(-0.218, -0.049), resolution=(960, 540))
+        更新按钮 = Template(r"tpl1724936646196.png", record_pos=(0.209, 0.051), resolution=(960, 540))
+        self.安装元素 = [王者图标, 更新按钮]
 
         安装界面, self.安装元素 = self.Tool.存在任一张图(self.安装元素, "体验服.安装元素")
         if 安装界面:
-            for i in self.安装按钮:
-                self.Tool.existsTHENtouch(i, f"安装按钮{i}", savepos=False)
-            sleep(waittime)
-            self.APPOB.重启APP()
+            if self.Tool.existsTHENtouch(更新按钮, f"体验服.更新按钮", savepos=False):
+                sleep(waittime)
+                self.APPOB.重启APP()
+        # 体验服随便点无所谓 不用追求太逻辑和完美，就直接点以前的更新坐标
+        self.Tool.touch_record_pos(更新按钮.record_pos, self.移动端.resolution, keystr=f"体验服.更新按钮")
         #
         #
         关闭界面 = Template(r"tpl1723551215061.png", record_pos=(0.323, -0.202), resolution=(960, 540))
@@ -134,8 +148,10 @@ class tiyanfu():
         #
         开始游戏 = Template(r"tpl1723551226168.png", record_pos=(-0.003, 0.155), resolution=(960, 540))
         if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
-            TimeECHO("检测到开始游戏")
             sleep(waittime)
+        if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
+            TimeECHO("还存在开始游戏，有可能体验服正在更新")
+            return False
         #
         self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
         #
@@ -159,7 +175,7 @@ class tiyanfu():
             if leftmin > 0:
                 TimeECHO("剩余%d分钟进入新的一天" % (leftmin))
                 self.APPOB.关闭APP()
-                self.移动端.重启设备(leftmin*60)
+                self.移动端.重启重连设备(leftmin*60)
                 continue
             times = times+1
             TimeECHO("="*10)
@@ -173,5 +189,8 @@ if __name__ == "__main__":
     Settings.Config(config_file)
     ce = tiyanfu()
     ce.run()
-    ce.looprun()
+    if ce.内置循环:
+        ce.looprun()
+    else:
+        ce.end()
     exit()
