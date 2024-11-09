@@ -2648,9 +2648,6 @@ class wzry_task:
             # >>> 设备状态调整
             if self.Tool.stopnow():
                 return self.END()
-            if os.path.exists(self.无法进行组队FILE):
-                self.组队模式 = False
-                self.totalnode = 1
             # ------------------------------------------------------------------------------
             #
             if self.新的一天:
@@ -2725,11 +2722,8 @@ class wzry_task:
                     # 让别的进程不要再执行组队代码
                     # 同时所有进程也不再创建和检测同步文件
                     self.组队模式 = False
-                    self.Tool.touchfile(self.无法进行组队FILE, content=content)
-                    #
-                    if os.path.exists(self.对局次数FILE) and self.totalnode_bak > 1:
-                        # 这条命令一出，将强制结束所有的进程
-                        return self.STOP(content)
+                    if self.totalnode_bak > 1:
+                        self.Tool.touchfile(self.无法进行组队FILE, content=content)
                     #
                     startclock = self.对战时间[0]
                     endclock = self.对战时间[1]
@@ -2777,7 +2771,8 @@ class wzry_task:
             while self.Tool.hour_in_span(startclock, endclock) > 0 and not self.新的一天:
                 # 万一其他节点因为bug卡在barrier,这里让他们别卡了
                 self.组队模式 = False
-                self.Tool.touchfile(self.无法进行组队FILE)
+                if self.totalnode_bak > 1:
+                    self.Tool.touchfile(self.无法进行组队FILE)
                 self.当前状态 = "领取礼包"
                 #
                 if not self.内置循环:
@@ -2842,7 +2837,7 @@ class wzry_task:
                 组队原因 = ""
                 单人原因 = ""
                 if self.组队模式 and self.无法进行组队:
-                    单人原因 = f"检测到{self.无法进行组队FILE}"
+                    单人原因 = f"检测到{self.无法进行组队FILE}:"+self.Tool.readfile(self.无法进行组队FILE)
                 if self.组队模式 and not 组队时间内:
                     单人原因 = f"不在组队时间[{startclock},{self.限时组队时间}]内"
                 if not self.组队模式 and 可以组队:
@@ -2890,7 +2885,7 @@ class wzry_task:
                 self.创建同步文件(content)
                 continue
             # ------------------------------------------------------------------------------
-            # 计算参数检查
+            # 计算参数检查警告
             if "5v5匹配" == self.对战模式:
                 if self.组队模式 and not self.青铜段位:
                     TimeECHO(f"警告: 不建议组队模式采用星耀难度")
