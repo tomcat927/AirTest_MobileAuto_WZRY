@@ -2876,7 +2876,7 @@ class wzry_task:
             TimeECHO(f"运行次数{self.runstep}|今日步数{self.jinristep}")
             # ------------------------------------------------------------------------------
             # 第一次运行, 如果APP不在前台,则直接重启
-            if self.jinristep == 1 and self.APPOB.前台APP(0):
+            if self.jinristep == 1 and not self.APPOB.前台APP(0):
                 self.重启并登录(5)
             # ------------------------------------------------------------------------------
             # 校验运行状态
