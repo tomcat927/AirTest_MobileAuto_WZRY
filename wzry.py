@@ -2647,7 +2647,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # >>> 设备状态调整
             if self.Tool.stopnow():
-                return self.END()
+                return self.END("循环前, Tool检测到终止文件")
             # ------------------------------------------------------------------------------
             #
             if self.新的一天:
@@ -2751,7 +2751,8 @@ class wzry_task:
                         continue
                     #
             if self.Tool.stopnow():
-                return self.END()
+                return self.END("对战前, Tool检测到终止文件")
+
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             self.当前状态 = "状态检查"
@@ -2775,7 +2776,7 @@ class wzry_task:
                 # 万一其他节点因为bug卡在barrier,这里让他们别卡了
                 self.组队模式 = False
                 if self.totalnode_bak > 1:
-                    self.Tool.touchfile(self.无法进行组队FILE)
+                    self.Tool.touchfile(self.无法进行组队FILE, f"今日任务完成, 准备领取礼包后退出")
                 self.当前状态 = "领取礼包"
                 #
                 if not self.内置循环:
@@ -2860,7 +2861,8 @@ class wzry_task:
                     self.totalnode = 1
                     self.Tool.totalnode = 1
                     # 避免时间差导致的时间判断失误
-                    self.Tool.touchfile(self.无法进行组队FILE, content=单人原因+组队原因)
+                    content = 单人原因+组队原因
+                    self.Tool.touchfile(self.无法进行组队FILE, content)
                     TimeECHO(f"无法进行组队: {content}")
             # ------------------------------------------------------------------------------
             # 运行前统一变量
