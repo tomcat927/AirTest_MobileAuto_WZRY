@@ -30,7 +30,7 @@ class tiyanfu():
         # Tool
         dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution[0])}.{min(self.移动端.resolution[1])}.dict.yaml")
+        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
