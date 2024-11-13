@@ -1320,6 +1320,7 @@ class wzry_task:
             self.礼包功能_KPL礼包 = False
             # 是否领取了每日商城礼包
             self.Tool.var_dict["运行参数.免费商城礼包"] = True
+            self.Tool.var_dict["运行参数.战队礼包"] = 0
 
             return
         #
@@ -1381,8 +1382,12 @@ class wzry_task:
                 self.每日礼包_妲己礼物()
             self.友情礼包()
             if self.礼包功能_战队礼包:
-                TimeECHO("战队礼包不再维护，如果遇到问题，请自行调试。")
-                self.战队礼包()
+                if self.Tool.var_dict["运行参数.战队礼包"] < 2:
+                    TimeECHO("战队礼包不再维护，如果遇到问题，请自行调试。")
+                    self.战队礼包()
+                    self.Tool.var_dict["运行参数.战队礼包"] =  self.Tool.var_dict["运行参数.战队礼包"] + 1
+                else:
+                    TimeECHO(f"战队礼包领取次数达到{self.Tool.var_dict["运行参数.战队礼包"]}, 不再继续领取。")
             if self.Tool.存在同步文件():
                 return True
             #
