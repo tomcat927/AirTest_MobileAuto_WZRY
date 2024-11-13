@@ -278,7 +278,7 @@ class wzry_task:
         # 保存字典，计算参数的文件
         self.dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml")
+        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution[0])}.{min(self.移动端.resolution[1])}.dict.yaml")
         loaddict = not os.path.exists(self.dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=self.dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -1402,8 +1402,16 @@ class wzry_task:
         #
         # 战队礼包
         TimeECHO(f":战队礼包")
-        self.Tool.existsTHENtouch(Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540)), "战队")
-        # @todo, 添加已阅战队赛
+        战队入口 = Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540))
+        if not self.Tool.existsTHENtouch(战队入口, "战队"):
+            TimeECHO("找不到战队入口, 尝试强制点击")
+            sleep(2)
+            self.Tool.touch_record_pos(战队入口.record_pos, self.移动端.resolution, "战队")
+        #
+        sleep(10)
+        战队赛已阅 = Template(r"tpl1731496049726.png", record_pos=(-0.001, 0.231), resolution=(960, 540))
+        self.Tool.existsTHENtouch(战队赛已阅, "战队赛已阅")
+        #
         sleep(10)
         self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540)), "展开战队")
         sleep(10)
