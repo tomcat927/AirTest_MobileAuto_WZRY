@@ -1391,7 +1391,7 @@ class wzry_task:
                     self.战队礼包()
                     self.Tool.var_dict["运行参数.战队礼包"] = self.Tool.var_dict["运行参数.战队礼包"] + 1
                 else:
-                    TimeECHO(f"战队礼包领取次数达到{self.Tool.var_dict["运行参数.战队礼包"]}, 不再继续领取。")
+                    TimeECHO(f"战队礼包领取次数达到2, 不再继续领取。")
             if self.Tool.存在同步文件():
                 return True
             #
