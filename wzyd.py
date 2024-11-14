@@ -144,6 +144,7 @@ class wzyd_libao:
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
+            self.Tool.removefile("重新登录营地战令.txt")
             self.初始化成功 = True
         #
         return True
