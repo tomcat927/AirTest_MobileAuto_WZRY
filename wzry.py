@@ -1528,12 +1528,11 @@ class wzry_task:
         进入商城界面 = False
         # 注：如果实在无法识别，这里手动点击到促销界面，让程序savepos记住促销的位置
         for i in range(len(商城界面)):
-            # 如果促销入口识别错了，手动 del self.Tool.var_dict["促销入口"] 掉
-            if not self.Tool.existsTHENtouch(促销入口, f"新促销入口", savepos=True):
-                self.Tool.cal_record_pos(促销入口.record_pos, self.移动端.resolution, f"新促销入口")
+            self.Tool.cal_record_pos(促销入口.record_pos, self.移动端.resolution, f"新促销入口")
             sleep(20)
             TimeECHO(f"检测商城界面中...{i}")
-            if exists(商城界面[i]):
+            存在商城界面, 商城界面 = self.Tool.存在任一张图(商城界面, "商城界面")
+            if 存在商城界面:
                 进入商城界面 = True
                 break
         #

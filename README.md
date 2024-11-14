@@ -44,6 +44,7 @@
 在全新的[文档页面](https://cndaqiang.github.io/wzry.doc)获得使用方法。
 
 ## 致谢
+* [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)
 * [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)
 * [Airtest Project](https://github.com/AirtestProject)
 
