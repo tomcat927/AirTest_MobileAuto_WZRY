@@ -1539,13 +1539,14 @@ class wzry_task:
         if not 进入商城界面:
             TimeECHO(f"未检测到商城界面, 重新进入商城")
             self.Tool.LoopTouch(返回, "返回")
-            del self.Tool.var_dict[f"新促销入口"]
             return self.商城免费礼包(times=times)
         #
         领取成功 = False
-        if self.Tool.existsTHENtouch(免费图标, "免费图标", savepos=False):
+        if not self.Tool.existsTHENtouch(免费图标, "免费图标", savepos=False):
+            self.Tool.cal_record_pos(免费图标.record_pos, self.移动端.resolution, f"tpl1719455279197")
             sleep(5)
-            领取成功 = self.Tool.existsTHENtouch(免费领取, "免费领取", savepos=False)
+        #
+        if self.Tool.existsTHENtouch(免费领取, "免费领取", savepos=False):
             sleep(10)
             self.Tool.LoopTouch(确定购买, "确定购买")
             self.关闭按钮()
