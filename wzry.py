@@ -1116,7 +1116,7 @@ class wzry_task:
                 if self.Tool.existsTHENtouch(Template(r"tpl1689668138416.png", record_pos=(-0.095, 0.191), resolution=(960, 540)), "冲突取消英雄", savepos=False):
                     # 选择备选英雄
                     self.Tool.existsTHENtouch(self.备战英雄线路, "备战英雄线路", savepos=True)
-                    self.Tool.existsTHENtouch(self.备战英雄头像, "备战英雄", savepos=True)
+                    self.Tool.existsTHENtouch(self.备战英雄头像, "备战英雄头像", savepos=True)
             # 确定英雄后一般要等待队友确定，这需要时间
             self.Tool.LoopTouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定英雄", loop=6, savepos=False)
         # 加载游戏界面
