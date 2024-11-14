@@ -1826,7 +1826,7 @@ class wzry_task:
             TimeECHO(":没能进入KPL观赛入口,重新进入")
             return self.KPL每日观赛(times, 观赛时长)
         looptimes = 0
-        while not self.set_timelimit(istep=times, init=looptimes == 0, timelimit=观赛时长, nstep=100):
+        while not self.set_timelimit(istep=times, init=False, timelimit=观赛时长, nstep=100):
             TimeECHO(f":KPL观影中{looptimes*30.0/60}/{观赛时长/60}")
             self.Tool.existsTHENtouch(KPL播放按钮, "KPL播放按钮")
             sleep(30)
