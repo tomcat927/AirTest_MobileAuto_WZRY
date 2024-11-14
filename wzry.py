@@ -1802,10 +1802,12 @@ class wzry_task:
         times = times+1
         KPL观赛入口 = Template(r"tpl1707396642681.png", record_pos=(0.463, 0.126), resolution=(960, 540))
         KPL战令入口 = Template(r"tpl1731554853126.png", record_pos=(0.211, -0.217), resolution=(960, 540))
+        KPL播放按钮 = Template(r"tpl1731559385368.png", record_pos=(-0.177, -0.01), resolution=(960, 540))
         KPL观赛界面 = []
         KPL观赛界面.append(Template(r"tpl1731554835127.png", record_pos=(0.439, -0.264), resolution=(960, 540)))
         KPL观赛界面.append(Template(r"tpl1731554824633.png", record_pos=(0.23, -0.105), resolution=(960, 540)))
         KPL观赛界面.append(KPL战令入口)
+        KPL观赛界面.append(KPL播放按钮)
         if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
             self.Tool.cal_record_pos(KPL观赛入口.record_pos, self.移动端.resolution, f"KPL观赛入口")
         #
@@ -1826,6 +1828,7 @@ class wzry_task:
         looptimes = 0
         while not self.set_timelimit(istep=times, init=looptimes == 0, timelimit=观赛时长, nstep=100):
             TimeECHO(f":KPL观影中{looptimes*30.0/60}/{观赛时长/60}")
+            self.Tool.existsTHENtouch(KPL播放按钮, "KPL播放按钮")
             sleep(30)
             looptimes = looptimes+1
         # 开始领战令礼包
