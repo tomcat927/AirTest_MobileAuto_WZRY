@@ -278,7 +278,7 @@ class wzry_task:
         # 保存字典，计算参数的文件
         self.dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml")
+        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(self.dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=self.dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -616,9 +616,18 @@ class wzry_task:
                 更新图标 = Template(r"tpl1723551024328.png", record_pos=(0.059, 0.199), resolution=(960, 540))
                 if self.Tool.existsTHENtouch(关闭更新, "关闭更新", savepos=False):
                     sleep(10)
-                    if not self.Tool.existsTHENtouch(更新图标, "登录更新图标", savepos=True):
+                    # 点击关闭按钮后, 若有点击更新图标则点击更新
+                    if self.Tool.existsTHENtouch(更新图标, "登录更新图标"):
+                        sleep(60*3)
+                        self.重启APP_acce()
+                        break
+                    else:
                         self.Tool.touch_record_pos(record_pos=更新图标.record_pos, resolution=self.移动端.resolution, keystr="更新图标")
+                #
+                if exists(self.图片.登录界面开始游戏图标):
+                    TimeECHO("检测到登录按钮. 更新完成")
                     break
+                #
                 if exists(Template(r"tpl1692946702006.png", record_pos=(-0.009, -0.014), resolution=(960, 540), threshold=0.9)):
                     TimeECHO("更新完成")
                     if not self.Tool.existsTHENtouch(金色确定, "登录金色确定", savepos=True):
@@ -1116,7 +1125,7 @@ class wzry_task:
                 if self.Tool.existsTHENtouch(Template(r"tpl1689668138416.png", record_pos=(-0.095, 0.191), resolution=(960, 540)), "冲突取消英雄", savepos=False):
                     # 选择备选英雄
                     self.Tool.existsTHENtouch(self.备战英雄线路, "备战英雄线路", savepos=True)
-                    self.Tool.existsTHENtouch(self.备战英雄头像, "备战英雄", savepos=True)
+                    self.Tool.existsTHENtouch(self.备战英雄头像, "备战英雄头像", savepos=True)
             # 确定英雄后一般要等待队友确定，这需要时间
             self.Tool.LoopTouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定英雄", loop=6, savepos=False)
         # 加载游戏界面
@@ -1314,12 +1323,14 @@ class wzry_task:
             # 外置礼包，暂无手册，遇到问题，请自行调试
             self.外置礼包_王者营地 = False
             self.外置礼包_体验服 = False
-            # 以下礼包不再维护，如果遇到问题，请自行调试
+            # 以下礼包不再第一时间随着游戏更新，如果遇到问题，请自行调试
             self.礼包功能_战队礼包 = False
             self.礼包功能_商城礼包 = False
             self.礼包功能_KPL礼包 = False
             # 是否领取了每日商城礼包
-            self.Tool.var_dict["运行参数.免费商城礼包"] = True
+            self.Tool.var_dict["运行参数.免费商城礼包"] = True  # 是否需要领取判断
+            self.Tool.var_dict["运行参数.战队礼包"] = 0        # 领取次数技术
+            self.Tool.var_dict["运行参数.KPL观赛时长"] = 60*15  # 观赛时长
 
             return
         #
@@ -1355,9 +1366,12 @@ class wzry_task:
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
                 return
             #
-            if self.礼包功能_商城礼包 and self.Tool.var_dict["运行参数.免费商城礼包"]:
-                if self.商城免费礼包():
-                    self.Tool.var_dict["运行参数.免费商城礼包"] = False
+            if self.礼包功能_商城礼包:
+                if self.Tool.var_dict["运行参数.免费商城礼包"]:
+                    TimeECHO("费商城礼包不再第一时间随着游戏更新，如果遇到问题，请自行调试。")
+                    self.Tool.var_dict["运行参数.免费商城礼包"] = not self.商城免费礼包()
+                else:
+                    TimeECHO("今日已领取过免费商城礼包, 不再领取")
             #
             # 由于王者营地也可以领战令经验, 如果在这里把战令经验领到上限，营地的经验就不能领了
             # 所以加个控制参数决定是否领取
@@ -1381,17 +1395,24 @@ class wzry_task:
                 self.每日礼包_妲己礼物()
             self.友情礼包()
             if self.礼包功能_战队礼包:
-                TimeECHO("战队礼包不再维护，如果遇到问题，请自行调试。")
-                self.战队礼包()
+                if self.Tool.var_dict["运行参数.战队礼包"] < 2:
+                    TimeECHO("战队礼包不再第一时间随着游戏更新，如果遇到问题，请自行调试。")
+                    self.战队礼包()
+                    self.Tool.var_dict["运行参数.战队礼包"] = self.Tool.var_dict["运行参数.战队礼包"] + 1
+                else:
+                    TimeECHO(f"战队礼包领取次数达到2, 不再继续领取。")
             if self.Tool.存在同步文件():
                 return True
             #
             if self.礼包功能_KPL礼包:
-                TimeECHO("进行KPL观赛")
-                TimeECHO("KPL礼包不再维护，如果遇到问题，请自行调试。")
-                self.进入大厅()
-                观赛时长 = 60*15
-                self.KPL每日观赛(times=1, 观赛时长=观赛时长)
+                观赛时长 = self.Tool.var_dict["运行参数.KPL观赛时长"]
+                if 观赛时长 > 0:
+                    self.进入大厅()
+                    TimeECHO("KPL礼包不再第一时间随着游戏更新，如果遇到问题，请自行调试。")
+                    self.KPL每日观赛(times=1, 观赛时长=观赛时长)
+                    self.Tool.var_dict["运行参数.KPL观赛时长"] = 0
+                else:
+                    TimeECHO("今日已完成KPL观赛礼包, 不再领取")
         else:
             TimeECHO("时间太短,暂时不领取游戏礼包")
         #
@@ -1402,8 +1423,16 @@ class wzry_task:
         #
         # 战队礼包
         TimeECHO(f":战队礼包")
-        self.Tool.existsTHENtouch(Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540)), "战队")
-        # @todo, 添加已阅战队赛
+        战队入口 = Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540))
+        if not self.Tool.existsTHENtouch(战队入口, "战队"):
+            TimeECHO("找不到战队入口, 尝试强制点击")
+            sleep(2)
+            self.Tool.touch_record_pos(战队入口.record_pos, self.移动端.resolution, "战队")
+        #
+        sleep(10)
+        战队赛已阅 = Template(r"tpl1731496049726.png", record_pos=(-0.001, 0.231), resolution=(960, 540))
+        self.Tool.existsTHENtouch(战队赛已阅, "战队赛已阅")
+        #
         sleep(10)
         self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540)), "展开战队")
         sleep(10)
@@ -1485,14 +1514,10 @@ class wzry_task:
         #
         # 商城免费礼包
         TimeECHO(f"领任务礼包:每日任务{times}")
-        if self.健康系统():
-            return False
         #
         TimeECHO(f":商城免费礼包")
         # 做活动时，商城入口会变
-        商城入口 = []
-        商城入口.append(Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540)))
-        商城入口.append(Template(r"tpl1705718545013.png", target_pos=2, record_pos=(0.461, -0.115), resolution=(960, 540)))
+        商城入口 = Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540))
         # 因为默认的商城进入后是特效很多的皮肤，影响了界面的识别，所以切到干净的促销入口进行识别
         促销入口 = Template(r"tpl1719455432184.png", record_pos=(-0.436, 0.075), resolution=(960, 540))
         免费图标 = Template(r"tpl1719455279197.png", record_pos=(-0.122, -0.252), resolution=(960, 540))
@@ -1505,36 +1530,32 @@ class wzry_task:
         商城界面.append(Template(r"tpl1719455836014.png", record_pos=(-0.458, 0.19), resolution=(960, 540)))
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
-        找到商城入口 = False
-        找到商城入口, 商城入口 = self.Tool.存在任一张图(商城入口, f"{fun_name(1)}商城入口", savepos=True)
-        if not 找到商城入口:
+        if not self.Tool.existsTHENtouch(商城入口, f"商城入口", savepos=False):
             TimeECHO(f"无法找到商城入口, 尝试计算坐标")
-            self.Tool.cal_record_pos(商城入口[0].record_pos, self.移动端.resolution, f"{fun_name(1)}商城入口", savepos=True)
-        self.Tool.existsTHENtouch(商城入口[0], f"{fun_name(1)}商城入口", savepos=True)
+            self.Tool.cal_record_pos(商城入口.record_pos, self.移动端.resolution, f"商城入口")
         sleep(30)
         进入商城界面 = False
         # 注：如果实在无法识别，这里手动点击到促销界面，让程序savepos记住促销的位置
         for i in range(len(商城界面)):
-            # 如果促销入口识别错了，手动 del self.Tool.var_dict["促销入口"] 掉
-            self.Tool.existsTHENtouch(促销入口, f"新促销入口", savepos=True)
+            self.Tool.cal_record_pos(促销入口.record_pos, self.移动端.resolution, f"新促销入口")
             sleep(20)
             TimeECHO(f"检测商城界面中...{i}")
-            if exists(商城界面[i]):
+            存在商城界面, 商城界面 = self.Tool.存在任一张图(商城界面, "商城界面")
+            if 存在商城界面:
                 进入商城界面 = True
                 break
-        if self.健康系统():
-            return False
+        #
         if not 进入商城界面:
             TimeECHO(f"未检测到商城界面, 重新进入商城")
             self.Tool.LoopTouch(返回, "返回")
-            del self.Tool.var_dict[f"{fun_name(1)}商城入口"]
-            TimeECHO("如果实在无法识别，手动点击到促销界面，让程序savepos记住促销的位置")
             return self.商城免费礼包(times=times)
         #
         领取成功 = False
-        if self.Tool.existsTHENtouch(免费图标, "免费图标", savepos=False):
+        if not self.Tool.existsTHENtouch(免费图标, "免费图标", savepos=False):
+            self.Tool.cal_record_pos(免费图标.record_pos, self.移动端.resolution, f"tpl1719455279197")
             sleep(5)
-            领取成功 = self.Tool.existsTHENtouch(免费领取, "免费领取", savepos=False)
+        #
+        if self.Tool.existsTHENtouch(免费领取, "免费领取", savepos=False):
             sleep(10)
             self.Tool.LoopTouch(确定购买, "确定购买")
             self.关闭按钮()
@@ -1779,7 +1800,6 @@ class wzry_task:
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
 
     def KPL每日观赛(self, times=0, 观赛时长=20*60):
-        # @todo,内部的timelimit
         if not self.check_run_status():
             return True
         self.进入大厅()
@@ -1790,22 +1810,23 @@ class wzry_task:
             return True
         times = times+1
         KPL观赛入口 = Template(r"tpl1707396642681.png", record_pos=(0.463, 0.126), resolution=(960, 540))
-        KPL战令入口 = Template(r"tpl1707398684588.png", record_pos=(0.231, -0.231), resolution=(960, 540))
+        KPL战令入口 = Template(r"tpl1731554853126.png", record_pos=(0.211, -0.217), resolution=(960, 540))
+        KPL播放按钮 = Template(r"tpl1731559385368.png", record_pos=(-0.177, -0.01), resolution=(960, 540))
         KPL观赛界面 = []
-        KPL观赛界面.append(Template(r"tpl1707396755590.png", record_pos=(-0.354, -0.264), resolution=(960, 540)))
-        KPL观赛界面.append(Template(r"tpl1707398710560.png", record_pos=(-0.3, -0.269), resolution=(960, 540)))
+        KPL观赛界面.append(Template(r"tpl1731554835127.png", record_pos=(0.439, -0.264), resolution=(960, 540)))
+        KPL观赛界面.append(Template(r"tpl1731554824633.png", record_pos=(0.23, -0.105), resolution=(960, 540)))
         KPL观赛界面.append(KPL战令入口)
-        self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True)
+        KPL观赛界面.append(KPL播放按钮)
+        if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
+            self.Tool.cal_record_pos(KPL观赛入口.record_pos, self.移动端.resolution, f"KPL观赛入口")
+        #
+        同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
+        self.Tool.existsTHENtouch(同意游戏, "KPL首次进入需要同意游戏")
+        #
         进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
         if not 进入观赛界面:
-            TimeECHO("准备进入KPL观赛入口")
-            self.进入大厅()
-            # 第一次识别失败时,更新观赛入口
-            self.Tool.存在任一张图([KPL观赛入口], "KPL观赛入口", savepos=True)
-            if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
-                return self.KPL每日观赛(times, 观赛时长)
             sleep(30)
-            for i in range(15):
+            for i in range(10):
                 进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
                 if 进入观赛界面:
                     break
@@ -1814,13 +1835,14 @@ class wzry_task:
             TimeECHO(":没能进入KPL观赛入口,重新进入")
             return self.KPL每日观赛(times, 观赛时长)
         looptimes = 0
-        while not self.set_timelimit(istep=times, init=times == 0, timelimit=观赛时长, nstep=100):
+        while not self.set_timelimit(istep=times, init=False, timelimit=观赛时长, nstep=100):
             TimeECHO(f":KPL观影中{looptimes*30.0/60}/{观赛时长/60}")
+            self.Tool.existsTHENtouch(KPL播放按钮, "KPL播放按钮")
             sleep(30)
             looptimes = looptimes+1
         # 开始领战令礼包
-        if not self.Tool.existsTHENtouch(KPL战令入口, "KPL战令入口", savepos=True):
-            return
+        if not self.Tool.existsTHENtouch(KPL战令入口, "KPL战令入口"):
+            self.Tool.cal_record_pos(KPL战令入口.record_pos, self.移动端.resolution, f"KPL战令入口")
         KPL战令任务 = Template(r"tpl1707398869726.png", record_pos=(-0.441, -0.158), resolution=(960, 540))
         if not self.Tool.existsTHENtouch(KPL战令任务, "KPL战令任务", savepos=True):
             return

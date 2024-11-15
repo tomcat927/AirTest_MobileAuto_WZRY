@@ -35,15 +35,16 @@
 * 祈愿页面领取祈愿币、玉镖夺魁的飞镖
 * 王者营地礼包
 * 王者体验服礼包
-* [停止更新]KPL观赛战令观赛领取经验升级
-* [停止更新]战队商店领取英雄碎片
-* [停止更新]商城每日免费钻石碎片随机礼包
+* KPL观赛战令观赛领取经验升级
+* 战队商店领取英雄碎片
+* 商城每日免费钻石碎片随机礼包
 
 ## 如何使用
 
 在全新的[文档页面](https://cndaqiang.github.io/wzry.doc)获得使用方法。
 
 ## 致谢
+* [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)
 * [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)
 * [Airtest Project](https://github.com/AirtestProject)
 

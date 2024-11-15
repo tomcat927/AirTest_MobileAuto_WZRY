@@ -24,7 +24,7 @@ class wzyd_libao:
         # Tool
         dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{self.移动端.resolution[0]}.{self.移动端.resolution[1]}.dict.yaml")
+        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -144,6 +144,7 @@ class wzyd_libao:
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
+            self.Tool.removefile("重新登录营地战令.txt")
             self.初始化成功 = True
         #
         return True
