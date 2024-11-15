@@ -616,9 +616,18 @@ class wzry_task:
                 更新图标 = Template(r"tpl1723551024328.png", record_pos=(0.059, 0.199), resolution=(960, 540))
                 if self.Tool.existsTHENtouch(关闭更新, "关闭更新", savepos=False):
                     sleep(10)
-                    if not self.Tool.existsTHENtouch(更新图标, "登录更新图标", savepos=True):
+                    # 点击关闭按钮后, 若有点击更新图标则点击更新
+                    if self.Tool.existsTHENtouch(更新图标, "登录更新图标"):
+                        sleep(60*3)
+                        self.重启APP_acce()
+                        break
+                    else:
                         self.Tool.touch_record_pos(record_pos=更新图标.record_pos, resolution=self.移动端.resolution, keystr="更新图标")
+                #
+                if exists(self.图片.登录界面开始游戏图标):
+                    TimeECHO("检测到登录按钮. 更新完成")
                     break
+                #
                 if exists(Template(r"tpl1692946702006.png", record_pos=(-0.009, -0.014), resolution=(960, 540), threshold=0.9)):
                     TimeECHO("更新完成")
                     if not self.Tool.existsTHENtouch(金色确定, "登录金色确定", savepos=True):
