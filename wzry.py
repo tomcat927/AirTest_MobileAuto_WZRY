@@ -98,7 +98,8 @@ class wzry_figure:
         self.礼册记忆碎片 = Template(r"tpl1723334128219.png", record_pos=(0.355, 0.222), resolution=(960, 540))
         #
         self.大厅祈愿 = []
-        self.大厅祈愿.append(Template(r"tpl1724317603873.png", record_pos=(0.443, -0.105), resolution=(960, 540)))
+        # 这个图片基本无效, 每次活动都变, 使用record_pos记录真实的位置, 直接touch这个
+        self.大厅祈愿.append(Template(r"tpl1724317603873.png", record_pos=(0.45, -0.103), resolution=(960, 540)))
         self.大厅活动 = []
         self.大厅活动.append(Template(r"tpl1728168902804.png", record_pos=(0.463, -0.025), resolution=(960, 540)))
 
@@ -248,7 +249,8 @@ class wzry_figure:
         #
         #
         # 礼包图库
-        self.战令入口 = Template(r"tpl1721266385770.png", record_pos=(0.343, -0.105), resolution=(960, 540))
+        # 这个图片基本无效, 每次活动都变, 使用record_pos记录真实的位置, 直接touch这个
+        self.战令入口 = Template(r"tpl1721266385770.png", record_pos=(0.347, -0.105), resolution=(960, 540))
         # ------------------------------------------------------------------------------
         self.图片更新FILE = "WZRY.图片更新.txt"
         run_class_command(self=self, command=self.Tool.readfile(self.图片更新FILE))
@@ -1497,7 +1499,6 @@ class wzry_task:
         self.Tool.existsTHENtouch(返回按钮, "回忆礼册返回按钮", savepos=True)
         return
 
-
     def 商城免费礼包(self, times=0):
         #
         if not self.check_run_status():
@@ -1621,11 +1622,12 @@ class wzry_task:
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*5, nstep=10):
             return True
         #
-        if times > 4:  # 1,2,3
+        times = times+1
+        #
+        if times > 3:  # 1,2,3
             for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅祈愿"])):
                 del self.Tool.var_dict[delstr]
         #
-        times = times+1
         #
         if "大厅祈愿" not in self.Tool.var_dict.keys():
             # savepos 如果找到会自动替换上一次的字典
@@ -1864,6 +1866,10 @@ class wzry_task:
             return True
         #
         times = times+1
+        #
+        if times > 3:  # 1,2,3
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口"])):
+                del self.Tool.var_dict[delstr]
         # 每日任务
         战令奖励界面 = []
         战令奖励界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
@@ -1883,7 +1889,7 @@ class wzry_task:
         #
         self.进入大厅()
         if not self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True):
-            TimeECHO(f"未找到战令入口，尝试计算入口中（仅适用于16:9屏幕）")
+            TimeECHO(f"未找到战令入口尝试计算坐标")
             self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
         sleep(15)
 
@@ -2077,11 +2083,11 @@ class wzry_task:
         返回 = Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540))
         能力测试关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
         #
-        存在妲己图标, 妲己图标 = self.Tool.存在任一张图(妲己图标, f"妲己图标",savepos=True)
+        存在妲己图标, 妲己图标 = self.Tool.存在任一张图(妲己图标, f"妲己图标", savepos=True)
         if 存在妲己图标:
-            self.Tool.existsTHENtouch(妲己图标[0], f"妲己图标",savepos=True)
+            self.Tool.existsTHENtouch(妲己图标[0], f"妲己图标", savepos=True)
         elif times > 2:
-            #多次识别不成功, 强制点击
+            # 多次识别不成功, 强制点击
             TimeECHO("没找到妲己图标, 尝试强制点击")
             self.Tool.touch_record_pos(record_pos=妲己图标[0].record_pos, resolution=self.移动端.resolution, keystr="妲己图标")
         else:
