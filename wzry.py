@@ -102,7 +102,11 @@ class wzry_figure:
         self.大厅祈愿.append(Template(r"tpl1724317603873.png", record_pos=(0.45, -0.103), resolution=(960, 540)))
         self.大厅活动 = []
         self.大厅活动.append(Template(r"tpl1728168902804.png", record_pos=(0.463, -0.025), resolution=(960, 540)))
-
+        #
+        # 小妲己的图标会变化
+        self.妲己图标 = []
+        self.妲己图标.append(Template(r"tpl1694441259292.png", record_pos=(0.458, 0.21), resolution=(960, 540)))
+        self.妲己图标.append(Template(r"tpl1703297029482.png", record_pos=(0.451, 0.207), resolution=(960, 540)))
         # 这种活动图标总在变，直接写死成绝对坐标来避免识别
         #
         # 开始图标和登录图标等很接近, 不要用于房间判断
@@ -110,13 +114,14 @@ class wzry_figure:
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), threshold=0.9))
         self.确定匹配按钮 = Template(r"tpl1689666290543.png", record_pos=(-0.001, 0.152), resolution=(960, 540), threshold=0.8)
         self.展开英雄列表 = Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540))
-        # 新年活动结束时,替换一个常规的取消准备按钮
         self.房间中的取消按钮图标 = []
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
+        #
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
-        self.大厅元素.append(Template(r"tpl1729677632444.png", record_pos=(-0.463, -0.125), resolution=(960, 540), threshold=0.95))
-        self.大厅元素.append(Template(r"tpl1729677640815.png", record_pos=(-0.461, -0.124), resolution=(960, 540), threshold=0.95))
+        self.大厅元素.append(self.大厅娱乐模式)
+        for i in self.妲己图标:
+            self.大厅元素.append(i)
         #
         self.房间元素 = []
         self.房间元素.append(Template(r"tpl1690442701046.png", record_pos=(0.135, -0.029), resolution=(960, 540)))
@@ -399,7 +404,7 @@ class wzry_task:
             TimeECHO("网络优化提示")
             self.Tool.existsTHENtouch(Template(r"tpl1693669117249.png", record_pos=(-0.102, 0.116), resolution=(960, 540)), "下次吧")
 
-    def 确定按钮(self):
+    def 存在确定按钮(self):
         确定按钮 = []
         for i in self.图片.蓝色确定按钮:
             确定按钮.append(i)
@@ -408,7 +413,14 @@ class wzry_task:
         确定按钮 = self.Tool.uniq_Template_array(确定按钮)
         存在, 确定按钮 = self.Tool.存在任一张图(确定按钮, "确定按钮")
         if not 存在:
-            return
+            return False
+        else:
+            return 确定按钮
+
+    def 确定按钮(self):
+        确定按钮 = self.存在确定按钮()
+        if not 确定按钮:
+            return False
         for i in 确定按钮:
             self.Tool.existsTHENtouch(i, f"确定{i}", savepos=False)
 
@@ -455,7 +467,7 @@ class wzry_task:
         #
 
     def 进入大厅(self, times=0):
-        self.当前界面 == "未知"
+        self.当前界面 = "未知"
         #
         if not self.check_run_status():
             return True
@@ -485,7 +497,8 @@ class wzry_task:
                 return True
         # 界面识别
         if self.判断大厅中(acce=False):
-            return True
+            if not self.存在确定按钮():
+                return True
         #
         if times < 2 and self.判断对战中():
             处理对战 = "模拟战" in self.对战模式
@@ -563,7 +576,7 @@ class wzry_task:
         return self.进入大厅(times)
 
     def 登录游戏(self, times=0, 检测到登录界面=False):
-        self.当前界面 == "未知"
+        self.当前界面 = "未知"
         if times == 0:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
             self.Tool.removefile(self.重新登录FILE)
@@ -572,6 +585,13 @@ class wzry_task:
             return True
         if times > 1 and not 检测到登录界面:
             TimeErr(f"登录游戏:{times}次没有检测到登录界面")
+        if times == 2:
+            # 有时候是软件卡住了
+            if not touch((0, 0)):
+                content = f"登录游戏: 无法触摸屏幕"
+                self.创建同步文件(content)
+                return True
+
         # 这里是为了避免，卡在游戏界面，定时重启一下
         if times % 4 == 3 or self.Tool.timelimit(timekey="登录游戏", limit=60*10, init=False):
             TimeErr(f"登录游戏:{times}次登录失败,检查您是否应该更新资源或者删除更新资源")
@@ -792,6 +812,7 @@ class wzry_task:
                 if self.判断大厅中():
                     self.Tool.touch_record_pos(self.图片.大厅对战图标.record_pos, self.移动端.resolution, f"计算大厅对战")
         sleep(2)
+        self.当前界面 = "未知"
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
             if times % 3 != 2:
                 return self.单人进入人机匹配房间(times)
@@ -800,8 +821,8 @@ class wzry_task:
                 self.Tool.touch_record_pos(self.图片.进入5v5匹配.record_pos, self.移动端.resolution, f"5v5王者峡谷")
         sleep(2)
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
-            del self.Tool.var_dict["大厅对战"]
-            del self.Tool.var_dict["5v5王者峡谷"]
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷"])):
+                del self.Tool.var_dict[delstr]
             return self.单人进入人机匹配房间(times)
         sleep(2)
         #
@@ -1949,7 +1970,7 @@ class wzry_task:
         进入战令界面, 战令奖励界面 = self.Tool.存在任一张图(战令奖励界面, "战令奖励界面元素")
         进入任务界面 = False
         if not 进入战令界面:
-            self.当前界面 == "未知"
+            self.当前界面 = "未知"
             TimeECHO("判断进入战令界面失败， 尝试进入任务界面进行再次判断")
             sleep(10)
             if not self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True):
@@ -1986,10 +2007,8 @@ class wzry_task:
         #
         if not 进入任务界面 and times % 5 == 4:
             TimeECHO(f"未检测到任务界面, 重新进入领任务礼包")
-            if "战令入口" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["战令入口"]
-            if "战令的每日任务" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["战令的每日任务"]
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口", "战令的每日任务"])):
+                del self.Tool.var_dict[delstr]
             return self.每日礼包_每日任务(times=times-1)
         #
         # 开始正式领取
@@ -2124,10 +2143,7 @@ class wzry_task:
             return True
         #
         times = times+1
-        # 小妲己的图标会变化
-        妲己图标 = []
-        妲己图标.append(Template(r"tpl1694441259292.png", record_pos=(0.458, 0.21), resolution=(960, 540)))
-        妲己图标.append(Template(r"tpl1703297029482.png", record_pos=(0.451, 0.207), resolution=(960, 540)))
+        #
         一键领奖 = Template(r"tpl1694442066106.png", record_pos=(-0.134, 0.033), resolution=(960, 540))
         去领取 = Template(r"tpl1694442088041.png", record_pos=(-0.135, 0.107), resolution=(960, 540))
         收下 = Template(r"tpl1694442103573.png", record_pos=(-0.006, 0.181), resolution=(960, 540))
@@ -2135,13 +2151,13 @@ class wzry_task:
         返回 = Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540))
         能力测试关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
         #
-        存在妲己图标, 妲己图标 = self.Tool.存在任一张图(妲己图标, f"妲己图标", savepos=True)
+        存在妲己图标, self.图片.妲己图标 = self.Tool.存在任一张图(self.图片.妲己图标, f"妲己图标", savepos=True)
         if 存在妲己图标:
-            self.Tool.existsTHENtouch(妲己图标[0], f"妲己图标", savepos=True)
+            self.Tool.existsTHENtouch(self.图片.妲己图标[0], f"妲己图标", savepos=True)
         elif times > 2:
             # 多次识别不成功, 强制点击
             TimeECHO("没找到妲己图标, 尝试强制点击")
-            self.Tool.touch_record_pos(record_pos=妲己图标[0].record_pos, resolution=self.移动端.resolution, keystr="妲己图标")
+            self.Tool.touch_record_pos(record_pos=self.图片.妲己图标[0].record_pos, resolution=self.移动端.resolution, keystr="妲己图标")
         else:
             # 前几次失败, 重新返回大厅识别
             return self.每日礼包_妲己礼物(times)
@@ -2260,7 +2276,7 @@ class wzry_task:
         if not 存在:
             存在, self.图片.结算页面元素 = self.Tool.存在任一张图(self.图片.结算页面元素, "结算页面元素")
         if 存在:
-            self.当前界面 == "战绩页面"
+            self.当前界面 = "战绩页面"
             self.Tool.timelimit(timekey="当前界面", init=True)
         else:
             self.当前界面 = "未知"
@@ -2269,11 +2285,11 @@ class wzry_task:
     def 判断大厅中(self, acce=True):
         # 有些快速情况不适合加速，比如正在实时校验的登录游戏和进入大厅函数中.
         if not acce:
-            self.当前界面 == "未知"
+            self.当前界面 = "未知"
         #
         if self.当前界面 == "大厅中":
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 == "未知"
+                self.当前界面 = "未知"
             else:
                 TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return True
@@ -2287,7 +2303,7 @@ class wzry_task:
                 return False
         #
         if not self.APPOB.前台APP(0):
-            self.当前界面 == "未知"
+            self.当前界面 = "未知"
             return False
         存在, self.图片.大厅元素 = self.Tool.存在任一张图(self.图片.大厅元素, "大厅元素")
         #
@@ -2311,7 +2327,7 @@ class wzry_task:
         #
         if self.当前界面 == "房间中":
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 == "未知"
+                self.当前界面 = "未知"
             else:
                 TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 return True
@@ -2368,7 +2384,7 @@ class wzry_task:
         对战中 = False
         if self.当前界面 == "对战中":
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 == "未知"
+                self.当前界面 = "未知"
             else:
                 TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 对战中 = True
@@ -2494,9 +2510,7 @@ class wzry_task:
             #
             if self.Tool.timelimit(timekey="endgame", limit=60*30, init=False):
                 TimeErr("对战中游戏时间过长,重启游戏")  # 存在对战的时间超过20min,大概率卡死了
-                self.重启并登录(10)
-                self.进入大厅()
-                return False
+                return self.重启并登录(10)
         return True
 
     def 判断对战中_模拟战(self, 处理=False):
@@ -2507,7 +2521,7 @@ class wzry_task:
         对战中 = False
         if self.当前界面 == "对战中_模拟战":
             if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 == "未知"
+                self.当前界面 = "未知"
             else:
                 TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                 对战中 = True
