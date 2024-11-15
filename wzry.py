@@ -1518,7 +1518,7 @@ class wzry_task:
         times = times+1
         #
         # 在此处循环点击灵宝的头顶礼包, 直到点回大厅
-        互动按钮 = Template(r"tpl1731661759718.png", record_pos=(-0.006, 0.023), resolution=(960, 540))
+        互动按钮 = Template(r"tpl1731661759718.png", record_pos=(0.00, 0.03), resolution=(960, 540))
         关闭按钮 = Template(r"tpl1723334229790.png", record_pos=(0.361, -0.194), resolution=(960, 540))
         返回按钮 = Template(r"tpl1723334241957.png", record_pos=(-0.439, -0.25), resolution=(960, 540))
         if self.判断大厅中():
