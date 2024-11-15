@@ -450,11 +450,11 @@ class wzry_task:
         sleep(2)
         if self.判断大厅中(acce=False):
             return True
-        TimeECHO(": 未能进入大厅,有可能有新的关闭按钮,继续尝试关闭中")
+        TimeECHO("未能进入大厅,有可能有新的关闭按钮,继续尝试关闭中")
         for key, value in self.Tool.var_dict.items():
             if "王者登陆关闭按钮" not in key:
                 continue
-            TimeECHO(":尝试touch:"+key)
+            TimeECHO("尝试touch:"+key)
             touch(value)
             if self.判断大厅中(acce=False):
                 return True
@@ -848,7 +848,7 @@ class wzry_task:
         # 段位限制
         if not self.青铜段位:  # 其他段位有次数限制
             if self.Tool.LoopTouch(开始练习, "开始练习", loop=3):
-                TimeECHO(":高阶段位已达上限,采用青铜模式")
+                TimeECHO("高阶段位已达上限,采用青铜模式")
                 self.青铜段位 = True
                 self.选择人机模式 = True
                 段位key = "青铜段位"
@@ -1422,7 +1422,7 @@ class wzry_task:
         self.进入大厅()
         #
         # 战队礼包
-        TimeECHO(f":战队礼包")
+        TimeECHO(f"战队礼包")
         战队入口 = Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540))
         if not self.Tool.existsTHENtouch(战队入口, "战队"):
             TimeECHO("找不到战队入口, 尝试强制点击")
@@ -1497,7 +1497,6 @@ class wzry_task:
         self.Tool.existsTHENtouch(返回按钮, "回忆礼册返回按钮", savepos=True)
         return
 
-    # @todo,其他活动一键领取
 
     def 商城免费礼包(self, times=0):
         #
@@ -1515,7 +1514,7 @@ class wzry_task:
         # 商城免费礼包
         TimeECHO(f"领任务礼包:每日任务{times}")
         #
-        TimeECHO(f":商城免费礼包")
+        TimeECHO(f"商城免费礼包")
         # 做活动时，商城入口会变
         商城入口 = Template(r"tpl1705069544018.png", record_pos=(0.465, -0.173), resolution=(960, 540))
         # 因为默认的商城进入后是特效很多的皮肤，影响了界面的识别，所以切到干净的促销入口进行识别
@@ -1715,8 +1714,8 @@ class wzry_task:
         self.进入大厅()
         #
         # 友情礼包,虽然每次只领取了一个,但是每周/日领取了多次,一周内是可以领完上限的
-        TimeECHO(f":友情礼包")
-        TimeECHO(f":对战友情币")
+        TimeECHO(f"友情礼包")
+        TimeECHO(f"对战友情币")
         if not self.Tool.existsTHENtouch(Template(r"tpl1700454802287.png", record_pos=(0.242, -0.251), resolution=(960, 540)), "友情双人入口"):
             return
         sleep(5)
@@ -1832,11 +1831,11 @@ class wzry_task:
                     break
                 sleep(5)
         if not 进入观赛界面:
-            TimeECHO(":没能进入KPL观赛入口,重新进入")
+            TimeECHO("没能进入KPL观赛入口,重新进入")
             return self.KPL每日观赛(times, 观赛时长)
         looptimes = 0
         while not self.set_timelimit(istep=times, init=False, timelimit=观赛时长, nstep=100):
-            TimeECHO(f":KPL观影中{looptimes*30.0/60}/{观赛时长/60}")
+            TimeECHO(f"KPL观影中{looptimes*30.0/60}/{观赛时长/60}")
             self.Tool.existsTHENtouch(KPL播放按钮, "KPL播放按钮")
             sleep(30)
             looptimes = looptimes+1
@@ -2078,14 +2077,15 @@ class wzry_task:
         返回 = Template(r"tpl1694442136196.png", record_pos=(-0.445, -0.251), resolution=(960, 540))
         能力测试关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
         #
-        进入成功 = False
-        for i in range(len(妲己图标)):
-            if not self.判断大厅中(acce=False):
-                self.进入大厅()
-            进入成功 = self.Tool.existsTHENtouch(妲己图标[i], f"妲己图标{i}")
-            if 进入成功:
-                break
-        if not 进入成功:
+        存在妲己图标, 妲己图标 = self.Tool.存在任一张图(妲己图标, f"妲己图标",savepos=True)
+        if 存在妲己图标:
+            self.Tool.existsTHENtouch(妲己图标[0], f"妲己图标",savepos=True)
+        elif times > 2:
+            #多次识别不成功, 强制点击
+            TimeECHO("没找到妲己图标, 尝试强制点击")
+            self.Tool.touch_record_pos(record_pos=妲己图标[0].record_pos, resolution=self.移动端.resolution, keystr="妲己图标")
+        else:
+            # 前几次失败, 重新返回大厅识别
             return self.每日礼包_妲己礼物(times)
         #
         if exists(一键领奖):
@@ -2418,7 +2418,7 @@ class wzry_task:
                     try:
                         x = float(inputxy[0])
                         y = float(inputxy[1])
-                        TimeECHO(": x=%5.3f, y=%5.3f" % (x, y))
+                        TimeECHO("\t x=%5.3f, \t y=%5.3f" % (x, y))
                     except:
                         TimeErr(f" not found x y in [{self.触摸对战FILE}]")
                 for i in range(random.randint(1, 5)):
@@ -2659,7 +2659,7 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 检测是否出现控制冲突,双脚本情况
             if self.myPID != self.Tool.readfile(self.WZRYPIDFILE)[0].strip():
-                content = f": 本次运行PID[{self.myPID}]不同于[{self.WZRYPIDFILE}],退出中....."
+                content = f"本次运行PID[{self.myPID}]不同于[{self.WZRYPIDFILE}],退出中....."
                 TimeErr(content)
                 if self.totalnode_bak > 1:  # 让其他节点抓紧结束
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
@@ -2680,7 +2680,7 @@ class wzry_task:
                 # 参数、礼包、图片、文件等的初始化
                 self.初始化(init=False)
                 if self.totalnode_bak > 1:
-                    TimeECHO(":新的一天创建同步文件进行初次校准")
+                    TimeECHO("新的一天创建同步文件进行初次校准")
                     # 因为创建了同步文件之后，其他进程就会停下来
                     # **因此新一天的初始化命令必须放在前面处理同步的前面**
                     # 否则，其他进程就会进入到同步状态
@@ -2956,7 +2956,7 @@ class wzry_task:
                 self.每日礼包()
             #
             if self.移动端.实体终端 and self.Tool.timelimit("休息手机", limit=60*60, init=False):
-                TimeECHO(":实体终端,休息设备")
+                TimeECHO("实体终端,休息设备")
                 # self.APPOB.关闭APP()
                 sleep(60*2)
 
