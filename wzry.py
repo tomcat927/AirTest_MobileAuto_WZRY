@@ -1322,6 +1322,9 @@ class wzry_task:
             self.友情礼包_皮肤宝箱 = True
             self.友情礼包_回城宝箱 = True
             self.友情礼包_击败宝箱 = True
+            self.友情礼包_排位保护 = False
+            self.礼包功能_回忆礼册 = False
+            self.礼包功能_灵宝互动 = False
             # 外置礼包，暂无手册，遇到问题，请自行调试
             self.外置礼包_王者营地 = False
             self.外置礼包_体验服 = False
@@ -1388,8 +1391,10 @@ class wzry_task:
                 self.玉镖夺魁()
             else:
                 TimeECHO("暂时不进行玉镖夺魁")
-            # 回忆礼册. 不知道这个礼包会存在多久
-            self.回忆礼册()
+            if self.礼包功能_回忆礼册:
+                self.回忆礼册()
+            if self.礼包功能_灵宝互动:
+                self.灵宝互动()
             # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
             if self.礼包功能_邮件礼包:
                 self.每日礼包_邮件礼包()
@@ -1497,6 +1502,40 @@ class wzry_task:
         返回按钮 = Template(r"tpl1723334241957.png", record_pos=(-0.439, -0.25), resolution=(960, 540))
         self.Tool.existsTHENtouch(关闭按钮, "回忆礼册关闭按钮", savepos=True)
         self.Tool.existsTHENtouch(返回按钮, "回忆礼册返回按钮", savepos=True)
+        return
+
+    def 灵宝互动(self, times=0):
+        if not self.check_run_status():
+            return True
+        self.进入大厅()
+        if not self.check_run_status():
+            return True
+        #
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10):
+            return True
+        #
+        #
+        times = times+1
+        #
+        # 在此处循环点击灵宝的头顶礼包, 直到点回大厅
+        互动按钮 = Template(r"tpl1731661759718.png", record_pos=(-0.006, 0.023), resolution=(960, 540))
+        关闭按钮 = Template(r"tpl1723334229790.png", record_pos=(0.361, -0.194), resolution=(960, 540))
+        返回按钮 = Template(r"tpl1723334241957.png", record_pos=(-0.439, -0.25), resolution=(960, 540))
+        if self.判断大厅中():
+            self.Tool.cal_record_pos(互动按钮.record_pos, self.移动端.resolution, f"灵宝互动按钮", savepos=True)
+            # 就直接强制点击进行了, 根本不用识别
+            self.Tool.LoopTouch(互动按钮, f"灵宝互动按钮", loop=5, savepos=True)
+            if self.判断大厅中():
+                return True
+            # 不在大厅可能领到了特殊的礼物
+            self.确定按钮()
+            self.Tool.existsTHENtouch(关闭按钮, f"{fun_name(1)}关闭按钮", savepos=False)
+            self.Tool.LoopTouch(返回按钮, f"{fun_name(1)}返回按钮", loop=5, savepos=False)
+        else:
+            TimeECHO("不在大厅无法互动灵宝")
+            return self.灵宝互动(times)
+
+        # @todo, 进入灵宝装扮页面
         return
 
     def 商城免费礼包(self, times=0):
@@ -1770,7 +1809,7 @@ class wzry_task:
         #
         返回图标 = Template(r"tpl1707301421376.png", record_pos=(-0.445, -0.253), resolution=(960, 540))
         # 皮肤宝箱
-        if self.友情礼包_皮肤宝箱 and self.Tool.existsTHENtouch(Template(r"tpl1700454970340.png", record_pos=(-0.12, -0.154), resolution=(960, 540)), "友情皮肤礼包兑换"):
+        if self.友情礼包_皮肤宝箱 and self.Tool.existsTHENtouch(Template(r"tpl1700454970340.png", record_pos=(-0.12, -0.154), resolution=(960, 540)), "皮肤宝箱兑换"):
             sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1700454978914.png", record_pos=(0.32, 0.228), resolution=(960, 540)), "友情币兑换"):
                 sleep(5)
@@ -1780,7 +1819,7 @@ class wzry_task:
                 sleep(5)
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
         # 回城宝箱
-        if self.友情礼包_回城宝箱 and self.Tool.existsTHENtouch(Template(r"tpl1707301299599.png", record_pos=(0.035, -0.15), resolution=(960, 540)), "友情皮肤礼包兑换"):
+        if self.友情礼包_回城宝箱 and self.Tool.existsTHENtouch(Template(r"tpl1707301299599.png", record_pos=(0.035, -0.15), resolution=(960, 540)), "回城宝箱兑换"):
             sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1707301267168.png", record_pos=(0.32, 0.228), resolution=(960, 540)), "友情币兑换"):
                 sleep(5)
@@ -1790,7 +1829,7 @@ class wzry_task:
                 sleep(5)
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
         # 击败宝箱
-        if self.友情礼包_击败宝箱 and self.Tool.existsTHENtouch(Template(r"tpl1707301309821.png", record_pos=(-0.279, 0.005), resolution=(960, 540)), "友情皮肤礼包兑换"):
+        if self.友情礼包_击败宝箱 and self.Tool.existsTHENtouch(Template(r"tpl1707301309821.png", record_pos=(-0.279, 0.005), resolution=(960, 540)), "击败宝箱兑换"):
             sleep(5)
             if self.Tool.existsTHENtouch(Template(r"tpl1707301267168.png", record_pos=(0.32, 0.228), resolution=(960, 540)), "友情币兑换"):
                 sleep(5)
@@ -1799,6 +1838,18 @@ class wzry_task:
             if self.Tool.existsTHENtouch(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)), "蓝色确定兑换"):
                 sleep(5)
             self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
+        # 排位保护卡
+        if self.友情礼包_排位保护 and self.Tool.existsTHENtouch(Template(r"tpl1731661786008.png", record_pos=(-0.281, -0.164), resolution=(960, 540)), "排位保护卡兑换"):
+            sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1731661803315.png", record_pos=(0.317, 0.225), resolution=(960, 540)), "友情币兑换"):
+                sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)), "金色确定兑换"):
+                sleep(5)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700454996867.png", record_pos=(-0.099, 0.166), resolution=(960, 540)), "蓝色确定兑换"):
+                sleep(5)
+            self.Tool.existsTHENtouch(返回图标, "友情礼包返回图标", savepos=True)
+        #
+        self.Tool.LoopTouch(返回图标, "友情礼包返回图标", savepos=False)
 
     def KPL每日观赛(self, times=0, 观赛时长=20*60):
         if not self.check_run_status():
