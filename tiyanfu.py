@@ -157,7 +157,6 @@ class tiyanfu():
         #
         self.大厅元素 = []
         self.大厅元素.append(Template(r"tpl1723551269026.png", record_pos=(0.455, 0.203), resolution=(960, 540)))
-        self.大厅元素.append(Template(r"tpl1723551278162.png", record_pos=(-0.003, 0.142), resolution=(960, 540)))
         self.大厅元素.append(Template(r"tpl1723551299495.png", record_pos=(-0.461, -0.249), resolution=(960, 540)))
         self.大厅元素.append(Template(r"tpl1723551309461.png", record_pos=(0.354, -0.252), resolution=(960, 540)))
         大厅中, self.大厅元素 = self.Tool.存在任一张图(self.大厅元素, "体验服.大厅元素")

@@ -136,13 +136,6 @@ class wzry_figure:
         self.移动S = [self.移动]  # 其他特色的移动图标
         self.装备S = []
         #
-        self.普攻S.append(Template(r"tpl1719546715992.png", record_pos=(0.366, 0.196), resolution=(960, 540)))
-        self.普攻S.append(Template(r"tpl1719546725396.png", record_pos=(0.37, 0.197), resolution=(960, 540)))
-        self.普攻S.append(Template(r"tpl1719546735621.png", record_pos=(0.369, 0.199), resolution=(960, 540)))
-        self.普攻S.append(Template(r"tpl1719546976757.png", record_pos=(0.368, 0.201), resolution=(960, 540)))
-        self.普攻S.append(Template(r"tpl1719546988763.png", record_pos=(0.366, 0.2), resolution=(960, 540)))
-        self.普攻S.append(Template(r"tpl1719547004757.png", record_pos=(0.365, 0.198), resolution=(960, 540)))
-        #
         self.装备S.append(Template(r"tpl1709220117102.png", record_pos=(0.401, -0.198), resolution=(960, 540)))
         self.装备S.append(Template(r"tpl1725075714801.png", record_pos=(0.398, -0.203), resolution=(960, 540)))
         self.装备S.append(Template(r"tpl1725076266344.png", record_pos=(0.399, -0.198), resolution=(960, 540)))
@@ -474,137 +467,104 @@ class wzry_task:
         #
         # 次数上限/时间上限，则重启
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*5, nstep=10, touch同步=True):
-            TimeECHO(f"进入大厅超时退出,更新图片资源库")
             self.图片 = wzry_figure(Tool=self.Tool)
             # 进不去就重启
             return self.重启并登录(10)
         #
         times = times+1
         TimeECHO(f"{fun_name(2)}.尝试进入大厅{times}")
+        #
+        if not self.check_run_status():
+            return True
+        #
         # 检验程序是否启动
         if not self.APPOB.前台APP(0):
-            return self.登录游戏()
-        #
-        if not self.check_run_status():
-            return True
-        #
-        if "ios" in self.移动端.LINK:
-            配件不支持 = Template(r"tpl1701523669097.png", record_pos=(-0.001, 0.002), resolution=(1136, 640))
-            关闭配件不支持 = Template(r"tpl1701523677678.png", record_pos=(-0.004, 0.051), resolution=(1136, 640))
-            if exists(配件不支持):
-                self.Tool.existsTHENtouch(关闭配件不支持, "关闭配件不支持")
-            if self.判断大厅中(acce=False):
-                return True
+            self.重启并登录()
         # 界面识别
-        if self.判断大厅中(acce=False):
-            if not self.存在确定按钮():
-                return True
+        if self.大厅严格判断():
+            return True
         #
-        if times < 2 and self.判断对战中():
-            处理对战 = "模拟战" in self.对战模式
-            if self.触摸对战:
-                处理对战 = True
-            while self.判断对战中(处理对战):
-                TimeECHO("尝试进入大厅:对战sleep")
-                sleep(15)  # sleep太久容易死
-                if self.Tool.timelimit(timekey="结束对战", limit=60*15, init=False):
-                    break
-            self.结束人机匹配()
-            if self.判断大厅中(acce=False):
-                return True
-        if times < 2 and self.判断战绩页面():
-            self.结束人机匹配()
-            if self.判断大厅中(acce=False):
-                return True
         #
-        # 健康系统直接重新同步
-        if self.健康系统_常用命令():
-            return True
-        # 返回图标
-        返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
-        # 房间
-        if times < 2 and self.判断房间中():
-            self.Tool.LoopTouch(返回图标, "返回图标", loop=2, savepos=False)
-            self.确定按钮()
-            if self.判断大厅中(acce=False):
-                return True
-        # 其他返回页面
-        self.Tool.LoopTouch(返回图标, "返回图标", loop=5, savepos=False)
-        self.确定按钮()
-        if self.判断大厅中(acce=False):
-            return True
-        if exists(Template(r"tpl1693886922690.png", record_pos=(-0.005, 0.114), resolution=(960, 540))):
-            self.Tool.existsTHENtouch(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)), "确定按钮")
-            if self.判断大厅中(acce=False):
-                return True
-            if not self.check_run_status():
-                return True
-        self.网络优化()
-        # 各种异常，异常图标,比如网速不佳、画面设置、
-        self.Tool.existsTHENtouch(Template(r"tpl1692951507865.png", record_pos=(-0.106, 0.12), resolution=(960, 540), threshold=0.9), "关闭画面设置")
-        # 更新资源
-        WIFI更新资源 = Template(r"tpl1694357134235.png", record_pos=(-0.004, -0.019), resolution=(960, 540))
-        if exists(WIFI更新资源):
-            self.Tool.existsTHENtouch(Template(r"tpl1694357142735.png", record_pos=(-0.097, 0.116), resolution=(960, 540)))
-        if self.判断大厅中(acce=False):
-            return True
-        # 更新图形显示设置
-        显示设置 = Template(r"tpl1694359268612.png", record_pos=(-0.002, 0.12), resolution=(960, 540))
-        if exists(显示设置):
-            self.Tool.existsTHENtouch(Template(r"tpl1694359275922.png", record_pos=(-0.113, 0.124), resolution=(960, 540)))
-            if self.判断大厅中(acce=False):
-                return True
+        # 下面是各种异常情况的逐一排查
         #
-        if not self.check_run_status():
-            return True
-        # 邀请
-        if exists(Template(r"tpl1692951548745.png", record_pos=(0.005, 0.084), resolution=(960, 540))):
-            关闭邀请 = Template(r"tpl1692951558377.png", record_pos=(0.253, -0.147), resolution=(960, 540), threshold=0.9)
-            self.Tool.LoopTouch(关闭邀请, "关闭邀请", loop=5, savepos=False)
-        # 老账号的友情提示
-        if exists(Template(r"tpl1707377651759.png", record_pos=(-0.282, -0.032), resolution=(960, 540))):
-            关闭邀请 = Template(r"tpl1707377671958.png", record_pos=(0.453, -0.205), resolution=(960, 540))
-            self.Tool.LoopTouch(关闭邀请, "关闭友情对战推荐", loop=5, savepos=False)
-        #
-        if self.判断大厅中(acce=False):
-            return True
         # 登录页面
         # 这里一定要重启，不然存在登录界面识别错误，误触到别的按钮
         if exists(self.图片.登录界面开始游戏图标) or exists(self.图片.登录界面年龄提示):
-            return self.重启并登录()
+            self.重启并登录()
+            # 界面识别
+            if self.大厅严格判断():
+                return True
+        # 对战页面
+        if times < 2:
+            处理对战 = "模拟战" in self.对战模式
+            if self.触摸对战:
+                处理对战 = True
+            if self.判断战绩页面() or self.判断对战中(处理对战):
+                sleep(5)
+                self.结束人机匹配()
+        #
+        # 房间
+        返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
+        if times < 2 and self.判断房间中():
+            self.Tool.LoopTouch(返回图标, "返回图标", loop=3, savepos=False)
+            self.确定按钮()
+            self.Tool.LoopTouch(返回图标, "返回图标", loop=3, savepos=False)
+        #
+        # 界面识别
+        if self.大厅严格判断():
+            return True
+        #
+        # 其他页面
+        self.大厅的异常画面处理()
+        #
+        # 界面识别
+        if self.大厅严格判断():
+            return True
         #
         return self.进入大厅(times)
 
     def 登录游戏(self, times=0, 检测到登录界面=False):
+        # 调用 self.登录游戏() 之前默认都重启过了
+        # 检测到登录界面是指有登录按钮的那个画面, 更新页面不算
         self.当前界面 = "未知"
+        #
+        if not self.check_run_status():
+            return True
+        #
+        # 次数上限/时间上限，则重启
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*20, nstep=10, touch同步=True):
+            content = f"登录游戏超时退出"
+            self.移动端.重启重连设备(10)
+            self.创建同步文件(content)
+            return True
+        #
         if times == 0:
             self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
             self.Tool.removefile(self.重新登录FILE)
+        #
         times = times+1
-        if not self.check_run_status():
-            return True
+        TimeECHO(f"{fun_name(2)}>登录游戏{times}")
         if times > 1 and not 检测到登录界面:
             TimeErr(f"登录游戏:{times}次没有检测到登录界面")
+        #
+        # 这里是为了避免，卡在游戏界面，定时重启一下
+        if times % 4 == 3:
+            TimeErr(f"登录游戏:{times}次登录失败,重启设备")
+            self.移动端.重启重连设备(10)
+            if not self.APPOB.前台APP(2):
+                return self.登录游戏(times, False)
+            self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
+                                       resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
+            检测到登录界面 = True
+        #
         if times == 2:
             # 有时候是软件卡住了
             if not touch((0, 0)):
                 content = f"登录游戏: 无法触摸屏幕"
                 self.创建同步文件(content)
                 return True
-
-        # 这里是为了避免，卡在游戏界面，定时重启一下
-        if times % 4 == 3 or self.Tool.timelimit(timekey="登录游戏", limit=60*10, init=False):
-            TimeErr(f"登录游戏:{times}次登录失败,检查您是否应该更新资源或者删除更新资源")
-            TimeErr(f"登录游戏:{times}次登录失败,重启设备")
-            self.移动端.重启重连设备(10)
-            检测到登录界面 = self.APPOB.前台APP(2)
-            self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
-                                       resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         #
-        if times > 8:
-            TimeErr(f"登录游戏:{times}次登录失败,返回")
-            return False
-        TimeECHO(f"{fun_name(2)}>登录游戏{times}")
+        # 游戏闪退了
         if not self.APPOB.前台APP(2):
             return self.登录游戏(times, False)
         #
@@ -612,13 +572,11 @@ class wzry_task:
             content = "网络不可用,取消登录,需要重启设备"
             self.创建同步文件(content)
             return True
-        if self.判断大厅中(acce=False):
-            return True
         #
         # 更新公告
         更新公告 = Template(r"tpl1692946575591.png", record_pos=(0.103, -0.235), resolution=(960, 540), threshold=0.9)
         if exists(更新公告):
-            检测到登录界面 = True
+            检测到登录界面 = False
             for igengxin in np.arange(30):
                 TimeECHO("更新中%d" % (igengxin))
                 关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
@@ -655,7 +613,6 @@ class wzry_task:
         if exists(Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)):
             检测到登录界面 = True
             self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=True)
-            TimeECHO("同意游戏")
         #
         if self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=False):
             检测到登录界面 = True
@@ -669,10 +626,19 @@ class wzry_task:
             return True
         #
         if exists(Template(r"tpl1692951324205.png", record_pos=(0.005, -0.145), resolution=(960, 540))):
-            检测到登录界面 = True
-            TimeECHO("关闭家长模式")
-            touch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)))
+            self.Tool.existsTHENtouch(Template(r"tpl1692951358456.png", record_pos=(0.351, -0.175), resolution=(960, 540)), "关闭家长模式")
             sleep(5)
+        #
+        # 适合王者活动更改登录界面图标时
+        if exists(self.图片.登录界面年龄提示):
+            检测到登录界面 = True
+            self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
+                                       resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
+            sleep(10)
+            # 登陆后一般会有活动需要关闭
+            self.大厅的异常画面处理()
+            if self.大厅严格判断():
+                return True
         #
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             检测到登录界面 = True
@@ -681,35 +647,13 @@ class wzry_task:
             if not self.APPOB.前台APP(0):
                 return self.登录游戏(times, False)
             # 登陆后一般会有活动需要关闭
-            self.关闭按钮()
-            if self.判断大厅中(acce=False):
+            self.大厅的异常画面处理()
+            if self.大厅严格判断():
                 return True
         else:
             # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
             self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
-        # 再检查一下登录情况
-        取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
-        关闭 = Template(r"tpl1719739199756.png", record_pos=(-0.059, 0.209), resolution=(960, 540))
-        self.Tool.existsTHENtouch(取消, "取消按钮")
-        self.Tool.existsTHENtouch(关闭, "关闭按钮")
-        self.关闭按钮()
-        self.Tool.existsTHENtouch(取消, "取消按钮")
-        self.Tool.existsTHENtouch(关闭, "关闭按钮")
-        #
-        if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
-            检测到登录界面 = True
             sleep(10)
-            # 模拟器点击登陆后容易闪退
-            if not self.APPOB.前台APP(0):
-                return self.登录游戏(times, False)
-            self.关闭按钮()
-        if self.判断大厅中(acce=False):
-            return True
-        # 适合王者活动更改登录界面图标时
-        if exists(self.图片.登录界面年龄提示):
-            检测到登录界面 = True
-            self.Tool.touch_record_pos(record_pos=self.图片.登录界面开始游戏图标.record_pos,
-                                       resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
         #
         # ..................................................................................
         # 第一次万一已经登录过了
@@ -721,23 +665,71 @@ class wzry_task:
         # 健康系统直接重新同步
         if self.健康系统_常用命令():
             return True
-        havetouch = False
-        # 动态下载资源提示
-        回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
-        if exists(回归礼物):
-            havetouch = True
-            self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
-        回归挑战 = Template(r"tpl1699680234401.png", record_pos=(0.314, 0.12), resolution=(1136, 640))
-        self.Tool.existsTHENtouch(回归挑战, "不进行回归挑战")
-        存在返回按钮, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, "登录返回按钮", savepos=True)
-        if 存在返回按钮:
-            havetouch = True
-            self.Tool.existsTHENtouch(self.图片.返回按钮[0], "登录返回按钮", savepos=True)
-            self.确定按钮()
         #
-        if havetouch and self.判断大厅中(acce=False):
+        self.大厅的异常画面处理()
+        if self.大厅严格判断():
             return True
         #
+        # 进入大厅时遇到的复杂的关闭按钮, 尝试胡乱点击
+        self.进入大厅时遇到的复杂的关闭按钮()
+        #
+        取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
+        今日不再弹出 = Template(r"tpl1693272038809.png", record_pos=(0.38, 0.215), resolution=(960, 540), threshold=0.9)
+        if exists(今日不再弹出):  # 当活动海报太大时，容易识别关闭图标错误，此时采用历史的关闭图标位置
+            TimeECHO("今日不再弹出仍在")
+            self.Tool.existsTHENtouch(取消, "取消按钮")
+            self.进入大厅时遇到的复杂的关闭按钮()
+        #
+        self.大厅的异常画面处理()
+        if self.大厅严格判断():
+            return True
+        #
+        return self.登录游戏(times, 检测到登录界面)
+
+    def 大厅严格判断(self):
+        if self.判断大厅中(acce=False):
+            # 有时候卡顿, 这里等待一下
+            sleep(5)
+            if not self.存在确定按钮():
+                存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
+                if not 存在:
+                    return True
+        return False
+
+    def 大厅的异常画面处理(self):
+        # 把这个单独拿出来, 是因为登录的时候要执行
+        # 进入大厅的函数也要执行这些指令
+        # 健康系统直接重新同步
+        # 没有检测完一个就判断大厅. 是因为判断大厅元素容易出错
+        if not self.check_run_status():
+            return True
+        if self.健康系统_常用命令():
+            return True
+        #
+        # ios 配件提示
+        if "ios" in self.移动端.LINK:
+            配件不支持 = Template(r"tpl1701523669097.png", record_pos=(-0.001, 0.002), resolution=(1136, 640))
+            关闭配件不支持 = Template(r"tpl1701523677678.png", record_pos=(-0.004, 0.051), resolution=(1136, 640))
+            if exists(配件不支持):
+                self.Tool.existsTHENtouch(关闭配件不支持, "关闭配件不支持")
+        #
+        # 关闭图标
+        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, f"{funs_name(2)}关闭按钮", savepos=True)
+        if 存在:
+            self.Tool.existsTHENtouch(self.图片.王者登录关闭按钮[0], f"{funs_name(2)}关闭按钮", savepos=True)
+            self.Tool.LoopTouch(self.图片.王者登录关闭按钮[0], "关闭按钮", loop=3, savepos=False)
+        # 返回图标
+        存在, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, f"{funs_name(2)}返回按钮", savepos=True)
+        if 存在:
+            self.Tool.existsTHENtouch(self.图片.返回按钮[0], f"{funs_name(2)}返回按钮", savepos=True)
+            self.Tool.LoopTouch(self.图片.返回按钮[0], "返回按钮", loop=3, savepos=False)
+        # 确定图标
+        self.确定按钮()
+        #
+        if exists(Template(r"tpl1693886922690.png", record_pos=(-0.005, 0.114), resolution=(960, 540))):
+            self.Tool.existsTHENtouch(Template(r"tpl1693886962076.png", record_pos=(0.097, 0.115), resolution=(960, 540)), "确定按钮")
+        if not self.check_run_status():
+            return True
         self.关闭按钮()
         self.网络优化()
         # 各种异常，异常图标,比如网速不佳、画面设置、
@@ -745,30 +737,34 @@ class wzry_task:
         # 更新资源
         WIFI更新资源 = Template(r"tpl1694357134235.png", record_pos=(-0.004, -0.019), resolution=(960, 540))
         if exists(WIFI更新资源):
-            self.Tool.existsTHENtouch(Template(r"tpl1694357142735.png", record_pos=(-0.097, 0.116), resolution=(960, 540)), "取消更新")
-        #
+            self.Tool.existsTHENtouch(Template(r"tpl1694357142735.png", record_pos=(-0.097, 0.116), resolution=(960, 540)))
         动态下载资源 = Template(r"tpl1697785792245.png", record_pos=(-0.004, -0.009), resolution=(960, 540))
+        取消 = Template(r"tpl1697785803856.png", record_pos=(-0.099, 0.115), resolution=(960, 540))
         if exists(动态下载资源):
             self.Tool.existsTHENtouch(取消, "取消按钮")
         self.Tool.existsTHENtouch(取消, "取消按钮")
-        # 活动界面
-        self.进入大厅时遇到的复杂的关闭按钮()
-        self.Tool.existsTHENtouch(取消, "取消按钮")
-        if self.判断大厅中(acce=False):
+        #
+        # 更新图形显示设置
+        显示设置 = Template(r"tpl1694359268612.png", record_pos=(-0.002, 0.12), resolution=(960, 540))
+        if exists(显示设置):
+            self.Tool.existsTHENtouch(Template(r"tpl1694359275922.png", record_pos=(-0.113, 0.124), resolution=(960, 540)))
+        #
+        if not self.check_run_status():
             return True
+        # 邀请
+        if exists(Template(r"tpl1692951548745.png", record_pos=(0.005, 0.084), resolution=(960, 540))):
+            关闭邀请 = Template(r"tpl1692951558377.png", record_pos=(0.253, -0.147), resolution=(960, 540), threshold=0.9)
+            self.Tool.LoopTouch(关闭邀请, "关闭邀请", loop=5, savepos=False)
+        # 老账号的友情提示
+        if exists(Template(r"tpl1707377651759.png", record_pos=(-0.282, -0.032), resolution=(960, 540))):
+            关闭邀请 = Template(r"tpl1707377671958.png", record_pos=(0.453, -0.205), resolution=(960, 540))
+            self.Tool.LoopTouch(关闭邀请, "关闭友情对战推荐", loop=5, savepos=False)
         #
-        今日不再弹出 = Template(r"tpl1693272038809.png", record_pos=(0.38, 0.215), resolution=(960, 540), threshold=0.9)
-        if exists(今日不再弹出):  # 当活动海报太大时，容易识别关闭图标错误，此时采用历史的关闭图标位置
-            TimeECHO("今日不再弹出仍在")
-            self.Tool.existsTHENtouch(取消, "取消按钮")
-            self.进入大厅时遇到的复杂的关闭按钮()
-            self.网络优化()
-            if self.判断大厅中(acce=False):
-                return True
-            else:
-                sleep(10)
-        #
-        return self.登录游戏(times, 检测到登录界面)
+        回归礼物 = Template(r"tpl1699607355777.png", resolution=(1136, 640))
+        if exists(回归礼物):
+            self.Tool.existsTHENtouch(Template(r"tpl1699607371836.png", resolution=(1136, 640)))
+        回归挑战 = Template(r"tpl1699680234401.png", record_pos=(0.314, 0.12), resolution=(1136, 640))
+        self.Tool.existsTHENtouch(回归挑战, "不进行回归挑战")
 
     def 单人进入人机匹配房间(self, times=0):
         if not self.check_run_status():
@@ -2309,8 +2305,6 @@ class wzry_task:
         #
         if 存在:
             self.当前界面 = "大厅中"
-            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
-            del self.图片.大厅元素[1:]
             self.Tool.timelimit(timekey="当前界面", init=True)
         else:
             self.当前界面 = "未知"
@@ -3006,6 +3000,7 @@ class wzry_task:
             # 后续程序的控制，仍采用 self.触摸对战等参数
             self.构建循环参数(self.本循环参数)
             # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
+            # 第一步时参数一定不同, 会强制进入大厅, 这也能保证没有进错画面
             self.本循环参数.printinfo()
             if not self.本循环参数.compare(self.上循环参数):
                 TimeECHO(f"上步计算参数不同,回到大厅重新初始化")
