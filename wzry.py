@@ -1517,7 +1517,9 @@ class wzry_task:
         # 灵宝界面不断点击
         for i in range(5):
             self.Tool.existsTHENtouch(灵宝入口, f"灵宝入口按钮", savepos=True)
+            sleep(1)
             self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
+            sleep(1)
         self.确定按钮()
         self.Tool.LoopTouch(返回按钮, f"{fun_name(1)}返回按钮", loop=5, savepos=False)
         #
