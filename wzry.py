@@ -168,11 +168,7 @@ class wzry_figure:
         # 登录关闭按钮
         self.王者登录关闭按钮 = []
         self.王者登录关闭按钮.append(Template(r"tpl1692947351223.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
-        self.王者登录关闭按钮.append(Template(r"tpl1699616162254.png", record_pos=(0.38, -0.237), resolution=(960, 540), threshold=0.9))
         self.王者登录关闭按钮.append(Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540)))
-        self.王者登录关闭按钮.append(Template(r"tpl1693271987720.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9))
-        self.王者登录关闭按钮.append(Template(r"tpl1700294024287.png", record_pos=(0.465, -0.214), resolution=(1136, 640)))
-        self.王者登录关闭按钮.append(Template(r"tpl1707232517229.png", record_pos=(0.394, -0.237), resolution=(960, 540)))
         self.王者登录关闭按钮.append(Template(r"tpl1719742718808.png", record_pos=(0.394, -0.241), resolution=(960, 540)))
         # 返回图标
         self.返回按钮 = []
@@ -1524,8 +1520,11 @@ class wzry_task:
         if self.判断大厅中():
             self.Tool.cal_record_pos(互动按钮.record_pos, self.移动端.resolution, f"灵宝互动按钮", savepos=True)
             # 就直接强制点击进行了, 根本不用识别
-            self.Tool.LoopTouch(互动按钮, f"灵宝互动按钮", loop=5, savepos=True)
-            if self.判断大厅中():
+            self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
+            self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
+            self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
+            #
+            if self.判断大厅中(acce=False):
                 return True
             # 不在大厅可能领到了特殊的礼物
             self.确定按钮()
