@@ -1514,15 +1514,24 @@ class wzry_task:
         times = times+1
         #
         # 在此处循环点击灵宝的头顶礼包, 直到点回大厅
-        互动按钮 = Template(r"tpl1731661759718.png", record_pos=(0.00, 0.03), resolution=(960, 540))
+        互动按钮 = Template(r"tpl1731661759718.png", record_pos=(-0.006, 0.024), resolution=(960, 540))
+        灵宝入口 = Template(r"tpl1731665149612.png", record_pos=(0.002, 0.107), resolution=(960, 540))
         关闭按钮 = Template(r"tpl1723334229790.png", record_pos=(0.361, -0.194), resolution=(960, 540))
         返回按钮 = Template(r"tpl1723334241957.png", record_pos=(-0.439, -0.25), resolution=(960, 540))
-        if self.判断大厅中():
-            self.Tool.cal_record_pos(互动按钮.record_pos, self.移动端.resolution, f"灵宝互动按钮", savepos=True)
-            # 就直接强制点击进行了, 根本不用识别
+        #
+        self.Tool.cal_record_pos(灵宝入口.record_pos, self.移动端.resolution, f"灵宝入口按钮", savepos=True)
+        self.Tool.cal_record_pos(互动按钮.record_pos, self.移动端.resolution, f"灵宝互动按钮", savepos=True)
+        # 就直接强制点击进行了, 根本不用识别
+        # 灵宝界面不断点击
+        for i in range(5):
+            self.Tool.existsTHENtouch(灵宝入口, f"灵宝入口按钮", savepos=True)
             self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
-            self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
-            self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
+        self.确定按钮()
+        self.Tool.LoopTouch(返回按钮, f"{fun_name(1)}返回按钮", loop=5, savepos=False)
+        #
+        if self.判断大厅中(acce=False):
+            for i in range(5):
+                self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
             #
             if self.判断大厅中(acce=False):
                 return True
@@ -1530,12 +1539,6 @@ class wzry_task:
             self.确定按钮()
             self.Tool.existsTHENtouch(关闭按钮, f"{fun_name(1)}关闭按钮", savepos=False)
             self.Tool.LoopTouch(返回按钮, f"{fun_name(1)}返回按钮", loop=5, savepos=False)
-        else:
-            TimeECHO("不在大厅无法互动灵宝")
-            return self.灵宝互动(times)
-
-        # @todo, 进入灵宝装扮页面
-        return
 
     def 商城免费礼包(self, times=0):
         #
