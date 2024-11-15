@@ -1524,10 +1524,15 @@ class wzry_task:
         if self.判断大厅中(acce=False):
             for i in range(5):
                 self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
-            #
+                sleep(1)
+            # 有可能回点到灵宝活动
+            sleep(10)
             if self.判断大厅中(acce=False):
                 return True
             # 不在大厅可能领到了特殊的礼物
+            for i in range(5):
+                self.Tool.existsTHENtouch(互动按钮, f"灵宝互动按钮", savepos=True)
+                sleep(1)
             self.确定按钮()
             self.Tool.existsTHENtouch(关闭按钮, f"{fun_name(1)}关闭按钮", savepos=False)
             self.Tool.LoopTouch(返回按钮, f"{fun_name(1)}返回按钮", loop=5, savepos=False)
