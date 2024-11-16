@@ -476,6 +476,12 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
+        if times == 2:
+            # 有时候是软件卡住了
+            if not touch((1, 1)):
+                content = f"进入大厅: 无法触摸屏幕"
+                self.创建同步文件(content)
+                return True
         #
         # 检验程序是否启动
         if not self.APPOB.前台APP(0):
@@ -559,7 +565,7 @@ class wzry_task:
         #
         if times == 2:
             # 有时候是软件卡住了
-            if not touch((0, 0)):
+            if not touch((1, 1)):
                 content = f"登录游戏: 无法触摸屏幕"
                 self.创建同步文件(content)
                 return True
@@ -2762,6 +2768,10 @@ class wzry_task:
                 #
                 if not connect_status():
                     self.移动端.连接设备()
+                if not touch((1, 1)):
+                    content = f"RUN(): 无法触摸屏幕"
+                    TimeErr(content)
+                    self.移动端.重启重连设备(10)
                 #
                 # 必须所有节点都能上线，否则并行任务就全部停止
                 if not connect_status(times=2):
