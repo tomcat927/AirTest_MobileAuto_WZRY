@@ -2968,10 +2968,17 @@ class wzry_task:
             self.房主 = self.mynode == 0 or self.totalnode == 1
             if self.组队模式:
                 TimeECHO("组队模式, 广播变量中....")
-                self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
-                self.jinristep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.jinristep, name="jinristep")
-                # 广播一些变量，这样就不用在每个文件中都写初始化参数了
-                self.限时组队时间 = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.限时组队时间, name="限时组队时间")
+                para = [self.runstep, self.jinristep, self.限时组队时间, self.对战模式]
+                para = self.Tool.bcastvar(self.mynode, self.totalnode, var=para, name="runstep")
+                self.runstep = para[0]
+                self.jinristep = para[1]
+                self.限时组队时间 = para[2]
+                self.对战模式 = para[3]
+                #
+                para = [self.标准模式, self.青铜段位]
+                para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="duizhan")
+                self.标准模式 = all(ipara for ipara in para[0])
+                self.青铜段位 = any(ipara for ipara in para[1])
                 #
                 self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
                 #
