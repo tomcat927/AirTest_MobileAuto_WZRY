@@ -41,7 +41,7 @@
 
 ## 如何使用
 
-在全新的[文档页面](https://cndaqiang.github.io/wzry.doc)获得使用方法。
+在全新的[文档页面](https://wzry-doc.pages.dev/)获得使用方法。
 
 ## 致谢
 * [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)
