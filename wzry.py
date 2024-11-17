@@ -2430,7 +2430,7 @@ class wzry_task:
                     return False
             if self.Tool.存在同步文件():
                 return True
-            # 不同账户出装位置不同, 这里随机识别一次，更新未位置
+            # 不同账户出装位置不同, 这里随机识别一次，更新位置
             if random.randint(1, 5) == 1:
                 装备pos = False
             if not 装备pos:
@@ -2464,7 +2464,10 @@ class wzry_task:
                 touch(装备pos)
             #
             if 移动pos:
-                content = self.Tool.readfile(self.触摸对战FILE)
+                if os.path.exists(self.触摸对战FILE):
+                    content = self.Tool.readfile(self.触摸对战FILE)
+                else:
+                    content = [""]
                 # 如果有血条在第一行，则进行下面的测试代码
                 # 很难判断成功
                 if len(content) > 1:
@@ -2509,8 +2512,9 @@ class wzry_task:
                 touch(普攻pos)
             #
             if self.Tool.timelimit(timekey="endgame", limit=60*30, init=False):
-                TimeErr("对战中游戏时间过长,重启游戏")  # 存在对战的时间超过20min,大概率卡死了
-                return self.重启并登录(10)
+                content = "对战中游戏时间过长,大概率卡死了"
+                self.创建同步文件(content)
+                return False
         return True
 
     def 判断对战中_模拟战(self, 处理=False):
