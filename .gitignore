@@ -1,3 +1,6 @@
+#推送到pypi镜像站
+setup.py
+
 #避免windows检查说有病毒，不再同步运行脚本
 *.bat
 *.sh
@@ -14,6 +17,37 @@ run.1.bat
 ./tpl*.png
 #clean png
 .pngtmp/
+
+# Python 构建文件夹
+build/
+dist/
+*.egg-info/
+*.egg
+
+# 缓存和临时文件
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 虚拟环境文件夹（如果你使用虚拟环境）
+venv/
+.env/
+
+# Windows 特定文件
+Thumbs.db
+desktop.ini
+
+# macOS 特定文件
+.DS_Store
+
+# 安装包和压缩包
+*.tar.gz
+*.zip
+*.whl
+
+# IDE 配置文件（如 PyCharm、VSCode 等）
+.idea/
+.vscode/
 
 #macos
 .DS_Store
