@@ -109,6 +109,14 @@ class wzry_figure:
         self.妲己图标.append(Template(r"tpl1703297029482.png", record_pos=(0.451, 0.207), resolution=(960, 540)))
         # 这种活动图标总在变，直接写死成绝对坐标来避免识别
         #
+        # 人机选择图标
+        self.人机标准模式 = Template(r"tpl1702268393125.png", record_pos=(-0.35, -0.148), resolution=(960, 540))
+        self.人机快速模式 = Template(r"tpl1689666057241.png", record_pos=(-0.308, -0.024), resolution=(960, 540))
+        self.人机青铜段位 = Template(r"tpl1689666083204.png", record_pos=(0.014, -0.148), resolution=(960, 540))
+        self.人机星耀段位 = Template(r"tpl1689666092009.png", record_pos=(0.0, 0.111), resolution=(960, 540))
+        # 开始练习和下页的开始匹配太像了,修改一下target
+        self.人机开始练习 = Template(r"tpl1700298996343.png", record_pos=(0.326, 0.197), resolution=(1136, 640), threshold=0.9, target_pos=2)
+        #
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
         self.房间中的开始按钮图标.append(Template(r"tpl1689666117573.png", record_pos=(0.096, 0.232), resolution=(960, 540), threshold=0.9))
@@ -775,11 +783,6 @@ class wzry_task:
     def 单人进入人机匹配房间(self, times=0):
         if not self.check_run_status():
             return True
-        if "ios" in self.移动端.LINK:
-            配件不支持 = Template(r"tpl1701523669097.png", record_pos=(-0.001, 0.002), resolution=(1136, 640))
-            关闭配件不支持 = Template(r"tpl1701523677678.png", record_pos=(-0.004, 0.051), resolution=(1136, 640))
-            if exists(配件不支持):
-                self.Tool.existsTHENtouch(关闭配件不支持, "关闭配件不支持")
         if "模拟战" in self.对战模式:
             TimeECHO(f"首先进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
@@ -789,12 +792,9 @@ class wzry_task:
         #
         # ... 状态检查和重置
         TimeECHO(f"首先进入人机匹配房间{times}")
-        if self.判断对战中():
-            self.结束人机匹配()
-            if self.判断房间中(处理=False):
-                return True
         if self.判断房间中():
             return True
+        #
         self.进入大厅()
         if not self.check_run_status():
             return True
@@ -806,90 +806,94 @@ class wzry_task:
         #
         times = times+1
         #
+        # 前面已经进入大厅了, 这是不进行识别, 连续点击, 最好找不到再重来
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
-            if times % 3 != 2:
-                return self.单人进入人机匹配房间(times)
-            else:
-                # 在第2+3*i 次 计算坐标, 避免更新
-                if self.判断大厅中():
-                    self.Tool.touch_record_pos(self.图片.大厅对战图标.record_pos, self.移动端.resolution, f"计算大厅对战")
-        sleep(2)
-        self.当前界面 = "未知"
+            return self.单人进入人机匹配房间(times)
+        #
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
-            if times % 3 != 2:
-                return self.单人进入人机匹配房间(times)
-            else:
-                # 在第2+3*i 次 计算坐标, 避免更新
-                self.Tool.touch_record_pos(self.图片.进入5v5匹配.record_pos, self.移动端.resolution, f"5v5王者峡谷")
-        sleep(2)
+            return self.单人进入人机匹配房间(times)
+        #
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷"])):
-                del self.Tool.var_dict[delstr]
+            #
+            if times > 2:
+                TimeECHO("没有检测到[进入人机匹配]界面")
+            if times > 3:
+                TimeECHO("请注意WZ是否又更新了进入人机的界面")
+            if times > 4:
+                for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷"])):
+                    del self.Tool.var_dict[delstr]
+            #
+            # 返回按钮
+            返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+            self.Tool.LoopTouch(返回, "返回")
+            #
             return self.单人进入人机匹配房间(times)
         sleep(2)
         #
+        模式key = "标准模式" if self.标准模式 else "快速模式"
         段位key = "青铜段位" if self.青铜段位 else "星耀段位"
         if self.选择人机模式:
             TimeECHO("选择对战模式")
-            匹配模式 = {}
-            匹配模式["标准模式"] = Template(r"tpl1702268393125.png", record_pos=(-0.35, -0.148), resolution=(960, 540))
-            匹配模式["快速模式"] = Template(r"tpl1689666057241.png", record_pos=(-0.308, -0.024), resolution=(960, 540))
-            key = "快速模式"
-            if self.标准模式:
-                key = "标准模式"
-            if not self.Tool.existsTHENtouch(匹配模式[key], key):
+            匹配模式 = self.图片.人机标准模式 if self.标准模式 else self.图片.人机快速模式
+            段位图标 = self.图片.人机青铜段位 if self.青铜段位 else self.图片.人机星耀段位
+            if not self.Tool.existsTHENtouch(匹配模式, f"匹配模式.{模式key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
-            # 选择难度
-            段位图标 = {}
-            段位图标["青铜段位"] = Template(r"tpl1689666083204.png", record_pos=(0.014, -0.148), resolution=(960, 540))
-            段位图标["星耀段位"] = Template(r"tpl1689666092009.png", record_pos=(0.0, 0.111), resolution=(960, 540))
-            self.Tool.existsTHENtouch(段位图标[段位key], "选择"+段位key, savepos=False)
-        # 开始练习
-        开始练习 = Template(r"tpl1689666102973.png", record_pos=(0.323, 0.161), resolution=(960, 540), threshold=0.9)
-        开始练习 = Template(r"tpl1700298996343.png", record_pos=(0.326, 0.197), resolution=(1136, 640), threshold=0.9, target_pos=2)
-
-        # 开始练习和下页的开始匹配太像了,修改一下
-        if not self.Tool.existsTHENtouch(开始练习, "开始练习"):
-            return self.单人进入人机匹配房间(times)
+            if not self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True):
+                return self.单人进入人机匹配房间(times)
         #
-        sleep(10)
+        sleep(5)
+        if not self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习"):
+            if times > 2:
+                TimeECHO("没有检测到[人机开始练习]")
+                for delstr in list(set(self.Tool.var_dict.keys()) & set([f"匹配模式.{模式key}", f"段位图标.{段位key}"])):
+                    del self.Tool.var_dict[delstr]
+            #
+            return self.单人进入人机匹配房间(times)
+        sleep(5)
+        #
+        if self.判断房间中():
+            return True
+        #
         禁赛提示 = Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
         if exists(禁赛提示):
             content = "禁赛提示无法进行匹配"
             return self.创建同步文件(content)
         #
-        # 段位限制
+        确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
+        while self.Tool.existsTHENtouch(确定按钮, "不匹配被禁赛的确定按钮"):
+            sleep(20)
+            if self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习"):
+                sleep(10)
+            # 信誉分很低时，这里会被禁数十小时，此时不适合继续等待下去了
+            if self.set_timelimit(istep=times, init=False, timelimit=60*10, nstep=10):
+                self.创建同步文件("不匹配被禁赛")
+                return True
+            if not self.check_run_status():
+                return True
+        #
+        if self.判断房间中():
+            return True
+        #
         if not self.青铜段位:  # 其他段位有次数限制
-            if self.Tool.LoopTouch(开始练习, "开始练习", loop=3):
+            if self.Tool.LoopTouch(self.图片.人机开始练习, "开始练习", loop=3):
                 TimeECHO("高阶段位已达上限,采用青铜模式")
                 self.青铜段位 = True
                 self.选择人机模式 = True
-                段位key = "青铜段位"
-                self.Tool.existsTHENtouch(段位图标[段位key], "选择"+段位key, savepos=False)
-                self.Tool.existsTHENtouch(开始练习, "开始练习")
                 self.Tool.var_dict["运行参数.青铜段位"] = True
                 if self.组队模式:
                     TimeErr("段位不合适,创建同步文件")
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, "星耀段位次数用完")
-                    return
+                    return False
                 else:
+                    段位key = "青铜段位"
+                    self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True)
+                    self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习")
                     return self.单人进入人机匹配房间(times)
         #
-        if not self.判断房间中():
-            # 有时候长时间不进去被禁赛了
-            确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
-            while self.Tool.existsTHENtouch(确定按钮, "不匹配被禁赛的确定按钮"):
-                sleep(20)
-                if self.Tool.existsTHENtouch(开始练习, "开始练习"):
-                    sleep(10)
-                # 信誉分很低时，这里会被禁数十小时，此时不适合继续等待下去了
-                if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10, touch同步=True):
-                    self.创建同步文件("不匹配被禁赛")
-                    return True
-                if not self.check_run_status():
-                    return True
-            return self.单人进入人机匹配房间(times)
-        return True
+        if self.判断房间中():
+            return True
+        #
+        return self.单人进入人机匹配房间(times)
 
     def 单人进入排位房间(self, times=0):
         if not self.check_run_status():
@@ -941,13 +945,13 @@ class wzry_task:
         if "5v5匹配" == self.对战模式 and not self.青铜段位 and self.房主:
             TimeECHO("!!! 再次确认，正在采用星耀段位进行组队")
         # ...............................................................
-        # 当多人组队模式时，这里要暂时保证是房间中，因为邀请系统还没写好
         self.Tool.barriernode(self.mynode, self.totalnode, "组队进房间")
+        if not self.check_run_status():
+            return True
+        #
         if not self.房主:
             sleep(self.mynode*10)
         self.Tool.timelimit(timekey=f"组队模式进房间{self.mynode}", limit=60*5, init=True)
-        if not self.check_run_status():
-            return True
         if not self.房主:
             找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
             self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=True)
@@ -961,11 +965,12 @@ class wzry_task:
                 #
                 # 需要小号和主号建立亲密关系，并在主号中设置亲密关系自动进入房间
                 TimeECHO("不在组队的房间中")
+                self.当前界面 = "未知"
                 if not self.判断房间中(处理=False):
                     self.单人进入人机匹配房间()
+                #
                 # 这里给的是特殊账户的头像
                 进房 = self.图片.房主头像
-                self.Tool.timedict["当前界面"] = 0
                 TimeECHO("准备进入组队房间")
                 if not exists(进房):
                     TimeECHO("没找到房主头像, 采用通用房主头像")
@@ -993,7 +998,7 @@ class wzry_task:
                     TimeECHO("未找到组队房间,检测主节点登录状态")
                 if not 找到取消按钮:
                     TimeECHO("没有找到取消按钮，王者最近可能有活动更新了图标")
-                    TimeECHO("检查页面是否有图片更新 https://github.com/cndaqiang/WZRY/issues/8")
+                    TimeECHO("检查页面是否有图片更新 https://wzry-doc.pages.dev/guide/upfig/")
                     TimeECHO("更新后可以加速匹配速度")
 
         self.Tool.barriernode(self.mynode, self.totalnode, "结束组队进房间")
@@ -2677,33 +2682,24 @@ class wzry_task:
             TimeECHO("人机匹配对战循环:"+"->"*10)
         # 进入房间
         self.进入人机匹配房间()
-        if not self.check_run_status():
-            return
         # 进行对战
         self.进行人机匹配()
-        if not self.check_run_status():
-            return
+        #
         加速对战 = False
         if "模拟战" in self.对战模式:
             加速对战 = True
         if self.触摸对战 and "5v5" in self.对战模式:
             加速对战 = True
         if self.判断对战中(加速对战):
-            sleep(30)
-        if not self.check_run_status():
-            return
+            sleep(10)
         # 结束对战
         self.结束人机匹配()
-        #
-        if not self.check_run_status():
-            return
         #
         if self.mynode == 0:
             self.Tool.clean文件()
         if self.房主:
             TimeECHO("<-"*10)
         #
-    #
 
     def STOP(self, content=""):
         """
