@@ -196,15 +196,13 @@ class wzry_figure:
         self.金色确定按钮.append(Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540)))
 
         self.战绩页面元素 = []
-        self.战绩页面元素.append(Template(r"tpl1699677816333.png", record_pos=(0.408, 0.226), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
+        self.战绩页面元素.append(Template(r"tpl1727236520434.png", record_pos=(0.103, -0.067), resolution=(960, 540)))
+        # 老战绩页面
         self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
         self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1689669071283.png", record_pos=(-0.001, -0.036), resolution=(960, 540)))
-        self.结算页面元素 = []
-        self.结算页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))
-        self.结算页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))
-        self.结算页面元素.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
-        self.结算页面元素.append(Template(r"tpl1727236520434.png", record_pos=(0.103, -0.067), resolution=(960, 540)))
         #
         self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
         self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
@@ -513,8 +511,9 @@ class wzry_task:
             处理对战 = "模拟战" in self.对战模式
             if self.触摸对战:
                 处理对战 = True
-            if self.判断战绩页面() or self.判断对战中(处理对战):
-                sleep(5)
+            存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
+            if 存在 or self.quick判断界面() in ["对战中", "对战中_模拟战", "战绩页面"]:
+                self.判断对战中(处理对战)
                 self.结束人机匹配()
         #
         # 房间
@@ -783,6 +782,17 @@ class wzry_task:
     def 单人进入人机匹配房间(self, times=0):
         if not self.check_run_status():
             return True
+        #
+        # 务必保证 times == 0 时, 要么在大厅, 要么在房间
+        if times == 0:
+            if self.判断房间中():
+                return True
+        else:
+            self.进入大厅()
+        if not self.check_run_status():
+            return True
+        #
+        # 下面这些程序在循环过程中, 都return到self.单人进入人机匹配房间
         if "模拟战" in self.对战模式:
             TimeECHO(f"首先进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
@@ -792,14 +802,6 @@ class wzry_task:
         #
         # ... 状态检查和重置
         TimeECHO(f"首先进入人机匹配房间{times}")
-        if self.判断房间中():
-            return True
-        #
-        # 调用之前都已经进入过大厅了, 这里仅做一个判断
-        if not self.判断大厅中(acce=times == 0):
-            self.进入大厅()
-        if not self.check_run_status():
-            return True
         #
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10, touch同步=True):
             return True
@@ -895,19 +897,6 @@ class wzry_task:
         return self.单人进入人机匹配房间(times)
 
     def 单人进入排位房间(self, times=0):
-        if not self.check_run_status():
-            return True
-        # ... 状态检查和重置
-        TimeECHO(f"首先进入排位房间{times}")
-        if self.判断对战中():
-            self.结束人机匹配()
-            if self.判断房间中(处理=False):
-                return True
-        if self.判断房间中():
-            return True
-        self.进入大厅()
-        if not self.check_run_status():
-            return True
         #
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=30, touch同步=True):
             return True
@@ -915,11 +904,11 @@ class wzry_task:
         times = times+1
         if not self.Tool.existsTHENtouch(self.图片.大厅排位赛, "大厅排位赛", savepos=False):
             TimeErr("找不到大厅排位赛")
-            return self.单人进入排位房间(times)
+            return self.单人进入人机匹配房间(times)
         sleep(10)
         if not self.Tool.existsTHENtouch(self.图片.进入排位赛, "进入排位赛", savepos=False):
             TimeErr("找不到进入排位赛")
-            return self.单人进入排位房间(times)
+            return self.单人进入人机匹配房间(times)
         #
         if not self.判断房间中():
             # 有时候长时间不进去被禁赛了
@@ -929,7 +918,7 @@ class wzry_task:
                 if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=30, touch同步=True):
                     self.创建同步文件("不匹配被禁赛, 超时无法进入")
                     return True
-            return self.单人进入排位房间(times)
+            return self.单人进入人机匹配房间(times)
         return True
     #
 
@@ -957,7 +946,7 @@ class wzry_task:
             while not 找到取消按钮:
                 if self.Tool.timelimit(timekey=f"辅助进房{self.mynode}", limit=60*5, init=False):
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, "辅助进房超时退出")
-                    break
+                    return True
                 if not self.check_run_status():
                     TimeErr("辅助进房失败")
                     return True
@@ -966,7 +955,8 @@ class wzry_task:
                 TimeECHO("不在组队的房间中")
                 self.当前界面 = "未知"
                 if not self.判断房间中(处理=False):
-                    self.单人进入人机匹配房间()
+                    self.Tool.touch同步文件(self.Tool.辅助同步文件, "辅助进房异常. 找不到房间")
+                    return True
                 #
                 # 这里给的是特殊账户的头像
                 进房 = self.图片.房主头像
@@ -1001,25 +991,9 @@ class wzry_task:
                     TimeECHO("更新后可以加速匹配速度")
 
         self.Tool.barriernode(self.mynode, self.totalnode, "结束组队进房间")
-        return
+        return True
 
     def 单人进入人机匹配房间_模拟战(self, times=0):
-        if not self.check_run_status():
-            return True
-        # ... 状态检查和重置
-        TimeECHO(f"首先进入人机匹配房间{times}")
-        if self.判断对战中():
-            self.结束人机匹配()
-            if self.判断房间中(处理=False):
-                return True
-        if self.判断房间中():
-            return True
-        #
-        # 调用之前都已经进入过大厅了, 这里仅做一个判断
-        if not self.判断大厅中(acce=times == 0):
-            self.进入大厅()
-        if not self.check_run_status():
-            return True
         #
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*30, nstep=30, touch同步=True):
             return True
@@ -1189,7 +1163,7 @@ class wzry_task:
             # 已返回房间或大厅
             if self.判断房间中(处理=False):
                 return
-            if self.判断大厅中():
+            if self.判断大厅中(acce=True):
                 return
             # 健康系统直接重新同步
             if self.健康系统_常用命令():
@@ -1198,7 +1172,7 @@ class wzry_task:
             # S37 更新了结算动画
             self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
-            存在, self.图片.结算页面元素 = self.Tool.存在任一张图(self.图片.结算页面元素, "对战.结算页面元素")
+            存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
             if 存在:
                 if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                     TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
@@ -1235,7 +1209,7 @@ class wzry_task:
                     sleep(10)
                     if self.Tool.existsTHENtouch(Template(r"tpl1689667256973.png", record_pos=(0.094, 0.115), resolution=(960, 540)), "确定返回大厅"):
                         sleep(10)
-                if self.判断大厅中():
+                if self.判断大厅中(acce=True):
                     return
     #
 
@@ -1246,7 +1220,7 @@ class wzry_task:
         self.Tool.timelimit(timekey="结束模拟战", limit=60*20, init=True)
         while True:
             self.APPOB.打开APP()
-            if self.Tool.timelimit(timekey="结束模拟战", limit=60*30, init=False) or self.健康系统() or self.判断大厅中():
+            if self.Tool.timelimit(timekey="结束模拟战", limit=60*30, init=False) or self.健康系统() or self.判断大厅中(acce=True):
                 TimeErr("结束游戏时间过长 OR 健康系统 OR 大厅中")
                 return self.进入大厅()
             # 模拟战在排队的时候就处在房间的界面，所以这里的判断可能会很早的退出去
@@ -1277,7 +1251,7 @@ class wzry_task:
                 self.Tool.existsTHENtouch(Template(r"tpl1690545545580.png", record_pos=(-0.101, 0.182), resolution=(960, 540)), "选择退出对战")
             if self.判断房间中(处理=False):
                 return
-            if self.判断大厅中():
+            if self.判断大厅中(acce=True):
                 return
             # 为了避免识别错误，加一个强制点击的命令
             任意点击_monizhan = [Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))]
@@ -1304,7 +1278,7 @@ class wzry_task:
                             break
             if self.判断房间中(处理=False):
                 return
-            if self.判断大厅中():
+            if self.判断大厅中(acce=True):
                 return
     #
 
@@ -2253,54 +2227,34 @@ class wzry_task:
             self.当前界面 = 对战tag
         elif 元素集合[0] == 战绩元素:
             self.当前界面 = "战绩页面"
-        self.Tool.timelimit(timekey="当前界面", limit=60*2, init=True)
         TimeECHO(f"{fun_name(2)}.quick判断界面:{self.当前界面}")
         return self.当前界面
         #
     #
 
-    def 判断战绩页面(self):
-        if self.当前状态 in ["领取礼包", "重新启动"]:
-            TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
-            return False
-        #
-        if self.quick判断界面() in ["大厅中", "房间中", "对战中", "对战中_模拟战"]:
-            return False
-        #
-        if not self.Tool.timelimit(timekey="当前界面", limit=60*2, init=False):
-            if self.当前界面 in ["房间中", "大厅中", "登录界面"]:
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
-        #
-        存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "战绩页面元素")
-        if not 存在:
-            存在, self.图片.结算页面元素 = self.Tool.存在任一张图(self.图片.结算页面元素, "结算页面元素")
-        if 存在:
-            self.当前界面 = "战绩页面"
-            self.Tool.timelimit(timekey="当前界面", init=True)
-        else:
-            self.当前界面 = "未知"
-        return 存在
-
-    def 判断大厅中(self, acce=True):
+    def 判断大厅中(self, acce=False):
+        # 在安全的页面进行acce
         # 有些快速情况不适合加速，比如正在实时校验的登录游戏和进入大厅函数中.
-        if not acce:
-            self.当前界面 = "未知"
-        #
-        if self.当前界面 == "大厅中":
-            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 = "未知"
-            else:
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return True
-        elif self.当前界面 == "房间中":
-            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+        # 应该合理规划是否要 调用 self.判断大厅中()
+        # 而不是无脑用acce减少判断时间
+        if acce:
+            #
+            if self.quick判断界面() in ["登录界面", "房间中", "对战中", "对战中_模拟战", "战绩页面"]:
                 return False
-        elif self.当前界面 == "登录界面":
-            if not self.Tool.timelimit(timekey="当前界面", limit=20, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
+            if self.当前界面 == "大厅中":
+                if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    self.当前界面 = "未知"
+                else:
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return True
+            elif self.当前界面 == "房间中":
+                if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
+            elif self.当前界面 == "登录界面":
+                if not self.Tool.timelimit(timekey="当前界面", limit=20, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
         #
         if not self.APPOB.前台APP(0):
             self.当前界面 = "未知"
@@ -2315,28 +2269,29 @@ class wzry_task:
         #
         return 存在
 
-    def 判断房间中(self, 处理=True):
-        if self.当前状态 in ["重新启动"]:
+    def 判断房间中(self, 处理=False, acce=False):
+        if self.当前状态 in ["领取礼包", "重新启动"]:
             TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
             return
         #
-        if self.quick判断界面() in ["大厅中", "对战中", "战绩页面", "对战中_模拟战"]:
-            return False
-        #
-        if self.当前界面 == "房间中":
-            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 = "未知"
-            else:
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return True
-        elif self.当前界面 == "对战中":
-            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+        if acce:
+            if self.quick判断界面() in ["大厅中", "对战中", "战绩页面", "对战中_模拟战"]:
                 return False
-        elif self.当前界面 == "登录界面":
-            if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
+            #
+            if self.当前界面 == "房间中":
+                if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    self.当前界面 = "未知"
+                else:
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return True
+            elif self.当前界面 == "对战中":
+                if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
+            elif self.当前界面 == "登录界面":
+                if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         if 存在:
             # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
@@ -2368,7 +2323,7 @@ class wzry_task:
         #
         return 存在
 
-    def 判断对战中(self, 处理=False):
+    def 判断对战中(self, 处理=False, acce=False):
         if self.当前状态 in ["领取礼包", "重新启动"]:
             TimeECHO(f"{fun_name(1)}: 当前状态 =  {self.当前状态}, return False")
             return False
@@ -2379,28 +2334,28 @@ class wzry_task:
         if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
             return False
         #
-        对战中 = False
-        if self.当前界面 == "对战中":
-            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 = "未知"
-            else:
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                对战中 = True
-        elif self.当前界面 == "大厅中":
-            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
-        elif self.当前界面 == "登录界面":
-            if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
-        if not 对战中:
-            对战中, self.图片.对战图片元素 = self.Tool.存在任一张图(self.图片.对战图片元素, "对战图片元素")
-            if 对战中:
-                self.当前界面 = "对战中"
-                self.Tool.timelimit(timekey="当前界面", init=True)
-            else:
-                self.当前界面 = "未知"
+        if acce:
+            if self.当前界面 == "对战中":
+                if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    self.当前界面 = "未知"
+                else:
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    对战中 = True
+            elif self.当前界面 == "大厅中":
+                if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
+            elif self.当前界面 == "登录界面":
+                if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
+        #
+        对战中, self.图片.对战图片元素 = self.Tool.存在任一张图(self.图片.对战图片元素, "对战图片元素")
+        if 对战中:
+            self.当前界面 = "对战中"
+            self.Tool.timelimit(timekey="当前界面", init=True)
+        else:
+            self.当前界面 = "未知"
         #
         if 对战中:
             TimeECHO(f"{fun_name(1)}:正在对战")
@@ -2515,33 +2470,33 @@ class wzry_task:
                 return False
         return True
 
-    def 判断对战中_模拟战(self, 处理=False):
+    def 判断对战中_模拟战(self, 处理=False, acce=False):
         #
         if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
             return False
         #
-        对战中 = False
-        if self.当前界面 == "对战中_模拟战":
-            if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                self.当前界面 = "未知"
-            else:
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                对战中 = True
-        elif self.当前界面 == "大厅中":
-            if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
-        elif self.当前界面 == "登录界面":
-            if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
-                TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
-                return False
-        if not 对战中:
-            对战中, self.图片.对战图片元素_模拟战 = self.Tool.存在任一张图(self.图片.对战图片元素_模拟战, "对战图片元素_模拟战")
-            if 对战中:
-                self.当前界面 = "对战中_模拟战"
-                self.Tool.timelimit(timekey="当前界面", init=True)
-            else:
-                self.当前界面 = "未知"
+        if acce:
+            if self.当前界面 == "对战中_模拟战":
+                if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    self.当前界面 = "未知"
+                else:
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    对战中 = True
+            elif self.当前界面 == "大厅中":
+                if not self.Tool.timelimit(timekey="当前界面", limit=30, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
+            elif self.当前界面 == "登录界面":
+                if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
+                    TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
+                    return False
+        #
+        对战中, self.图片.对战图片元素_模拟战 = self.Tool.存在任一张图(self.图片.对战图片元素_模拟战, "对战图片元素_模拟战")
+        if 对战中:
+            self.当前界面 = "对战中_模拟战"
+            self.Tool.timelimit(timekey="当前界面", init=True)
+        else:
+            self.当前界面 = "未知"
         #
         if 对战中:
             TimeECHO(f"{fun_name(1)}:正在对战")
