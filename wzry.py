@@ -795,18 +795,17 @@ class wzry_task:
         if self.判断房间中():
             return True
         #
-        self.进入大厅()
+        # 调用之前都已经进入过大厅了, 这里仅做一个判断
+        if not self.判断大厅中(acce=times == 0):
+            self.进入大厅()
         if not self.check_run_status():
             return True
         #
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10, touch同步=True):
-            content = "单人进入人机匹配房间超时"
-            self.创建同步文件(content)
             return True
         #
         times = times+1
         #
-        # 前面已经进入大厅了, 这是不进行识别, 连续点击, 最好找不到再重来
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
@@ -1015,7 +1014,10 @@ class wzry_task:
                 return True
         if self.判断房间中():
             return True
-        self.进入大厅()
+        #
+        # 调用之前都已经进入过大厅了, 这里仅做一个判断
+        if not self.判断大厅中(acce=times == 0):
+            self.进入大厅()
         if not self.check_run_status():
             return True
         #
@@ -1023,15 +1025,6 @@ class wzry_task:
             return True
         #
         times = times + 1
-        #
-        if self.判断对战中():
-            self.结束人机匹配()
-        # 模拟战的房间很干净，不用处理
-        if self.判断房间中(处理=False):
-            return True
-        #
-        self.进入大厅()
-        TimeECHO("大厅中.开始进入模拟战房间")
         #
         任意位置继续 = Template(r"tpl1693660122898.png", record_pos=(0.001, 0.252), resolution=(960, 540))  # 多次
         任意位置继续2 = Template(r"tpl1693660165029.png", record_pos=(-0.001, 0.244), resolution=(960, 540))
