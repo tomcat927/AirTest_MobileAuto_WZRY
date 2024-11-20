@@ -1593,16 +1593,17 @@ class wzry_task:
         #
         if not self.Tool.existsTHENtouch(免费图标, "免费图标", savepos=False):
             self.Tool.touch_record_pos(免费图标.record_pos, self.移动端.resolution, f"商城.免费图标")
-        sleep(10)
+        sleep(20)
         #
         if not self.Tool.existsTHENtouch(免费领取, "免费领取", savepos=False):
             self.Tool.touch_record_pos(免费领取.record_pos, self.移动端.resolution, f"商城.免费领取")
         sleep(10)
         #
-        self.Tool.LoopTouch(确定购买, "确定购买")
+        # 这个只能点一次, 不然容易买到商品
+        self.Tool.existsTHENtouch(确定购买, "确定购买")
+        #
         self.关闭按钮()
         self.Tool.LoopTouch(返回, "返回")
-        self.确定按钮()
         #
         return True
 
