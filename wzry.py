@@ -707,8 +707,6 @@ class wzry_task:
             if not self.存在确定按钮():
                 存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
                 if not 存在:
-                    # 现在确定是大厅页面了, 点击一下屏幕中心, 确定链接也是正常的
-
                     return True
         return False
 
@@ -1299,17 +1297,17 @@ class wzry_task:
             self.活动礼包 = False
             self.祈愿礼包 = False
             self.玉镖夺魁签到 = False
-            self.每日任务礼包 = True
-            self.礼包功能_邮件礼包 = True
-            self.礼包功能_妲己礼物 = True
-            self.礼包功能_友情礼包 = True
-            self.友情礼包_积分夺宝 = True
-            self.友情礼包_皮肤碎片 = True
-            self.友情礼包_英雄碎片 = True
-            self.友情礼包_铭文碎片 = True
-            self.友情礼包_皮肤宝箱 = True
-            self.友情礼包_回城宝箱 = True
-            self.友情礼包_击败宝箱 = True
+            self.每日任务礼包 = False
+            self.礼包功能_邮件礼包 = False
+            self.礼包功能_妲己礼物 = False
+            self.礼包功能_友情礼包 = False
+            self.友情礼包_积分夺宝 = False
+            self.友情礼包_皮肤碎片 = False
+            self.友情礼包_英雄碎片 = False
+            self.友情礼包_铭文碎片 = False
+            self.友情礼包_皮肤宝箱 = False
+            self.友情礼包_回城宝箱 = False
+            self.友情礼包_击败宝箱 = False
             self.友情礼包_排位保护 = False
             self.礼包功能_回忆礼册 = False
             self.礼包功能_灵宝互动 = False
@@ -1353,7 +1351,9 @@ class wzry_task:
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
                 return
             self.APPOB.打开APP()
-            self.进入大厅()
+            #
+            if not self.判断大厅中(acce=False):
+                self.进入大厅()
             #
             if not self.check_run_status():
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
@@ -1388,7 +1388,8 @@ class wzry_task:
                 self.每日礼包_邮件礼包()
             if self.礼包功能_妲己礼物:
                 self.每日礼包_妲己礼物()
-            self.友情礼包()
+            if self.礼包功能_友情礼包:
+                self.友情礼包()
             if self.礼包功能_战队礼包:
                 if self.Tool.var_dict["运行参数.战队礼包"] < 2:
                     TimeECHO("战队礼包不再第一时间随着游戏更新，如果遇到问题，请自行调试。")
@@ -1402,9 +1403,8 @@ class wzry_task:
             if self.礼包功能_KPL礼包:
                 观赛时长 = self.Tool.var_dict["运行参数.KPL观赛时长"]
                 if 观赛时长 > 0:
-                    self.进入大厅()
                     TimeECHO("KPL礼包不再第一时间随着游戏更新，如果遇到问题，请自行调试。")
-                    self.KPL每日观赛(times=1, 观赛时长=观赛时长)
+                    self.KPL每日观赛(times=0, 观赛时长=观赛时长)
                     self.Tool.var_dict["运行参数.KPL观赛时长"] = 0
                 else:
                     TimeECHO("今日已完成KPL观赛礼包, 不再领取")
@@ -1413,9 +1413,20 @@ class wzry_task:
         #
         self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False)
 
-    def 战队礼包(self):
-        self.进入大厅()
+    def 战队礼包(self, times=0):
         #
+        if not self.check_run_status():
+            return True
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
+        if not self.check_run_status():
+            return True
+        #
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=3):
+            return True
+        times = times + 1
         # 战队礼包
         TimeECHO(f"战队礼包")
         战队入口 = Template(r"tpl1700403158264.png", record_pos=(0.067, 0.241), resolution=(960, 540))
@@ -1429,18 +1440,26 @@ class wzry_task:
         self.Tool.existsTHENtouch(战队赛已阅, "战队赛已阅")
         #
         sleep(10)
-        self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540)), "展开战队")
+        if not self.Tool.existsTHENtouch(Template(r"tpl1700403166845.png", record_pos=(0.306, 0.228), resolution=(960, 540)), "展开战队"):
+            TimeECHO("找不到展开战队, 可能没有加战队或者识别错误")
+            return self.战队礼包(times)
         sleep(10)
-        if not self.Tool.existsTHENtouch(Template(r"tpl1700403174640.png", record_pos=(0.079, 0.236), resolution=(960, 540)), "战队商店"):
-            TimeECHO("找不到战队商店, 可能没有加战队, 返回")
+        战队商店 = Template(r"tpl1700403174640.png", record_pos=(0.079, 0.236), resolution=(960, 540))
+        if not self.Tool.existsTHENtouch(战队商店, "战队商店"):
+            TimeECHO("找不到战队商店, 计算坐标")
+            self.Tool.touch_record_pos(record_pos=战队商店.record_pos, resolution=self.移动端.resolution, keystr="战队商店")
+        #
         sleep(10)
-        self.Tool.existsTHENtouch(Template(r"tpl1700403186636.png", record_pos=(0.158, -0.075), resolution=(960, 540), target_pos=8), "英雄碎片")
-        sleep(10)
-        self.Tool.existsTHENtouch(Template(r"tpl1700403207652.png", record_pos=(0.092, 0.142), resolution=(960, 540)), "领取")
-        sleep(10)
-        self.Tool.existsTHENtouch(Template(r"tpl1700403218837.png", record_pos=(0.098, 0.117), resolution=(960, 540)), "确定")
-        sleep(10)
-        return
+        if self.Tool.existsTHENtouch(Template(r"tpl1700403186636.png", record_pos=(0.158, -0.075), resolution=(960, 540), target_pos=8), "英雄碎片"):
+            sleep(10)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700403207652.png", record_pos=(0.092, 0.142), resolution=(960, 540)), "领取"):
+                sleep(10)
+            if self.Tool.existsTHENtouch(Template(r"tpl1700403218837.png", record_pos=(0.098, 0.117), resolution=(960, 540)), "确定"):
+                sleep(10)
+        #
+        返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
+        self.Tool.LoopTouch(返回, "返回")
+        return True
 
     def 回忆礼册(self, times=0):
         #
@@ -1449,7 +1468,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1462,7 +1484,6 @@ class wzry_task:
         #
         times = times+1
         #
-        self.进入大厅()
         if not self.Tool.existsTHENtouch(self.图片.大厅回忆礼册, "大厅回忆礼册", savepos=True):
             return self.回忆礼册(times)
         sleep(2)
@@ -1495,7 +1516,10 @@ class wzry_task:
     def 灵宝互动(self, times=0):
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1544,7 +1568,10 @@ class wzry_task:
         # 出现异常以及领取失败时返回 False
         if not self.check_run_status():
             return False
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return False
         #
@@ -1612,7 +1639,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1653,7 +1683,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1694,7 +1727,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1750,8 +1786,12 @@ class wzry_task:
         self.Tool.existsTHENtouch(Template(r"tpl1700803191090.png", record_pos=(0.372, -0.184), resolution=(960, 540)))
         return
 
-    def 友情礼包(self):
-        self.进入大厅()
+    def 友情礼包(self, times=0):
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
+        times = times + 1
         #
         # 友情礼包,虽然每次只领取了一个,但是每周/日领取了多次,一周内是可以领完上限的
         TimeECHO(f"友情礼包")
@@ -1853,7 +1893,10 @@ class wzry_task:
     def KPL每日观赛(self, times=0, 观赛时长=20*60):
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1894,9 +1937,20 @@ class wzry_task:
         # 开始领战令礼包
         if not self.Tool.existsTHENtouch(KPL战令入口, "KPL战令入口"):
             self.Tool.touch_record_pos(KPL战令入口.record_pos, self.移动端.resolution, f"KPL战令入口")
-        KPL战令任务 = Template(r"tpl1707398869726.png", record_pos=(-0.441, -0.158), resolution=(960, 540))
+        # KPL 很卡, 每一处都多等待
+        sleep(15)
+        #
+        一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.391, 0.224), resolution=(960, 540))
+        确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
+        if self.Tool.existsTHENtouch(一键领取, "KPL一键领取", savepos=False):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
+            sleep(5)
+        #
+        KPL战令任务 = Template(r"tpl1707398869726.png", record_pos=(-0.44, -0.143), resolution=(960, 540))
         if not self.Tool.existsTHENtouch(KPL战令任务, "KPL战令任务", savepos=True):
-            return
+            TimeECHO(f"没找到KPL战令任务, 计算点击")
+            self.Tool.touch_record_pos(KPL战令任务.record_pos, self.移动端.resolution, f"KPL战令任务")
+        sleep(15)
         KPL领取奖励 = Template(r"tpl1707398884057.png", record_pos=(0.359, -0.176), resolution=(960, 540))
         self.Tool.LoopTouch(KPL领取奖励, "KPL领取奖励", savepos=False)
         KPL战令返回 = Template(r"tpl1707399262936.png", record_pos=(-0.478, -0.267), resolution=(960, 540))
@@ -1908,7 +1962,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -1937,12 +1994,10 @@ class wzry_task:
         #
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
-        self.进入大厅()
         if not self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True):
             TimeECHO(f"未找到战令入口尝试计算坐标")
             self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
         sleep(15)
-
         #
         进入战令界面, 战令奖励界面 = self.Tool.存在任一张图(战令奖励界面, "战令奖励界面元素")
         进入任务界面 = False
@@ -1955,7 +2010,7 @@ class wzry_task:
             战令奖励界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
             进入任务界面, 战令奖励界面 = self.Tool.存在任一张图(战令任务界面, "战令任务界面界面元素")
         #
-        if not 进入战令界面 and times % 5 == 4:
+        if not 进入战令界面 and times > 3:
             TimeECHO(f"未检测到战令界面, 重新进入领任务礼包")
             if "战令入口" in self.Tool.var_dict.keys():
                 del self.Tool.var_dict["战令入口"]
@@ -1981,6 +2036,8 @@ class wzry_task:
             if exists(一键领取):
                 进入任务界面 = True
             sleep(1)
+            if self.判断大厅中(acce=False):
+                return self.每日礼包_每日任务(times=times)
         #
         if not 进入任务界面 and times % 5 == 4:
             TimeECHO(f"未检测到任务界面, 重新进入领任务礼包")
@@ -2040,7 +2097,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -2064,27 +2124,29 @@ class wzry_task:
         黄色礼物确定 = Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540))
         系统礼物关闭 = Template(r"tpl1699626801240.png", record_pos=(0.34, -0.205), resolution=(960, 540))
         下次再选 = Template(r"tpl1704542576626.png", record_pos=(-0.099, 0.182), resolution=(960, 540))
-
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
-        self.Tool.existsTHENtouch(邮件图标)
-        if not exists(好友邮件):
-            if not self.判断大厅中(acce=False):
-                self.进入大厅()
-            if self.Tool.existsTHENtouch(邮件图标, "邮件图标"):
-                sleep(10)
-            if not exists(好友邮件):
-                return self.每日礼包_邮件礼包(times)
         #
-        if self.Tool.existsTHENtouch(好友邮件):
-            self.Tool.existsTHENtouch(收到邮件, "收到邮件", savepos=False)
-            self.Tool.existsTHENtouch(快速领取, "快速领取", savepos=False)
-            # 缺少确定
+        if not self.Tool.existsTHENtouch(邮件图标, "邮件图标", savepos=True):
+            return self.每日礼包_邮件礼包(times)
+        sleep(5)
+        if not self.Tool.existsTHENtouch(好友邮件, "好友邮件", savepos=True):
+            return self.每日礼包_邮件礼包(times)
+        sleep(5)
+        if not self.Tool.existsTHENtouch(收到邮件, "收到邮件", savepos=False):
+            if times > 2:
+                for delstr in list(set(self.Tool.var_dict.keys()) & set(["邮件图标", "好友邮件"])):
+                    del self.Tool.var_dict[delstr]
+            return self.每日礼包_邮件礼包(times)
+        sleep(5)
+        #
+        # 好友邮件快速领取
+        if self.Tool.existsTHENtouch(快速领取, "快速领取", savepos=False):
             self.Tool.LoopTouch(下次吧, "下次吧", loop=10)
             self.Tool.existsTHENtouch(金币确定, "金币确定")
             self.Tool.existsTHENtouch(点击屏幕继续, "点击屏幕继续")
             self.Tool.existsTHENtouch(友情确定, "友情确定")
             #
-        if self.Tool.existsTHENtouch(系统邮件):
+        if self.Tool.existsTHENtouch(系统邮件, "系统邮件", savepos=False):
             sleep(5)
             self.Tool.LoopTouch(系统礼物关闭, "系统礼物关闭", loop=5)
             self.Tool.existsTHENtouch(系统快速领取, "系统快速领取", savepos=False)
@@ -2103,7 +2165,10 @@ class wzry_task:
                     TimeECHO("领邮件礼包超时.....")
                     return self.每日礼包_邮件礼包(times)
             self.Tool.LoopTouch(系统礼物确定, "系统礼物确定", loop=10)
-
+        else:
+            TimeECHO("没有找到系统邮件. 王者又更改界面了?")
+            return self.每日礼包_邮件礼包(times)
+        #
         self.Tool.LoopTouch(返回, "返回")
         return True
 
@@ -2112,7 +2177,10 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        self.进入大厅()
+        #
+        if times > 0 or not self.判断大厅中(acce=False):
+            self.进入大厅()
+        #
         if not self.check_run_status():
             return True
         #
@@ -2671,8 +2739,8 @@ class wzry_task:
         self.APPOB.关闭APP()
         self.移动端.关闭设备()
         return
-
     #
+
     def RUN(self):  # 程序入口
         self.新的一天 = False
         self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
