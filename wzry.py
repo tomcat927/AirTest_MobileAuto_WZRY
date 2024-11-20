@@ -482,12 +482,6 @@ class wzry_task:
         #
         if not self.check_run_status():
             return True
-        if times == 2:
-            # 有时候是软件卡住了
-            if not touch((1, 1)):
-                content = f"进入大厅: 无法触摸屏幕"
-                self.创建同步文件(content)
-                return True
         #
         # 检验程序是否启动
         if not self.APPOB.前台APP(0):
@@ -495,6 +489,13 @@ class wzry_task:
         # 界面识别
         if self.大厅严格判断():
             return True
+        else:
+            if times == 1:
+                # 有时候是软件卡住了
+                if not touch((1, 1)):
+                    content = f"进入大厅: 无法触摸屏幕"
+                    self.创建同步文件(content)
+                    return True
         #
         #
         # 下面是各种异常情况的逐一排查
@@ -513,7 +514,7 @@ class wzry_task:
                 处理对战 = True
             存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
             if 存在 or self.quick判断界面() in ["对战中", "对战中_模拟战", "战绩页面"]:
-                self.判断对战中(处理对战)
+                self.判断对战中(处理=处理对战)
                 self.结束人机匹配()
         #
         # 房间
@@ -570,7 +571,7 @@ class wzry_task:
                                        resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.登录界面开始游戏图标")
             检测到登录界面 = True
         #
-        if times == 2:
+        if times == 1:
             # 有时候是软件卡住了
             if not touch((1, 1)):
                 content = f"登录游戏: 无法触摸屏幕"
@@ -1157,7 +1158,7 @@ class wzry_task:
             加速对战 = False
             if self.触摸对战:
                 加速对战 = True
-            if self.判断对战中(加速对战):
+            if self.判断对战中(处理=加速对战):
                 sleep(30)
                 continue
             # 已返回房间或大厅
@@ -1228,9 +1229,9 @@ class wzry_task:
                 return
             点击屏幕继续 = Template(r"tpl1701229138066.png", record_pos=(-0.002, 0.226), resolution=(960, 540))
             self.Tool.existsTHENtouch(点击屏幕继续, "点击屏幕继续")
-            if self.判断对战中(False):
+            if self.判断对战中(处理=False):
                 sleeploop = 0
-                while self.判断对战中(True):  # 开始处理准备结束
+                while self.判断对战中(处理=True):  # 开始处理准备结束
                     sleep(10)
                     sleeploop = sleeploop+1
                     if not self.check_run_status():
@@ -2638,7 +2639,7 @@ class wzry_task:
             加速对战 = True
         if self.触摸对战 and "5v5" in self.对战模式:
             加速对战 = True
-        if self.判断对战中(加速对战):
+        if self.判断对战中(处理=加速对战):
             sleep(10)
         # 结束对战
         self.结束人机匹配()
