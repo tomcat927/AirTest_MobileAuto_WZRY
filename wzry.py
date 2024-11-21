@@ -124,6 +124,7 @@ class wzry_figure:
         self.展开英雄列表 = Template(r"tpl1689666324375.png", record_pos=(-0.297, -0.022), resolution=(960, 540))
         self.房间中的取消按钮图标 = []
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
+        self.房间中的取消匹配图标 = Template(r"tpl1732156694454.png", record_pos=(0.121, -0.263), resolution=(960, 540))
         #
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
@@ -167,7 +168,8 @@ class wzry_figure:
         self.钱袋子_模拟战 = Template(r"tpl1690546610171.png", record_pos=(0.391, 0.216), resolution=(960, 540))
         self.刷新金币_模拟战 = Template(r"tpl1690547053276.png", record_pos=(0.458, -0.045), resolution=(960, 540))
         self.关闭钱袋子_模拟战 = Template(r"tpl1690547457483.png", record_pos=(0.392, 0.216), resolution=(960, 540))
-        self.对战图片元素_模拟战 = [self.钱袋子_模拟战, self.刷新金币_模拟战, self.关闭钱袋子_模拟战]
+        self.对战图片元素_模拟战 = [self.钱袋子_模拟战, self.刷新金币_模拟战]
+        # self.关闭钱袋子_模拟战 不能用于识别模拟战状态, 因为确定匹配页面也有叉号
         self.对战图片元素_模拟战.append(Template(r"tpl1690546926096.png", record_pos=(-0.416, -0.076), resolution=(960, 540)))
         self.对战图片元素_模拟战.append(Template(r"tpl1690547491681.png", record_pos=(0.471, 0.165), resolution=(960, 540)))
         self.对战图片元素_模拟战.append(Template(r"tpl1690552290188.png", record_pos=(0.158, 0.089), resolution=(960, 540)))
@@ -1033,6 +1035,8 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
 
     def 进行人机匹配(self, times=0):
+        # 调用此函数之前, 已经进入过房间了,此处不再进行校验
+        #
         if not self.check_run_status():
             return True
         if times == 0:
@@ -1043,13 +1047,14 @@ class wzry_task:
             return True
         #
         times = times+1
-        self.APPOB.打开APP()
         #
         self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
         self.Tool.timelimit(timekey="未检测到确认匹配", limit=60*3, init=True)
         #
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
+        # 开始按钮的位置(房主)可以不断点击
+        # 房主的取消匹配在上方的叉号
         if self.房主:
             找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
             房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
@@ -1070,8 +1075,10 @@ class wzry_task:
         自己曾经确定过匹配 = False
         while True:
             if self.Tool.存在同步文件():
+                self.Tool.touch_record_pos(record_pos=self.图片.房间中的取消匹配图标.record_pos, resolution=self.移动端.resolution, keystr="房间中的取消匹配图标")
                 return True
             if self.Tool.timelimit(timekey="超时确认匹配", limit=60*8, init=False):
+                self.Tool.touch_record_pos(record_pos=self.图片.房间中的取消匹配图标.record_pos, resolution=self.移动端.resolution, keystr="房间中的取消匹配图标")
                 return self.创建同步文件("超时太久,退出匹配")
             # 每隔3分钟，点击一次确定/取消匹配按钮
             if self.Tool.timelimit(timekey="未检测到确认匹配", limit=60*3, init=False):
@@ -1085,7 +1092,7 @@ class wzry_task:
             if 自己曾经确定过匹配:
                 # 该界面用于判断是都匹配成功
                 if "模拟战" in self.对战模式:
-                    队友确认匹配 = self.判断对战中()
+                    队友确认匹配 = self.判断对战中(处理=False)
                 else:
                     队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
                 #
@@ -1098,7 +1105,9 @@ class wzry_task:
                     TimeECHO("等待队友确认匹配中.... 强行点击确定坐标")
                     self.Tool.touch_record_pos(self.图片.确定匹配按钮.record_pos, self.移动端.resolution, "确定匹配按钮")
                     自己曾经确定过匹配 = True
-        #
+        # 模拟战到此就结束了
+        if "模拟战" in self.对战模式:
+            return True
         # 选择英雄
         if self.选择英雄:
             self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
@@ -2400,12 +2409,12 @@ class wzry_task:
             return False
         #
         if "模拟战" in self.对战模式:
-            return self.判断对战中_模拟战(处理)
-        #
-        if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
-            return False
+            return self.判断对战中_模拟战(处理=处理, acce=acce)
         #
         if acce:
+            if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
+                return False
+            #
             if self.当前界面 == "对战中":
                 if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                     self.当前界面 = "未知"
@@ -2543,10 +2552,10 @@ class wzry_task:
 
     def 判断对战中_模拟战(self, 处理=False, acce=False):
         #
-        if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
-            return False
-        #
         if acce:
+            if self.quick判断界面() in ["大厅中", "房间中", "战绩页面"]:
+                return False
+            #
             if self.当前界面 == "对战中_模拟战":
                 if self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                     self.当前界面 = "未知"
@@ -2578,7 +2587,7 @@ class wzry_task:
         #
         # 开始处理加速对战
         self.Tool.timelimit(timekey="endgame", limit=60*20, init=True)
-        while self.判断对战中_模拟战(False):
+        while self.判断对战中_模拟战(处理=False):
             TimeECHO("处理对战中")
             self.Tool.LoopTouch(self.图片.钱袋子_模拟战, "LOOP钱袋子", loop=10)  # 点击结束后,应该变成X号
             self.Tool.LoopTouch(self.图片.刷新金币_模拟战, "LOOP刷新金币", loop=10)
@@ -3041,7 +3050,8 @@ class wzry_task:
             if not self.本循环参数.compare(self.上循环参数):
                 TimeECHO(f"上步计算参数不同,回到大厅重新初始化")
                 self.图片 = wzry_figure(Tool=self.Tool)
-                self.进入大厅()
+                if self.jinristep > 1 or not self.判断大厅中(acce=False):
+                    self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.当前状态 = "对战状态"
