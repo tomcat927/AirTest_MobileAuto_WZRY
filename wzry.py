@@ -313,6 +313,16 @@ class wzry_task:
         self.无法进行组队FILE = f"WZRY.无法进行组队FILE.txt"  # 各种原因导致的无法进行组队
         self.重新登录FILE = f"WZRY.{self.mynode}.重新登录FILE.txt"  # 账号下线时创建
         #
+        TimeECHO(f"  self.触摸对战FILE      =     {    self.触摸对战FILE     }")
+        TimeECHO(f"  self.调试文件FILE      =     {    self.调试文件FILE     }")
+        TimeECHO(f"  self.运行模式FILE      =     {    self.运行模式FILE     }")
+        TimeECHO(f"  self.无法进行组队FILE  =     {    self.无法进行组队FILE }")
+        TimeECHO(f"  self.重新登录FILE      =     {    self.重新登录FILE     }")
+        TimeECHO(f"  self.Tool.辅助同步文件 =     {    self.Tool.辅助同步文件 }")
+        TimeECHO(f"  self.Tool.独立同步文件 =     {    self.Tool.独立同步文件 }")
+        TimeECHO(f"  self.Tool.stopfile    =     {    self.Tool.stopfile     }")
+        TimeECHO(f"  self.重新登录FILE      =     {    self.重新登录FILE     }")
+        #
         self.初始化(init=True)
         # 自定义参数可以通过self.设置参数() 插入
         #
