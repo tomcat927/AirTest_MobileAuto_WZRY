@@ -730,14 +730,14 @@ class wzry_task:
                 self.Tool.existsTHENtouch(关闭配件不支持, "关闭配件不支持")
         #
         # 关闭图标
-        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, f"{funs_name(2)}关闭按钮", savepos=True)
+        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, f"{fun_name(1)}.{fun_name(2)}关闭按钮", savepos=True)
         if 存在:
-            self.Tool.existsTHENtouch(self.图片.王者登录关闭按钮[0], f"{funs_name(2)}关闭按钮", savepos=True)
+            self.Tool.existsTHENtouch(self.图片.王者登录关闭按钮[0], f"{fun_name(1)}.{fun_name(2)}关闭按钮", savepos=True)
             self.Tool.LoopTouch(self.图片.王者登录关闭按钮[0], "关闭按钮", loop=3, savepos=False)
         # 返回图标
-        存在, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, f"{funs_name(2)}返回按钮", savepos=True)
+        存在, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, f"{fun_name(1)}.{fun_name(2)}返回按钮", savepos=True)
         if 存在:
-            self.Tool.existsTHENtouch(self.图片.返回按钮[0], f"{funs_name(2)}返回按钮", savepos=True)
+            self.Tool.existsTHENtouch(self.图片.返回按钮[0], f"{fun_name(1)}.{fun_name(2)}返回按钮", savepos=True)
             self.Tool.LoopTouch(self.图片.返回按钮[0], "返回按钮", loop=3, savepos=False)
         # 确定图标
         self.确定按钮()
