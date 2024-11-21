@@ -521,7 +521,7 @@ class wzry_task:
         #
         # 房间
         返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
-        if times < 2 and self.判断房间中():
+        if times < 2 and self.判断房间中(处理=False):
             self.Tool.LoopTouch(返回图标, "返回图标", loop=3, savepos=False)
             self.确定按钮()
             self.Tool.LoopTouch(返回图标, "返回图标", loop=3, savepos=False)
@@ -730,14 +730,14 @@ class wzry_task:
                 self.Tool.existsTHENtouch(关闭配件不支持, "关闭配件不支持")
         #
         # 关闭图标
-        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, f"{funs_name(2)}关闭按钮", savepos=True)
+        存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, f"{fun_name(1)}.{fun_name(2)}关闭按钮", savepos=True)
         if 存在:
-            self.Tool.existsTHENtouch(self.图片.王者登录关闭按钮[0], f"{funs_name(2)}关闭按钮", savepos=True)
+            self.Tool.existsTHENtouch(self.图片.王者登录关闭按钮[0], f"{fun_name(1)}.{fun_name(2)}关闭按钮", savepos=True)
             self.Tool.LoopTouch(self.图片.王者登录关闭按钮[0], "关闭按钮", loop=3, savepos=False)
         # 返回图标
-        存在, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, f"{funs_name(2)}返回按钮", savepos=True)
+        存在, self.图片.返回按钮 = self.Tool.存在任一张图(self.图片.返回按钮, f"{fun_name(1)}.{fun_name(2)}返回按钮", savepos=True)
         if 存在:
-            self.Tool.existsTHENtouch(self.图片.返回按钮[0], f"{funs_name(2)}返回按钮", savepos=True)
+            self.Tool.existsTHENtouch(self.图片.返回按钮[0], f"{fun_name(1)}.{fun_name(2)}返回按钮", savepos=True)
             self.Tool.LoopTouch(self.图片.返回按钮[0], "返回按钮", loop=3, savepos=False)
         # 确定图标
         self.确定按钮()
@@ -788,7 +788,7 @@ class wzry_task:
         #
         # 务必保证 times == 0 时, 要么在大厅, 要么在房间
         if times == 0:
-            if self.判断房间中():
+            if self.判断房间中(处理=False):
                 return True
         else:
             self.进入大厅()
@@ -855,7 +855,7 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
         sleep(5)
         #
-        if self.判断房间中():
+        if self.判断房间中(处理=True):
             return True
         #
         禁赛提示 = Template(r"tpl1700128026288.png", record_pos=(-0.002, 0.115), resolution=(960, 540))
@@ -875,7 +875,7 @@ class wzry_task:
             if not self.check_run_status():
                 return True
         #
-        if self.判断房间中():
+        if self.判断房间中(处理=True):
             return True
         #
         if not self.青铜段位:  # 其他段位有次数限制
@@ -894,7 +894,7 @@ class wzry_task:
                     self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习")
                     return self.单人进入人机匹配房间(times)
         #
-        if self.判断房间中():
+        if self.判断房间中(处理=True):
             return True
         #
         return self.单人进入人机匹配房间(times)
@@ -913,7 +913,7 @@ class wzry_task:
             TimeErr("找不到进入排位赛")
             return self.单人进入人机匹配房间(times)
         #
-        if not self.判断房间中():
+        if not self.判断房间中(处理=True):
             # 有时候长时间不进去被禁赛了
             确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
             while self.Tool.existsTHENtouch(确定按钮, "不匹配被禁赛的确定按钮"):
@@ -1006,32 +1006,35 @@ class wzry_task:
         任意位置继续 = Template(r"tpl1693660122898.png", record_pos=(0.001, 0.252), resolution=(960, 540))  # 多次
         邀请好友 = Template(r"tpl1693660666527.png", record_pos=(0.408, 0.166), resolution=(960, 540))  # 就是进入房间
         # 新手要跳过教学局,自己先跳过
-        # 不要管是否识别成功，就是按，后面加一个检测，没有检测成果就是按失败了，再返回即可
-        if self.Tool.existsTHENtouch(self.图片.大厅娱乐模式, "大厅娱乐模式", savepos=True):
-            sleep(2)
+        # 娱乐模式的位置是确定的,可以强制点击
+        if not self.Tool.existsTHENtouch(self.图片.大厅娱乐模式, "大厅娱乐模式", savepos=True):
+            self.Tool.touch_record_pos(record_pos=self.图片.大厅娱乐模式.record_pos, resolution=self.移动端.resolution, keystr=f"强制点击大厅娱乐模式")
+        sleep(5)
+        # 不同账户的图标位置可能有区别, 这里更新一下位置
         self.Tool.存在任一张图([self.图片.王者模拟战图标], "王者模拟战图标", savepos=True)
-        if self.Tool.existsTHENtouch(self.图片.王者模拟战图标, "王者模拟战图标", savepos=True):
-            sleep(2)
-        while self.Tool.existsTHENtouch(任意位置继续, "任意位置继续"):
-            sleep(5)
+        if not self.Tool.existsTHENtouch(self.图片.王者模拟战图标, "王者模拟战图标", savepos=True):
+            self.Tool.touch_record_pos(record_pos=self.图片.王者模拟战图标.record_pos, resolution=self.移动端.resolution, keystr=f"强制点击王者模拟战图标")
+        sleep(5)
+        #
         # savepos 如果找到会自动替换上一次的字典
         存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
         if not 存在邀请好友:
-            for i in range(5):
+            for i in range(10):
                 self.Tool.touch_record_pos(record_pos=任意位置继续.record_pos, resolution=self.移动端.resolution, keystr=f"任意位置继续{i}")
-                sleep(5)
+                sleep(2)
                 存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
                 if 存在邀请好友:
                     break
-        #
-        if not 存在邀请好友:
             TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口, 将尝试历史入口")
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅娱乐模式", "王者模拟战图标"])):
-                del self.Tool.var_dict[delstr]
-        self.Tool.existsTHENtouch(邀请好友, "模拟战.邀请好友", savepos=True)
+        #
+        if not self.Tool.existsTHENtouch(邀请好友, "模拟战.邀请好友", savepos=True):
+            self.Tool.touch_record_pos(record_pos=邀请好友.record_pos, resolution=self.移动端.resolution, keystr=f"强制点击模拟战.邀请好友")
+        sleep(2)
         if self.判断房间中(处理=False):
             return True
         else:
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅娱乐模式", "王者模拟战图标", "模拟战.邀请好友"])):
+                del self.Tool.var_dict[delstr]
             return self.单人进入人机匹配房间(times)
 
     def 进行人机匹配(self, times=0):
@@ -1337,7 +1340,8 @@ class wzry_task:
         if not self.启动礼包功能:
             TimeECHO("默认关闭礼包功能，如需启动")
             TimeECHO(f"请添加 self.启动礼包功能=True 到 {self.运行模式FILE} ")
-            TimeECHO(f"如果遇到问题，请自行调试，礼包功能不再持续维护。")
+            return
+        #
         if 强制领取:
             self.Tool.timedict["领游戏礼包"] = 0
             self.Tool.timedict["领营地礼包"] = 0
