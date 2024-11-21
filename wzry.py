@@ -1340,7 +1340,8 @@ class wzry_task:
         if not self.启动礼包功能:
             TimeECHO("默认关闭礼包功能，如需启动")
             TimeECHO(f"请添加 self.启动礼包功能=True 到 {self.运行模式FILE} ")
-            TimeECHO(f"如果遇到问题，请自行调试，礼包功能不再持续维护。")
+            return
+        #
         if 强制领取:
             self.Tool.timedict["领游戏礼包"] = 0
             self.Tool.timedict["领营地礼包"] = 0
