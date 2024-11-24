@@ -17,6 +17,7 @@
 <div align="center">
 
 使用方法，请访问：[使用手册](https://wzry-doc.pages.dev)
+
 遇到问题，请在提问前查看：[常见问题](https://wzry-doc.pages.dev/qa/qa/)
 
 </div>
@@ -70,5 +71,7 @@
 
 ## Star
 
-<img alt="" src="https://api.star-history.com/svg?repos=cndaqiang/WZRY&type=Date" align="center" />
+<div align="center">
+<img alt="" src="https://api.star-history.com/svg?repos=cndaqiang/WZRY&type=Date" width="60%"/>
+</div>
 
