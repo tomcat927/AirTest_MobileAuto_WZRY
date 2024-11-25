@@ -6,17 +6,18 @@
   </h1>
 </div>
 
-<div align="center">
-  <a href="https://github.com/cndaqiang/WZRY/releases" style="text-decoration: none;">
+<p align="center">
+  <a href="https://github.com/cndaqiang/WZRY/releases">
     <img alt="WZRY Release" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?label=WZRY&style=flat-square&color=4096d8" />
   </a>
-  <a href="https://github.com/cndaqiang" style="text-decoration: none;">
+  <a href="https://github.com/cndaqiang">
     <img alt="Developer" src="https://img.shields.io/badge/cndaqiang-blue?label=Developer&style=flat-square&color=0077b5" />
   </a>
-  <a href="https://github.com/cndaqiang/WZRY/stargazers" style="text-decoration: none;">
+  <a href="https://github.com/cndaqiang/WZRY/stargazers">
     <img alt="Stars" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=f1c40f" />
   </a>
-</div>
+</p>
+
 
 
 
