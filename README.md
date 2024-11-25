@@ -5,13 +5,11 @@
     WZRY · 农活自动化助手
   </h1>
 </div>
-
-
-<p align="center">
-    <img alt="WZRY Release" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?label=WZRY&style=flat-square&color=ff7fbf" />
-    <img alt="Stars" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=66bb6a" />
-    <img alt="Developer" src="https://img.shields.io/badge/cndaqiang-blue?label=Developer&style=flat-square&color=4096d8" />
-</p>
+<div align="center">
+  <img alt="WZRY Release" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?label=WZRY&style=flat-square&color=ff7fbf" />
+  <img alt="Stars" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=66bb6a" />
+  <img alt="Developer" src="https://img.shields.io/badge/cndaqiang-blue?label=Developer&style=flat-square&color=4096d8" />
+</div>
 
 ## WZRY
 
