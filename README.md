@@ -5,25 +5,14 @@
     WZRY · 农活自动化助手
   </h1>
 </div>
-<br/>
-
 <div align="center">
-  <img alt="" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?style=flat-square&color=4096d8" />
-  <img alt="" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=f18cb9" />
-  <img alt="" src="https://img.shields.io/github/downloads/cndaqiang/WZRY/total?style=flat-square&color=4096d8" />
+  <img alt="WZRY Release" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?label=WZRY&style=flat-square&color=ff7fbf" />
+  <img alt="Stars" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=66bb6a" />
+  <img alt="Developer" src="https://img.shields.io/badge/cndaqiang-blue?label=Developer&style=flat-square&color=4096d8" />
 </div>
-
-<br/>
-<div align="center">
-
-使用方法，请访问：[使用手册](https://wzry-doc.pages.dev)
-
-遇到问题，请在提问前查看：[常见问题](https://wzry-doc.pages.dev/qa/qa/)
-
-</div>
-
 
 ## WZRY
+
 [WZRY](https://github.com/cndaqiang/WZRY)是基于[airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto)开发的王者荣耀农活自动化免费开源脚本. 
 
 
@@ -65,13 +54,13 @@
 * 商城每日免费钻石碎片随机礼包
 
 ## 致谢
-* [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)
-* [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)
-* [Airtest Project](https://github.com/AirtestProject)
+- *本项目的 [图标](http://wzry-doc.pages.dev/wzry.favicon.png) 由 [Cloudiiink](https://github.com/Cloudiiink) 设计并制作，版权归其所有。*  
+  特别感谢 Cloudiiink 的精心创作！  
 
-## Star
+- 灵感和支持来自以下项目：  
+  - [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)  
+  - [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)  
+  - [Airtest Project](https://github.com/AirtestProject)
 
-<div align="center">
-<img alt="" src="https://api.star-history.com/svg?repos=cndaqiang/WZRY&type=Date" width="60%"/>
-</div>
+- 感谢所有提问 issue 和为本项目打星的用户！
 
