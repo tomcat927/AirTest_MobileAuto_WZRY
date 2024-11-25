@@ -8,9 +8,9 @@
 <br/>
 
 <div align="center">
-  <img alt="" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?style=flat-square&color=4096d8" />
-  <img alt="" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=f18cb9" />
-  <img alt="" src="https://img.shields.io/github/downloads/cndaqiang/WZRY/total?style=flat-square&color=4096d8" />
+  <img alt="" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?label=WZRY&style=flat-square&color=4096d8" />
+  <img alt="" src="https://img.shields.io/pypi/v/airtest-mobileauto?label=airtest-mobileauto&style=flat-square&color=f18cb9" />
+  <img alt="" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=4096d8" />
 </div>
 
 <br/>
