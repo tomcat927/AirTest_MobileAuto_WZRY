@@ -678,7 +678,7 @@ class wzry_task:
                 return True
         else:
             # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
-            self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
+            self.Tool.touch_record_pos(record_pos=(1, 1), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
             sleep(10)
         #
         # ..................................................................................
