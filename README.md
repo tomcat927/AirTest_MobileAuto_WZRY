@@ -6,9 +6,15 @@
   </h1>
 </div>
 <div align="center">
-  <img alt="WZRY Release" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?label=WZRY&style=flat-square&color=ff7fbf" />
-  <img alt="Stars" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=66bb6a" />
-  <img alt="Developer" src="https://img.shields.io/badge/cndaqiang-blue?label=Developer&style=flat-square&color=4096d8" />
+  <img alt="WZRY Release" src="https://img.shields.io/github/v/release/cndaqiang/WZRY?style=flat-square&color=ff7fbf&label=WZRY" />
+  <img alt="Stars" src="https://img.shields.io/github/stars/cndaqiang/WZRY?style=flat-square&color=66bb6a&label=Stars" />
+  <img alt="Developer" src="https://img.shields.io/badge/cndaqiang-blue?style=flat-square&color=4096d8&label=Developer" />
+</div>
+
+<div align="center">
+使用方法, 请访问: <a href="https://wzry-doc.pages.dev">使用手册</a>.
+<br/>
+遇到问题, 请在提问前查看: <a href="https://wzry-doc.pages.dev/qa/qa/">常见问题</a>.
 </div>
 
 ## WZRY
