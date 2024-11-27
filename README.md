@@ -60,7 +60,7 @@
 * 商城每日免费钻石碎片随机礼包
 
 ## 致谢
-- * *[Cloudiiink](https://github.com/Cloudiiink) 正在设计制作全新的项目图标，版权归其所有。*  
+- *[Cloudiiink](https://github.com/Cloudiiink) 正在设计制作全新的项目图标，版权归其所有。*  
   特别感谢 Cloudiiink 的精心创作！  
 
 - 灵感和支持来自以下项目：  
