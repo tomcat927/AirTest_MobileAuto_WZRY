@@ -395,6 +395,28 @@ class wzry_task:
             setattr(self, key, value)
         self.构建循环参数(self.本循环参数)
 
+    # 同步对战参数
+    # 主要是在运行出故障后, 虽然能同步，但是运行参数可能并不统一
+    # 这里进行统一
+    def 广播参数(self):
+        if self.totalnode_bak <= 1:
+            return True
+        if self.Tool.存在同步文件():
+            return True
+        # 仅在组队状态/ self.totalnode_bak > 1 才调用本函数
+        para = [self.runstep, self.jinristep, self.限时组队时间, self.对战模式]
+        para = self.Tool.bcastvar(self.mynode, self.totalnode, var=para, name="runstep")
+        self.runstep = para[0]
+        self.jinristep = para[1]
+        self.限时组队时间 = para[2]
+        self.对战模式 = para[3]
+        #
+        para = [self.标准模式, self.青铜段位]
+        para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="duizhan")
+        self.标准模式 = all(ipara for ipara in para[0])
+        self.青铜段位 = any(ipara for ipara in para[1])
+        #
+
     # 保存运行信息
     def 构建循环参数(self, runinfo=None):
         if runinfo == None:
@@ -2766,7 +2788,7 @@ class wzry_task:
 
     def RUN(self):  # 程序入口
         self.新的一天 = False
-        self.runstep = self.Tool.bcastvar(self.mynode, self.totalnode, var=self.runstep, name="runstep")
+        self.广播参数()
         #
         while True:
             self.当前状态 = "状态检查"
@@ -2848,6 +2870,9 @@ class wzry_task:
                         # 在创建self.Tool.辅助同步文件时，会自动创建self.Tool.独立同步文件
                         # 所以删除self.Tool.辅助同步文件没有问题
                         self.Tool.removefile(self.Tool.辅助同步文件)
+                    else:
+                        # 避免同步时间不用进程的runstep等参数不同, 导致下面组队情况的差异
+                        self.广播参数()
                 else:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
@@ -3010,18 +3035,7 @@ class wzry_task:
             self.房主 = self.mynode == 0 or self.totalnode == 1
             if self.组队模式:
                 TimeECHO("组队模式, 广播变量中....")
-                para = [self.runstep, self.jinristep, self.限时组队时间, self.对战模式]
-                para = self.Tool.bcastvar(self.mynode, self.totalnode, var=para, name="runstep")
-                self.runstep = para[0]
-                self.jinristep = para[1]
-                self.限时组队时间 = para[2]
-                self.对战模式 = para[3]
-                #
-                para = [self.标准模式, self.青铜段位]
-                para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="duizhan")
-                self.标准模式 = all(ipara for ipara in para[0])
-                self.青铜段位 = any(ipara for ipara in para[1])
-                #
+                self.广播参数()
                 self.Tool.barriernode(self.mynode, self.totalnode, "准备进入战斗循环")
                 #
             self.Tool.var_dict["运行参数.runstep"] = self.runstep
