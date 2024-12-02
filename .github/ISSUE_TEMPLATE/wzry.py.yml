@@ -44,6 +44,16 @@ body:
         airtest-mobileauto 2.0.13
   - type: textarea
     attributes:
+      label: "简单描述你的问题"
+      description: "请在此处描述你遇到的问题或者对代码疑问"
+      value: |
+        [此处支持: 填写文本、上传文件、粘贴截图]
+        # 例如
+        运行之后,很快接黑屏了,我怎么查看运行报错的信息
+    validations:
+      required: true
+  - type: textarea
+    attributes:
       label: "配置文件: config.win.yaml"
       description: "请在此处填写或上传你的配置文件, 亦可截图粘贴到此处"
       value: |
