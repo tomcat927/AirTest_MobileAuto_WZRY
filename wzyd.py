@@ -687,7 +687,15 @@ class wzyd_libao:
             TimeECHO(":没找到营地币")
             return self.营地币兑换碎片(times)
         touch(奖励位置)
-        self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
+        #
+        确定兑换 = Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960))
+        if not self.Tool.existsTHENtouch(确定兑换):
+            self.Tool.touch_record_pos(确定兑换.record_pos, self.移动端.resolution, f"确定兑换")
+        #
+        再次确定兑换 = Template(r"tpl1733194097335.png", record_pos=(0.007, 0.748), resolution=(540, 960))
+        if not self.Tool.existsTHENtouch(再次确定兑换):
+            self.Tool.touch_record_pos(再次确定兑换.record_pos, self.移动端.resolution, f"再次确定兑换")
+        #
         self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
 
     def looprun(self, times=0):
