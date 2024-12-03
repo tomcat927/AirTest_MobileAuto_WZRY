@@ -47,7 +47,7 @@ class wzyd_libao:
         self.APPOB = appOB(APPID=self.APPID, big=False, device=self.移动端)
         #
         self.营地初始化FILE = f"{self.prefix}.初始化.txt"
-        self.内置循环 = False # 是否每日循环执行此脚本
+        self.内置循环 = False  # 是否每日循环执行此脚本
         self.营地需要登录FILE = self.prefix+f".需要登录.txt"
         #
         self.timelimit = 60*60*0.5
@@ -69,10 +69,11 @@ class wzyd_libao:
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
         self.营地大厅元素 = []
-        self.营地大厅元素.append(Template(r"tpl1708393295383.png", record_pos=(0.011, -0.8), resolution=(540, 960)))
-        self.营地大厅元素.append(self.个人界面图标)
-        self.营地大厅元素.append(self.游戏界面图标)
-        self.营地大厅元素.append(self.每日福利图标)
+        # 不用添加底部所有的图标, 活动时肯定全部改变, 多添加一些特色的图标
+        self.营地大厅元素.append(self.社区界面图标)
+        self.营地大厅元素.append(self.赛事入口)
+
+        #
         self.营地登录元素 = []
         self.营地登录元素.append(Template(r"tpl1708393355383.png", record_pos=(-0.004, 0.524), resolution=(540, 960)))
         self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
@@ -91,9 +92,9 @@ class wzyd_libao:
 
     def 判断营地大厅中(self):
         #
-        self.营地大厅元素.append(self.个人界面图标)
-        self.营地大厅元素.append(self.游戏界面图标)
-        self.营地大厅元素.append(self.每日福利图标)
+        # 不用添加底部所有的图标, 活动时肯定全部改变
+        self.营地大厅元素.append(self.社区界面图标)
+        self.营地大厅元素.append(self.赛事入口)
         存在, self.营地大厅元素 = self.Tool.存在任一张图(self.营地大厅元素, "营地大厅元素")
         return 存在
     #
@@ -119,9 +120,11 @@ class wzyd_libao:
             return False
         #
         # 打开APP
-        if not self.APPOB.重启APP(10):
+        if not self.APPOB.前台APP(2):
             TimeECHO(":营地无法打开,返回")
             self.APPOB.关闭APP()
+            if 初始化检查:
+                return True
             return False
         sleep(20)  # 等待营地打开
         run_class_command(self=self, command=self.Tool.readfile(self.营地初始化FILE))
@@ -133,14 +136,24 @@ class wzyd_libao:
             self.APPOB.关闭APP()
             return False
         # 这里很容易出问题，主页的图标变来变去
+        # MuMu 模拟器营地居然也闪退
         if not self.判断营地大厅中():
             TimeECHO(":营地未知原因没能进入大厅,再次尝试")
-            self.APPOB.重启APP(40)
-            if not self.判断营地大厅中():
+            self.APPOB.关闭APP()
+            if not self.APPOB.前台APP(2):
+                TimeECHO(":营地无法打开,返回")
+                self.APPOB.关闭APP()
+                if 初始化检查:
+                    return True
+                return False
+            #
+            # 说明可以启动, 此时没有登录元素就算是成功了吧
+            if self.判断营地登录中():
+                TimeECHO(":检测到营地登录界面,不领取礼包")
                 self.Tool.touchfile(self.营地需要登录FILE)
                 self.APPOB.关闭APP()
-                self.Tool.timedict["检测营地登录"] = 0  # 下次继续检查
                 return False
+
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
@@ -214,6 +227,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地任务_观看赛事(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.赛事入口, "赛事入口", savepos=True)
         去直播间 = Template(r"tpl1717046024359.png", record_pos=(0.033, 0.119), resolution=(540, 960))
@@ -250,6 +267,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地任务_圈子签到(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.社区界面图标, "社区界面图标", savepos=True)
         sleep(10)
@@ -301,6 +322,9 @@ class wzyd_libao:
             if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
                 TimeECHO(f"{keystr}{times}超时退出")
                 return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地任务_浏览资讯(times)
         #
         TimeECHO(f"{keystr}{times}")
         self.APPOB.重启APP(10)
@@ -384,6 +408,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地战令经验(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.游戏界面图标, "游戏界面图标", savepos=True)
         sleep(5)
@@ -470,6 +498,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.体验服礼物(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.游戏界面图标, "游戏界面图标", savepos=True)
         sleep(5)
@@ -569,6 +601,10 @@ class wzyd_libao:
                 return False
         if times > 5:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.每日签到任务(times)
+        #
         # 每日签到
         self.APPOB.重启APP(10)
         sleep(10)
@@ -611,6 +647,10 @@ class wzyd_libao:
         if times > 10:
             return False
         self.APPOB.重启APP(10)
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地币兑换碎片(times)
+        #
         sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, "个人界面")
         sleep(5)
