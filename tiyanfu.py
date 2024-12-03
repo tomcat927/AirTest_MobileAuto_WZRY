@@ -52,7 +52,7 @@ class tiyanfu():
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         #
         self.体验服初始化FILE = f"WZRY.ce.{self.mynode}.临时初始化.txt"
-        self.内置循环 = False # 是否每日循环执行此脚本
+        self.内置循环 = False  # 是否每日循环执行此脚本
         #
         self.timelimit = 60*60*2.0
         # 更新时间
