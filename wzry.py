@@ -12,12 +12,12 @@ import os
 import traceback
 
 try:
-    from airtest_mobileauto.control import *
+    from airtest_mobileauto import *
 except ImportError:
     traceback.print_exc()
     print("模块[airtest_mobileauto]导入不存在, 请安装airtest_mobileauto")
     print("python -m pip install airtest_mobileauto --upgrade")
-    from airtest_mobileauto.control import *
+    from airtest_mobileauto import *
 
 
 class wzry_runinfo:

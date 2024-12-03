@@ -11,7 +11,7 @@
 # What   : 王者营地的礼包         #
 ##################################
 
-from airtest_mobileauto.control import *
+from airtest_mobileauto import *
 
 
 class wzyd_libao:
