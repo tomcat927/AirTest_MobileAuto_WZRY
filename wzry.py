@@ -587,7 +587,6 @@ class wzry_task:
             return True
         #
         if times == 0:
-            self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
             self.Tool.removefile(self.重新登录FILE)
         #
         times = times+1
@@ -623,9 +622,16 @@ class wzry_task:
         #
         # 更新公告
         更新公告 = Template(r"tpl1692946575591.png", record_pos=(0.103, -0.235), resolution=(960, 540), threshold=0.9)
+        self.Tool.timelimit(timekey="登录游戏>更新公告", limit=60*5, init=True)
         if exists(更新公告):
             检测到登录界面 = False
             for igengxin in np.arange(30):
+                if self.Tool.timelimit(timekey="登录游戏>更新公告", limit=60*5, init=False):
+                    if not touch((1, 1)):
+                        content = f"登录游戏>更新公告: 无法触摸屏幕"
+                        self.创建同步文件(content)
+                        break
+                #
                 TimeECHO("更新中%d" % (igengxin))
                 关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
                 金色确定 = Template(r"tpl1692946738054.png", record_pos=(-0.002, 0.116), resolution=(960, 540), threshold=0.9)
