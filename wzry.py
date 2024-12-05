@@ -1395,8 +1395,27 @@ class wzry_task:
         #
         # 王者APP礼包
         self.王者礼包()
+    #
+
+    def 王者礼包异常处理(self):
+        # 礼物过程中出现异常的处理
+        if os.path.exists(self.重新登录FILE):
+            return False
+        #
+        if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件) and not self.path.exists(self.无法进行组队FILE):
+            return False
+        elif self.Tool.存在同步文件(self.Tool.独立同步文件):
+            self.移动端.重启重连设备(10)
+            self.登录游戏()
+            return True
+        #
+        # 正常情况
+        return True
 
     def 王者礼包(self):
+        # ........................................................
+        if not self.王者礼包异常处理():
+            return True
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             if not self.check_run_status():
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
@@ -1425,6 +1444,10 @@ class wzry_task:
                 self.活动入口()
             if self.祈愿礼包:
                 self.祈愿入口()
+            # ........................................................
+            if not self.王者礼包异常处理():
+                return True
+            #
             # 以前的活动
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
@@ -1432,8 +1455,10 @@ class wzry_task:
                 TimeECHO("暂时不进行玉镖夺魁")
             if self.礼包功能_回忆礼册:
                 self.回忆礼册()
-            if self.礼包功能_灵宝互动:
-                self.灵宝互动()
+            # ........................................................
+            if not self.王者礼包异常处理():
+                return True
+            #
             # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
             if self.礼包功能_邮件礼包:
                 self.每日礼包_邮件礼包()
@@ -1448,7 +1473,8 @@ class wzry_task:
                     self.Tool.var_dict["运行参数.战队礼包"] = self.Tool.var_dict["运行参数.战队礼包"] + 1
                 else:
                     TimeECHO(f"战队礼包领取次数达到2, 不再继续领取。")
-            if self.Tool.存在同步文件():
+            # ........................................................
+            if not self.王者礼包异常处理():
                 return True
             #
             if self.礼包功能_KPL礼包:
@@ -1459,6 +1485,10 @@ class wzry_task:
                     self.Tool.var_dict["运行参数.KPL观赛时长"] = 0
                 else:
                     TimeECHO("今日已完成KPL观赛礼包, 不再领取")
+            #
+            # 灵宝礼包页面特别复杂, 无法很好的回到大厅,在最后领取
+            if self.礼包功能_灵宝互动:
+                self.灵宝互动()
         else:
             TimeECHO("时间太短,暂时不领取游戏礼包")
         #
