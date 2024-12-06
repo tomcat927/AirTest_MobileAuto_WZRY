@@ -2062,114 +2062,88 @@ class wzry_task:
         战令奖励界面 = []
         战令奖励界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
         战令奖励界面.append(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
-        任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
-        任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
         确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
+        # 精细位置
+        任务 = Template(r"tpl1703755622899.png", record_pos=(-0.444, -0.111), resolution=(960, 540))
         # 正常每日礼包
+        # 这里的record_pos是我精细截取的位置, 即使识别失败, 也可以直接touch
         一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.391, 0.224), resolution=(960, 540))
-        # 新图标
-        今日活跃 = Template(r"tpl1703758748236.png", record_pos=(-0.239, 0.233), resolution=(960, 540))
-        本周活跃1 = Template(r"tpl1703758755430.png", record_pos=(-0.075, 0.232), resolution=(960, 540))
-        本周活跃2 = Template(r"tpl1703758760425.png", record_pos=(-0.015, 0.232), resolution=(960, 540))
+        今日活跃 = Template(r"tpl1703758748236.png", record_pos=(-0.248, 0.222), resolution=(960, 540))
+        本周活跃1 = Template(r"tpl1703758755430.png", record_pos=(-0.084, 0.229), resolution=(960, 540))
+        本周活跃2 = Template(r"tpl1703758760425.png", record_pos=(-0.017, 0.228), resolution=(960, 540))
         战令任务界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
         #
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
         if not self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True):
-            TimeECHO(f"未找到战令入口尝试计算坐标")
+            TimeECHO(f"未找到战令入口.尝试计算坐标")
             self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
         sleep(15)
         #
-        进入战令界面, 战令奖励界面 = self.Tool.存在任一张图(战令奖励界面, "战令奖励界面元素")
-        进入任务界面 = False
-        if not 进入战令界面:
-            self.当前界面 = "未知"
-            TimeECHO("判断进入战令界面失败， 尝试进入任务界面进行再次判断")
-            sleep(10)
-            if not self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True):
-                self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
-            战令奖励界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
-            进入任务界面, 战令奖励界面 = self.Tool.存在任一张图(战令任务界面, "战令任务界面界面元素")
-        #
-        if not 进入战令界面 and times > 3:
-            TimeECHO(f"未检测到战令界面, 重新进入领任务礼包")
-            if "战令入口" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["战令入口"]
-            return self.每日礼包_每日任务(times=times)
-        #
-        #
-        for i in range(10):  # 下面的循环touch很费时，总循环不用很久
-            if 进入任务界面:
-                break
-            self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True)
-            if i > 2:
-                TimeECHO(f"[{i}]战令页面更新了，你需要自己截图更新图片资源了")
-                TimeECHO(f"本程序会尝试寻找一下位置（仅适用于16:9屏幕），但不保证成功")
-                for j in range(10):
-                    record_pos = (-0.445, -0.03-j/100)
-                    self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
-                    if exists(一键领取):
-                        TimeECHO(f"更新(战令的每日任务)坐标")
-                        self.Tool.cal_record_pos(record_pos, self.移动端.resolution, f"战令的每日任务", savepos=True)
-                        break
-            if exists(任务列表):
-                进入任务界面 = True
-            if exists(一键领取):
-                进入任务界面 = True
-            sleep(1)
+        if self.判断大厅中(acce=False):
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口"])):
+                del self.Tool.var_dict[delstr]
+            #
+            TimeECHO("进入战令界面失败，仍在大厅中, 计算点击战令入口")
+            self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
+            sleep(15)
             if self.判断大厅中(acce=False):
+                TimeECHO("再次进入战令界面失败，仍在大厅中, 异常无法解决")
                 return self.每日礼包_每日任务(times=times)
         #
-        if not 进入任务界面 and times % 5 == 4:
-            TimeECHO(f"未检测到任务界面, 重新进入领任务礼包")
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口", "战令的每日任务"])):
+        # 开始尝试进入任务界面, 后面均采用精确坐标进行touch
+        进入任务界面 = False
+        for i in range(10):
+            self.Tool.touch_record_pos(任务.record_pos, self.移动端.resolution, "战令的每日任务")
+            sleep(10)
+            战令奖励界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
+            进入任务界面, 战令奖励界面 = self.Tool.存在任一张图(战令任务界面, "战令任务界面界面元素")
+            if 进入任务界面:
+                break
+        #
+        if not 进入任务界面:
+            TimeECHO(f"未检测到战令任务界面, 重新进入领任务礼包")
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口"])):
                 del self.Tool.var_dict[delstr]
             return self.每日礼包_每日任务(times=times-1)
         #
-        # 开始正式领取
-        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
+        # 开始正式领取, 找不要位置就精细点击坐标
+        活跃礼包 = {"一键领取": 一键领取, "今日活跃": 今日活跃, "本周活跃1": 本周活跃1, "本周活跃2": 本周活跃2}
+        for keystr in 活跃礼包.keys():
+            if not self.Tool.existsTHENtouch(活跃礼包[keystr], keystr):
+                self.Tool.touch_record_pos(record_pos=活跃礼包[keystr].record_pos, resolution=self.移动端.resolution, keystr=keystr)
+            self.Tool.LoopTouch(确定按钮, "确定按钮")
             sleep(5)
-        # 这几个活跃，暂时没有找到位置，不确定是没发光的原因，还是图标变化
-        # 这是使用savepos，下次换了新的领取位置记得清除这些dict
-        if self.Tool.existsTHENtouch(今日活跃, "今日活跃", savepos=True):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1", savepos=True):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃2, "本周活跃2", savepos=True):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        #
         self.Tool.LoopTouch(确定按钮, "确定按钮")
-        self.关闭按钮()
-        self.确定按钮()
         #
-        # 新赛季增加的领取入口
+        # 若之后出现新的弹窗, 可能需要开启这两个注释, 并插入到后面的间隔中
+        # self.关闭按钮()
+        # self.确定按钮()
+        #
+        # 新赛季增加的领取入口,全部采用精确坐标, 不再识别
         本周任务 = Template(r"tpl1703755716888.png", record_pos=(-0.175, -0.192), resolution=(960, 540))
         本周签到 = Template(r"tpl1703755733895.png", record_pos=(0.244, 0.228), resolution=(960, 540))
         确定签到 = Template(r"tpl1703755744366.png", record_pos=(-0.001, 0.165), resolution=(960, 540))
-        if self.Tool.existsTHENtouch(本周任务, "本周任务礼包", savepos=True):
+        # 本周任务
+        self.Tool.touch_record_pos(record_pos=本周任务.record_pos, resolution=self.移动端.resolution, keystr="本周任务礼包")
+        sleep(5)
+        if self.Tool.existsTHENtouch(本周签到, "本周战令签到", savepos=False):
+            self.Tool.LoopTouch(确定签到, "确定签到战令")
+        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
-            if self.Tool.existsTHENtouch(本周签到, "本周战令签到", savepos=False):
-                self.Tool.LoopTouch(确定签到, "确定签到战令")
-            if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-                self.Tool.existsTHENtouch(确定按钮, "确定")
-                sleep(5)
-            self.Tool.LoopTouch(确定按钮, "确定按钮")
-            self.关闭按钮()
-            self.确定按钮()
+        self.Tool.LoopTouch(确定按钮, "确定按钮")
+        # 本期任务
         本期任务 = Template(r"tpl1703755722682.png", record_pos=(-0.068, -0.192), resolution=(960, 540))
-        if self.Tool.existsTHENtouch(本期任务, "本期任务礼包", savepos=True):
+        self.Tool.touch_record_pos(record_pos=本期任务.record_pos, resolution=self.移动端.resolution, keystr="本期任务礼包")
+        sleep(5)
+        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
-            if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-                self.Tool.existsTHENtouch(确定按钮, "确定")
-                sleep(5)
-            self.Tool.LoopTouch(确定按钮, "确定按钮")
-            self.关闭按钮()
-            self.确定按钮()
+        self.Tool.LoopTouch(确定按钮, "确定按钮")
         #
+        self.关闭按钮()
+        self.确定按钮()
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
         return True
