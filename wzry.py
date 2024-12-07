@@ -2887,8 +2887,13 @@ class wzry_task:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
                 # 重置完成
-                if not self.组队模式 and "健康系统" in content and self.外置礼包_王者营地:
-                    self.每日礼包_王者营地()
+                if not self.组队模式:
+                    if "健康系统" in content:
+                        if self.外置礼包_王者营地:
+                            self.每日礼包_王者营地()
+                        else:
+                            TimeECHO(f"健康系统导致的同步, sleep 5 min 再继续执行")
+                            sleep(5*60)
                 #
                 # 检测账号登录状况
                 if os.path.exists(self.重新登录FILE):
