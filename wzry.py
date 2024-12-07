@@ -412,9 +412,9 @@ class wzry_task:
         self.对战模式 = para[3]
         #
         para = [self.标准模式, self.青铜段位]
-        para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="duizhan")
-        self.标准模式 = all(ipara for ipara in para[0])
-        self.青铜段位 = any(ipara for ipara in para[1])
+        para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="广播对战参数")
+        self.标准模式 = all(ipara[0] for ipara in para)
+        self.青铜段位 = any(ipara[1] for ipara in para)
         #
 
     # 保存运行信息
