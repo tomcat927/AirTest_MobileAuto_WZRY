@@ -3,7 +3,7 @@
 
 ##################################
 # Author : cndaqiang             #
-# Update : 2024-07-27            #
+# Update : 2024-12-08            #
 # Build  : 2023-11-10            #
 # What   : WZRY                  #
 ##################################
@@ -15,9 +15,10 @@ try:
     from airtest_mobileauto import *
 except ImportError:
     traceback.print_exc()
-    print("模块[airtest_mobileauto]导入不存在, 请安装airtest_mobileauto")
+    print("模块 [airtest_mobileauto] 导入不存在，请安装 airtest_mobileauto")
+    print("运行以下命令安装：")
     print("python -m pip install airtest_mobileauto --upgrade")
-    from airtest_mobileauto import *
+    raise ImportError("模块 [airtest_mobileauto] 导入失败")
 
 
 class wzry_runinfo:
@@ -80,6 +81,13 @@ class wzry_figure:
     # 方便更新,
     # 以及用于统一更新图片传递给所有进程
     def __init__(self, Tool=None):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         self.Tool = DQWheel() if Tool == None else Tool
         # 一些图库, 后期使用图片更新
         self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
@@ -251,12 +259,14 @@ class wzry_figure:
 
 
 class wzry_task:
-    # 备注
-    # 新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
-    # 需要传递中文时,由于精简后无法输入中文,在shell中建
-    # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
-
     def __init__(self):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         # device
         self.mynode = Settings.mynode
         self.totalnode = Settings.totalnode
@@ -274,7 +284,7 @@ class wzry_task:
         # 保存字典，计算参数的文件
         self.dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
+        dictreso = os.path.join(assets_dir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(self.dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=self.dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -2279,7 +2289,12 @@ class wzry_task:
         if self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
             TimeECHO(f"{fun_name(1)}")
             self.APPOB.关闭APP()
-            from wzyd import wzyd_libao
+            try:
+                # 如果模块没有被打包成包，直接导入 wzyd 模块
+                from wzyd import wzyd_libao
+            except ImportError:
+                # 如果模块已经打包成包，使用相对导入
+                from .wzyd import wzyd_libao
             ce = wzyd_libao()
             ce.run()
             ce.APPOB.关闭APP()
@@ -2293,7 +2308,12 @@ class wzry_task:
         if self.Tool.timelimit("体验服更新", limit=60*60*3, init=False):
             TimeECHO(f"{fun_name(1)}")
             self.APPOB.关闭APP()
-            from tiyanfu import tiyanfu
+            try:
+                # 如果模块没有被打包成包，直接导入 tiyanfu 模块
+                from tiyanfu import tiyanfu
+            except ImportError:
+                # 如果模块已经打包成包，使用相对导入
+                from .tiyanfu import tiyanfu
             ce = tiyanfu()
             ce.run()
             ce.APPOB.关闭APP()
@@ -3117,7 +3137,7 @@ class wzry_task:
                 sleep(60*2)
 
 
-if __name__ == "__main__":
+def main():
     # 如果使用vscode/pycharm/AirTestIDE等图形界面程序运行此脚本
     # 在此处指定config_file=config文件
     config_file = ""
@@ -3138,3 +3158,7 @@ if __name__ == "__main__":
         # sys.exit()  # 确保程序退出
     # 后面不能再跟其他指令，特别是exit()
     # 后面的命令会与task_manager.execute()中的多进程同时执行
+
+
+if __name__ == "__main__":
+    main()

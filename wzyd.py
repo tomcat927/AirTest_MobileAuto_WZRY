@@ -1,21 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 ##################################
 # Author : cndaqiang             #
-# Update : 2024-07-28            #
+# Update : 2024-12-08            #
 # Build  : 2024-07-28            #
 # What   : 王者营地的礼包         #
 ##################################
+import sys
+import os
+import traceback
 
-from airtest_mobileauto import *
+try:
+    from airtest_mobileauto import *
+except ImportError:
+    traceback.print_exc()
+    print("模块 [airtest_mobileauto] 导入不存在，请安装 airtest_mobileauto")
+    print("运行以下命令安装：")
+    print("python -m pip install airtest_mobileauto --upgrade")
+    raise ImportError("模块 [airtest_mobileauto] 导入失败")
 
 
 class wzyd_libao:
     def __init__(self):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         # device
         self.mynode = Settings.mynode
         self.totalnode = Settings.totalnode
@@ -24,7 +38,7 @@ class wzyd_libao:
         # Tool
         dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
+        dictreso = os.path.join(assets_dir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -714,7 +728,7 @@ class wzyd_libao:
             self.run()
 
 
-if __name__ == "__main__":
+def main():
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
@@ -726,3 +740,7 @@ if __name__ == "__main__":
     else:
         ce.end()
     exit()
+
+
+if __name__ == "__main__":
+    main()
