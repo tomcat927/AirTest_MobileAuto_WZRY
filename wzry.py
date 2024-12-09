@@ -3138,7 +3138,7 @@ class wzry_task:
 
 
 def main():
-    # 如果使用vscode/pycharm/AirTestIDE等图形界面程序运行此脚本
+    # 如果使用vscode等IDE运行此脚本
     # 在此处指定config_file=config文件
     config_file = ""
     if len(sys.argv) > 1:
