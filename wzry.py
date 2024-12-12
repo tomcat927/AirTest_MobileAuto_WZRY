@@ -868,12 +868,8 @@ class wzry_task:
         #
         sleep(5) # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
-            #
             if times > 2:
-                TimeECHO("没有检测到[进入人机匹配]界面")
-            if times > 3:
-                TimeECHO("请注意WZ是否又更新了进入人机的界面")
-            if times > 4:
+                TimeECHO("没有检测到[进入人机匹配]界面, 请注意WZ是否又更新了进入人机的界面")
                 for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷"])):
                     del self.Tool.var_dict[delstr]
             #
