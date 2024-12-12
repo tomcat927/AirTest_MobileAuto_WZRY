@@ -862,9 +862,11 @@ class wzry_task:
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
+        sleep(5) # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
+        sleep(5) # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
             #
             if times > 2:
@@ -888,12 +890,14 @@ class wzry_task:
             TimeECHO("选择对战模式")
             匹配模式 = self.图片.人机标准模式 if self.标准模式 else self.图片.人机快速模式
             段位图标 = self.图片.人机青铜段位 if self.青铜段位 else self.图片.人机星耀段位
+            sleep(5) # 点击之后要等待,有的模拟器速度太慢
             if not self.Tool.existsTHENtouch(匹配模式, f"匹配模式.{模式key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
+            sleep(5) # 点击之后要等待,有的模拟器速度太慢
             if not self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
         #
-        sleep(5)
+        sleep(5) # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习"):
             if times > 2:
                 TimeECHO("没有检测到[人机开始练习]")
