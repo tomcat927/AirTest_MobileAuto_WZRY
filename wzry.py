@@ -704,6 +704,10 @@ class wzry_task:
             if self.大厅严格判断():
                 return True
         #
+        # 点击登陆后有概率.游戏闪退
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, False)
+        #
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             检测到登录界面 = True
             sleep(10)
@@ -718,6 +722,10 @@ class wzry_task:
             # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
             self.Tool.touch_record_pos(record_pos=(1, 1), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
             sleep(10)
+        #
+        # 点击登陆后有概率.游戏闪退
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, False)
         #
         # ..................................................................................
         # 第一次万一已经登录过了
