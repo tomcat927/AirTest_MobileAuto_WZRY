@@ -870,11 +870,11 @@ class wzry_task:
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
-        sleep(5) # 点击之后要等待,有的模拟器速度太慢
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
-        sleep(5) # 点击之后要等待,有的模拟器速度太慢
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
             if times > 2:
                 TimeECHO("没有检测到[进入人机匹配]界面, 请注意WZ是否又更新了进入人机的界面")
@@ -894,14 +894,14 @@ class wzry_task:
             TimeECHO("选择对战模式")
             匹配模式 = self.图片.人机标准模式 if self.标准模式 else self.图片.人机快速模式
             段位图标 = self.图片.人机青铜段位 if self.青铜段位 else self.图片.人机星耀段位
-            sleep(5) # 点击之后要等待,有的模拟器速度太慢
+            sleep(5)  # 点击之后要等待,有的模拟器速度太慢
             if not self.Tool.existsTHENtouch(匹配模式, f"匹配模式.{模式key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
-            sleep(5) # 点击之后要等待,有的模拟器速度太慢
+            sleep(5)  # 点击之后要等待,有的模拟器速度太慢
             if not self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
         #
-        sleep(5) # 点击之后要等待,有的模拟器速度太慢
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习"):
             if times > 2:
                 TimeECHO("没有检测到[人机开始练习]")
@@ -2446,32 +2446,27 @@ class wzry_task:
                 if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                     TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                     return False
-        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
-        if 存在:
-            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
-            del self.图片.房间元素[1:]
-        # 活动界面
-        if 存在 and 处理:
-            # 这些活动翻页元素一般只显示一次，新的账户每次进入房间都会提示
+        #
+        # 这些活动翻页元素一般只显示一次，回归账户/新用户每次进入房间都会提示
+        if 处理:
             存在翻页活动, self.图片.房间翻页活动元素 = self.Tool.存在任一张图(self.图片.房间翻页活动元素, "房间翻页活动元素")
             if 存在翻页活动:
                 # 存在之后，这个活动只出现一次,可以删除这个变量了
                 del self.图片.房间翻页活动元素[0]
-                # 每天生成新的图片对象时会重新恢复原始图片的
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
-            else:
-                # 如果不存的话,也可以适当删除一些self.图片.房间翻页活动元素
-                if len(self.图片.房间翻页活动元素) > 0:
-                    if not exists(self.图片.房间翻页活动元素[-1]):
-                        del self.图片.房间翻页活动元素[-1]
-            #
-            存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
+        #
+        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         #
         if 存在:
             self.当前界面 = "房间中"
             self.Tool.timelimit(timekey="当前界面", init=True)
+            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
+            del self.图片.房间元素[1:]
+            if len(self.图片.房间翻页活动元素) > 0:
+                if not exists(self.图片.房间翻页活动元素[-1]):
+                    del self.图片.房间翻页活动元素[-1]
         else:
             self.当前界面 = "未知"
         #
