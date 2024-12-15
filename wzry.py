@@ -1423,6 +1423,7 @@ class wzry_task:
         if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件) and not self.path.exists(self.无法进行组队FILE):
             return False
         elif self.Tool.存在同步文件(self.Tool.独立同步文件):
+            self.Tool.removefile(self.Tool.独立同步文件)
             self.移动端.重启重连设备(10)
             self.登录游戏()
             return True
