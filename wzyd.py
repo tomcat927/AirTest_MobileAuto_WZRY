@@ -143,12 +143,6 @@ class wzyd_libao:
         sleep(20)  # 等待营地打开
         run_class_command(self=self, command=self.Tool.readfile(self.营地初始化FILE))
         #
-        # 判断营地是否登录的界面
-        if self.判断营地登录中():
-            TimeECHO(":检测到营地登录界面,不领取礼包")
-            self.Tool.touchfile(self.营地需要登录FILE)
-            self.APPOB.关闭APP()
-            return False
         # 这里很容易出问题，主页的图标变来变去
         # MuMu 模拟器营地居然也闪退
         if not self.判断营地大厅中():
