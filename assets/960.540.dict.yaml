@@ -109,13 +109,13 @@ KPL观赛入口: !!python/tuple
 王者模拟战图标: !!python/tuple
 - 63
 - 142
-王者登陆关闭按钮Template(assets\tpl1692947351223.png): !!python/tuple
+王者登陆关闭按钮tpl1692947351223.png: !!python/tuple
 - 891
 - 73
-王者登陆关闭按钮Template(assets\tpl1692951432616.png): !!python/tuple
+王者登陆关闭按钮tpl1692951432616.png: !!python/tuple
 - 893
 - 74
-王者登陆关闭按钮Template(assets\tpl1693271987720.png): !!python/tuple
+王者登陆关闭按钮tpl1693271987720.png: !!python/tuple
 - 907
 - 73
 登录返回按钮: !!python/tuple
@@ -136,28 +136,10 @@ KPL观赛入口: !!python/tuple
 移动pos(0): !!python/tuple
 - 167
 - 432
-第[1]次寻找商城免费礼包商城入口: !!python/tuple
-- 925
-- 114
-第[1]次寻找登录返回按钮: !!python/tuple
-- 60
-- 33
-第[22]次寻找装备pos(0):
-- 858
-- 138
-第[23]次寻找装备pos(0):
-- 858
-- 138
-第[2]次寻找礼册.一键领取: !!python/tuple
-- 764
-- 460
-第[5]次寻找登录返回按钮: !!python/tuple
-- 60
-- 33
 获取回忆之证: !!python/tuple
 - 891
 - 475
-装备pos(0):
+装备pos(0): !!python/tuple
 - 865
 - 140
 返回房间: !!python/tuple
