@@ -12,7 +12,7 @@
 </div>
 
 <div align="center">
-使用方法, 请访问: <a href="https://wzry-doc.pages.dev">使用手册</a>.
+使用方法, 请访问: <a href="https://wzry-doc.pages.dev/guide/install/">安装指南</a>.
 <br/>
 遇到问题, 请在提问前查看: <a href="https://wzry-doc.pages.dev/qa/qa/">常见问题</a>.
 </div>

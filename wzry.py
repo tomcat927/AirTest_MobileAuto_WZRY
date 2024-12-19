@@ -474,8 +474,11 @@ class wzry_task:
         存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
         if not 存在:
             return
-        for i in self.图片.王者登录关闭按钮:
-            keyindex = f"王者登陆关闭按钮{i}"
+        for idx, i in enumerate(self.图片.王者登录关闭按钮):
+            try:
+                keyindex = f"王者登陆关闭按钮{os.path.basename(i.filename)}"
+            except:
+                keyindex = f"王者登陆关闭按钮{idx}"
             pos = exists(i)
             if pos:
                 self.Tool.var_dict[keyindex] = pos
@@ -486,7 +489,12 @@ class wzry_task:
         存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
         if not 存在:
             return
-        for i in self.图片.王者登录关闭按钮:
+        #
+        for idx, i in enumerate(self.图片.王者登录关闭按钮):
+            try:
+                keyindex = f"王者登陆关闭按钮{os.path.basename(i.filename)}"
+            except:
+                keyindex = f"王者登陆关闭按钮{idx}"
             self.Tool.LoopTouch(i, f"王者登录关闭按钮{i}", loop=3, savepos=False)
     #
 
