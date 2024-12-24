@@ -681,8 +681,27 @@ class wzry_task:
                     TimeECHO("正在下载资源包")
                 sleep(60)
                 self.确定按钮()
+        #
+        # 登录界面有两个协议: 《用户协议和隐私政策》、《权限列表》、《游戏许可和隐私保护协议》
+        用户协议和隐私政策 = Template(r"tpl1735018819008.png", record_pos=(0.004, -0.135), resolution=(960, 540))
+        同意协议 = Template(r"tpl1735018827666.png", record_pos=(0.061, 0.078), resolution=(960, 540))
+        if exists(用户协议和隐私政策):
+            检测到登录界面 = True
+            self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=True)
+        if self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=False):
+            检测到登录界面 = True
+        #
+        权限列表 = Template(r"tpl1735019011072.png", record_pos=(-0.005, -0.158), resolution=(960, 540))
+        确定权限 = Template(r"tpl1735019018575.png", record_pos=(-0.005, 0.093), resolution=(960, 540))
+        if exists(权限列表):
+            检测到登录界面 = True
+            self.Tool.existsTHENtouch(确定权限, "确定权限", savepos=True)
+        if self.Tool.existsTHENtouch(确定权限, "确定权限", savepos=False):
+            检测到登录界面 = True
+        #
         同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
-        if exists(Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)):
+        游戏许可和隐私保护协议 = Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)
+        if exists(游戏许可和隐私保护协议):
             检测到登录界面 = True
             self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=True)
         #
@@ -2022,8 +2041,8 @@ class wzry_task:
         if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
             self.Tool.touch_record_pos(KPL观赛入口.record_pos, self.移动端.resolution, f"KPL观赛入口")
         #
-        同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
-        self.Tool.existsTHENtouch(同意游戏, "KPL首次进入需要同意游戏")
+        KPL同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
+        self.Tool.existsTHENtouch(KPL同意游戏, "KPL首次进入需要同意游戏")
         #
         进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
         if not 进入观赛界面:
