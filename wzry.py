@@ -205,14 +205,32 @@ class wzry_figure:
         self.金色确定按钮.append(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)))
         self.金色确定按钮.append(Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540)))
 
+        # 对战结束的画面
+        # 水晶爆炸的胜利失败画面
+        self.对战水晶爆炸页面元素 = []
+        self.对战水晶爆炸页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))  # 胜利
+        self.对战水晶爆炸页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))  # 失败
+        #
+        self.MVP结算画面 = []
+        # S37更新的团队MVP结算画面
+        self.MVP结算画面.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
+        # S38更新的个人MVP结算画面
+        # 触摸模式低级MVP
+        self.MVP结算画面.append(Template(r"tpl1735099219943.png", record_pos=(0.189, -0.017), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735099226736.png", record_pos=(0.383, -0.016), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735104765902.png", record_pos=(0.19, -0.021), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735104770577.png", record_pos=(0.385, -0.017), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735105627113.png", record_pos=(0.188, -0.014), resolution=(960, 540)))
+        # 挂机模式高级MVP等待截图
+        #
         self.战绩页面元素 = []
-        self.战绩页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1727236520434.png", record_pos=(0.103, -0.067), resolution=(960, 540)))
-        # 老战绩页面
-        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
+        # 战绩页面
+        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))  # 胜利
+        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))  # 失败
+        for i in self.对战水晶爆炸页面元素:
+            self.战绩页面元素.append(i)
+        for i in self.MVP结算画面:
+            self.战绩页面元素.append(i)
         #
         self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
         self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
@@ -902,6 +920,12 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
         #
         sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+        if exists(self.图片.进入5v5匹配):
+            TimeECHO("检测到 5v5王者峡谷. 历史位置有误, 更新中")
+            del self.Tool.var_dict["5v5王者峡谷"]
+            self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True)
+        #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
             if times > 2:
                 TimeECHO("没有检测到[进入人机匹配]界面, 请注意WZ是否又更新了进入人机的界面")
@@ -1267,14 +1291,34 @@ class wzry_task:
             if self.健康系统_常用命令():
                 return True
             #
-            # S37 更新了结算动画
-            self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
+            # 水晶爆炸,随便点击画面跳过
+            存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
+            if 存在:
+                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
+                sleep(5)
+                # S37 更新了MVP结算动画
+                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
+                sleep(5)
+                # S38 更新了MVP结算动画
+                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                sleep(5)
+            #
+            # S37 更新了MVP结算动画
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
-            存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
+            存在, self.图片.MVP结算画面 = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
             if 存在:
                 if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                     TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
                     self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+                    sleep(5)
+                #
+                # S38更新, 还要多开一遍个人的MVP结算画面
+                存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面[1:], "个人.MVP结算画面")
+                if 存在:
+                    if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
+                        TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
+                        self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
+                        sleep(5)
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
             #
             # 对战结算时的弹窗
