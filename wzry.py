@@ -704,6 +704,7 @@ class wzry_task:
         用户协议和隐私政策 = Template(r"tpl1735018819008.png", record_pos=(0.004, -0.135), resolution=(960, 540))
         同意协议 = Template(r"tpl1735018827666.png", record_pos=(0.061, 0.078), resolution=(960, 540))
         if exists(用户协议和隐私政策):
+            TimeECHO(f"{fun_name(1)}.用户协议和隐私政策")
             检测到登录界面 = True
             self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=True)
         if self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=False):
@@ -712,19 +713,29 @@ class wzry_task:
         权限列表 = Template(r"tpl1735019011072.png", record_pos=(-0.005, -0.158), resolution=(960, 540))
         确定权限 = Template(r"tpl1735019018575.png", record_pos=(-0.005, 0.093), resolution=(960, 540))
         if exists(权限列表):
+            TimeECHO(f"{fun_name(1)}.确定权限列表")
             检测到登录界面 = True
             self.Tool.existsTHENtouch(确定权限, "确定权限", savepos=True)
         if self.Tool.existsTHENtouch(确定权限, "确定权限", savepos=False):
             检测到登录界面 = True
         #
+        关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
+        self.Tool.existsTHENtouch(关闭更新, "关闭更新", savepos=False)
+        #
         同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
         游戏许可和隐私保护协议 = Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)
+        # 这个协议出现，基本上就是账户被退出了
         if exists(游戏许可和隐私保护协议):
+            TimeECHO(f"{fun_name(1)}.游戏许可和隐私保护协议")
             检测到登录界面 = True
             self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=True)
         #
         if self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=False):
             检测到登录界面 = True
+        #
+        # 点击同意游戏后, 容易发生游戏闪退, 再检查一下
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, False)
         #
         # 这里是账户被退出的界面，需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
