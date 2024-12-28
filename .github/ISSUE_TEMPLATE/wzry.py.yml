@@ -8,22 +8,22 @@ body:
       value: |
         - 🥰请礼貌**友善**的提问.
         - ✨为本项目点个star, 我会更愉快的回答你的问题.
-        - 📚快去阅读最新的[使用教程、问题收录、经验分享](https://wzry-doc.pages.dev/).
+        - 📚快去阅读最新的[使用教程、问题收录、经验分享]( https://wzry-doc.pages.dev/ ).
   - type: checkboxes
     attributes:
       label: "请在阅读完下面的内容后再进行提问:"
-      description: "[使用文档WZRY.doc](https://wzry-doc.pages.dev/)每天都有更新, 提问题前先阅读这些内容."
+      description: "[使用文档WZRY.doc]( https://wzry-doc.pages.dev/ )每天都有更新, 提问题前先阅读这些内容."
       options:
-        - label: "🌱已阅读[安装指南](https://wzry-doc.pages.dev/guide/install/)"
-        - label: "🌱已阅读[配置文件的说明](https://wzry-doc.pages.dev/guide/config/)"
-        - label: "🌱已阅读[控制文件的使用方法: 运行时间、礼包功能、对战模式、选择英雄等](https://wzry-doc.pages.dev/guide/file/)"
-        - label: "🌱已阅读[常见问题](https://wzry-doc.pages.dev/qa/qa)"
+        - label: "🌱已阅读[安装指南]( https://wzry-doc.pages.dev/guide/install/ )"
+        - label: "🌱已阅读[配置文件的说明]( https://wzry-doc.pages.dev/guide/config/ )"
+        - label: "🌱已阅读[控制文件的使用方法: 运行时间、礼包功能、对战模式、选择英雄等]( https://wzry-doc.pages.dev/guide/file/ )"
+        - label: "🌱已阅读[常见问题]( https://wzry-doc.pages.dev/qa/qa )"
   - type: dropdown
     id: version
     attributes:
       label: "请选择你在使用的程序及版本号"
       description: |
-        - 请尽可能的使用最新的[stable版本](https://github.com/cndaqiang/WZRY/releases)
+        - 请尽可能的使用最新的[stable版本]( https://github.com/cndaqiang/WZRY/releases )
         - 请尽可能的升级airtest_mobileauto`python -m pip install airtest_mobileauto --upgrade`
         - 你遇到的问题, 可能在最新的版本中已经被修复了.
       options:
