@@ -1316,7 +1316,7 @@ class wzry_task:
             #
             # S37 更新了MVP结算动画
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
-            存在, self.图片.MVP结算画面 = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
+            存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
             if 存在:
                 if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                     TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
