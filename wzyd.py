@@ -126,6 +126,10 @@ class wzyd_libao:
             TimeECHO(f":不存在APP{self.APPOB.APPID}")
             return False
         #
+        self.礼包功能_营地币换碎片 = True
+        self.礼包功能_体验币换碎片 = True
+        run_class_command(self=self, command=self.Tool.readfile(self.营地初始化FILE))
+        #
         # 判断网络情况
         if not connect_status():
             TimeECHO(":营地暂时无法触摸,返回")
@@ -141,7 +145,6 @@ class wzyd_libao:
                 return True
             return False
         sleep(20)  # 等待营地打开
-        run_class_command(self=self, command=self.Tool.readfile(self.营地初始化FILE))
         #
         # 这里很容易出问题，主页的图标变来变去
         # MuMu 模拟器营地居然也闪退
@@ -204,10 +207,11 @@ class wzyd_libao:
         self.营地任务_圈子签到()
         #
         # 体验服只有安卓客户端可以领取
-        if not self.IOS:
+        if not self.IOS and self.礼包功能_体验币换碎片:
             self.体验服礼物()
         self.每日签到任务()
-        self.营地币兑换碎片()
+        if self.礼包功能_营地币换碎片:
+            self.营地币兑换碎片()
         self.营地战令经验()
         self.APPOB.关闭APP()
         return True
