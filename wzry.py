@@ -208,8 +208,8 @@ class wzry_figure:
         # 对战结束的画面
         # 水晶爆炸的胜利失败画面
         self.对战水晶爆炸页面元素 = []
-        self.对战水晶爆炸页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))  # 胜利
         self.对战水晶爆炸页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))  # 失败
+        self.对战水晶爆炸页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))  # 胜利
         #
         self.MVP结算画面 = []
         # S37更新的团队MVP结算画面
@@ -1257,8 +1257,10 @@ class wzry_task:
             加载中 = exists(加载游戏界面)
             if 加载中:
                 TimeECHO("加载游戏中.....")
-                if self.Tool.existsTHENtouch(Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540)), "加油按钮", savepos=False):
-                    sleep(2)
+                加油按钮 = Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540))
+                if not self.Tool.existsTHENtouch(加油按钮, "加油按钮", savepos=False):
+                    self.Tool.touch_record_pos(加油按钮.record_pos, self.移动端.resolution, "加油按钮")
+                sleep(2)
             else:
                 break
             if self.Tool.timelimit(timekey="加载游戏", limit=60*10, init=False):
@@ -1286,9 +1288,12 @@ class wzry_task:
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
+            #
             self.APPOB.打开APP()
+            #
+            点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
-                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
             # 对战阶段，处理对战
             加速对战 = False
             if self.触摸对战:
@@ -1300,33 +1305,31 @@ class wzry_task:
             存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
             if 存在:
                 sleep(5)
-                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
-                sleep(5)
-                # S37 更新了MVP结算动画
-                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
-                sleep(5)
-                # S38 更新了MVP结算动画
-                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
-                sleep(5)
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
+                sleep(10)
+                # 团队结算画面
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
+                sleep(10)
+                # 个人结算动画
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                sleep(10)
             #
             # S37 更新了MVP结算动画
-            点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
             存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
             if 存在:
                 sleep(5)
                 if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                     TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
-                    self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
-                    sleep(5)
+                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+                    sleep(10)
                 #
                 # S38更新, 还要多开一遍个人的MVP结算画面
                 存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面[1:], "个人.MVP结算画面")
                 if 存在:
-                    sleep(5)
                     if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                         TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
-                        self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
-                        sleep(5)
+                        self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
+                        sleep(10)
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
             #
             # 对战结算时的弹窗
@@ -1344,6 +1347,7 @@ class wzry_task:
             if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
                 sleep(2)
                 self.确定按钮()
+                sleep(5)
             # 返回房间/大厅
             if self.对战结束返回房间:
                 if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
