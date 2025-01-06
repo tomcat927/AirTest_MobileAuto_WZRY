@@ -585,7 +585,10 @@ class wzry_task:
             存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
             if 存在 or self.quick判断界面() in ["对战中", "对战中_模拟战", "战绩页面"]:
                 self.判断对战中(处理=处理对战)
+                对战结束返回房间 = self.对战结束返回房间
+                self.对战结束返回房间 = False
                 self.结束人机匹配()
+                self.对战结束返回房间 = 对战结束返回房间
         #
         # 房间
         返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
@@ -1135,12 +1138,12 @@ class wzry_task:
         sleep(5)
         #
         # savepos 如果找到会自动替换上一次的字典
-        存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
+        存在邀请好友, _ = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
         if not 存在邀请好友:
             for i in range(10):
                 self.Tool.touch_record_pos(record_pos=任意位置继续.record_pos, resolution=self.移动端.resolution, keystr=f"任意位置继续{i}")
                 sleep(2)
-                存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
+                存在邀请好友, _ = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
                 if 存在邀请好友:
                     break
             TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口, 将尝试历史入口")
@@ -1293,18 +1296,10 @@ class wzry_task:
             if self.判断对战中(处理=加速对战):
                 sleep(30)
                 continue
-            # 已返回房间或大厅
-            if self.判断房间中(处理=False):
-                return
-            if self.判断大厅中(acce=True):
-                return
-            # 健康系统直接重新同步
-            if self.健康系统_常用命令():
-                return True
-            #
             # 水晶爆炸,随便点击画面跳过
             存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
             if 存在:
+                sleep(5)
                 self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
                 sleep(5)
                 # S37 更新了MVP结算动画
@@ -1318,6 +1313,7 @@ class wzry_task:
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
             存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
             if 存在:
+                sleep(5)
                 if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                     TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
                     self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
@@ -1326,6 +1322,7 @@ class wzry_task:
                 # S38更新, 还要多开一遍个人的MVP结算画面
                 存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面[1:], "个人.MVP结算画面")
                 if 存在:
+                    sleep(5)
                     if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
                         TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
                         self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
@@ -1338,33 +1335,42 @@ class wzry_task:
             确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
             self.Tool.LoopTouch(确定按钮, "回归对战|新赛季|友情币等奖励确定按钮", savepos=False)
             # 奇怪的结算画面
-            游戏结束了 = Template(r"tpl1694360304332.png", record_pos=(-0.011, -0.011), resolution=(960, 540))
-            if exists(游戏结束了):
-                self.Tool.existsTHENtouch(Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540)))
+            金色确定 = Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540))
+            self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=False)
+            #
             if not self.check_run_status():
                 return
-            # 有时候会莫名进入分享界面
-            if exists(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540))):
-                TimeECHO("分享界面")
-                self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540)))
+            # 万一点到某处, 这是返回按钮
+            if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
                 sleep(2)
                 self.确定按钮()
             # 返回房间/大厅
             if self.对战结束返回房间:
                 if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
                     sleep(10)
-                # 万一返回房间后来一堆提示
-                self.网络优化()
-                if self.判断房间中(处理=False):
-                    return
+                    # 万一返回房间后来一堆提示
+                    self.网络优化()
+                    if self.判断房间中(处理=False):
+                        return
             else:
                 if self.Tool.existsTHENtouch(Template(r"tpl1689667243845.png", record_pos=(-0.082, 0.221), resolution=(960, 540), threshold=0.9), "返回大厅"):
                     sleep(10)
                     if self.Tool.existsTHENtouch(Template(r"tpl1689667256973.png", record_pos=(0.094, 0.115), resolution=(960, 540)), "确定返回大厅"):
                         sleep(10)
-                if self.判断大厅中(acce=True):
-                    return
-    #
+                    if self.判断大厅中(acce=True):
+                        return
+            #
+            # 调用结束人机匹配时, 通常是刚结束对战, 无需判断房间中还是大厅中的,
+            # 因此把这几行判断放在最后
+            # 已返回房间或大厅
+            if self.判断房间中(处理=False):
+                return
+            if self.判断大厅中(acce=True):
+                return
+            # 健康系统直接重新同步
+            if self.健康系统_常用命令():
+                return True
+            #
 
     def 结束人机匹配_模拟战(self):
         TimeECHO("准备结束本局模拟战")
