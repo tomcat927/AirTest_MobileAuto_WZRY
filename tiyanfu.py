@@ -162,6 +162,9 @@ class tiyanfu():
             return self.run(times)
         #
         self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
+        # 避免点多了, 如果有返回就返回一下
+        返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
+        self.Tool.LoopTouch(返回图标, "返回图标", loop=3, savepos=False)
         #
         self.大厅元素 = []
         self.大厅元素.append(Template(r"tpl1723551269026.png", record_pos=(0.455, 0.203), resolution=(960, 540)))
