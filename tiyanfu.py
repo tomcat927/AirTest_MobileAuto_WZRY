@@ -159,7 +159,7 @@ class tiyanfu():
             sleep(waittime)
         if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
             TimeECHO("还存在开始游戏，有可能体验服正在更新")
-            return False
+            return self.run(times)
         #
         self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
         #
