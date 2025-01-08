@@ -132,7 +132,7 @@ class tiyanfu():
         # 体验服随便点无所谓 不用追求太逻辑和完美，就直接点以前的更新坐标
         self.Tool.touch_record_pos(更新按钮.record_pos, self.移动端.resolution, keystr=f"体验服.更新按钮")
         #
-        #
+        # 更新界面的关闭按钮
         关闭界面 = Template(r"tpl1723551215061.png", record_pos=(0.323, -0.202), resolution=(960, 540))
         关闭按钮 = Template(r"tpl1723551244924.png", record_pos=(0.425, -0.205), resolution=(960, 540))
         if exists(关闭界面):
@@ -161,6 +161,7 @@ class tiyanfu():
             TimeECHO("还存在开始游戏，有可能体验服正在更新")
             return self.run(times)
         #
+        # 进入游戏大厅偶尔会有关闭按钮
         self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
         # 避免点多了, 如果有返回就返回一下
         返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
