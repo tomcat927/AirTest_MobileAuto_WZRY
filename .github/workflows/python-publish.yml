@@ -28,8 +28,6 @@ jobs:
         mkdir  autowzry
         mv assets autowzry/
         mv  __init__.py  tiyanfu.py  wzry.py  wzyd.py  autowzry/
-        ls 
-        ls autowzry/
 
     - name: Set version in setup.py
       run: |  
