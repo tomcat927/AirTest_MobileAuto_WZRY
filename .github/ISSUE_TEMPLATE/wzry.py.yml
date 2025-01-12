@@ -27,9 +27,9 @@ body:
         - 请尽可能的升级airtest_mobileauto`python -m pip install airtest_mobileauto --upgrade`
         - 你遇到的问题, 可能在最新的版本中已经被修复了.
       options:
-        - WZRY == 2.3.0
-        - WZRY == 2.2.9-patch3
-        - AutoWZRY >= 2.3.0
+        - WZRY == 2.3.1a6
+        - WZRY >= 2.3.2  
+        - AutoWZRY >= 2.3.1
         - 其他
     validations:
       required: true
