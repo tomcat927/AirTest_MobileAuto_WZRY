@@ -15,6 +15,7 @@ body:
       description: "[使用文档WZRY.doc]( https://wzry-doc.pages.dev/ )每天都有更新, 提问题前先阅读这些内容."
       options:
         - label: "🌱已阅读[安装指南]( https://wzry-doc.pages.dev/guide/install/ )"
+        - label: "🌱已观看[视频教程]( https://www.bilibili.com/video/BV1JmcteBEUS )"
         - label: "🌱已阅读[配置文件的说明]( https://wzry-doc.pages.dev/guide/config/ )"
         - label: "🌱已阅读[控制文件的使用方法: 运行时间、礼包功能、对战模式、选择英雄等]( https://wzry-doc.pages.dev/guide/file/ )"
         - label: "🌱已阅读[常见问题]( https://wzry-doc.pages.dev/qa/qa )"
@@ -27,7 +28,7 @@ body:
         - 请尽可能的升级airtest_mobileauto`python -m pip install airtest_mobileauto --upgrade`
         - 你遇到的问题, 可能在最新的版本中已经被修复了.
       options:
-        - WZRY == 2.3.1a6
+        - WZRY == 2.3.1a9
         - WZRY >= 2.3.2  
         - AutoWZRY >= 2.3.1
         - 其他
