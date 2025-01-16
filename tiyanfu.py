@@ -92,6 +92,12 @@ class tiyanfu():
         # ------------------------------------------------------------------------------
         run_class_command(self=self, command=self.Tool.readfile(self.体验服初始化FILE))
         # ------------------------------------------------------------------------------
+        # 修正分辨率, 避免某些模拟器返回的分辨率不对
+        if self.移动端.resolution[0] < self.移动端.resolution[1]:
+            TimeECHO("=>"*20)
+            TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
+            self.移动端.resolution = (max(self.移动端.resolution),min(self.移动端.resolution))
+            TimeECHO("<="*20)
         #
         极简下载 = Template(r"tpl1723551085244.png", record_pos=(-0.008, -0.096), resolution=(960, 540), target_pos=6)
         确定按钮 = Template(r"tpl1723551187946.png", record_pos=(-0.003, 0.122), resolution=(960, 540))

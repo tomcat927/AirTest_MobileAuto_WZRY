@@ -2399,6 +2399,8 @@ class wzry_task:
             ce = wzyd_libao()
             ce.run()
             ce.APPOB.关闭APP()
+            # 修正某些模拟器, 运行完营地后强制改变分辨率的问题
+            self.移动端.resolution = (max(self.移动端.resolution),min(self.移动端.resolution))
             return True
         else:
             TimeECHO(f"时间太短,暂时不{fun_name(1)}")
@@ -3007,6 +3009,7 @@ class wzry_task:
                     if "健康系统" in content:
                         if self.外置礼包_王者营地:
                             self.每日礼包_王者营地()
+
                         else:
                             TimeECHO(f"健康系统导致的同步, sleep 5 min 再继续执行")
                             sleep(5*60)
@@ -3061,6 +3064,12 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             self.当前状态 = "状态检查"
+            # 修正分辨率, 避免某些模拟器返回的分辨率不对
+            if self.移动端.resolution[0] < self.移动端.resolution[1]:
+                TimeECHO("=>"*20)
+                TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
+                self.移动端.resolution = (max(self.移动端.resolution),min(self.移动端.resolution))
+                TimeECHO("<="*20)
             if not self.check_run_status():
                 continue
             # ------------------------------------------------------------------------------

@@ -179,6 +179,13 @@ class wzyd_libao:
 
     def RUN(self):
         #
+        # 修正分辨率, 避免某些模拟器返回的分辨率不对
+        if self.移动端.resolution[0] > self.移动端.resolution[1]:
+            TimeECHO("=>"*20)
+            TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
+            self.移动端.resolution = (min(self.移动端.resolution),max(self.移动端.resolution))
+            TimeECHO("<="*20)
+        #
         if not self.APPOB.HaveAPP:
             TimeECHO(f":不存在APP{self.APPOB.APPID}")
             return False
