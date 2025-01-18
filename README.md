@@ -15,6 +15,8 @@
 使用方法, 请访问: <a href="https://wzry-doc.pages.dev/guide/install/">安装指南</a>.
 <br/>
 遇到问题, 请在提问前查看: <a href="https://wzry-doc.pages.dev/qa/qa/">常见问题</a>.
+<br/>
+<b>被系统安排的破防了, 垃圾游戏, 一点都不想玩了, 助手停更.</b>
 </div>
 
 ## WZRY
