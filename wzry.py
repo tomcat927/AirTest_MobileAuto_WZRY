@@ -1294,6 +1294,7 @@ class wzry_task:
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
+                TimeECHO(f"⚠️ 警告: 若脚本长期卡在点击此处继续, 请检查是否应该更新资源: https://wzry-doc.pages.dev/guide/upfig/")
             # 对战阶段，处理对战
             加速对战 = False
             if self.触摸对战:
