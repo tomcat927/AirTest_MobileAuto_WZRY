@@ -134,6 +134,10 @@ class wzry_figure:
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
         self.房间中的取消匹配图标 = Template(r"tpl1732156694454.png", record_pos=(0.121, -0.263), resolution=(960, 540))
         #
+        # 虽然排位房间/匹配房间中的开始匹配按钮和人机局的开始按钮不一样,
+        # 但是利用touch_record_pos点击的位置是相同的
+        # 因此此处没必要添加排位房间的开始匹配按钮
+        #
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅娱乐模式)
