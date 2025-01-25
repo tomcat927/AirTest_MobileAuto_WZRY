@@ -138,6 +138,14 @@ class wzry_figure:
         # 但是利用touch_record_pos点击的位置是相同的
         # 因此此处没必要添加排位房间的开始匹配按钮
         #
+        self.排位设置分路 = Template(r"tpl1737811881694.png", record_pos=(-0.422, -0.093), resolution=(960, 540))
+        self.排位分路图标 = Template(r"tpl1737811979105.png", record_pos=(0.232, -0.052), resolution=(960, 540))
+        self.排位分路确定 = Template(r"tpl1737811985267.png", record_pos=(-0.001, 0.224), resolution=(960, 540))
+        self.排位开始匹配 = []
+        self.排位开始匹配.append(Template(r"tpl1737812003181.png", record_pos=(0.102, 0.232), resolution=(960, 540)))
+        self.排位选英雄界面 = Template(r"tpl1737812036326.png", record_pos=(0.43, -0.189), resolution=(960, 540))
+
+        #
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
         self.大厅元素.append(self.大厅娱乐模式)
@@ -1026,11 +1034,14 @@ class wzry_task:
 
     def 单人进入排位房间(self, times=0):
         #
+        TimeECHO(f"第{times}次进入进入排位房间")
+        TimeECHO("请提前预选好分路(只用预选一次,建议游走),脚本暂不支持预选分路")
+        TimeECHO("请打开自动购买装备和自动技能加点")
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=30, touch同步=True):
             return True
         #
         times = times+1
-        if not self.Tool.existsTHENtouch(self.图片.大厅排位赛, "大厅排位赛", savepos=False):
+        if not self.Tool.existsTHENtouch(self.图片.大厅排位赛, "大厅排位赛", savepos=True):
             TimeErr("找不到大厅排位赛")
             return self.单人进入人机匹配房间(times)
         sleep(10)
@@ -1047,6 +1058,18 @@ class wzry_task:
                     self.创建同步文件("不匹配被禁赛, 超时无法进入")
                     return True
             return self.单人进入人机匹配房间(times)
+        #
+        # S38赛季可能需要预选分路, 由于按钮太小, 识别率低，所以这里仅先适配960x540分辨率,固定位置点击
+        # 但是如果预选过分路了，这里再选择则会取消预选，因此暂时不实现选分路, 手动选择
+        if False:
+            sleep(10)
+            self.Tool.touch_record_pos(record_pos=self.图片.排位设置分路.record_pos, resolution=self.移动端.resolution, keystr=f"排位设置分路")
+            sleep(20)
+            self.Tool.touch_record_pos(record_pos=self.图片.排位分路图标.record_pos, resolution=self.移动端.resolution, keystr=f"排位分路图标")
+            sleep(20)
+            self.Tool.existsTHENtouch(self.图片.排位分路确定, "排位分路确定", savepos=True)
+            sleep(20)
+        #
         return True
     #
 
@@ -1183,6 +1206,8 @@ class wzry_task:
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         # 开始按钮的位置(房主)可以不断点击
         # 房主的取消匹配在上方的叉号
+        if "5v5排位" in self.对战模式:
+            self.图片.房间中的开始按钮图标 = self.图片.排位开始匹配 + self.图片.房间中的开始按钮图标
         if self.房主:
             找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
             房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
@@ -1221,6 +1246,11 @@ class wzry_task:
                 # 该界面用于判断是都匹配成功
                 if "模拟战" in self.对战模式:
                     队友确认匹配 = self.判断对战中(处理=False)
+                elif "5v5排位" in self.对战模式:
+                    队友确认匹配 = exists(self.图片.排位选英雄界面)
+                    if 队友确认匹配:
+                        TimeECHO("检测到排位界面,sleep(30)后继续")
+                        sleep(30)
                 else:
                     队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
                 #
@@ -1235,6 +1265,9 @@ class wzry_task:
                     自己曾经确定过匹配 = True
         # 模拟战到此就结束了
         if "模拟战" in self.对战模式:
+            return True
+        if "5v5排位" in self.对战模式:
+            # 暂时不支持选英雄,界面和人机差别太大, 目前无继续开发计划, 默认随机英雄打就完了
             return True
         # 选择英雄
         if self.选择英雄:
@@ -1318,6 +1351,11 @@ class wzry_task:
                 # 个人结算动画
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
                 sleep(10)
+                # 排位变化界面
+                if "5v5排位" in self.对战模式:
+                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                    sleep(10)
+
             #
             # S37 更新了MVP结算动画
             存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
@@ -2405,7 +2443,7 @@ class wzry_task:
             ce.run()
             ce.APPOB.关闭APP()
             # 修正某些模拟器, 运行完营地后强制改变分辨率的问题
-            self.移动端.resolution = (max(self.移动端.resolution),min(self.移动端.resolution))
+            self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
             return True
         else:
             TimeECHO(f"时间太短,暂时不{fun_name(1)}")
@@ -2621,6 +2659,7 @@ class wzry_task:
         装备pos = False
         移动pos = False
         普攻pos = False
+        存在装备图标 = False
         装备poskey = f"装备pos({self.mynode})"
         移动poskey = f"移动pos({self.mynode})"
         普攻poskey = f"普攻pos({self.mynode})"
@@ -2633,9 +2672,10 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 return True
             # 不同账户出装位置不同, 这里随机识别一次，更新位置
-            if random.randint(1, 5) == 1:
+            if not 存在装备图标 and random.randint(1, 5) == 1:
                 装备pos = False
-            if not 装备pos:
+             # 排位的时候就别找装备了,时间紧,快逃离泉水危险区域
+            if not 装备pos and "5v5排位" not in self.对战模式:
                 # 每一次尝试采用新的位置
                 存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
                 if 存在装备图标:
@@ -2708,6 +2748,12 @@ class wzry_task:
                     #
                     if 普攻pos:
                         sleep(0.2)
+                        touch(普攻pos)
+                    #
+                    # 排位时多走走, 离开泉水区域
+                    if "5v5排位" in self.对战模式:
+                        for _ in range(5):
+                            swipe(移动pos, vector=[x, y])
                         touch(普攻pos)
             #
             if 普攻pos:
@@ -2884,6 +2930,8 @@ class wzry_task:
         #
         加速对战 = False
         if "模拟战" in self.对战模式:
+            加速对战 = True
+        if "5v5排位" in self.对战模式:
             加速对战 = True
         if self.触摸对战 and "5v5" in self.对战模式:
             加速对战 = True
@@ -3073,7 +3121,7 @@ class wzry_task:
             if self.移动端.resolution[0] < self.移动端.resolution[1]:
                 TimeECHO("=>"*20)
                 TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
-                self.移动端.resolution = (max(self.移动端.resolution),min(self.移动端.resolution))
+                self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
                 TimeECHO("<="*20)
             if not self.check_run_status():
                 continue

@@ -58,6 +58,9 @@ KPL观赛入口: !!python/tuple
 大厅祈愿: !!python/tuple
 - 912
 - 169
+大厅排位赛: !!python/tuple
+- 587
+- 407
 战令入口: !!python/tuple
 - 813
 - 169
