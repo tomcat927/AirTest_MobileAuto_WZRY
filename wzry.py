@@ -1016,16 +1016,22 @@ class wzry_task:
                 TimeECHO("高阶段位已达上限,采用青铜模式")
                 self.青铜段位 = True
                 self.选择人机模式 = True
+                模式key = "标准模式" if self.标准模式 else "快速模式"
+                段位key = "青铜段位" if self.青铜段位 else "星耀段位"
+                匹配模式 = self.图片.人机标准模式 if self.标准模式 else self.图片.人机快速模式
+                段位图标 = self.图片.人机青铜段位 if self.青铜段位 else self.图片.人机星耀段位
                 self.Tool.var_dict["运行参数.青铜段位"] = True
                 if self.组队模式:
                     TimeErr("段位不合适,创建同步文件")
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, "星耀段位次数用完")
                     return False
                 else:
-                    段位key = "青铜段位"
+                    # 切换青铜段位, 上面进行了:匹配模式、段位图标、模式key、段位key的重置
+                    sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+                    self.Tool.existsTHENtouch(匹配模式, f"匹配模式.{模式key}", savepos=True)
+                    sleep(5)  # 点击之后要等待,有的模拟器速度太慢
                     self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True)
                     self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习")
-                    return self.单人进入人机匹配房间(times)
         #
         if self.判断房间中(处理=True):
             return True
@@ -1322,6 +1328,7 @@ class wzry_task:
             if not self.check_run_status():
                 return True
             addtime = 60*10 if self.本循环参数.标准模式 else 0
+            addtime = 60*30 if "5v5排位" in self.对战模式 else addtime
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
@@ -3307,6 +3314,9 @@ def main():
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
+        if not os.path.exists(config_file):
+            TimeECHO(f"不存在{config_file},请检查文件是否存在、文件名是否正确以及yaml.txt等错误拓展名")
+            TimeECHO(f"将加载默认配置运行.")
     # task_manager = TaskManager(config_file, None, None)
     task_manager = TaskManager(config_file, wzry_task, 'RUN')
     try:

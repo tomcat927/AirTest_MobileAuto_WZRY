@@ -96,7 +96,7 @@ class tiyanfu():
         if self.移动端.resolution[0] < self.移动端.resolution[1]:
             TimeECHO("=>"*20)
             TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
-            self.移动端.resolution = (max(self.移动端.resolution),min(self.移动端.resolution))
+            self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
             TimeECHO("<="*20)
         #
         极简下载 = Template(r"tpl1723551085244.png", record_pos=(-0.008, -0.096), resolution=(960, 540), target_pos=6)
@@ -205,6 +205,9 @@ def main():
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
+        if not os.path.exists(config_file):
+            TimeECHO(f"不存在{config_file},请检查文件是否存在、文件名是否正确以及yaml.txt等错误拓展名")
+            TimeECHO(f"将加载默认配置运行.")
     Settings.Config(config_file)
     ce = tiyanfu()
     ce.run()
