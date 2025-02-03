@@ -8,30 +8,29 @@ body:
       value: |
         - 🥰请礼貌**友善**的提问.
         - ✨为本项目点个star, 我会更愉快的回答你的问题.
-        - 📚快去阅读最新的[使用教程、问题收录、经验分享](https://wzry-doc.pages.dev/).
+        - 📚快去阅读最新的[使用教程、问题收录、经验分享]( https://wzry-doc.pages.dev/ ).
   - type: checkboxes
     attributes:
       label: "请在阅读完下面的内容后再进行提问:"
-      description: "[使用文档WZRY.doc](https://wzry-doc.pages.dev/)每天都有更新, 提问题前先阅读这些内容."
+      description: "[使用文档WZRY.doc]( https://wzry-doc.pages.dev/ )每天都有更新, 提问题前先阅读这些内容."
       options:
-        - label: "🌱已阅读[安装指南](https://wzry-doc.pages.dev/guide/install/)"
-        - label: "🌱已阅读[配置文件的说明](https://wzry-doc.pages.dev/guide/config/)"
-        - label: "🌱已阅读[控制文件的使用方法: 运行时间、礼包功能、对战模式、选择英雄等](https://wzry-doc.pages.dev/guide/file/)"
-        - label: "🌱已阅读[常见问题](https://wzry-doc.pages.dev/qa/qa)"
-    validations:
-      required: false
+        - label: "🌱已阅读[安装指南]( https://wzry-doc.pages.dev/guide/install/ )"
+        - label: "🌱已观看[视频教程]( https://www.bilibili.com/video/BV1JmcteBEUS )"
+        - label: "🌱已阅读[配置文件的说明]( https://wzry-doc.pages.dev/guide/config/ )"
+        - label: "🌱已阅读[控制文件的使用方法: 运行时间、礼包功能、对战模式、选择英雄等]( https://wzry-doc.pages.dev/guide/file/ )"
+        - label: "🌱已阅读[常见问题]( https://wzry-doc.pages.dev/qa/qa )"
   - type: dropdown
     id: version
     attributes:
       label: "请选择你在使用的程序及版本号"
       description: |
-        - 请尽可能的使用最新的[stable版本](https://github.com/cndaqiang/WZRY/releases)
+        - 请尽可能的使用最新的[stable版本]( https://github.com/cndaqiang/WZRY/releases )
         - 请尽可能的升级airtest_mobileauto`python -m pip install airtest_mobileauto --upgrade`
         - 你遇到的问题, 可能在最新的版本中已经被修复了.
       options:
-        - WZRY == 2.2.9-stable
-        - WZRY == 2.2.8-stable
-        - AutoWZRY >= 2.2.9a1
+        - WZRY == 2.3.1a9
+        - WZRY >= 2.3.2  
+        - AutoWZRY >= 2.3.1
         - 其他
     validations:
       required: true
@@ -40,8 +39,10 @@ body:
     attributes:
       label: "如果选择了其他，请输入具体版本"
       value: |
-        WZRY-2.2.8
-        airtest-mobileauto 2.0.13
+        [此处支持: 填写文本、上传文件、粘贴截图]
+        # 例如
+        WZRY-2.2.8-stable
+        airtest-mobileauto 2.1.2
   - type: textarea
     attributes:
       label: "简单描述你的问题"

@@ -3,7 +3,7 @@
 
 ##################################
 # Author : cndaqiang             #
-# Update : 2024-07-27            #
+# Update : 2024-12-08            #
 # Build  : 2023-11-10            #
 # What   : WZRY                  #
 ##################################
@@ -12,12 +12,13 @@ import os
 import traceback
 
 try:
-    from airtest_mobileauto.control import *
+    from airtest_mobileauto import *
 except ImportError:
     traceback.print_exc()
-    print("模块[airtest_mobileauto]导入不存在, 请安装airtest_mobileauto")
+    print("模块 [airtest_mobileauto] 导入不存在，请安装 airtest_mobileauto")
+    print("运行以下命令安装：")
     print("python -m pip install airtest_mobileauto --upgrade")
-    from airtest_mobileauto.control import *
+    raise ImportError("模块 [airtest_mobileauto] 导入失败")
 
 
 class wzry_runinfo:
@@ -80,6 +81,13 @@ class wzry_figure:
     # 方便更新,
     # 以及用于统一更新图片传递给所有进程
     def __init__(self, Tool=None):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         self.Tool = DQWheel() if Tool == None else Tool
         # 一些图库, 后期使用图片更新
         self.网络不可用 = Template(r"tpl1720067196954.png", record_pos=(0.003, 0.045), resolution=(960, 540))
@@ -125,6 +133,18 @@ class wzry_figure:
         self.房间中的取消按钮图标 = []
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
         self.房间中的取消匹配图标 = Template(r"tpl1732156694454.png", record_pos=(0.121, -0.263), resolution=(960, 540))
+        #
+        # 虽然排位房间/匹配房间中的开始匹配按钮和人机局的开始按钮不一样,
+        # 但是利用touch_record_pos点击的位置是相同的
+        # 因此此处没必要添加排位房间的开始匹配按钮
+        #
+        self.排位设置分路 = Template(r"tpl1737811881694.png", record_pos=(-0.422, -0.093), resolution=(960, 540))
+        self.排位分路图标 = Template(r"tpl1737811979105.png", record_pos=(0.232, -0.052), resolution=(960, 540))
+        self.排位分路确定 = Template(r"tpl1737811985267.png", record_pos=(-0.001, 0.224), resolution=(960, 540))
+        self.排位开始匹配 = []
+        self.排位开始匹配.append(Template(r"tpl1737812003181.png", record_pos=(0.102, 0.232), resolution=(960, 540)))
+        self.排位选英雄界面 = Template(r"tpl1737812036326.png", record_pos=(0.43, -0.189), resolution=(960, 540))
+
         #
         self.大厅元素 = []
         self.大厅元素.append(self.大厅对战图标)
@@ -197,14 +217,32 @@ class wzry_figure:
         self.金色确定按钮.append(Template(r"tpl1700454987098.png", record_pos=(0.1, 0.117), resolution=(960, 540)))
         self.金色确定按钮.append(Template(r"tpl1694441373245.png", record_pos=(-0.002, 0.116), resolution=(960, 540)))
 
+        # 对战结束的画面
+        # 水晶爆炸的胜利失败画面
+        self.对战水晶爆炸页面元素 = []
+        self.对战水晶爆炸页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))  # 失败
+        self.对战水晶爆炸页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))  # 胜利
+        #
+        self.MVP结算画面 = []
+        # S37更新的团队MVP结算画面
+        self.MVP结算画面.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
+        # S38更新的个人MVP结算画面
+        # 触摸模式低级MVP
+        self.MVP结算画面.append(Template(r"tpl1735099219943.png", record_pos=(0.189, -0.017), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735099226736.png", record_pos=(0.383, -0.016), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735104765902.png", record_pos=(0.19, -0.021), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735104770577.png", record_pos=(0.385, -0.017), resolution=(960, 540)))
+        self.MVP结算画面.append(Template(r"tpl1735105627113.png", record_pos=(0.188, -0.014), resolution=(960, 540)))
+        # 挂机模式高级MVP等待截图
+        #
         self.战绩页面元素 = []
-        self.战绩页面元素.append(Template(r"tpl1727234712515.png", record_pos=(-0.007, 0.018), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1727237953837.png", record_pos=(-0.008, -0.009), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1727231951999.png", record_pos=(0.433, -0.235), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1727236520434.png", record_pos=(0.103, -0.067), resolution=(960, 540)))
-        # 老战绩页面
-        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))
-        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))
+        # 战绩页面
+        self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))  # 胜利
+        self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))  # 失败
+        for i in self.对战水晶爆炸页面元素:
+            self.战绩页面元素.append(i)
+        for i in self.MVP结算画面:
+            self.战绩页面元素.append(i)
         #
         self.返回房间按钮 = Template(r"tpl1689667226045.png", record_pos=(0.079, 0.226), resolution=(960, 540), threshold=0.9)
         self.房间我知道了 = Template(r"tpl1707519287850.png", record_pos=(-0.006, 0.191), resolution=(960, 540))
@@ -251,12 +289,14 @@ class wzry_figure:
 
 
 class wzry_task:
-    # 备注
-    # 新账户,第一次打开各种模块,如万向天宫,会有动画等展示,脚本不做处理,手动点几下，之后就不会出现了
-    # 需要传递中文时,由于精简后无法输入中文,在shell中建
-    # redroid_arm64:/mnt/sdcard/Download # touch 诗语江南s4tpxWGu.txt
-
     def __init__(self):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         # device
         self.mynode = Settings.mynode
         self.totalnode = Settings.totalnode
@@ -274,7 +314,7 @@ class wzry_task:
         # 保存字典，计算参数的文件
         self.dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
+        dictreso = os.path.join(assets_dir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(self.dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=self.dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -412,9 +452,9 @@ class wzry_task:
         self.对战模式 = para[3]
         #
         para = [self.标准模式, self.青铜段位]
-        para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="duizhan")
-        self.标准模式 = all(ipara for ipara in para[0])
-        self.青铜段位 = any(ipara for ipara in para[1])
+        para = self.Tool.gathervar(self.mynode, self.totalnode, var=para, name="广播对战参数")
+        self.标准模式 = all(ipara[0] for ipara in para)
+        self.青铜段位 = any(ipara[1] for ipara in para)
         #
 
     # 保存运行信息
@@ -464,8 +504,11 @@ class wzry_task:
         存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
         if not 存在:
             return
-        for i in self.图片.王者登录关闭按钮:
-            keyindex = f"王者登陆关闭按钮{i}"
+        for idx, i in enumerate(self.图片.王者登录关闭按钮):
+            try:
+                keyindex = f"王者登陆关闭按钮{os.path.basename(i.filename)}"
+            except:
+                keyindex = f"王者登陆关闭按钮{idx}"
             pos = exists(i)
             if pos:
                 self.Tool.var_dict[keyindex] = pos
@@ -476,7 +519,12 @@ class wzry_task:
         存在, self.图片.王者登录关闭按钮 = self.Tool.存在任一张图(self.图片.王者登录关闭按钮, "王者登录关闭按钮")
         if not 存在:
             return
-        for i in self.图片.王者登录关闭按钮:
+        #
+        for idx, i in enumerate(self.图片.王者登录关闭按钮):
+            try:
+                keyindex = f"王者登陆关闭按钮{os.path.basename(i.filename)}"
+            except:
+                keyindex = f"王者登陆关闭按钮{idx}"
             self.Tool.LoopTouch(i, f"王者登录关闭按钮{i}", loop=3, savepos=False)
     #
 
@@ -549,7 +597,10 @@ class wzry_task:
             存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
             if 存在 or self.quick判断界面() in ["对战中", "对战中_模拟战", "战绩页面"]:
                 self.判断对战中(处理=处理对战)
+                对战结束返回房间 = self.对战结束返回房间
+                self.对战结束返回房间 = False
                 self.结束人机匹配()
+                self.对战结束返回房间 = 对战结束返回房间
         #
         # 房间
         返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
@@ -587,7 +638,6 @@ class wzry_task:
             return True
         #
         if times == 0:
-            self.Tool.timelimit(timekey="登录游戏", limit=60*5, init=True)
             self.Tool.removefile(self.重新登录FILE)
         #
         times = times+1
@@ -623,9 +673,16 @@ class wzry_task:
         #
         # 更新公告
         更新公告 = Template(r"tpl1692946575591.png", record_pos=(0.103, -0.235), resolution=(960, 540), threshold=0.9)
+        self.Tool.timelimit(timekey="登录游戏>更新公告", limit=60*5, init=True)
         if exists(更新公告):
             检测到登录界面 = False
             for igengxin in np.arange(30):
+                if self.Tool.timelimit(timekey="登录游戏>更新公告", limit=60*5, init=False):
+                    if not touch((1, 1)):
+                        content = f"登录游戏>更新公告: 无法触摸屏幕"
+                        self.创建同步文件(content)
+                        break
+                #
                 TimeECHO("更新中%d" % (igengxin))
                 关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
                 金色确定 = Template(r"tpl1692946738054.png", record_pos=(-0.002, 0.116), resolution=(960, 540), threshold=0.9)
@@ -657,13 +714,43 @@ class wzry_task:
                     TimeECHO("正在下载资源包")
                 sleep(60)
                 self.确定按钮()
+        #
+        # 登录界面有两个协议: 《用户协议和隐私政策》、《权限列表》、《游戏许可和隐私保护协议》
+        用户协议和隐私政策 = Template(r"tpl1735018819008.png", record_pos=(0.004, -0.135), resolution=(960, 540))
+        同意协议 = Template(r"tpl1735018827666.png", record_pos=(0.061, 0.078), resolution=(960, 540))
+        if exists(用户协议和隐私政策):
+            TimeECHO(f"{fun_name(1)}.用户协议和隐私政策")
+            检测到登录界面 = True
+            self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=True)
+        if self.Tool.existsTHENtouch(同意协议, "同意协议", savepos=False):
+            检测到登录界面 = True
+        #
+        权限列表 = Template(r"tpl1735019011072.png", record_pos=(-0.005, -0.158), resolution=(960, 540))
+        确定权限 = Template(r"tpl1735019018575.png", record_pos=(-0.005, 0.093), resolution=(960, 540))
+        if exists(权限列表):
+            TimeECHO(f"{fun_name(1)}.确定权限列表")
+            检测到登录界面 = True
+            self.Tool.existsTHENtouch(确定权限, "确定权限", savepos=True)
+        if self.Tool.existsTHENtouch(确定权限, "确定权限", savepos=False):
+            检测到登录界面 = True
+        #
+        关闭更新 = Template(r"tpl1693446444598.png", record_pos=(0.428, -0.205), resolution=(960, 540), threshold=0.9)
+        self.Tool.existsTHENtouch(关闭更新, "关闭更新", savepos=False)
+        #
         同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
-        if exists(Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)):
+        游戏许可和隐私保护协议 = Template(r"tpl1692946837840.png", record_pos=(-0.092, -0.166), resolution=(960, 540), threshold=0.9)
+        # 这个协议出现，基本上就是账户被退出了
+        if exists(游戏许可和隐私保护协议):
+            TimeECHO(f"{fun_name(1)}.游戏许可和隐私保护协议")
             检测到登录界面 = True
             self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=True)
         #
         if self.Tool.existsTHENtouch(同意游戏, "同意游戏", savepos=False):
             检测到登录界面 = True
+        #
+        # 点击同意游戏后, 容易发生游戏闪退, 再检查一下
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, False)
         #
         # 这里是账户被退出的界面，需要重新登录了
         if exists(Template(r"tpl1692946938717.png", record_pos=(-0.108, 0.159), resolution=(960, 540), threshold=0.9)):
@@ -688,6 +775,10 @@ class wzry_task:
             if self.大厅严格判断():
                 return True
         #
+        # 点击登陆后有概率.游戏闪退
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, False)
+        #
         if self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "登录界面.开始游戏", savepos=False):
             检测到登录界面 = True
             sleep(10)
@@ -702,6 +793,10 @@ class wzry_task:
             # 现在打开可能会放一段视频，这个随意点击也为了让界面换一下
             self.Tool.touch_record_pos(record_pos=(1, 1), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
             sleep(10)
+        #
+        # 点击登陆后有概率.游戏闪退
+        if not self.APPOB.前台APP(2):
+            return self.登录游戏(times, False)
         #
         # ..................................................................................
         # 第一次万一已经登录过了
@@ -846,16 +941,20 @@ class wzry_task:
         if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True):
             return self.单人进入人机匹配房间(times)
         #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+        if exists(self.图片.进入5v5匹配):
+            TimeECHO("检测到 5v5王者峡谷. 历史位置有误, 更新中")
+            del self.Tool.var_dict["5v5王者峡谷"]
+            self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True)
+        #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
-            #
             if times > 2:
-                TimeECHO("没有检测到[进入人机匹配]界面")
-            if times > 3:
-                TimeECHO("请注意WZ是否又更新了进入人机的界面")
-            if times > 4:
+                TimeECHO("没有检测到[进入人机匹配]界面, 请注意WZ是否又更新了进入人机的界面")
                 for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "5v5王者峡谷"])):
                     del self.Tool.var_dict[delstr]
             #
@@ -872,12 +971,14 @@ class wzry_task:
             TimeECHO("选择对战模式")
             匹配模式 = self.图片.人机标准模式 if self.标准模式 else self.图片.人机快速模式
             段位图标 = self.图片.人机青铜段位 if self.青铜段位 else self.图片.人机星耀段位
+            sleep(5)  # 点击之后要等待,有的模拟器速度太慢
             if not self.Tool.existsTHENtouch(匹配模式, f"匹配模式.{模式key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
+            sleep(5)  # 点击之后要等待,有的模拟器速度太慢
             if not self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True):
                 return self.单人进入人机匹配房间(times)
         #
-        sleep(5)
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习"):
             if times > 2:
                 TimeECHO("没有检测到[人机开始练习]")
@@ -915,16 +1016,22 @@ class wzry_task:
                 TimeECHO("高阶段位已达上限,采用青铜模式")
                 self.青铜段位 = True
                 self.选择人机模式 = True
+                模式key = "标准模式" if self.标准模式 else "快速模式"
+                段位key = "青铜段位" if self.青铜段位 else "星耀段位"
+                匹配模式 = self.图片.人机标准模式 if self.标准模式 else self.图片.人机快速模式
+                段位图标 = self.图片.人机青铜段位 if self.青铜段位 else self.图片.人机星耀段位
                 self.Tool.var_dict["运行参数.青铜段位"] = True
                 if self.组队模式:
                     TimeErr("段位不合适,创建同步文件")
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, "星耀段位次数用完")
                     return False
                 else:
-                    段位key = "青铜段位"
+                    # 切换青铜段位, 上面进行了:匹配模式、段位图标、模式key、段位key的重置
+                    sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+                    self.Tool.existsTHENtouch(匹配模式, f"匹配模式.{模式key}", savepos=True)
+                    sleep(5)  # 点击之后要等待,有的模拟器速度太慢
                     self.Tool.existsTHENtouch(段位图标, f"段位图标.{段位key}", savepos=True)
                     self.Tool.existsTHENtouch(self.图片.人机开始练习, "人机开始练习")
-                    return self.单人进入人机匹配房间(times)
         #
         if self.判断房间中(处理=True):
             return True
@@ -933,11 +1040,14 @@ class wzry_task:
 
     def 单人进入排位房间(self, times=0):
         #
+        TimeECHO(f"第{times}次进入进入排位房间")
+        TimeECHO("请提前预选好分路(只用预选一次,建议游走),脚本暂不支持预选分路")
+        TimeECHO("请打开自动购买装备和自动技能加点")
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=30, touch同步=True):
             return True
         #
         times = times+1
-        if not self.Tool.existsTHENtouch(self.图片.大厅排位赛, "大厅排位赛", savepos=False):
+        if not self.Tool.existsTHENtouch(self.图片.大厅排位赛, "大厅排位赛", savepos=True):
             TimeErr("找不到大厅排位赛")
             return self.单人进入人机匹配房间(times)
         sleep(10)
@@ -954,6 +1064,18 @@ class wzry_task:
                     self.创建同步文件("不匹配被禁赛, 超时无法进入")
                     return True
             return self.单人进入人机匹配房间(times)
+        #
+        # S38赛季可能需要预选分路, 由于按钮太小, 识别率低，所以这里仅先适配960x540分辨率,固定位置点击
+        # 但是如果预选过分路了，这里再选择则会取消预选，因此暂时不实现选分路, 手动选择
+        if False:
+            sleep(10)
+            self.Tool.touch_record_pos(record_pos=self.图片.排位设置分路.record_pos, resolution=self.移动端.resolution, keystr=f"排位设置分路")
+            sleep(20)
+            self.Tool.touch_record_pos(record_pos=self.图片.排位分路图标.record_pos, resolution=self.移动端.resolution, keystr=f"排位分路图标")
+            sleep(20)
+            self.Tool.existsTHENtouch(self.图片.排位分路确定, "排位分路确定", savepos=True)
+            sleep(20)
+        #
         return True
     #
 
@@ -997,6 +1119,7 @@ class wzry_task:
                 进房 = self.图片.房主头像
                 TimeECHO("准备进入组队房间")
                 if not exists(进房):
+                    #注: 该通用头像的成功率较低, 不建议使用
                     TimeECHO("没找到房主头像, 采用通用房主头像")
                     进房 = Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540), threshold=0.9)
                 if self.Tool.existsTHENtouch(进房, "房主头像按钮", savepos=False):
@@ -1018,6 +1141,7 @@ class wzry_task:
                         找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
                         if not 找到取消按钮:
                             TimeECHO("进入房间失败,可能是今日更新太频繁,版本不一致无法进房,需要重新登录更新")
+                            TimeECHO("也可能<房主头像>截图区域不合适, 详见手册 https://wzry-doc.pages.dev/guide/zudui/")
                 else:
                     TimeECHO("未找到组队房间,检测主节点登录状态")
                 if not 找到取消按钮:
@@ -1049,12 +1173,12 @@ class wzry_task:
         sleep(5)
         #
         # savepos 如果找到会自动替换上一次的字典
-        存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
+        存在邀请好友, _ = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
         if not 存在邀请好友:
             for i in range(10):
                 self.Tool.touch_record_pos(record_pos=任意位置继续.record_pos, resolution=self.移动端.resolution, keystr=f"任意位置继续{i}")
                 sleep(2)
-                存在邀请好友, 模拟战页面元素 = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
+                存在邀请好友, _ = self.Tool.存在任一张图([邀请好友], "模拟战.邀请好友", savepos=True)
                 if 存在邀请好友:
                     break
             TimeECHO(f"{fun_name(1)}.无法找到模拟对战入口, 将尝试历史入口")
@@ -1090,6 +1214,8 @@ class wzry_task:
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         # 开始按钮的位置(房主)可以不断点击
         # 房主的取消匹配在上方的叉号
+        if "5v5排位" in self.对战模式:
+            self.图片.房间中的开始按钮图标 = self.图片.排位开始匹配 + self.图片.房间中的开始按钮图标
         if self.房主:
             找到开始按钮, self.图片.房间中的开始按钮图标 = self.Tool.存在任一张图(self.图片.房间中的开始按钮图标, "开始匹配")
             房间中的开始按钮 = self.图片.房间中的开始按钮图标[0]
@@ -1128,6 +1254,11 @@ class wzry_task:
                 # 该界面用于判断是都匹配成功
                 if "模拟战" in self.对战模式:
                     队友确认匹配 = self.判断对战中(处理=False)
+                elif "5v5排位" in self.对战模式:
+                    队友确认匹配 = exists(self.图片.排位选英雄界面)
+                    if 队友确认匹配:
+                        TimeECHO("检测到排位界面,sleep(30)后继续")
+                        sleep(30)
                 else:
                     队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
                 #
@@ -1142,6 +1273,9 @@ class wzry_task:
                     自己曾经确定过匹配 = True
         # 模拟战到此就结束了
         if "模拟战" in self.对战模式:
+            return True
+        if "5v5排位" in self.对战模式:
+            # 暂时不支持选英雄,界面和人机差别太大, 目前无继续开发计划, 默认随机英雄打就完了
             return True
         # 选择英雄
         if self.选择英雄:
@@ -1168,8 +1302,10 @@ class wzry_task:
             加载中 = exists(加载游戏界面)
             if 加载中:
                 TimeECHO("加载游戏中.....")
-                if self.Tool.existsTHENtouch(Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540)), "加油按钮", savepos=False):
-                    sleep(2)
+                加油按钮 = Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540))
+                if not self.Tool.existsTHENtouch(加油按钮, "加油按钮", savepos=False):
+                    self.Tool.touch_record_pos(加油按钮.record_pos, self.移动端.resolution, "加油按钮")
+                sleep(2)
             else:
                 break
             if self.Tool.timelimit(timekey="加载游戏", limit=60*10, init=False):
@@ -1194,12 +1330,17 @@ class wzry_task:
             if not self.check_run_status():
                 return True
             addtime = 60*10 if self.本循环参数.标准模式 else 0
+            addtime = 60*30 if "5v5排位" in self.对战模式 else addtime
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
+            #
             self.APPOB.打开APP()
+            #
+            点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
-                self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
+                TimeECHO(f"⚠️ 警告: 若脚本长期卡在点击此处继续, 请检查是否应该更新资源: https://wzry-doc.pages.dev/guide/upfig/")
             # 对战阶段，处理对战
             加速对战 = False
             if self.触摸对战:
@@ -1207,6 +1348,76 @@ class wzry_task:
             if self.判断对战中(处理=加速对战):
                 sleep(30)
                 continue
+            # 水晶爆炸,随便点击画面跳过
+            存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
+            if 存在:
+                sleep(5)
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
+                sleep(10)
+                # 团队结算画面
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
+                sleep(10)
+                # 个人结算动画
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                sleep(10)
+                # 排位变化界面
+                if "5v5排位" in self.对战模式:
+                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                    sleep(10)
+
+            #
+            # S37 更新了MVP结算动画
+            存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
+            if 存在:
+                sleep(5)
+                if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
+                    TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
+                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+                    sleep(10)
+                #
+                # S38更新, 还要多开一遍个人的MVP结算画面
+                存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面[1:], "个人.MVP结算画面")
+                if 存在:
+                    if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
+                        TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
+                        self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
+                        sleep(10)
+            self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
+            #
+            # 对战结算时的弹窗
+            每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
+            self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
+            确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
+            self.Tool.LoopTouch(确定按钮, "回归对战|新赛季|友情币等奖励确定按钮", savepos=False)
+            # 奇怪的结算画面
+            金色确定 = Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540))
+            self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=False)
+            #
+            if not self.check_run_status():
+                return
+            # 万一点到某处, 这是返回按钮
+            if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
+                sleep(2)
+                self.确定按钮()
+                sleep(5)
+            # 返回房间/大厅
+            if self.对战结束返回房间:
+                if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
+                    sleep(10)
+                    # 万一返回房间后来一堆提示
+                    self.网络优化()
+                    if self.判断房间中(处理=False):
+                        return
+            else:
+                if self.Tool.existsTHENtouch(Template(r"tpl1689667243845.png", record_pos=(-0.082, 0.221), resolution=(960, 540), threshold=0.9), "返回大厅"):
+                    sleep(10)
+                    if self.Tool.existsTHENtouch(Template(r"tpl1689667256973.png", record_pos=(0.094, 0.115), resolution=(960, 540)), "确定返回大厅"):
+                        sleep(10)
+                    if self.判断大厅中(acce=True):
+                        return
+            #
+            # 调用结束人机匹配时, 通常是刚结束对战, 无需判断房间中还是大厅中的,
+            # 因此把这几行判断放在最后
             # 已返回房间或大厅
             if self.判断房间中(处理=False):
                 return
@@ -1216,49 +1427,6 @@ class wzry_task:
             if self.健康系统_常用命令():
                 return True
             #
-            # S37 更新了结算动画
-            self.Tool.touch_record_pos(record_pos=(0, 0), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.屏幕中心")
-            点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
-            存在, self.图片.战绩页面元素 = self.Tool.存在任一张图(self.图片.战绩页面元素, "对战.战绩页面元素")
-            if 存在:
-                if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
-                    TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
-                    self.Tool.touch_record_pos(record_pos=(-0.002, 0.203), resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
-            self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
-            #
-            # 对战结算时的弹窗
-            每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
-            self.Tool.existsTHENtouch(每日任务进展, "新号每日任务进展", savepos=False)
-            确定按钮 = Template(r"tpl1689667950453.png", record_pos=(-0.001, 0.111), resolution=(960, 540))
-            self.Tool.LoopTouch(确定按钮, "回归对战|新赛季|友情币等奖励确定按钮", savepos=False)
-            # 奇怪的结算画面
-            游戏结束了 = Template(r"tpl1694360304332.png", record_pos=(-0.011, -0.011), resolution=(960, 540))
-            if exists(游戏结束了):
-                self.Tool.existsTHENtouch(Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540)))
-            if not self.check_run_status():
-                return
-            # 有时候会莫名进入分享界面
-            if exists(Template(r"tpl1689667038979.png", record_pos=(0.235, -0.125), resolution=(960, 540))):
-                TimeECHO("分享界面")
-                self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540)))
-                sleep(2)
-                self.确定按钮()
-            # 返回房间/大厅
-            if self.对战结束返回房间:
-                if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
-                    sleep(10)
-                # 万一返回房间后来一堆提示
-                self.网络优化()
-                if self.判断房间中(处理=False):
-                    return
-            else:
-                if self.Tool.existsTHENtouch(Template(r"tpl1689667243845.png", record_pos=(-0.082, 0.221), resolution=(960, 540), threshold=0.9), "返回大厅"):
-                    sleep(10)
-                    if self.Tool.existsTHENtouch(Template(r"tpl1689667256973.png", record_pos=(0.094, 0.115), resolution=(960, 540)), "确定返回大厅"):
-                        sleep(10)
-                if self.判断大厅中(acce=True):
-                    return
-    #
 
     def 结束人机匹配_模拟战(self):
         TimeECHO("准备结束本局模拟战")
@@ -1389,8 +1557,28 @@ class wzry_task:
         #
         # 王者APP礼包
         self.王者礼包()
+    #
+
+    def 王者礼包异常处理(self):
+        # 礼物过程中出现异常的处理
+        if os.path.exists(self.重新登录FILE):
+            return False
+        #
+        if self.totalnode_bak > 1 and self.Tool.存在同步文件(self.Tool.辅助同步文件) and not self.path.exists(self.无法进行组队FILE):
+            return False
+        elif self.Tool.存在同步文件(self.Tool.独立同步文件):
+            self.Tool.removefile(self.Tool.独立同步文件)
+            self.移动端.重启重连设备(10)
+            self.登录游戏()
+            return True
+        #
+        # 正常情况
+        return True
 
     def 王者礼包(self):
+        # ........................................................
+        if not self.王者礼包异常处理():
+            return True
         if self.Tool.timelimit("领游戏礼包", limit=60*60*3, init=False):
             if not self.check_run_status():
                 TimeECHO("领礼包时.检测状态失败, 停止领取")
@@ -1419,6 +1607,10 @@ class wzry_task:
                 self.活动入口()
             if self.祈愿礼包:
                 self.祈愿入口()
+            # ........................................................
+            if not self.王者礼包异常处理():
+                return True
+            #
             # 以前的活动
             if self.玉镖夺魁签到:
                 self.玉镖夺魁()
@@ -1426,8 +1618,10 @@ class wzry_task:
                 TimeECHO("暂时不进行玉镖夺魁")
             if self.礼包功能_回忆礼册:
                 self.回忆礼册()
-            if self.礼包功能_灵宝互动:
-                self.灵宝互动()
+            # ........................................................
+            if not self.王者礼包异常处理():
+                return True
+            #
             # 友情礼包、邮件礼包、战队礼包不领取不会丢失,影响不大,最后领取
             if self.礼包功能_邮件礼包:
                 self.每日礼包_邮件礼包()
@@ -1442,7 +1636,8 @@ class wzry_task:
                     self.Tool.var_dict["运行参数.战队礼包"] = self.Tool.var_dict["运行参数.战队礼包"] + 1
                 else:
                     TimeECHO(f"战队礼包领取次数达到2, 不再继续领取。")
-            if self.Tool.存在同步文件():
+            # ........................................................
+            if not self.王者礼包异常处理():
                 return True
             #
             if self.礼包功能_KPL礼包:
@@ -1453,6 +1648,10 @@ class wzry_task:
                     self.Tool.var_dict["运行参数.KPL观赛时长"] = 0
                 else:
                     TimeECHO("今日已完成KPL观赛礼包, 不再领取")
+            #
+            # 灵宝礼包页面特别复杂, 无法很好的回到大厅,在最后领取
+            if self.礼包功能_灵宝互动:
+                self.灵宝互动()
         else:
             TimeECHO("时间太短,暂时不领取游戏礼包")
         #
@@ -1959,8 +2158,8 @@ class wzry_task:
         if not self.Tool.existsTHENtouch(KPL观赛入口, "KPL观赛入口", savepos=True):
             self.Tool.touch_record_pos(KPL观赛入口.record_pos, self.移动端.resolution, f"KPL观赛入口")
         #
-        同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
-        self.Tool.existsTHENtouch(同意游戏, "KPL首次进入需要同意游戏")
+        KPL同意游戏 = Template(r"tpl1692946883784.png", record_pos=(0.092, 0.145), resolution=(960, 540), threshold=0.9)
+        self.Tool.existsTHENtouch(KPL同意游戏, "KPL首次进入需要同意游戏")
         #
         进入观赛界面, KPL观赛界面 = self.Tool.存在任一张图(KPL观赛界面, "KPL观赛界面")
         if not 进入观赛界面:
@@ -2026,114 +2225,88 @@ class wzry_task:
         战令奖励界面 = []
         战令奖励界面.append(Template(r"tpl1706543181534.png", record_pos=(0.373, 0.173), resolution=(960, 540)))
         战令奖励界面.append(Template(r"tpl1729838722235.png", record_pos=(0.449, 0.198), resolution=(960, 540)))
-        任务 = Template(r"tpl1703755622899.png", record_pos=(-0.448, -0.027), resolution=(960, 540))
-        任务列表 = Template(r"tpl1703757152809.png", record_pos=(-0.173, -0.18), resolution=(960, 540))
         确定按钮 = Template(r"tpl1694441190629.png", record_pos=(0.0, 0.165), resolution=(960, 540))
+        # 精细位置
+        任务 = Template(r"tpl1703755622899.png", record_pos=(-0.444, -0.111), resolution=(960, 540))
         # 正常每日礼包
+        # 这里的record_pos是我精细截取的位置, 即使识别失败, 也可以直接touch
         一键领取 = Template(r"tpl1693193500142.png", record_pos=(0.391, 0.224), resolution=(960, 540))
-        # 新图标
-        今日活跃 = Template(r"tpl1703758748236.png", record_pos=(-0.239, 0.233), resolution=(960, 540))
-        本周活跃1 = Template(r"tpl1703758755430.png", record_pos=(-0.075, 0.232), resolution=(960, 540))
-        本周活跃2 = Template(r"tpl1703758760425.png", record_pos=(-0.015, 0.232), resolution=(960, 540))
+        今日活跃 = Template(r"tpl1703758748236.png", record_pos=(-0.248, 0.222), resolution=(960, 540))
+        本周活跃1 = Template(r"tpl1703758755430.png", record_pos=(-0.084, 0.229), resolution=(960, 540))
+        本周活跃2 = Template(r"tpl1703758760425.png", record_pos=(-0.017, 0.228), resolution=(960, 540))
         战令任务界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
         #
         返回 = Template(r"tpl1694442171115.png", record_pos=(-0.441, -0.252), resolution=(960, 540))
         #
         if not self.Tool.existsTHENtouch(self.图片.战令入口, "战令入口", savepos=True):
-            TimeECHO(f"未找到战令入口尝试计算坐标")
+            TimeECHO(f"未找到战令入口.尝试计算坐标")
             self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
         sleep(15)
         #
-        进入战令界面, 战令奖励界面 = self.Tool.存在任一张图(战令奖励界面, "战令奖励界面元素")
-        进入任务界面 = False
-        if not 进入战令界面:
-            self.当前界面 = "未知"
-            TimeECHO("判断进入战令界面失败， 尝试进入任务界面进行再次判断")
-            sleep(10)
-            if not self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True):
-                self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
-            战令奖励界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
-            进入任务界面, 战令奖励界面 = self.Tool.存在任一张图(战令任务界面, "战令任务界面界面元素")
-        #
-        if not 进入战令界面 and times > 3:
-            TimeECHO(f"未检测到战令界面, 重新进入领任务礼包")
-            if "战令入口" in self.Tool.var_dict.keys():
-                del self.Tool.var_dict["战令入口"]
-            return self.每日礼包_每日任务(times=times)
-        #
-        #
-        for i in range(10):  # 下面的循环touch很费时，总循环不用很久
-            if 进入任务界面:
-                break
-            self.Tool.existsTHENtouch(任务, "战令的每日任务", savepos=True)
-            if i > 2:
-                TimeECHO(f"[{i}]战令页面更新了，你需要自己截图更新图片资源了")
-                TimeECHO(f"本程序会尝试寻找一下位置（仅适用于16:9屏幕），但不保证成功")
-                for j in range(10):
-                    record_pos = (-0.445, -0.03-j/100)
-                    self.Tool.touch_record_pos(record_pos, self.移动端.resolution, "战令的每日任务")
-                    if exists(一键领取):
-                        TimeECHO(f"更新(战令的每日任务)坐标")
-                        self.Tool.cal_record_pos(record_pos, self.移动端.resolution, f"战令的每日任务", savepos=True)
-                        break
-            if exists(任务列表):
-                进入任务界面 = True
-            if exists(一键领取):
-                进入任务界面 = True
-            sleep(1)
+        if self.判断大厅中(acce=False):
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口"])):
+                del self.Tool.var_dict[delstr]
+            #
+            TimeECHO("进入战令界面失败，仍在大厅中, 计算点击战令入口")
+            self.Tool.touch_record_pos(self.图片.战令入口.record_pos, self.移动端.resolution, "战令入口")
+            sleep(15)
             if self.判断大厅中(acce=False):
+                TimeECHO("再次进入战令界面失败，仍在大厅中, 异常无法解决")
                 return self.每日礼包_每日任务(times=times)
         #
-        if not 进入任务界面 and times % 5 == 4:
-            TimeECHO(f"未检测到任务界面, 重新进入领任务礼包")
-            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口", "战令的每日任务"])):
+        # 开始尝试进入任务界面, 后面均采用精确坐标进行touch
+        进入任务界面 = False
+        for i in range(10):
+            self.Tool.touch_record_pos(任务.record_pos, self.移动端.resolution, "战令的每日任务")
+            sleep(10)
+            战令奖励界面 = [一键领取, 今日活跃, 本周活跃1, 本周活跃2]
+            进入任务界面, 战令奖励界面 = self.Tool.存在任一张图(战令任务界面, "战令任务界面界面元素")
+            if 进入任务界面:
+                break
+        #
+        if not 进入任务界面:
+            TimeECHO(f"未检测到战令任务界面, 重新进入领任务礼包")
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["战令入口"])):
                 del self.Tool.var_dict[delstr]
             return self.每日礼包_每日任务(times=times-1)
         #
-        # 开始正式领取
-        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
+        # 开始正式领取, 找不要位置就精细点击坐标
+        活跃礼包 = {"一键领取": 一键领取, "今日活跃": 今日活跃, "本周活跃1": 本周活跃1, "本周活跃2": 本周活跃2}
+        for keystr in 活跃礼包.keys():
+            if not self.Tool.existsTHENtouch(活跃礼包[keystr], keystr):
+                self.Tool.touch_record_pos(record_pos=活跃礼包[keystr].record_pos, resolution=self.移动端.resolution, keystr=keystr)
+            self.Tool.LoopTouch(确定按钮, "确定按钮")
             sleep(5)
-        # 这几个活跃，暂时没有找到位置，不确定是没发光的原因，还是图标变化
-        # 这是使用savepos，下次换了新的领取位置记得清除这些dict
-        if self.Tool.existsTHENtouch(今日活跃, "今日活跃", savepos=True):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃1, "本周活跃1", savepos=True):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        if self.Tool.existsTHENtouch(本周活跃2, "本周活跃2", savepos=True):
-            self.Tool.existsTHENtouch(确定按钮, "确定")
-            sleep(5)
-        #
         self.Tool.LoopTouch(确定按钮, "确定按钮")
-        self.关闭按钮()
-        self.确定按钮()
         #
-        # 新赛季增加的领取入口
+        # 若之后出现新的弹窗, 可能需要开启这两个注释, 并插入到后面的间隔中
+        # self.关闭按钮()
+        # self.确定按钮()
+        #
+        # 新赛季增加的领取入口,全部采用精确坐标, 不再识别
         本周任务 = Template(r"tpl1703755716888.png", record_pos=(-0.175, -0.192), resolution=(960, 540))
         本周签到 = Template(r"tpl1703755733895.png", record_pos=(0.244, 0.228), resolution=(960, 540))
         确定签到 = Template(r"tpl1703755744366.png", record_pos=(-0.001, 0.165), resolution=(960, 540))
-        if self.Tool.existsTHENtouch(本周任务, "本周任务礼包", savepos=True):
+        # 本周任务
+        self.Tool.touch_record_pos(record_pos=本周任务.record_pos, resolution=self.移动端.resolution, keystr="本周任务礼包")
+        sleep(5)
+        if self.Tool.existsTHENtouch(本周签到, "本周战令签到", savepos=False):
+            self.Tool.LoopTouch(确定签到, "确定签到战令")
+        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
-            if self.Tool.existsTHENtouch(本周签到, "本周战令签到", savepos=False):
-                self.Tool.LoopTouch(确定签到, "确定签到战令")
-            if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-                self.Tool.existsTHENtouch(确定按钮, "确定")
-                sleep(5)
-            self.Tool.LoopTouch(确定按钮, "确定按钮")
-            self.关闭按钮()
-            self.确定按钮()
+        self.Tool.LoopTouch(确定按钮, "确定按钮")
+        # 本期任务
         本期任务 = Template(r"tpl1703755722682.png", record_pos=(-0.068, -0.192), resolution=(960, 540))
-        if self.Tool.existsTHENtouch(本期任务, "本期任务礼包", savepos=True):
+        self.Tool.touch_record_pos(record_pos=本期任务.record_pos, resolution=self.移动端.resolution, keystr="本期任务礼包")
+        sleep(5)
+        if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
+            self.Tool.existsTHENtouch(确定按钮, "确定")
             sleep(5)
-            if self.Tool.existsTHENtouch(一键领取, "一键领取 "):
-                self.Tool.existsTHENtouch(确定按钮, "确定")
-                sleep(5)
-            self.Tool.LoopTouch(确定按钮, "确定按钮")
-            self.关闭按钮()
-            self.确定按钮()
+        self.Tool.LoopTouch(确定按钮, "确定按钮")
         #
+        self.关闭按钮()
+        self.确定按钮()
         self.Tool.LoopTouch(返回, "返回")
         self.确定按钮()
         return True
@@ -2269,10 +2442,17 @@ class wzry_task:
         if self.Tool.timelimit("领营地礼包", limit=60*60*3, init=False):
             TimeECHO(f"{fun_name(1)}")
             self.APPOB.关闭APP()
-            from wzyd import wzyd_libao
+            try:
+                # 如果模块没有被打包成包，直接导入 wzyd 模块
+                from wzyd import wzyd_libao
+            except ImportError:
+                # 如果模块已经打包成包，使用相对导入
+                from .wzyd import wzyd_libao
             ce = wzyd_libao()
             ce.run()
             ce.APPOB.关闭APP()
+            # 修正某些模拟器, 运行完营地后强制改变分辨率的问题
+            self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
             return True
         else:
             TimeECHO(f"时间太短,暂时不{fun_name(1)}")
@@ -2283,7 +2463,12 @@ class wzry_task:
         if self.Tool.timelimit("体验服更新", limit=60*60*3, init=False):
             TimeECHO(f"{fun_name(1)}")
             self.APPOB.关闭APP()
-            from tiyanfu import tiyanfu
+            try:
+                # 如果模块没有被打包成包，直接导入 tiyanfu 模块
+                from tiyanfu import tiyanfu
+            except ImportError:
+                # 如果模块已经打包成包，使用相对导入
+                from .tiyanfu import tiyanfu
             ce = tiyanfu()
             ce.run()
             ce.APPOB.关闭APP()
@@ -2408,32 +2593,27 @@ class wzry_task:
                 if not self.Tool.timelimit(timekey="当前界面", limit=60, init=False):
                     TimeECHO(f"{fun_name(1)}.采用历史的判断结果判定当前处在:{self.当前界面}")
                     return False
-        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
-        if 存在:
-            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
-            del self.图片.房间元素[1:]
-        # 活动界面
-        if 存在 and 处理:
-            # 这些活动翻页元素一般只显示一次，新的账户每次进入房间都会提示
+        #
+        # 这些活动翻页元素一般只显示一次，回归账户/新用户每次进入房间都会提示
+        if 处理:
             存在翻页活动, self.图片.房间翻页活动元素 = self.Tool.存在任一张图(self.图片.房间翻页活动元素, "房间翻页活动元素")
             if 存在翻页活动:
                 # 存在之后，这个活动只出现一次,可以删除这个变量了
                 del self.图片.房间翻页活动元素[0]
-                # 每天生成新的图片对象时会重新恢复原始图片的
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
-            else:
-                # 如果不存的话,也可以适当删除一些self.图片.房间翻页活动元素
-                if len(self.图片.房间翻页活动元素) > 0:
-                    if not exists(self.图片.房间翻页活动元素[-1]):
-                        del self.图片.房间翻页活动元素[-1]
-            #
-            存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
+        #
+        存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         #
         if 存在:
             self.当前界面 = "房间中"
             self.Tool.timelimit(timekey="当前界面", init=True)
+            # 减少判断次数,不用担心图片太少的问题,每日会重新更新图片
+            del self.图片.房间元素[1:]
+            if len(self.图片.房间翻页活动元素) > 0:
+                if not exists(self.图片.房间翻页活动元素[-1]):
+                    del self.图片.房间翻页活动元素[-1]
         else:
             self.当前界面 = "未知"
         #
@@ -2488,6 +2668,7 @@ class wzry_task:
         装备pos = False
         移动pos = False
         普攻pos = False
+        存在装备图标 = False
         装备poskey = f"装备pos({self.mynode})"
         移动poskey = f"移动pos({self.mynode})"
         普攻poskey = f"普攻pos({self.mynode})"
@@ -2500,9 +2681,10 @@ class wzry_task:
             if self.Tool.存在同步文件():
                 return True
             # 不同账户出装位置不同, 这里随机识别一次，更新位置
-            if random.randint(1, 5) == 1:
+            if not 存在装备图标 and random.randint(1, 5) == 1:
                 装备pos = False
-            if not 装备pos:
+             # 排位的时候就别找装备了,时间紧,快逃离泉水危险区域
+            if not 装备pos and "5v5排位" not in self.对战模式:
                 # 每一次尝试采用新的位置
                 存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
                 if 存在装备图标:
@@ -2575,6 +2757,12 @@ class wzry_task:
                     #
                     if 普攻pos:
                         sleep(0.2)
+                        touch(普攻pos)
+                    #
+                    # 排位时多走走, 离开泉水区域
+                    if "5v5排位" in self.对战模式:
+                        for _ in range(5):
+                            swipe(移动pos, vector=[x, y])
                         touch(普攻pos)
             #
             if 普攻pos:
@@ -2752,6 +2940,8 @@ class wzry_task:
         加速对战 = False
         if "模拟战" in self.对战模式:
             加速对战 = True
+        if "5v5排位" in self.对战模式:
+            加速对战 = True
         if self.触摸对战 and "5v5" in self.对战模式:
             加速对战 = True
         if self.判断对战中(处理=加速对战):
@@ -2877,8 +3067,14 @@ class wzry_task:
                     TimeECHO(f"单账户重置完成")
                 self.Tool.removefile(self.Tool.独立同步文件)
                 # 重置完成
-                if not self.组队模式 and "健康系统" in content and self.外置礼包_王者营地:
-                    self.每日礼包_王者营地()
+                if not self.组队模式:
+                    if "健康系统" in content:
+                        if self.外置礼包_王者营地:
+                            self.每日礼包_王者营地()
+
+                        else:
+                            TimeECHO(f"健康系统导致的同步, sleep 5 min 再继续执行")
+                            sleep(5*60)
                 #
                 # 检测账号登录状况
                 if os.path.exists(self.重新登录FILE):
@@ -2930,6 +3126,12 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             self.当前状态 = "状态检查"
+            # 修正分辨率, 避免某些模拟器返回的分辨率不对
+            if self.移动端.resolution[0] < self.移动端.resolution[1]:
+                TimeECHO("=>"*20)
+                TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
+                self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
+                TimeECHO("<="*20)
             if not self.check_run_status():
                 continue
             # ------------------------------------------------------------------------------
@@ -3058,6 +3260,15 @@ class wzry_task:
                 continue
             # ------------------------------------------------------------------------------
             # 计算参数检查警告
+            if "5v5排位" == self.对战模式:
+                TimeECHO(f"==="*20)
+                TimeECHO(f"恭喜你发现了隐藏的排位模式入口, 排位的处罚很严重, 青铜一星局也有处罚风险")
+                TimeECHO(f"如果你单纯的想测试排位模式怎么样, 可以注释下一行代码,开放排位模块")
+                TimeECHO(f"农活自动化助手是希望为平民玩家在低配置的设备上完成对战、礼包等农活")
+                TimeECHO(f"排位上分需要的电脑具有性能充足的显卡, 并且偏离了助手的开发初衷")
+                TimeECHO(f"因此助手不支持排位上星, 并且以后也不会在助手中开发上星的功能。")
+                self.对战模式 = "5v5匹配"
+                TimeECHO(f"==="*20)
             if "5v5匹配" == self.对战模式:
                 if self.组队模式 and not self.青铜段位:
                     TimeECHO(f"警告: 不建议组队模式采用星耀难度")
@@ -3065,9 +3276,6 @@ class wzry_task:
                     TimeECHO(f"警告: 不建议星耀难度开启TOUCH模式")
                 if not self.青铜段位 and self.Tool.var_dict["运行参数.青铜段位"]:
                     TimeECHO(f"警告: 检测到对战达到星耀对战上限, 但仍将依据 self.青铜段位 = {self.青铜段位} 尝试进行星耀对战")
-            if "5v5排位" == self.对战模式:
-                TimeECHO(f"这是5v5排位, 小心你的信誉分啊喂")
-                TimeECHO(f"5v5的游戏被你完成4v5了, 会被系统检测到的")
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
             # 后续程序的控制，仍采用 self.触摸对战等参数
@@ -3102,12 +3310,15 @@ class wzry_task:
                 sleep(60*2)
 
 
-if __name__ == "__main__":
-    # 如果使用vscode/pycharm/AirTestIDE等图形界面程序运行此脚本
+def main():
+    # 如果使用vscode等IDE运行此脚本
     # 在此处指定config_file=config文件
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
+        if not os.path.exists(config_file):
+            TimeECHO(f"不存在{config_file},请检查文件是否存在、文件名是否正确以及yaml.txt等错误拓展名")
+            TimeECHO(f"将加载默认配置运行.")
     # task_manager = TaskManager(config_file, None, None)
     task_manager = TaskManager(config_file, wzry_task, 'RUN')
     try:
@@ -3123,3 +3334,7 @@ if __name__ == "__main__":
         # sys.exit()  # 确保程序退出
     # 后面不能再跟其他指令，特别是exit()
     # 后面的命令会与task_manager.execute()中的多进程同时执行
+
+
+if __name__ == "__main__":
+    main()

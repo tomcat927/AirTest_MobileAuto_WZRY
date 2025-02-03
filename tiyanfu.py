@@ -3,7 +3,7 @@
 
 ##################################
 # Author : cndaqiang             #
-# Update : 2024-08-18            #
+# Update : 2024-12-08            #
 # Build  : 2024-08-18            #
 # What   : 更新登录体验服         #
 ##################################
@@ -12,16 +12,24 @@ import os
 import traceback
 
 try:
-    from airtest_mobileauto.control import *
+    from airtest_mobileauto import *
 except ImportError:
     traceback.print_exc()
-    print("模块[airtest_mobileauto]导入不存在, 请安装airtest_mobileauto")
+    print("模块 [airtest_mobileauto] 导入不存在，请安装 airtest_mobileauto")
+    print("运行以下命令安装：")
     print("python -m pip install airtest_mobileauto --upgrade")
-    from airtest_mobileauto.control import *
+    raise ImportError("模块 [airtest_mobileauto] 导入失败")
 
 
 class tiyanfu():
     def __init__(self):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         # device
         self.mynode = Settings.mynode
         self.totalnode = Settings.totalnode
@@ -30,7 +38,7 @@ class tiyanfu():
         # Tool
         dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.ce.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
+        dictreso = os.path.join(assets_dir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -52,7 +60,7 @@ class tiyanfu():
         self.APPOB = appOB(APPID=self.APPID, big=True, device=self.移动端)
         #
         self.体验服初始化FILE = f"WZRY.ce.{self.mynode}.临时初始化.txt"
-        self.内置循环 = False # 是否每日循环执行此脚本
+        self.内置循环 = False  # 是否每日循环执行此脚本
         #
         self.timelimit = 60*60*2.0
         # 更新时间
@@ -84,6 +92,12 @@ class tiyanfu():
         # ------------------------------------------------------------------------------
         run_class_command(self=self, command=self.Tool.readfile(self.体验服初始化FILE))
         # ------------------------------------------------------------------------------
+        # 修正分辨率, 避免某些模拟器返回的分辨率不对
+        if self.移动端.resolution[0] < self.移动端.resolution[1]:
+            TimeECHO("=>"*20)
+            TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
+            self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
+            TimeECHO("<="*20)
         #
         极简下载 = Template(r"tpl1723551085244.png", record_pos=(-0.008, -0.096), resolution=(960, 540), target_pos=6)
         确定按钮 = Template(r"tpl1723551187946.png", record_pos=(-0.003, 0.122), resolution=(960, 540))
@@ -124,7 +138,7 @@ class tiyanfu():
         # 体验服随便点无所谓 不用追求太逻辑和完美，就直接点以前的更新坐标
         self.Tool.touch_record_pos(更新按钮.record_pos, self.移动端.resolution, keystr=f"体验服.更新按钮")
         #
-        #
+        # 更新界面的关闭按钮
         关闭界面 = Template(r"tpl1723551215061.png", record_pos=(0.323, -0.202), resolution=(960, 540))
         关闭按钮 = Template(r"tpl1723551244924.png", record_pos=(0.425, -0.205), resolution=(960, 540))
         if exists(关闭界面):
@@ -151,9 +165,13 @@ class tiyanfu():
             sleep(waittime)
         if self.Tool.existsTHENtouch(开始游戏, "开始游戏", savepos=False):
             TimeECHO("还存在开始游戏，有可能体验服正在更新")
-            return False
+            return self.run(times)
         #
+        # 进入游戏大厅偶尔会有关闭按钮
         self.Tool.LoopTouch(关闭按钮, "关闭按钮", loop=5, savepos=False)
+        # 避免点多了, 如果有返回就返回一下
+        返回图标 = Template(r"tpl1692949580380.png", record_pos=(-0.458, -0.25), resolution=(960, 540), threshold=0.9)
+        self.Tool.LoopTouch(返回图标, "返回图标", loop=3, savepos=False)
         #
         self.大厅元素 = []
         self.大厅元素.append(Template(r"tpl1723551269026.png", record_pos=(0.455, 0.203), resolution=(960, 540)))
@@ -181,10 +199,15 @@ class tiyanfu():
             self.run()
 
 
-if __name__ == "__main__":
+def main():
+    # 如果使用vscode等IDE运行此脚本
+    # 在此处指定config_file=config文件
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
+        if not os.path.exists(config_file):
+            TimeECHO(f"不存在{config_file},请检查文件是否存在、文件名是否正确以及yaml.txt等错误拓展名")
+            TimeECHO(f"将加载默认配置运行.")
     Settings.Config(config_file)
     ce = tiyanfu()
     ce.run()
@@ -193,3 +216,7 @@ if __name__ == "__main__":
     else:
         ce.end()
     exit()
+
+
+if __name__ == "__main__":
+    main()

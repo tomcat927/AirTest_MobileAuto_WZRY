@@ -1,21 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 ##################################
 # Author : cndaqiang             #
-# Update : 2024-07-28            #
+# Update : 2024-12-08            #
 # Build  : 2024-07-28            #
 # What   : 王者营地的礼包         #
 ##################################
+import sys
+import os
+import traceback
 
-from airtest_mobileauto.control import *
+try:
+    from airtest_mobileauto import *
+except ImportError:
+    traceback.print_exc()
+    print("模块 [airtest_mobileauto] 导入不存在，请安装 airtest_mobileauto")
+    print("运行以下命令安装：")
+    print("python -m pip install airtest_mobileauto --upgrade")
+    raise ImportError("模块 [airtest_mobileauto] 导入失败")
 
 
 class wzyd_libao:
     def __init__(self):
+        # 静态资源
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        assets_dir = os.path.join(current_dir, 'assets')
+        Settings.figdirs.append(assets_dir)
+        seen = set()
+        Settings.figdirs = [x for x in Settings.figdirs if not (x in seen or seen.add(x))]
+        #
         # device
         self.mynode = Settings.mynode
         self.totalnode = Settings.totalnode
@@ -24,7 +38,7 @@ class wzyd_libao:
         # Tool
         dictfile = f"{self.移动端.设备类型}.var_dict_{self.mynode}.wzyd.yaml"
         # 预设的分辨率对应的触点文件
-        dictreso = os.path.join(Settings.figdir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
+        dictreso = os.path.join(assets_dir, f"{max(self.移动端.resolution)}.{min(self.移动端.resolution)}.dict.yaml")
         loaddict = not os.path.exists(dictfile) and os.path.exists(dictreso)
         self.Tool = DQWheel(var_dict_file=dictfile, mynode=self.mynode, totalnode=self.totalnode)
         if loaddict:
@@ -47,7 +61,7 @@ class wzyd_libao:
         self.APPOB = appOB(APPID=self.APPID, big=False, device=self.移动端)
         #
         self.营地初始化FILE = f"{self.prefix}.初始化.txt"
-        self.内置循环 = False # 是否每日循环执行此脚本
+        self.内置循环 = False  # 是否每日循环执行此脚本
         self.营地需要登录FILE = self.prefix+f".需要登录.txt"
         #
         self.timelimit = 60*60*0.5
@@ -69,10 +83,11 @@ class wzyd_libao:
         if self.IOS:
             self.每日福利图标 = Template(r"tpl1700272452555.png", record_pos=(-0.198, -0.002), resolution=(640, 1136))
         self.营地大厅元素 = []
-        self.营地大厅元素.append(Template(r"tpl1708393295383.png", record_pos=(0.011, -0.8), resolution=(540, 960)))
-        self.营地大厅元素.append(self.个人界面图标)
-        self.营地大厅元素.append(self.游戏界面图标)
-        self.营地大厅元素.append(self.每日福利图标)
+        # 不用添加底部所有的图标, 活动时肯定全部改变, 多添加一些特色的图标
+        self.营地大厅元素.append(self.社区界面图标)
+        self.营地大厅元素.append(self.赛事入口)
+
+        #
         self.营地登录元素 = []
         self.营地登录元素.append(Template(r"tpl1708393355383.png", record_pos=(-0.004, 0.524), resolution=(540, 960)))
         self.营地登录元素.append(Template(r"tpl1708393749272.png", record_pos=(-0.002, 0.519), resolution=(540, 960)))
@@ -91,9 +106,9 @@ class wzyd_libao:
 
     def 判断营地大厅中(self):
         #
-        self.营地大厅元素.append(self.个人界面图标)
-        self.营地大厅元素.append(self.游戏界面图标)
-        self.营地大厅元素.append(self.每日福利图标)
+        # 不用添加底部所有的图标, 活动时肯定全部改变
+        self.营地大厅元素.append(self.社区界面图标)
+        self.营地大厅元素.append(self.赛事入口)
         存在, self.营地大厅元素 = self.Tool.存在任一张图(self.营地大厅元素, "营地大厅元素")
         return 存在
     #
@@ -111,6 +126,10 @@ class wzyd_libao:
             TimeECHO(f":不存在APP{self.APPOB.APPID}")
             return False
         #
+        self.礼包功能_营地币换碎片 = True
+        self.礼包功能_体验币换碎片 = True
+        run_class_command(self=self, command=self.Tool.readfile(self.营地初始化FILE))
+        #
         # 判断网络情况
         if not connect_status():
             TimeECHO(":营地暂时无法触摸,返回")
@@ -119,28 +138,33 @@ class wzyd_libao:
             return False
         #
         # 打开APP
-        if not self.APPOB.重启APP(10):
+        if not self.APPOB.前台APP(2):
             TimeECHO(":营地无法打开,返回")
             self.APPOB.关闭APP()
+            if 初始化检查:
+                return True
             return False
         sleep(20)  # 等待营地打开
-        run_class_command(self=self, command=self.Tool.readfile(self.营地初始化FILE))
         #
-        # 判断营地是否登录的界面
-        if self.判断营地登录中():
-            TimeECHO(":检测到营地登录界面,不领取礼包")
-            self.Tool.touchfile(self.营地需要登录FILE)
-            self.APPOB.关闭APP()
-            return False
         # 这里很容易出问题，主页的图标变来变去
+        # MuMu 模拟器营地居然也闪退
         if not self.判断营地大厅中():
             TimeECHO(":营地未知原因没能进入大厅,再次尝试")
-            self.APPOB.重启APP(40)
-            if not self.判断营地大厅中():
+            self.APPOB.关闭APP()
+            if not self.APPOB.前台APP(2):
+                TimeECHO(":营地无法打开,返回")
+                self.APPOB.关闭APP()
+                if 初始化检查:
+                    return True
+                return False
+            #
+            # 说明可以启动, 此时没有登录元素就算是成功了吧
+            if self.判断营地登录中():
+                TimeECHO(":检测到营地登录界面,不领取礼包")
                 self.Tool.touchfile(self.营地需要登录FILE)
                 self.APPOB.关闭APP()
-                self.Tool.timedict["检测营地登录"] = 0  # 下次继续检查
                 return False
+
         # 前面的都通过了,判断成功
         if 初始化检查:
             self.Tool.removefile(self.营地需要登录FILE)
@@ -154,6 +178,13 @@ class wzyd_libao:
         sleep(5)
 
     def RUN(self):
+        #
+        # 修正分辨率, 避免某些模拟器返回的分辨率不对
+        if self.移动端.resolution[0] > self.移动端.resolution[1]:
+            TimeECHO("=>"*20)
+            TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
+            self.移动端.resolution = (min(self.移动端.resolution), max(self.移动端.resolution))
+            TimeECHO("<="*20)
         #
         if not self.APPOB.HaveAPP:
             TimeECHO(f":不存在APP{self.APPOB.APPID}")
@@ -183,10 +214,11 @@ class wzyd_libao:
         self.营地任务_圈子签到()
         #
         # 体验服只有安卓客户端可以领取
-        if not self.IOS:
+        if not self.IOS and self.礼包功能_体验币换碎片:
             self.体验服礼物()
         self.每日签到任务()
-        self.营地币兑换碎片()
+        if self.礼包功能_营地币换碎片:
+            self.营地币兑换碎片()
         self.营地战令经验()
         self.APPOB.关闭APP()
         return True
@@ -214,6 +246,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地任务_观看赛事(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.赛事入口, "赛事入口", savepos=True)
         去直播间 = Template(r"tpl1717046024359.png", record_pos=(0.033, 0.119), resolution=(540, 960))
@@ -250,6 +286,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地任务_圈子签到(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.社区界面图标, "社区界面图标", savepos=True)
         sleep(10)
@@ -301,6 +341,9 @@ class wzyd_libao:
             if self.Tool.timelimit(timekey=f"{keystr}", limit=60*5, init=False):
                 TimeECHO(f"{keystr}{times}超时退出")
                 return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地任务_浏览资讯(times)
         #
         TimeECHO(f"{keystr}{times}")
         self.APPOB.重启APP(10)
@@ -384,6 +427,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地战令经验(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.游戏界面图标, "游戏界面图标", savepos=True)
         sleep(5)
@@ -470,6 +517,10 @@ class wzyd_libao:
                 return False
         if times > 10:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.体验服礼物(times)
+        #
         # 都保存位置,最后进不去再return
         self.Tool.existsTHENtouch(self.游戏界面图标, "游戏界面图标", savepos=True)
         sleep(5)
@@ -569,6 +620,10 @@ class wzyd_libao:
                 return False
         if times > 5:
             return False
+        #
+        if not self.APPOB.前台APP(2):
+            return self.每日签到任务(times)
+        #
         # 每日签到
         self.APPOB.重启APP(10)
         sleep(10)
@@ -611,6 +666,10 @@ class wzyd_libao:
         if times > 10:
             return False
         self.APPOB.重启APP(10)
+        #
+        if not self.APPOB.前台APP(2):
+            return self.营地币兑换碎片(times)
+        #
         sleep(10)
         self.Tool.existsTHENtouch(self.个人界面图标, "个人界面")
         sleep(5)
@@ -647,7 +706,15 @@ class wzyd_libao:
             TimeECHO(":没找到营地币")
             return self.营地币兑换碎片(times)
         touch(奖励位置)
-        self.Tool.existsTHENtouch(Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960)))
+        #
+        确定兑换 = Template(r"tpl1699873472386.png", record_pos=(0.163, 0.107), resolution=(540, 960))
+        if not self.Tool.existsTHENtouch(确定兑换):
+            self.Tool.touch_record_pos(确定兑换.record_pos, self.移动端.resolution, f"确定兑换")
+        #
+        再次确定兑换 = Template(r"tpl1733194097335.png", record_pos=(0.007, 0.748), resolution=(540, 960))
+        if not self.Tool.existsTHENtouch(再次确定兑换):
+            self.Tool.touch_record_pos(再次确定兑换.record_pos, self.移动端.resolution, f"再次确定兑换")
+        #
         self.Tool.existsTHENtouch(Template(r"tpl1699873480797.png", record_pos=(0.163, 0.104), resolution=(540, 960)))
 
     def looprun(self, times=0):
@@ -666,10 +733,15 @@ class wzyd_libao:
             self.run()
 
 
-if __name__ == "__main__":
+def main():
+    # 如果使用vscode等IDE运行此脚本
+    # 在此处指定config_file=config文件
     config_file = ""
     if len(sys.argv) > 1:
         config_file = str(sys.argv[1])
+        if not os.path.exists(config_file):
+            TimeECHO(f"不存在{config_file},请检查文件是否存在、文件名是否正确以及yaml.txt等错误拓展名")
+            TimeECHO(f"将加载默认配置运行.")
     Settings.Config(config_file)
     ce = wzyd_libao()
     ce.run()
@@ -678,3 +750,7 @@ if __name__ == "__main__":
     else:
         ce.end()
     exit()
+
+
+if __name__ == "__main__":
+    main()

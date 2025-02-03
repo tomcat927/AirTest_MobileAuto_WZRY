@@ -1,5 +1,5 @@
 5v5王者峡谷: !!python/tuple
-- 113
+- 213
 - 366
 KPL观赛入口: !!python/tuple
 - 922
@@ -11,11 +11,11 @@ KPL观赛入口: !!python/tuple
 - 479
 - 494
 参战英雄头像: !!python/tuple
-- 480.0
-- 500.40000000000003
+- 480
+- 500
 参战英雄线路: !!python/tuple
-- 178.56
-- 20.399999999999977
+- 178
+- 20
 友情礼包返回图标: !!python/tuple
 - 53
 - 27
@@ -58,6 +58,9 @@ KPL观赛入口: !!python/tuple
 大厅祈愿: !!python/tuple
 - 912
 - 169
+大厅排位赛: !!python/tuple
+- 587
+- 407
 战令入口: !!python/tuple
 - 813
 - 169
@@ -109,13 +112,13 @@ KPL观赛入口: !!python/tuple
 王者模拟战图标: !!python/tuple
 - 63
 - 142
-王者登陆关闭按钮Template(assets\tpl1692947351223.png): !!python/tuple
+王者登陆关闭按钮tpl1692947351223.png: !!python/tuple
 - 891
 - 73
-王者登陆关闭按钮Template(assets\tpl1692951432616.png): !!python/tuple
+王者登陆关闭按钮tpl1692951432616.png: !!python/tuple
 - 893
 - 74
-王者登陆关闭按钮Template(assets\tpl1693271987720.png): !!python/tuple
+王者登陆关闭按钮tpl1693271987720.png: !!python/tuple
 - 907
 - 73
 登录返回按钮: !!python/tuple
@@ -136,28 +139,10 @@ KPL观赛入口: !!python/tuple
 移动pos(0): !!python/tuple
 - 167
 - 432
-第[1]次寻找商城免费礼包商城入口: !!python/tuple
-- 925
-- 114
-第[1]次寻找登录返回按钮: !!python/tuple
-- 60
-- 33
-第[22]次寻找装备pos(0):
-- 858
-- 138
-第[23]次寻找装备pos(0):
-- 858
-- 138
-第[2]次寻找礼册.一键领取: !!python/tuple
-- 764
-- 460
-第[5]次寻找登录返回按钮: !!python/tuple
-- 60
-- 33
 获取回忆之证: !!python/tuple
 - 891
 - 475
-装备pos(0):
+装备pos(0): !!python/tuple
 - 865
 - 140
 返回房间: !!python/tuple
@@ -213,4 +198,4 @@ KPL观赛入口: !!python/tuple
 - 302
 赛事入口: !!python/tuple
 - 241
-- 34.0
+- 34
