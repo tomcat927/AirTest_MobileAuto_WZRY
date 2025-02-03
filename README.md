@@ -12,20 +12,18 @@
 </div>
 
 <div align="center">
-使用方法, 请访问: <a href="https://wzry-doc.pages.dev/guide/install/">安装指南</a>.
+使用方法, 请访问: <a href="https://wzry-doc.pages.dev/guide/install/">安装指南</a>|<a href="https://www.bilibili.com/video/BV1JmcteBEUS">视频教程</a>.
 <br/>
 遇到问题, 请在提问前查看: <a href="https://wzry-doc.pages.dev/qa/qa/">常见问题</a>.
 <br/>
-<b>被系统安排的破防了, 垃圾游戏, 一点都不想玩了, <del>助手停更</del>.</b>
 </div>
 
 ## WZRY
 
-[WZRY](https://github.com/cndaqiang/WZRY)是基于[airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto)开发的王者荣耀农活自动化免费开源脚本. 
+[WZRY](https://github.com/cndaqiang/WZRY) 是基于 [airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto) 开发的王者荣耀农活自动化免费开源脚本。**7*24h 完全无人值守运行**，支持自动启动模拟器、更新游戏、错误自修复、全自动对战及礼包领取，解放双手专注生活。
 
 
 ## 自动化
-真正的无人值守：自动对战、领取礼包、更新游戏、错误纠正
 
 * 开启关闭模拟器、容器、手机
 * 自动检测处理游戏闪退、模拟器关闭等各种错误
@@ -65,11 +63,10 @@
 - *[Cloudiiink](https://github.com/Cloudiiink) 正在设计制作全新的项目图标，版权归其所有。*  
   特别感谢 Cloudiiink 的精心创作！  
 
-
 - 灵感和支持来自以下项目：  
   - [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)  
   - [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)  
   - [Airtest Project](https://github.com/AirtestProject)
 
-- 感谢所有提问 issue 和为本项目打星的用户！
-
+- 感谢所有提问 issue 和为本项目打星的用户!
+- 感谢b站的老哥们点赞推广!

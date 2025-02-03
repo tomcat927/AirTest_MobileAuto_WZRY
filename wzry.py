@@ -1119,6 +1119,7 @@ class wzry_task:
                 进房 = self.图片.房主头像
                 TimeECHO("准备进入组队房间")
                 if not exists(进房):
+                    #注: 该通用头像的成功率较低, 不建议使用
                     TimeECHO("没找到房主头像, 采用通用房主头像")
                     进房 = Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540), threshold=0.9)
                 if self.Tool.existsTHENtouch(进房, "房主头像按钮", savepos=False):
@@ -1140,6 +1141,7 @@ class wzry_task:
                         找到取消按钮, self.图片.房间中的取消按钮图标 = self.Tool.存在任一张图(self.图片.房间中的取消按钮图标, "房间中的取消准备按钮")
                         if not 找到取消按钮:
                             TimeECHO("进入房间失败,可能是今日更新太频繁,版本不一致无法进房,需要重新登录更新")
+                            TimeECHO("也可能<房主头像>截图区域不合适, 详见手册 https://wzry-doc.pages.dev/guide/zudui/")
                 else:
                     TimeECHO("未找到组队房间,检测主节点登录状态")
                 if not 找到取消按钮:
