@@ -1119,7 +1119,7 @@ class wzry_task:
                 进房 = self.图片.房主头像
                 TimeECHO("准备进入组队房间")
                 if not exists(进房):
-                    #注: 该通用头像的成功率较低, 不建议使用
+                    # 注: 该通用头像的成功率较低, 不建议使用
                     TimeECHO("没找到房主头像, 采用通用房主头像")
                     进房 = Template(r"tpl1699181922986.png", record_pos=(0.46, -0.15), resolution=(960, 540), threshold=0.9)
                 if self.Tool.existsTHENtouch(进房, "房主头像按钮", savepos=False):
@@ -2991,6 +2991,13 @@ class wzry_task:
                     self.Tool.touch同步文件(self.Tool.辅助同步文件, content=content)
                 return True
             # ------------------------------------------------------------------------------
+            # 修正分辨率, 避免某些模拟器返回的分辨率不对
+            if self.移动端.resolution[0] < self.移动端.resolution[1]:
+                TimeECHO("=>"*20)
+                TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，已进行修正...")
+                self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
+                TimeECHO("<="*20)
+            # ------------------------------------------------------------------------------
             run_class_command(self=self, command=self.Tool.readfile(self.调试文件FILE))
             # ------------------------------------------------------------------------------
             # >>> 设备状态调整
@@ -3071,7 +3078,6 @@ class wzry_task:
                     if "健康系统" in content:
                         if self.外置礼包_王者营地:
                             self.每日礼包_王者营地()
-
                         else:
                             TimeECHO(f"健康系统导致的同步, sleep 5 min 再继续执行")
                             sleep(5*60)
@@ -3126,12 +3132,6 @@ class wzry_task:
             # ------------------------------------------------------------------------------
             # 下面就是正常的循环流程了
             self.当前状态 = "状态检查"
-            # 修正分辨率, 避免某些模拟器返回的分辨率不对
-            if self.移动端.resolution[0] < self.移动端.resolution[1]:
-                TimeECHO("=>"*20)
-                TimeECHO(f"⚠️ 警告: 分辨率 ({ self.移动端.resolution}) 不符合 (宽, 高) 格式，正在修正...")
-                self.移动端.resolution = (max(self.移动端.resolution), min(self.移动端.resolution))
-                TimeECHO("<="*20)
             if not self.check_run_status():
                 continue
             # ------------------------------------------------------------------------------
