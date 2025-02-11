@@ -1402,7 +1402,7 @@ class wzry_task:
             if self.触摸对战:
                 加速对战 = True
             if self.判断对战中(处理=加速对战):
-                sleep(30)
+                sleep(10)
                 continue
             # 水晶爆炸,随便点击画面跳过
             存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
@@ -1410,6 +1410,7 @@ class wzry_task:
                 sleep(5)
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
                 sleep(10)
+            if 存在 or 加速对战:  # 可能移动(加速对战)的时候误触了
                 # 团队结算画面
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
                 sleep(10)
@@ -1420,11 +1421,6 @@ class wzry_task:
                 if "5v5排位" in self.对战模式:
                     self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
                     sleep(10)
-            elif 加速对战:  # 可能移动(加速对战)的时候误触了
-                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
-                sleep(10)
-                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
-                sleep(10)
             #
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
             #
