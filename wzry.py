@@ -1119,7 +1119,7 @@ class wzry_task:
             sleep(3)  # 等待模拟器反应
             if exists(self.图片.人机闯关第一关):
                 break
-        if self.Tool.existsTHENtouch(self.图片.人机闯关第一关, "人机闯关第一关", savepos=False):
+        if not self.Tool.existsTHENtouch(self.图片.人机闯关第一关, "人机闯关第一关", savepos=False):
             TimeECHO(f"未找到人机闯关第一关, 将尝试计算点击")
             self.Tool.touch_record_pos(record_pos=self.图片.人机闯关第一关.record_pos, resolution=self.移动端.resolution, keystr="人机闯关第一关")
         sleep(10)  # 等待模拟器反应
