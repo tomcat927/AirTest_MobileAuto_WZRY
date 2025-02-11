@@ -1400,16 +1400,13 @@ class wzry_task:
                 TimeECHO(f"⚠️ 警告: 若脚本长期卡在点击此处继续, 请检查是否应该更新资源: https://wzry-doc.pages.dev/guide/upfig/")
             # 对战阶段，处理对战
             if self.判断对战中(处理=self.触摸对战):
-                # 检查是否真的结束了对战
-                存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
-                # 临时死亡或者其他原因导致的判断失败时, 等待30s再进行判断
-                if not 存在:
+                # 正常的挂机模式, 检测到对战则sleep 30s
+                if not self.触摸对战:
                     sleep(30)
                     continue
-            else:
-                存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
             #
             # 水晶爆炸,随便点击画面跳过
+            存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
             if 存在:
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
                 sleep(10)
