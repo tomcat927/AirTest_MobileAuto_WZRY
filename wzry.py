@@ -1385,6 +1385,7 @@ class wzry_task:
                 return True
             addtime = 60*10 if self.本循环参数.标准模式 else 0
             addtime = 60*30 if "5v5排位" in self.对战模式 else addtime
+            addtime = -60*10 if "人机闯关" in self.对战模式 else 0
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
@@ -1418,6 +1419,11 @@ class wzry_task:
                 if "5v5排位" in self.对战模式:
                     self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
                     sleep(10)
+            elif 加速对战:  # 可能移动(加速对战)的时候误触了
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+                sleep(10)
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+                sleep(10)
 
             #
             # S37 更新了MVP结算动画
@@ -2738,7 +2744,7 @@ class wzry_task:
             if not 存在装备图标 and random.randint(1, 5) == 1:
                 装备pos = False
              # 排位的时候就别找装备了,时间紧,快逃离泉水危险区域
-            if not 装备pos and "5v5排位" not in self.对战模式:
+            if not 装备pos and self.对战模式 not in ["5v5排位", "人机闯关"]:
                 # 每一次尝试采用新的位置
                 存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
                 if 存在装备图标:
@@ -2814,7 +2820,7 @@ class wzry_task:
                         touch(普攻pos)
                     #
                     # 排位时多走走, 离开泉水区域
-                    if "5v5排位" in self.对战模式:
+                    if self.对战模式 in ["5v5排位", "人机闯关"]:
                         for _ in range(5):
                             swipe(移动pos, vector=[x, y])
                         touch(普攻pos)
@@ -2994,7 +3000,7 @@ class wzry_task:
         加速对战 = False
         if "模拟战" in self.对战模式:
             加速对战 = True
-        if "5v5排位" in self.对战模式:
+        if self.对战模式 in ["5v5排位", "人机闯关"]:
             加速对战 = True
         if self.触摸对战 and "5v5" in self.对战模式:
             加速对战 = True
@@ -3180,6 +3186,7 @@ class wzry_task:
             self.jinristep = self.jinristep+1
             self.青铜段位 = self.Tool.var_dict["运行参数.青铜段位"]
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
+            self.对战结束返回房间 = True
             # 读入自定义对战参数
             # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.运行模式FILE"
             run_class_command(self=self, command=self.Tool.readfile(self.运行模式FILE))
@@ -3325,7 +3332,7 @@ class wzry_task:
                 TimeECHO(f"==="*20)
             if "人机闯关" == self.对战模式:
                 TimeECHO(f"=⚠="*20)
-                TimeECHO(f"⚠警告: 人机闯关存在被举报的风险, 请谨慎使用, 为自己的账户负责.")
+                TimeECHO(f"⚠警告: 人机闯关存在被举报的风险, 请为自己的账户负责. 详见手册网站说明")
                 TimeECHO(f"=⚠="*20)
                 self.触摸对战 = True
                 self.对战结束返回房间 = False
