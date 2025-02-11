@@ -923,8 +923,9 @@ class wzry_task:
         #
         # 务必保证 times == 0 时, 要么在大厅, 要么在房间
         if times == 0:
-            if self.判断房间中(处理=False):
-                return True
+            if self.当前界面 not in ["大厅中"]:  # 有可能已经是大厅了, 减少判断缩短时间
+                if self.判断房间中(处理=False):  # 这是用户手动进入房间的情况
+                    return True
         else:
             self.进入大厅()
         if not self.check_run_status():
@@ -1424,24 +1425,7 @@ class wzry_task:
                 sleep(10)
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
                 sleep(10)
-
             #
-            # S37 更新了MVP结算动画
-            存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
-            if 存在:
-                sleep(5)
-                if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
-                    TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
-                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
-                    sleep(10)
-                #
-                # S38更新, 还要多开一遍个人的MVP结算画面
-                存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面[1:], "个人.MVP结算画面")
-                if 存在:
-                    if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
-                        TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
-                        self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
-                        sleep(10)
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
             #
             # 对战结算时的弹窗
@@ -1475,6 +1459,25 @@ class wzry_task:
                         sleep(10)
                     if self.判断大厅中(acce=True):
                         return
+            #
+            # S37 更新了MVP结算动画
+            # 前面检测到水晶爆炸时已经点过一轮<点击此处继续了>
+            # 下面的是旧的点击此处继续的处理流程, 应该不会执行的, 为了减少运行时间, 将这部分代码后移到此处
+            存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面, "团队.MVP结算画面")
+            if 存在:
+                sleep(5)
+                if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
+                    TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
+                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.点击此处继续")
+                    sleep(10)
+                #
+                # S38更新, 还要多开一遍个人的MVP结算画面
+                存在, _ = self.Tool.存在任一张图(self.图片.MVP结算画面[1:], "个人.MVP结算画面")
+                if 存在:
+                    if not self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续"):
+                        TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
+                        self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
+                        sleep(10)
             #
             # 调用结束人机匹配时, 通常是刚结束对战, 无需判断房间中还是大厅中的,
             # 因此把这几行判断放在最后
@@ -2658,11 +2661,16 @@ class wzry_task:
         if 处理:
             存在翻页活动, self.图片.房间翻页活动元素 = self.Tool.存在任一张图(self.图片.房间翻页活动元素, "房间翻页活动元素")
             if 存在翻页活动:
-                # 存在之后，这个活动只出现一次,可以删除这个变量了
-                del self.图片.房间翻页活动元素[0]
+                # 存在之后，这个活动只出现一次,可以删除这个变量了, 改到下面删除了
+                # del self.图片.房间翻页活动元素[0]
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
+            #
+            # 删除翻页元素, 加速流程
+            if len(self.图片.房间翻页活动元素) > 1:
+                del self.图片.房间翻页活动元素[0]
+
         #
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         #
