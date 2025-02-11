@@ -2658,16 +2658,11 @@ class wzry_task:
         if 处理:
             存在翻页活动, self.图片.房间翻页活动元素 = self.Tool.存在任一张图(self.图片.房间翻页活动元素, "房间翻页活动元素")
             if 存在翻页活动:
-                # 存在之后，这个活动只出现一次,可以删除这个变量了, 改到下面删除了
-                # del self.图片.房间翻页活动元素[0]
+                # 存在之后，这个活动只出现一次,可以删除这个变量了
+                del self.图片.房间翻页活动元素[0]
                 活动翻页 = Template(r"tpl1707787154169.png", record_pos=(0.393, -0.01), resolution=(960, 540))
                 self.Tool.LoopTouch(活动翻页, "房间中活动翻页", savepos=False)
                 self.Tool.existsTHENtouch(self.图片.房间我知道了, "我知道了:翻页活动", savepos=False)
-            #
-            # 删除翻页元素, 加速流程
-            if len(self.图片.房间翻页活动元素) > 1:
-                del self.图片.房间翻页活动元素[0]
-
         #
         存在, self.图片.房间元素 = self.Tool.存在任一张图(self.图片.房间元素, "房间元素")
         #
@@ -2679,6 +2674,10 @@ class wzry_task:
             if len(self.图片.房间翻页活动元素) > 0:
                 if not exists(self.图片.房间翻页活动元素[-1]):
                     del self.图片.房间翻页活动元素[-1]
+            #
+            # 删除翻页元素, 加速流程, 极少的概率会出现多次翻页的活动,(如果出现了就让脚本无法进房最后卡住同步重新导入翻页活动即可)
+            if 处理 and len(self.图片.房间翻页活动元素) > 1:
+                del self.图片.房间翻页活动元素[1:]
         else:
             self.当前界面 = "未知"
         #
