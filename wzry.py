@@ -3338,7 +3338,6 @@ class wzry_task:
                 TimeECHO(f"=⚠="*20)
                 TimeECHO(f"⚠警告: 人机闯关存在被举报的风险, 请为自己的账户负责. 详见手册网站说明")
                 TimeECHO(f"=⚠="*20)
-                self.触摸对战 = True
                 self.对战结束返回房间 = False
             if "5v5匹配" == self.对战模式:
                 if self.组队模式 and not self.青铜段位:
