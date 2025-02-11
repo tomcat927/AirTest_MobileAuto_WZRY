@@ -1115,7 +1115,7 @@ class wzry_task:
         #
         # 滑动
         for i in range(5):
-            swipe(pos, vector=[0.0, 0.5])
+            swipe(self.Tool.var_dict["人机闯关列表"], vector=[0.0, 0.5])
             sleep(3)  # 等待模拟器反应
             if exists(self.图片.人机闯关第一关):
                 break
