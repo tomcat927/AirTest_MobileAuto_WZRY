@@ -60,6 +60,8 @@ class wzry_runinfo:
         # 对战模式没变时，模拟战不用判断了
         if "模拟战" in self.对战模式:
             return True
+        if "人机闯关" in self.对战模式:
+            return True
         if "5v5排位" in self.对战模式:
             return True
         if "5v5匹配" in self.对战模式:
@@ -124,6 +126,12 @@ class wzry_figure:
         self.人机星耀段位 = Template(r"tpl1689666092009.png", record_pos=(0.0, 0.111), resolution=(960, 540))
         # 开始练习和下页的开始匹配太像了,修改一下target
         self.人机开始练习 = Template(r"tpl1700298996343.png", record_pos=(0.326, 0.197), resolution=(1136, 640), threshold=0.9, target_pos=2)
+        #
+        # 人机闯关
+        self.人机闯关入口 = Template(r"tpl1739240549273.png", record_pos=(-0.431, 0.218), resolution=(960, 540))
+        self.人机闯关界面 = Template(r"tpl1739240558200.png", record_pos=(0.257, -0.017), resolution=(960, 540))
+        self.人机闯关列表 = Template(r"tpl1739240638786.png", record_pos=(-0.278, -0.022), resolution=(960, 540))
+        self.人机闯关第一关 = Template(r"tpl1739240712588.png", record_pos=(-0.438, -0.18), resolution=(960, 540))
         #
         # 开始图标和登录图标等很接近, 不要用于房间判断
         self.房间中的开始按钮图标 = []
@@ -931,7 +939,7 @@ class wzry_task:
             return self.单人进入排位房间(times)
         #
         # ... 状态检查和重置
-        TimeECHO(f"首先进入人机匹配房间{times}")
+        TimeECHO(f"进入人机匹配|闯关房间{times}")
         #
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=10, touch同步=True):
             return True
@@ -964,6 +972,12 @@ class wzry_task:
             #
             return self.单人进入人机匹配房间(times)
         sleep(2)
+        #
+        #
+        if "人机闯关" in self.对战模式:
+            TimeECHO(f"单人进入人机闯关房间{times}")
+            return self.单人进入人机闯关房间(times)
+        #
         #
         模式key = "标准模式" if self.标准模式 else "快速模式"
         段位key = "青铜段位" if self.青铜段位 else "星耀段位"
@@ -1078,6 +1092,46 @@ class wzry_task:
         #
         return True
     #
+
+    def 单人进入人机闯关房间(self, times=0):
+        if not self.Tool.existsTHENtouch(self.图片.人机闯关入口, "人机闯关入口", savepos=True):
+            TimeErr("找不到人机闯关入口")
+            return self.单人进入人机匹配房间(times)
+        sleep(10)  # 等待模拟器反应
+        if not exists(self.图片.人机闯关界面):
+            TimeErr("检测不到人机闯关界面.开始清除历史坐标")
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["人机闯关入口"])):
+                del self.Tool.var_dict[delstr]
+            return self.单人进入人机匹配房间(times)
+        sleep(10)  # 等待模拟器反应
+        #
+        # 开始滑动闯关列表, 滑动到第一关
+        pos = exists(self.图片.人机闯关列表)
+        if pos:
+            self.Tool.var_dict["人机闯关列表"] = pos
+        else:
+            TimeECHO(f"未找到关卡列表, 将计算关卡列表")
+            self.Tool.cal_record_pos(self.图片.人机闯关列表.record_pos, self.移动端.resolution, "人机闯关列表", savepos=True)
+        #
+        # 滑动
+        for i in range(5):
+            swipe(pos, vector=[0.0, 0.5])
+            sleep(3)  # 等待模拟器反应
+            if exists(self.图片.人机闯关第一关):
+                break
+        if self.Tool.existsTHENtouch(self.图片.人机闯关第一关, "人机闯关第一关", savepos=False):
+            TimeECHO(f"未找到人机闯关第一关, 将尝试计算点击")
+            self.Tool.touch_record_pos(record_pos=self.图片.人机闯关第一关.record_pos, resolution=self.移动端.resolution, keystr="人机闯关第一关")
+        sleep(10)  # 等待模拟器反应
+        if exists(self.图片.人机闯关界面):
+            TimeErr("仍处在人机闯关界面. 模拟是是否卡住??")
+            return self.单人进入人机匹配房间(times)
+        #
+        #
+        if self.判断房间中(处理=True):
+            return True
+        else:
+            return self.单人进入人机匹配房间(times)
 
     def 进入人机匹配房间(self):
         if not self.check_run_status():
@@ -3269,6 +3323,12 @@ class wzry_task:
                 TimeECHO(f"因此助手不支持排位上星, 并且以后也不会在助手中开发上星的功能。")
                 self.对战模式 = "5v5匹配"
                 TimeECHO(f"==="*20)
+            if "人机闯关" == self.对战模式:
+                TimeECHO(f"=⚠="*20)
+                TimeECHO(f"⚠警告: 人机闯关存在被举报的风险, 请谨慎使用, 为自己的账户负责.")
+                TimeECHO(f"=⚠="*20)
+                self.触摸对战 = True
+                self.对战结束返回房间 = False
             if "5v5匹配" == self.对战模式:
                 if self.组队模式 and not self.青铜段位:
                     TimeECHO(f"警告: 不建议组队模式采用星耀难度")
