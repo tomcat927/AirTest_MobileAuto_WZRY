@@ -955,12 +955,13 @@ class wzry_task:
             return self.单人进入人机匹配房间(times)
         #
         sleep(5)  # 点击之后要等待,有的模拟器速度太慢
-        if exists(self.图片.进入5v5匹配):
+        pos = exists(self.图片.进入5v5匹配)
+        if pos:
             TimeECHO("检测到 5v5王者峡谷. 历史位置有误, 更新中")
-            del self.Tool.var_dict["5v5王者峡谷"]
+            self.Tool.var_dict["5v5王者峡谷"] = pos
             self.Tool.existsTHENtouch(self.图片.进入5v5匹配, "5v5王者峡谷", savepos=True)
+            sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         #
-        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
         if not self.Tool.existsTHENtouch(self.图片.进入人机匹配, "进入人机匹配", savepos=False):
             if times > 2:
                 TimeECHO("没有检测到[进入人机匹配]界面, 请注意WZ是否又更新了进入人机的界面")
@@ -3002,11 +3003,10 @@ class wzry_task:
         self.进行人机匹配()
         #
         加速对战 = False
-        if "模拟战" in self.对战模式:
+        if self.对战模式 in ["5v5排位", "模拟战"]:
             加速对战 = True
-        if self.对战模式 in ["5v5排位", "人机闯关"]:
-            加速对战 = True
-        if self.触摸对战 and "5v5" in self.对战模式:
+        # 5v5人机匹配和人机闯关是否加速由用户指定
+        if self.触摸对战 and self.对战模式 in ["5v5匹配", "人机闯关" ]:
             加速对战 = True
         if self.判断对战中(处理=加速对战):
             sleep(10)
