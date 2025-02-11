@@ -2998,9 +2998,6 @@ class wzry_task:
         self.进入人机匹配房间()
         # 进行对战
         self.进行人机匹配()
-        #
-        if self.判断对战中(处理=self.触摸对战):
-            sleep(10)
         # 结束对战
         self.结束人机匹配()
         #
