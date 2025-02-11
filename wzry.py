@@ -1399,10 +1399,7 @@ class wzry_task:
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
                 TimeECHO(f"⚠️ 警告: 若脚本长期卡在点击此处继续, 请检查是否应该更新资源: https://wzry-doc.pages.dev/guide/upfig/")
             # 对战阶段，处理对战
-            加速对战 = False
-            if self.触摸对战:
-                加速对战 = True
-            if self.判断对战中(处理=加速对战):
+            if self.判断对战中(处理=self.触摸对战):
                 sleep(10)
                 continue
             # 水晶爆炸,随便点击画面跳过
@@ -1411,7 +1408,7 @@ class wzry_task:
                 sleep(5)
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
                 sleep(10)
-            if 存在 or 加速对战:  # 可能移动(加速对战)的时候误触了
+            if 存在 or self.触摸对战:  # 可能移动(加速对战)的时候误触了
                 # 团队结算画面
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
                 sleep(10)
@@ -1436,11 +1433,6 @@ class wzry_task:
             #
             if not self.check_run_status():
                 return
-            # 万一点到某处, 这是返回按钮
-            if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
-                sleep(2)
-                self.确定按钮()
-                sleep(5)
             # 返回房间/大厅
             if self.对战结束返回房间:
                 if self.Tool.existsTHENtouch(self.图片.返回房间按钮, "返回房间"):
@@ -1475,6 +1467,12 @@ class wzry_task:
                         TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
                         self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
                         sleep(10)
+            #
+            # 万一点到某处, 这是返回按钮
+            if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
+                sleep(2)
+                self.确定按钮()
+                sleep(5)
             #
             # 调用结束人机匹配时, 通常是刚结束对战, 无需判断房间中还是大厅中的,
             # 因此把这几行判断放在最后
@@ -3341,7 +3339,9 @@ class wzry_task:
                     TimeECHO(f"警告: 检测到对战达到星耀对战上限, 但仍将依据 self.青铜段位 = {self.青铜段位} 尝试进行星耀对战")
             #
             if self.对战模式 in ["5v5排位", "模拟战", "人机闯关"] and not self.触摸对战:
-                TimeECHO(f"⚠警告: 对战模式{self.对战模式}必须采用触摸模式, 正在强制设置为触摸模式")
+                TimeECHO(f"==="*20)
+                TimeECHO(f"对战模式[{self.对战模式}]必须采用触摸模式, 正在设置[self.触摸对战 = True]")
+                TimeECHO(f"==="*20)
                 self.触摸对战 = True
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
