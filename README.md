@@ -12,7 +12,7 @@
 </div>
 
 <div align="center">
-使用方法, 请访问: <a href="https://wzry-doc.pages.dev/guide/install/">安装指南</a>|<a href="https://www.bilibili.com/video/BV1JmcteBEUS">视频教程</a>.
+使用方法, 请访问: <a href="https://wzry-doc.pages.dev/guide/install/">安装指南</a>|<a href="https://wzrydoc.readthedocs.io/">备用安装指南</a>|<a href="https://www.bilibili.com/video/BV1JmcteBEUS">视频教程</a>.
 <br/>
 遇到问题, 请在提问前查看: <a href="https://wzry-doc.pages.dev/qa/qa/">常见问题</a>.
 <br/>
@@ -35,7 +35,7 @@
 
 5v5人机匹配: 单人模式、组队模式、标准模式、快速模式、星耀难度、青铜难度
 
-- 挂机模式: **全能**(击败|金牌|场次|熟练度)
+- 挂机模式: **全能**(击败、金牌、场次、熟练度)
 - 触摸模式: 边走边普通攻击, 满足特殊活动的**标准对战非挂机**对战要求
 
 人机闯关: 单人模式、组队模式
