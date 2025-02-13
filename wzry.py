@@ -1381,7 +1381,7 @@ class wzry_task:
         if "模拟战" in self.对战模式:
             return self.结束人机匹配_模拟战()
         self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=True)
-
+        #
         while True:
             if not self.check_run_status():
                 return True
@@ -1391,8 +1391,6 @@ class wzry_task:
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
-            #
-            self.APPOB.打开APP()
             #
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
@@ -1404,7 +1402,6 @@ class wzry_task:
                 if not self.触摸对战:
                     sleep(30)
                     continue
-            #
             # 水晶爆炸,随便点击画面跳过
             存在, self.图片.对战水晶爆炸页面元素 = self.Tool.存在任一张图(self.图片.对战水晶爆炸页面元素, "对战.对战水晶爆炸页面元素")
             if 存在:
@@ -1412,14 +1409,14 @@ class wzry_task:
                 sleep(10)
             if 存在 or self.触摸对战:  # 可能移动(加速对战)的时候误触了
                 # 团队结算画面
-                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+1")
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"点击此处继续+1")
                 sleep(10)
                 # 个人结算动画
-                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"点击此处继续+2")
                 sleep(10)
                 # 排位变化界面
                 if "5v5排位" in self.对战模式:
-                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面+2")
+                    self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"点击此处继续+3")
                     sleep(10)
             #
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
@@ -1486,7 +1483,13 @@ class wzry_task:
             # 健康系统直接重新同步
             if self.健康系统_常用命令():
                 return True
+            # 有时候会偶尔闪退
             #
+            if not self.APPOB.前台APP(1):
+                content = "结束人机匹配过程中遇到游戏闪退"
+                self.创建同步文件(content)
+                return
+            self.Tool.existsTHENtouch(self.图片.登录界面开始游戏图标, "结束游戏时闪退了?点击开始游戏按钮")
 
     def 结束人机匹配_模拟战(self):
         TimeECHO("准备结束本局模拟战")
@@ -2737,42 +2740,44 @@ class wzry_task:
         移动poskey = f"移动pos({self.mynode})"
         普攻poskey = f"普攻pos({self.mynode})"
         # 开始模拟人手点击
-        while self.判断对战中(处理=False):
+        # 通过变量initloop, 尽可能的减少空闲时间, 移动英雄
+        # 第一个循环一定是对战状态, 不用再次识别了
+        initloop = True
+        while initloop or self.判断对战中(处理=False):
             TimeECHO("加速对战中:对战按钮")
             if self.Tool.timelimit(timekey="check_run_status", limit=60, init=False):
                 if not self.check_run_status():
                     return False
             if self.Tool.存在同步文件():
                 return True
-            # 不同账户出装位置不同, 这里随机识别一次，更新位置
-            if not 存在装备图标 and random.randint(1, 5) == 1:
-                装备pos = False
-             # 排位的时候就别找装备了,时间紧,快逃离泉水危险区域
-            if not 装备pos and self.对战模式 not in ["5v5排位", "人机闯关"]:
-                # 每一次尝试采用新的位置
-                存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
-                if 存在装备图标:
-                    装备pos = self.Tool.var_dict[装备poskey]
-                # 如果找不到，就看看历史上使用的哪个位置
-                elif 装备poskey in self.Tool.var_dict.keys():
-                    装备pos = self.Tool.var_dict[装备poskey]
+            if not initloop:
+                # 移动按钮
+                if not 移动pos:
+                    # 每一次尝试采用新的位置，存在则更新，不存在则使用旧的
+                    _, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, 移动poskey, savepos=True)
+                    if 移动poskey in self.Tool.var_dict.keys():
+                        移动pos = self.Tool.var_dict[移动poskey]
+                        touch(移动pos)
+                #
+                # 不同账户出装位置不同, 这里随机识别一次，更新位置
+                if not 存在装备图标 and random.randint(1, 10) == 1:
+                    装备pos = False
+                # 排位的时候就别找装备了,时间紧,快逃离泉水危险区域
+                if not 装备pos and self.对战模式 not in ["5v5排位", "人机闯关"]:
+                    # 每一次尝试采用新的位置，存在则更新，不存在则使用旧的
+                    存在装备图标, self.图片.装备S = self.Tool.存在任一张图(self.图片.装备S, 装备poskey, savepos=True)
+                    if 装备poskey in self.Tool.var_dict.keys():
+                        装备pos = self.Tool.var_dict[装备poskey]
+            else:
+                if 普攻poskey in self.Tool.var_dict.keys():
+                    touch(self.Tool.var_dict[普攻poskey])
+                initloop = False
             #
-            if not 移动pos:
-                # 每一次尝试采用新的位置
-                存在移动图标, self.图片.移动S = self.Tool.存在任一张图(self.图片.移动S, 移动poskey, savepos=True)
-                if 存在移动图标:
-                    移动pos = self.Tool.var_dict[移动poskey]
-                # 如果找不到，就看看历史上使用的哪个位置
-                elif 移动poskey in self.Tool.var_dict.keys():
-                    移动pos = self.Tool.var_dict[移动poskey]
-            #
+            # 普攻按钮是实心的, 一定可以识别成功
             if not 普攻pos:
-                # 每一次尝试采用新的位置
-                存在普攻图标, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, 普攻poskey, savepos=True)
-                if 存在普攻图标:
-                    普攻pos = self.Tool.var_dict[普攻poskey]
-                # 如果找不到，就看看历史上使用的哪个位置
-                elif 普攻poskey in self.Tool.var_dict.keys():
+                # 每一次尝试采用新的位置，存在则更新，不存在则使用旧的
+                _, self.图片.普攻S = self.Tool.存在任一张图(self.图片.普攻S, 普攻poskey, savepos=True)
+                if 普攻poskey in self.Tool.var_dict.keys():
                     普攻pos = self.Tool.var_dict[普攻poskey]
             #
             if 装备pos:
