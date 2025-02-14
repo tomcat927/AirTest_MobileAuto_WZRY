@@ -1353,9 +1353,6 @@ class wzry_task:
         # 模拟战到此就结束了
         if "模拟战" in self.对战模式:
             return True
-        if "5v5排位" in self.对战模式:
-            # 暂时不支持选英雄,界面和人机差别太大, 目前无继续开发计划, 默认随机英雄打就完了
-            return True
         # 选择英雄
         if self.选择英雄:
             self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
@@ -1376,7 +1373,7 @@ class wzry_task:
         else:
             # 不选择英雄则多等待一会
             sleep(15)
-            if self.对战模式 in ["火焰山"]:  # 火焰山等待的更久
+            if self.对战模式 in ["火焰山", "5v5排位"]:  # 火焰山等待的更久
                 sleep(30)
         # 加载游戏界面
         加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
@@ -3384,11 +3381,9 @@ class wzry_task:
             if "5v5排位" == self.对战模式:
                 TimeECHO(f"==="*20)
                 TimeECHO(f"恭喜你发现了隐藏的排位模式入口, 排位的处罚很严重, 青铜一星局也有处罚风险")
-                TimeECHO(f"如果你单纯的想测试排位模式怎么样, 可以注释下一行代码,开放排位模块")
                 TimeECHO(f"农活自动化助手是希望为平民玩家在低配置的设备上完成对战、礼包等农活")
                 TimeECHO(f"排位上分需要的电脑具有性能充足的显卡, 并且偏离了助手的开发初衷")
                 TimeECHO(f"因此助手不支持排位上星, 并且以后也不会在助手中开发上星的功能。")
-                self.对战模式 = "5v5匹配"
                 TimeECHO(f"==="*20)
             if self.对战模式 in ["5v5排位", "模拟战", "人机闯关", "火焰山"]:
                 TimeECHO(f"=⚠="*20)
@@ -3400,8 +3395,8 @@ class wzry_task:
             # 人机闯关回大厅闯第一关
             if self.对战模式 in ["人机闯关"]:
                 self.对战结束返回房间 = False
-            # 火焰山不支持选择英雄
-            if self.对战模式 in ["火焰山"]:
+            # 火焰山不支持选择英雄, "5v5排位"界面改了,暂未开发选英雄功能
+            if self.对战模式 in ["火焰山", "5v5排位"]:
                 self.选择英雄 = False
             #
             if "5v5匹配" == self.对战模式:
