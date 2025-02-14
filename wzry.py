@@ -3241,10 +3241,12 @@ class wzry_task:
             # 设置默认对战参数
             self.runstep = self.runstep+1
             self.jinristep = self.jinristep+1
+            self.对战模式 = "5v5匹配"
+            self.标准模式 = False
             self.青铜段位 = self.Tool.var_dict["运行参数.青铜段位"]
+            self.选择英雄 = True
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
             self.对战结束返回房间 = True
-            self.选择英雄 = True
             # 读入自定义对战参数
             # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.运行模式FILE"
             run_class_command(self=self, command=self.Tool.readfile(self.运行模式FILE))
