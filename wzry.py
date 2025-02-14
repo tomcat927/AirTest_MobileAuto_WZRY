@@ -1449,7 +1449,7 @@ class wzry_task:
                     sleep(10)
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
-            if not initloop:
+            if initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -1470,7 +1470,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=False)
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
-            if not initloop:
+            if initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -1494,7 +1494,7 @@ class wzry_task:
                         return
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
-            if not initloop:
+            if initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -1519,7 +1519,7 @@ class wzry_task:
                         sleep(10)
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
-            if not initloop:
+            if initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
