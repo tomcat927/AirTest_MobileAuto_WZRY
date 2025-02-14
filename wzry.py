@@ -58,12 +58,9 @@ class wzry_runinfo:
             TimeECHO(f"RUNINFO:对战模式变化->{str(self.对战模式)}")
             return False
         # 对战模式没变时，模拟战不用判断了
-        if "模拟战" in self.对战模式:
+        if self.对战模式 in ["5v5排位", "人机闯关", "模拟战", "火焰山"]:
             return True
-        if "人机闯关" in self.对战模式:
-            return True
-        if "5v5排位" in self.对战模式:
-            return True
+        #
         if "5v5匹配" in self.对战模式:
             if self.青铜段位 == other.青铜段位:
                 if self.标准模式 == other.标准模式:
@@ -98,8 +95,9 @@ class wzry_figure:
         self.大厅对战图标 = Template(r"tpl1723219359665.png", record_pos=(-0.122, 0.133), resolution=(960, 540))
         self.大厅娱乐模式 = Template(r"tpl1723219381063.png", record_pos=(0.243, 0.14), resolution=(960, 540))
         self.王者模拟战图标 = Template(r"tpl1693660105012.png", record_pos=(-0.435, -0.134), resolution=(960, 540))
-        self.大厅排位赛 = Template(r"tpl1723219371045.png", record_pos=(0.127, 0.127), resolution=(960, 540))
-        self.进入排位赛 = Template(r"tpl1720065354455.png", record_pos=(0.29, 0.181), resolution=(960, 540))
+        self.火焰山图标 = Template(r"tpl1739510136533.png", record_pos=(0.048, -0.144), resolution=(960, 540))
+        self.大厅排位赛 = Template(r"tpl1739510088247.png", record_pos=(0.127, 0.127), resolution=(960, 540))
+        self.进入排位赛 = Template(r"tpl1739510101543.png", record_pos=(0.29, 0.181), resolution=(960, 540))
         self.进入5v5匹配 = Template(r"tpl1689666019941.png", record_pos=(-0.401, 0.098), resolution=(960, 540))
         self.进入人机匹配 = Template(r"tpl1689666034409.png", record_pos=(0.056, 0.087), resolution=(960, 540))
         # 回忆礼册
@@ -149,7 +147,7 @@ class wzry_figure:
         self.排位设置分路 = Template(r"tpl1737811881694.png", record_pos=(-0.422, -0.093), resolution=(960, 540))
         self.排位分路图标 = Template(r"tpl1737811979105.png", record_pos=(0.232, -0.052), resolution=(960, 540))
         self.排位分路确定 = Template(r"tpl1737811985267.png", record_pos=(-0.001, 0.224), resolution=(960, 540))
-        self.排位开始匹配 = []
+        self.排位开始匹配 = []  # 特殊活动时，会有新的开始匹配按钮
         self.排位开始匹配.append(Template(r"tpl1737812003181.png", record_pos=(0.102, 0.232), resolution=(960, 540)))
         self.排位选英雄界面 = Template(r"tpl1737812036326.png", record_pos=(0.43, -0.189), resolution=(960, 540))
 
@@ -244,7 +242,7 @@ class wzry_figure:
         # 挂机模式高级MVP等待截图
         #
         self.战绩页面元素 = []
-        # 战绩页面
+        # 战绩页面, 这两个元素,在娱乐模式中还在使用
         self.战绩页面元素.append(Template(r"tpl1699766285319.png", record_pos=(-0.009, -0.257), resolution=(960, 540)))  # 胜利
         self.战绩页面元素.append(Template(r"tpl1699677826933.png", record_pos=(-0.011, -0.257), resolution=(960, 540)))  # 失败
         for i in self.对战水晶爆炸页面元素:
@@ -935,6 +933,9 @@ class wzry_task:
         if "模拟战" in self.对战模式:
             TimeECHO(f"首先进入人机匹配房间_模拟战{times}")
             return self.单人进入人机匹配房间_模拟战(times)
+        if "火焰山" in self.对战模式:
+            TimeECHO(f"单人进入人机匹配房间_火焰山{times}")
+            return self.单人进入人机匹配房间_火焰山(times)
         if "5v5排位" == self.对战模式:
             TimeECHO(f"首先进入排位房间{times}")
             return self.单人进入排位房间(times)
@@ -1249,6 +1250,28 @@ class wzry_task:
                 del self.Tool.var_dict[delstr]
             return self.单人进入人机匹配房间(times)
 
+    def 单人进入人机匹配房间_火焰山(self, times=0):
+        #
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*30, nstep=30, touch同步=True):
+            return True
+        #
+        times = times + 1
+        # 娱乐模式的位置是确定的,可以强制点击
+        if not self.Tool.existsTHENtouch(self.图片.大厅娱乐模式, "大厅娱乐模式", savepos=True):
+            self.Tool.touch_record_pos(record_pos=self.图片.大厅娱乐模式.record_pos, resolution=self.移动端.resolution, keystr=f"强制点击大厅娱乐模式")
+        sleep(10)  # 进入娱乐模式时, 很多模式的图片需要刷新出来, 多等一会
+        # 不同账户的图标位置可能有区别, 这里更新一下位置
+        self.Tool.存在任一张图([self.图片.火焰山图标], "火焰山图标", savepos=True)
+        if not self.Tool.existsTHENtouch(self.图片.火焰山图标, "火焰山图标", savepos=True):
+            self.Tool.touch_record_pos(record_pos=self.图片.火焰山图标.record_pos, resolution=self.移动端.resolution, keystr=f"强制点击火焰山图标图标")
+        sleep(5)
+        if self.判断房间中(处理=True):
+            return True
+        else:
+            for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅娱乐模式", "火焰山图标"])):
+                del self.Tool.var_dict[delstr]
+            return self.单人进入人机匹配房间(times)
+
     def 进行人机匹配(self, times=0):
         # 调用此函数之前, 已经进入过房间了,此处不再进行校验
         #
@@ -1315,7 +1338,7 @@ class wzry_task:
                     if 队友确认匹配:
                         TimeECHO("检测到排位界面,sleep(30)后继续")
                         sleep(30)
-                else:
+                else:  # 5v5人机、人机闯关、火焰山
                     队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
                 #
             if 队友确认匹配:
@@ -1350,6 +1373,11 @@ class wzry_task:
                     self.Tool.existsTHENtouch(self.备战英雄头像, "备战英雄头像", savepos=True)
             # 确定英雄后一般要等待队友确定，这需要时间
             self.Tool.LoopTouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定英雄", loop=6, savepos=False)
+        else:
+            # 不选择英雄则多等待一会
+            sleep(15)
+            if self.对战模式 in ["火焰山"]:  # 火焰山等待的更久
+                sleep(30)
         # 加载游戏界面
         加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
@@ -1382,6 +1410,7 @@ class wzry_task:
             return self.结束人机匹配_模拟战()
         self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=True)
         #
+        initloop = True
         while True:
             if not self.check_run_status():
                 return True
@@ -1398,6 +1427,7 @@ class wzry_task:
                 TimeECHO(f"⚠️ 警告: 若脚本长期卡在点击此处继续, 请检查是否应该更新资源: https://wzry-doc.pages.dev/guide/upfig/")
             # 对战阶段，处理对战
             if self.判断对战中(处理=self.触摸对战):
+                initloop = False
                 # 正常的挂机模式, 检测到对战则sleep 30s
                 if not self.触摸对战:
                     sleep(30)
@@ -1419,7 +1449,17 @@ class wzry_task:
                     self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"点击此处继续+3")
                     sleep(10)
             #
+            # 避免选择英雄等原因导致进入对战页面延迟的问题
+            if not initloop:
+                if self.判断对战中(处理=self.触摸对战):
+                    initloop = False
+                    return
+            #
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
+            #
+            继续按钮 = Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))
+            if self.对战模式 in ["火焰山"]:
+                self.Tool.LoopTouch(继续按钮, "火焰山等继续按钮", savepos=False)
             #
             # 对战结算时的弹窗
             每日任务进展 = Template(r"tpl1703772723321.png", record_pos=(0.004, -0.174), resolution=(960, 540))
@@ -1429,6 +1469,12 @@ class wzry_task:
             # 奇怪的结算画面
             金色确定 = Template(r"tpl1694360310806.png", record_pos=(-0.001, 0.117), resolution=(960, 540))
             self.Tool.existsTHENtouch(金色确定, "金色确定", savepos=False)
+            #
+            # 避免选择英雄等原因导致进入对战页面延迟的问题
+            if not initloop:
+                if self.判断对战中(处理=self.触摸对战):
+                    initloop = False
+                    return
             #
             if not self.check_run_status():
                 return
@@ -1448,6 +1494,12 @@ class wzry_task:
                     if self.判断大厅中(acce=True):
                         return
             #
+            # 避免选择英雄等原因导致进入对战页面延迟的问题
+            if not initloop:
+                if self.判断对战中(处理=self.触摸对战):
+                    initloop = False
+                    return
+            #
             # S37 更新了MVP结算动画
             # 前面检测到水晶爆炸时已经点过一轮<点击此处继续了>
             # 下面的是旧的点击此处继续的处理流程, 应该不会执行的, 为了减少运行时间, 将这部分代码后移到此处
@@ -1466,6 +1518,13 @@ class wzry_task:
                         TimeECHO(f"无法找到.点击此处继续.可能叠加了英雄图层的原因")
                         self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.MVP结算画面.点击此处继续")
                         sleep(10)
+            #
+            # 避免选择英雄等原因导致进入对战页面延迟的问题
+            if not initloop:
+                if self.判断对战中(处理=self.触摸对战):
+                    initloop = False
+                    return
+            initloop = False
             #
             # 万一点到某处, 这是返回按钮
             if self.Tool.existsTHENtouch(Template(r"tpl1689667050980.png", record_pos=(-0.443, -0.251), resolution=(960, 540))):
@@ -2829,7 +2888,7 @@ class wzry_task:
                         touch(普攻pos)
                     #
                     # 排位时多走走, 离开泉水区域
-                    if self.对战模式 in ["5v5排位", "人机闯关"]:
+                    if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
                         for _ in range(5):
                             swipe(移动pos, vector=[x, y])
                         touch(普攻pos)
@@ -3186,6 +3245,7 @@ class wzry_task:
             self.青铜段位 = self.Tool.var_dict["运行参数.青铜段位"]
             self.触摸对战 = os.path.exists(self.触摸对战FILE)
             self.对战结束返回房间 = True
+            self.选择英雄 = True
             # 读入自定义对战参数
             # 若希望进行自动调整分路和设置触摸对战等参数，可以将相关指令添加到"self.运行模式FILE"
             run_class_command(self=self, command=self.Tool.readfile(self.运行模式FILE))
@@ -3329,11 +3389,20 @@ class wzry_task:
                 TimeECHO(f"因此助手不支持排位上星, 并且以后也不会在助手中开发上星的功能。")
                 self.对战模式 = "5v5匹配"
                 TimeECHO(f"==="*20)
-            if "人机闯关" == self.对战模式:
+            if self.对战模式 in ["5v5排位", "模拟战", "人机闯关", "火焰山"]:
                 TimeECHO(f"=⚠="*20)
-                TimeECHO(f"⚠警告: 人机闯关存在被举报的风险, 请为自己的账户负责. 详见手册网站说明")
+                TimeECHO(f"⚠警告: {self.对战模式}存在被举报的风险, 请为自己的账户负责. 详见手册网站说明")
+                if not self.触摸对战:
+                    TimeECHO(f"对战模式[{self.对战模式}]必须采用触摸模式, 正在设置[self.触摸对战 = True]")
+                    self.触摸对战 = True
                 TimeECHO(f"=⚠="*20)
+            # 人机闯关回大厅闯第一关
+            if self.对战模式 in ["人机闯关"]:
                 self.对战结束返回房间 = False
+            # 火焰山不支持选择英雄
+            if self.对战模式 in ["火焰山"]:
+                self.选择英雄 = False
+            #
             if "5v5匹配" == self.对战模式:
                 if self.组队模式 and not self.青铜段位:
                     TimeECHO(f"警告: 不建议组队模式采用星耀难度")
@@ -3341,12 +3410,6 @@ class wzry_task:
                     TimeECHO(f"警告: 不建议星耀难度开启TOUCH模式")
                 if not self.青铜段位 and self.Tool.var_dict["运行参数.青铜段位"]:
                     TimeECHO(f"警告: 检测到对战达到星耀对战上限, 但仍将依据 self.青铜段位 = {self.青铜段位} 尝试进行星耀对战")
-            #
-            if self.对战模式 in ["5v5排位", "模拟战", "人机闯关"] and not self.触摸对战:
-                TimeECHO(f"==="*20)
-                TimeECHO(f"对战模式[{self.对战模式}]必须采用触摸模式, 正在设置[self.触摸对战 = True]")
-                TimeECHO(f"==="*20)
-                self.触摸对战 = True
             # ------------------------------------------------------------------------------
             # 此处开始记录本步的计算参数，此参数目前的功能只用于判断前后两步的计算参数差异
             # 后续程序的控制，仍采用 self.触摸对战等参数
