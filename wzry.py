@@ -1452,7 +1452,7 @@ class wzry_task:
             if not initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
-                    return
+                    continue
             #
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
             #
@@ -1473,7 +1473,7 @@ class wzry_task:
             if not initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
-                    return
+                    continue
             #
             if not self.check_run_status():
                 return
@@ -1497,7 +1497,7 @@ class wzry_task:
             if not initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
-                    return
+                    continue
             #
             # S37 更新了MVP结算动画
             # 前面检测到水晶爆炸时已经点过一轮<点击此处继续了>
@@ -1522,7 +1522,7 @@ class wzry_task:
             if not initloop:
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
-                    return
+                    continue
             initloop = False
             #
             # 万一点到某处, 这是返回按钮
