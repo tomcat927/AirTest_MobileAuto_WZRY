@@ -2886,7 +2886,8 @@ class wzry_task:
                     # 排位时多走走, 离开泉水区域, "火焰山",别乱走,会烧死
                     if self.对战模式 in ["5v5排位", "人机闯关"]:
                         for _ in range(5):
-                            swipe(移动pos, vector=[x, y])
+                            vector = [random.random()/5, random.random()/5]
+                            swipe(移动pos, vector=vector)
                         touch(普攻pos)
             #
             if 普攻pos:
