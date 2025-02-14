@@ -2887,8 +2887,8 @@ class wzry_task:
                         sleep(0.2)
                         touch(普攻pos)
                     #
-                    # 排位时多走走, 离开泉水区域
-                    if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
+                    # 排位时多走走, 离开泉水区域, "火焰山",别乱走,会烧死
+                    if self.对战模式 in ["5v5排位", "人机闯关"]:
                         for _ in range(5):
                             swipe(移动pos, vector=[x, y])
                         touch(普攻pos)
