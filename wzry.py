@@ -1389,7 +1389,6 @@ class wzry_task:
                 加油按钮 = Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540))
                 if not self.Tool.existsTHENtouch(加油按钮, "加油按钮", savepos=False):
                     self.Tool.touch_record_pos(加油按钮.record_pos, self.移动端.resolution, "加油按钮")
-                sleep(2)
             else:
                 break
             if self.Tool.timelimit(timekey="加载游戏", limit=60*10, init=False):
