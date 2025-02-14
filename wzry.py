@@ -140,6 +140,7 @@ class wzry_figure:
         self.房间中的取消按钮图标.append(Template(r"tpl1699179402893.png", record_pos=(0.098, 0.233), resolution=(960, 540), threshold=0.9))
         self.房间中的取消匹配图标 = Template(r"tpl1732156694454.png", record_pos=(0.121, -0.263), resolution=(960, 540))
         #
+        self.加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
         # 虽然排位房间/匹配房间中的开始匹配按钮和人机局的开始按钮不一样,
         # 但是利用touch_record_pos点击的位置是相同的
         # 因此此处没必要添加排位房间的开始匹配按钮
@@ -1369,15 +1370,22 @@ class wzry_task:
             self.Tool.LoopTouch(Template(r"tpl1689666339749.png", record_pos=(0.421, 0.237), resolution=(960, 540)), "确定英雄", loop=6, savepos=False)
         else:
             # 不选择英雄则多等待一会
-            sleep(15)
-            if self.对战模式 in ["火焰山", "5v5排位"]:  # 火焰山等待的更久
-                sleep(30)
+            TimeECHO("不选择英雄, 则sleep一会")
+            sleep(10)
+            if self.对战模式 in ["火焰山", "5v5排位"]:  # 火焰山等待的更久，这个参数影响开局时是否开始或者开始过识别对战，导致对战不及时
+                sleepmax = 30
+                self.Tool.timelimit(timekey="不选择英雄", limit=sleepmax, init=True)
+                while True:
+                    TimeECHO(f"{self.对战模式}: 正在检测加载界面....")
+                    if self.Tool.timelimit(timekey="不选择英雄", limit=sleepmax, init=False):
+                        break
+                    if exists(self.图片.加载游戏界面):
+                        break
+                    sleep(1)
         # 加载游戏界面
-        加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
-        加载中 = exists(加载游戏界面)
         while True:
-            加载中 = exists(加载游戏界面)
+            加载中 = exists(self.图片.加载游戏界面)
             if 加载中:
                 TimeECHO("加载游戏中.....")
                 加油按钮 = Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540))
@@ -2880,11 +2888,12 @@ class wzry_task:
                         sleep(0.2)
                         touch(普攻pos)
                     #
-                    # 排位时多走走, 离开泉水区域, "火焰山",别乱走,会烧死
+                    # 排位时随机走
+                    # 可以卡在坑里，但是如果卡在水晶就会被警告，这里是为了强制移动已快速脱离水晶
+                    # 但是容易卡在坑里，这个不管
                     if self.对战模式 in ["5v5排位", "人机闯关"]:
                         for _ in range(5):
-                            vector = [random.random()/5, random.random()/5]
-                            swipe(移动pos, vector=vector)
+                            swipe(移动pos, vector=[x, -y])
                         touch(普攻pos)
             #
             if 普攻pos:
