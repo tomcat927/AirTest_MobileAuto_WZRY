@@ -1335,9 +1335,6 @@ class wzry_task:
                     队友确认匹配 = self.判断对战中(处理=False)
                 elif "5v5排位" in self.对战模式:
                     队友确认匹配 = exists(self.图片.排位选英雄界面)
-                    if 队友确认匹配:
-                        TimeECHO("检测到排位界面,sleep(30)后继续")
-                        sleep(30)
                 else:  # 5v5人机、人机闯关、火焰山
                     队友确认匹配 = self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False)
                 #
@@ -1373,10 +1370,8 @@ class wzry_task:
         else:
             # 不选择英雄则多等待一会
             sleep(15)
-            if self.对战模式 in ["火焰山"]:  # 火焰山等待的更久
+            if self.对战模式 in ["火焰山","5v5排位"]:  # 火焰山等待的更久
                 sleep(30)
-            if self.对战模式 in ["5v5排位"]:  # 火焰山等待的更久
-                sleep(10)
         # 加载游戏界面
         加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
