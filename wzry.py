@@ -1373,8 +1373,10 @@ class wzry_task:
         else:
             # 不选择英雄则多等待一会
             sleep(15)
-            if self.对战模式 in ["火焰山", "5v5排位"]:  # 火焰山等待的更久
+            if self.对战模式 in ["火焰山"]:  # 火焰山等待的更久
                 sleep(30)
+            if self.对战模式 in ["5v5排位"]:  # 火焰山等待的更久
+                sleep(10)
         # 加载游戏界面
         加载游戏界面 = Template(r"tpl1693143323624.png", record_pos=(0.003, -0.004), resolution=(960, 540))
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
