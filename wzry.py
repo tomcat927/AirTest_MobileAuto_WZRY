@@ -1380,17 +1380,22 @@ class wzry_task:
                     if self.Tool.timelimit(timekey="不选择英雄", limit=sleepmax, init=False):
                         break
                     if exists(self.图片.加载游戏界面):
+                        self.Tool.touch_record_pos(加油按钮.record_pos, self.移动端.resolution, "加油按钮")
                         break
                     sleep(1)
         # 加载游戏界面
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
+        点击加油按钮 = False  # 改为只加一次节省时间
         while True:
             加载中 = exists(self.图片.加载游戏界面)
+            self.无脑移动保护信誉分()
             if 加载中:
                 TimeECHO("加载游戏中.....")
-                加油按钮 = Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540))
-                if not self.Tool.existsTHENtouch(加油按钮, "加油按钮", savepos=False):
-                    self.Tool.touch_record_pos(加油按钮.record_pos, self.移动端.resolution, "加油按钮")
+                if not 点击加油按钮:
+                    加油按钮 = Template(r"tpl1689666367752.png", record_pos=(0.42, -0.001), resolution=(960, 540))
+                    if not self.Tool.existsTHENtouch(加油按钮, "加油按钮", savepos=False):
+                        self.Tool.touch_record_pos(加油按钮.record_pos, self.移动端.resolution, "加油按钮")
+                    点击加油按钮 = True
             else:
                 break
             if self.Tool.timelimit(timekey="加载游戏", limit=60*10, init=False):
@@ -1399,7 +1404,9 @@ class wzry_task:
         #
         关闭技能介绍1 = Template(r"tpl1692951432616.png", record_pos=(0.346, -0.207), resolution=(960, 540))
         关闭技能介绍2 = Template(r"tpl1700918628072.png", record_pos=(-0.059, 0.211), resolution=(960, 540))
+        self.无脑移动保护信誉分()
         self.Tool.existsTHENtouch(关闭技能介绍1, "关闭技能介绍1", savepos=False)
+        self.无脑移动保护信誉分()
         self.Tool.existsTHENtouch(关闭技能介绍2, "关闭技能介绍2", savepos=False)
         #
 
@@ -1411,19 +1418,20 @@ class wzry_task:
             return self.结束人机匹配_模拟战()
         self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=True)
         #
+        self.无脑移动保护信誉分()
         initloop = True
         while True:
             if not self.check_run_status():
                 return True
             addtime = 60*10 if self.本循环参数.标准模式 else 0
-            addtime = 60*30 if "5v5排位" in self.对战模式 else addtime
-            addtime = -60*10 if "人机闯关" in self.对战模式 else 0
+            addtime = 60*20 if self.对战模式 in ["5v5排位"] else addtime
+            addtime = -60*5 if self.对战模式 in ["人机闯关", "火焰山"] else addtime
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
             #
             点击此处继续 = Template(r"tpl1727232003870.png", record_pos=(-0.002, 0.203), resolution=(960, 540))
-            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*10, init=False, reset=False):
+            if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False, reset=False):
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"{fun_name(1)}.十分钟一次的点击")
                 TimeECHO(f"⚠️ 警告: 若脚本长期卡在点击此处继续, 请检查是否应该更新资源: https://wzry-doc.pages.dev/guide/upfig/")
             # 对战阶段，处理对战
@@ -1438,7 +1446,7 @@ class wzry_task:
             if 存在:
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"跳过水晶爆炸页面")
                 sleep(10)
-            if 存在 or self.触摸对战:  # 可能移动(加速对战)的时候误触了
+            if 存在 or (not initloop and self.触摸对战):  # 可能移动(加速对战)的时候误触了
                 # 团队结算画面
                 self.Tool.touch_record_pos(点击此处继续.record_pos, resolution=self.移动端.resolution, keystr=f"点击此处继续+1")
                 sleep(10)
@@ -1452,6 +1460,7 @@ class wzry_task:
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
             if initloop:
+                self.无脑移动保护信誉分()
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -1473,6 +1482,7 @@ class wzry_task:
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
             if initloop:
+                self.无脑移动保护信誉分()
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -1497,6 +1507,7 @@ class wzry_task:
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
             if initloop:
+                self.无脑移动保护信誉分()
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -1522,6 +1533,7 @@ class wzry_task:
             #
             # 避免选择英雄等原因导致进入对战页面延迟的问题
             if initloop:
+                self.无脑移动保护信誉分()
                 if self.判断对战中(处理=self.触摸对战):
                     initloop = False
                     continue
@@ -2905,6 +2917,18 @@ class wzry_task:
                 return False
         return True
 
+    def 无脑移动保护信誉分(self):
+        if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
+            移动poskey = f"移动pos({self.mynode})"
+            if 移动poskey in self.Tool.var_dict.keys():
+                TimeECHO(f"{self.对战模式}:无脑移动保护信誉分中....")
+                移动pos = self.Tool.var_dict[移动poskey]
+                swipe(移动pos, vector=[0.2, -0.2])
+            普攻poskey = f"普攻pos({self.mynode})"
+            if 普攻poskey in self.Tool.var_dict.keys():
+                touch(self.Tool.var_dict[普攻poskey])
+        return
+
     def 判断对战中_模拟战(self, 处理=False, acce=False):
         #
         if acce:
@@ -3387,7 +3411,7 @@ class wzry_task:
             # 计算参数检查警告
             if "5v5排位" == self.对战模式:
                 TimeECHO(f"==="*20)
-                TimeECHO(f"恭喜你发现了隐藏的排位模式入口")
+                TimeECHO(f"恭喜你发现了隐藏的排位模式入口,在新登录模拟器上需要提前手动进过一次房间预选好分路,然后返回大厅启动助手.")
                 TimeECHO(f"农活自动化助手是希望为平民玩家在低配置的设备上完成对战、礼包等农活")
                 TimeECHO(f"因此助手不会开发Ai排位的功能。")
                 TimeECHO(f"助手当前的排位模式是基于边走边平A的无脑模式运行，需要针对自己账户微调才能尽量少扣信誉分，请自行承担使用后果。")
@@ -3418,13 +3442,18 @@ class wzry_task:
             # 后续程序的控制，仍采用 self.触摸对战等参数
             self.构建循环参数(self.本循环参数)
             # 这里判断和之前的对战是否相同,不同则直接则进行大厅后重新开始
-            # 第一步时参数一定不同, 会强制进入大厅, 这也能保证没有进错画面
             self.本循环参数.printinfo()
             if not self.本循环参数.compare(self.上循环参数):
                 TimeECHO(f"上步计算参数不同,回到大厅重新初始化")
                 self.图片 = wzry_figure(Tool=self.Tool)
-                if self.jinristep > 1 or not self.判断大厅中(acce=False):
-                    self.进入大厅()
+                if not self.判断大厅中(acce=False):
+                    if self.jinristep == 1:
+                        if self.判断房间中():
+                            TimeECHO(f"第一局用户已进入房间, 则不返回大厅")
+                        else:
+                            self.进入大厅()
+                    else:
+                        self.进入大厅()
             # ------------------------------------------------------------------------------
             # 开始辅助同步,然后开始游戏
             self.当前状态 = "对战状态"
