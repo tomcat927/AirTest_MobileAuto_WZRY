@@ -2920,13 +2920,16 @@ class wzry_task:
     def 无脑移动保护信誉分(self):
         if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
             移动poskey = f"移动pos({self.mynode})"
+            普攻poskey = f"普攻pos({self.mynode})"
             if 移动poskey in self.Tool.var_dict.keys():
                 TimeECHO(f"{self.对战模式}:无脑移动保护信誉分中....")
                 移动pos = self.Tool.var_dict[移动poskey]
-                swipe(移动pos, vector=[0.2, -0.2])
-            普攻poskey = f"普攻pos({self.mynode})"
-            if 普攻poskey in self.Tool.var_dict.keys():
+                for i in range(5):
+                    swipe(移动pos, vector=[0.2, -0.2])
+            elif 普攻poskey in self.Tool.var_dict.keys():
                 touch(self.Tool.var_dict[普攻poskey])
+            else:
+                TimeECHO(f"未积累有效数据, 须在本局对战结束后才支持: 无脑移动保护信誉分")
         return
 
     def 判断对战中_模拟战(self, 处理=False, acce=False):
@@ -3411,7 +3414,8 @@ class wzry_task:
             # 计算参数检查警告
             if "5v5排位" == self.对战模式:
                 TimeECHO(f"==="*20)
-                TimeECHO(f"恭喜你发现了隐藏的排位模式入口,在新登录模拟器上需要提前手动进过一次房间预选好分路,然后返回大厅启动助手.")
+                TimeECHO(f"恭喜你发现了隐藏的排位模式入口,在新登录模拟器上需要提前手动进过一次房间预选好分路.")
+                TimeECHO(f"确保已经处在房间中后，再启动助手.")
                 TimeECHO(f"农活自动化助手是希望为平民玩家在低配置的设备上完成对战、礼包等农活")
                 TimeECHO(f"因此助手不会开发Ai排位的功能。")
                 TimeECHO(f"助手当前的排位模式是基于边走边平A的无脑模式运行，需要针对自己账户微调才能尽量少扣信誉分，请自行承担使用后果。")
