@@ -1387,8 +1387,8 @@ class wzry_task:
         self.Tool.timelimit(timekey="加载游戏", limit=60*5, init=True)
         点击加油按钮 = False  # 改为只加一次节省时间
         while True:
-            加载中 = exists(self.图片.加载游戏界面)
             self.无脑移动保护信誉分()
+            加载中 = exists(self.图片.加载游戏界面)
             if 加载中:
                 TimeECHO("加载游戏中.....")
                 if not 点击加油按钮:
@@ -1418,7 +1418,8 @@ class wzry_task:
             return self.结束人机匹配_模拟战()
         self.Tool.timelimit(timekey="结束人机匹配", limit=60*15, init=True)
         #
-        self.无脑移动保护信誉分()
+        for i in range(5):
+            self.无脑移动保护信誉分()
         initloop = True
         while True:
             if not self.check_run_status():
