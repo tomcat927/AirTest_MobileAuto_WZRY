@@ -1192,6 +1192,7 @@ class wzry_task:
                 return self.开始1v1对局(times)
         #
         if self.选择英雄:
+            sleep(5)
             TimeECHO("1v1设置新的英雄")
             if not self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False):
                 TimeECHO("1v1无法选择英雄,哪里出了问题?")
