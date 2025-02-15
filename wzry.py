@@ -3542,6 +3542,10 @@ class wzry_task:
             # 火焰山不支持选择英雄, "5v5排位"界面改了,暂未开发选英雄功能
             if self.对战模式 in ["火焰山", "5v5排位"]:
                 self.选择英雄 = False
+            elif self.对战模式 in ["1v1人人"]:
+                if self.totalnode_bak > 1 and self.组队模式:  # 让其他节点抓紧结束
+                    self.Tool.touchfile(self.无法进行组队FILE, content="1v1不进行组队")
+                self.组队模式 = False
             #
             if "5v5匹配" == self.对战模式:
                 if self.组队模式 and not self.青铜段位:
