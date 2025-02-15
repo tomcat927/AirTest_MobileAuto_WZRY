@@ -58,7 +58,7 @@ class wzry_runinfo:
             TimeECHO(f"RUNINFO:对战模式变化->{str(self.对战模式)}")
             return False
         # 对战模式没变时，模拟战不用判断了
-        if self.对战模式 in ["5v5排位", "人机闯关", "模拟战", "火焰山"]:
+        if self.对战模式 in ["5v5排位", "人机闯关", "模拟战", "火焰山", "1v1人人"]:
             return True
         #
         if "5v5匹配" in self.对战模式:
@@ -100,6 +100,13 @@ class wzry_figure:
         self.进入排位赛 = Template(r"tpl1739510101543.png", record_pos=(0.29, 0.181), resolution=(960, 540))
         self.进入5v5匹配 = Template(r"tpl1689666019941.png", record_pos=(-0.401, 0.098), resolution=(960, 540))
         self.进入人机匹配 = Template(r"tpl1689666034409.png", record_pos=(0.056, 0.087), resolution=(960, 540))
+        self.进入1v1模式 = Template(r"tpl1739612926204.png", record_pos=(0.374, -0.152), resolution=(960, 540))
+        self.进入1v1匹配 = Template(r"tpl1739612949187.png", record_pos=(-0.196, 0.053), resolution=(960, 540))
+        self.进入1v1墨家 = Template(r"tpl1739612955707.png", record_pos=(-0.146, -0.076), resolution=(960, 540))
+        self.进入1v1预选 = Template(r"tpl1739612974365.png", record_pos=(-0.098, 0.116), resolution=(960, 540))
+        self.进入1v1确定 = Template(r"tpl1739612967697.png", record_pos=(0.095, 0.115), resolution=(960, 540))
+        self.开始1v1游戏 = Template(r"tpl1739614855139.png", record_pos=(0.427, 0.245), resolution=(960, 540))
+
         # 回忆礼册
         self.大厅回忆礼册 = Template(r"tpl1723334115249.png", record_pos=(0.206, 0.244), resolution=(960, 540))
         self.获取回忆之证 = Template(r"tpl1727227611850.png", record_pos=(0.428, 0.214), resolution=(960, 540))
@@ -1058,7 +1065,7 @@ class wzry_task:
 
     def 单人进入排位房间(self, times=0):
         #
-        TimeECHO(f"第{times}次进入进入排位房间")
+        TimeECHO(f"第{times}次进入排位房间")
         TimeECHO("请提前预选好分路(只用预选一次,建议游走),脚本暂不支持预选分路")
         TimeECHO("请打开自动购买装备和自动技能加点")
         if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=30, touch同步=True):
@@ -1137,9 +1144,105 @@ class wzry_task:
         else:
             return self.单人进入人机匹配房间(times)
 
+    def 开始1v1对局(self, times=0):
+        #
+        if not self.check_run_status():
+            return True
+        #
+        if self.set_timelimit(istep=times, init=times == 0, timelimit=60*10, nstep=100, touch同步=True):
+            return True
+        #
+        # 务必保证 times == 0 时, 要么在大厅, 要么在房间
+        if times == 0:
+            if self.当前界面 not in ["大厅中"]:  # 有可能已经是大厅了, 减少判断缩短时间
+                self.进入大厅()
+        else:
+            self.进入大厅()
+        #
+        times = times+1
+        TimeECHO(f"第{times}次尝试1v1对局")
+        #
+        if not self.Tool.existsTHENtouch(self.图片.大厅对战图标, "大厅对战", savepos=True):
+            return self.单人进入人机匹配房间(times)
+        #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+        if not self.Tool.existsTHENtouch(self.图片.进入1v1模式, "进入1v1模式", savepos=True):
+            return self.单人进入人机匹配房间(times)
+        #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+        if not self.Tool.existsTHENtouch(self.图片.进入1v1匹配, "进入1v1匹配", savepos=True):
+            return self.单人进入人机匹配房间(times)
+        #
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+        if not self.Tool.existsTHENtouch(self.图片.进入1v1墨家, "进入1v1墨家", savepos=False):
+            if times > 2:
+                TimeECHO("没有检测到[墨家机关道]界面, 请注意WZ是否又更新了进入人机的界面")
+                for delstr in list(set(self.Tool.var_dict.keys()) & set(["大厅对战", "进入1v1模式", "进入1v1匹配"])):
+                    del self.Tool.var_dict[delstr]
+                return self.开始1v1对局(times)
+        sleep(5)  # 点击之后要等待,有的模拟器速度太慢
+        #
+        if exists(self.图片.展开英雄列表):
+            TimeECHO("⚠️"*20)
+            TimeECHO("没有设置1v1默认英雄, 正在尝试设置中, 若设置失败, 请手动设置")
+            TimeECHO("⚠️"*20)
+            self.选择英雄 = True
+        elif self.选择英雄:
+            if not self.Tool.existsTHENtouch(self.图片.进入1v1预选, "进入1v1预选", savepos=True):
+                return self.开始1v1对局(times)
+        #
+        if self.选择英雄:
+            TimeECHO("1v1设置新的英雄")
+            if not self.Tool.existsTHENtouch(self.图片.展开英雄列表, "英雄界面检测", savepos=False):
+                TimeECHO("1v1无法选择英雄,哪里出了问题?")
+                return self.开始1v1对局(times)
+            sleep(5)
+            #
+            self.Tool.existsTHENtouch(self.参战英雄线路, "参战英雄线路", savepos=True)
+            sleep(5)
+            # 这里是用savepos的好处就是那个英雄的熟练度低点哪个英雄
+            self.Tool.existsTHENtouch(self.参战英雄头像, "参战英雄头像", savepos=True)
+            sleep(5)
+            #
+            if not self.Tool.existsTHENtouch(self.图片.开始1v1游戏, "开始1v1游戏", savepos=False):
+                self.Tool.touch_record_pos(record_pos=self.图片.开始1v1游戏.record_pos, resolution=self.移动端.resolution, keystr="开始1v1游戏")
+        else:
+            TimeECHO("1v1使用预设英雄")
+            if not self.Tool.existsTHENtouch(self.图片.进入1v1确定, "进入1v1确定", savepos=False):
+                TimeECHO("1v1找不到预设确定英雄,哪里出了问题?")
+                return self.开始1v1对局(times)
+        #
+        # 下面就是等待对方确定开始了, 有30s的等待时间
+        sleep(10)
+        self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
+        self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
+        自己曾经确定过匹配 = self.Tool.existsTHENtouch(self.图片.确定匹配按钮, "确定匹配按钮")
+        队友确认匹配 = False
+        while True:
+            if self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=False):
+                return self.创建同步文件("1v1超时太久,退出匹配")
+            自己确定匹配 = self.Tool.existsTHENtouch(self.图片.确定匹配按钮, "确定匹配按钮")
+            自己曾经确定过匹配 = 自己曾经确定过匹配 or 自己确定匹配
+            if 自己确定匹配:
+                self.无脑移动保护信誉分()
+            if 自己曾经确定过匹配:
+                队友确认匹配 = self.判断对战中(处理=False)
+            if 队友确认匹配:
+                break
+            else:
+                if self.Tool.timelimit(timekey="确认匹配", limit=5, init=False):
+                    TimeECHO("等待队友确认匹配中.... 强行点击确定坐标")
+                    self.Tool.touch_record_pos(self.图片.确定匹配按钮.record_pos, self.移动端.resolution, "确定匹配按钮")
+                    自己曾经确定过匹配 = True
+        #
+        self.无脑移动保护信誉分()
+
     def 进入人机匹配房间(self):
         if not self.check_run_status():
             return True
+        if self.对战模式 == "1v1人人":
+            # 1v1没有房间的概念, 点击开始就是开始了
+            return
         TimeECHO("进入人机匹配房间")
         self.单人进入人机匹配房间()
         if not self.组队模式:
@@ -1276,8 +1379,12 @@ class wzry_task:
     def 进行人机匹配(self, times=0):
         # 调用此函数之前, 已经进入过房间了,此处不再进行校验
         #
+        if self.对战模式 in ["1v1人人"]:
+            return self.开始1v1对局(times)
+        #
         if not self.check_run_status():
             return True
+        #
         if times == 0:
             # 这里需要barrier一下,不然下面主节点如果提前点击领匹配,这里可能无法判断
             self.Tool.barriernode(self.mynode, self.totalnode, "人机匹配预判断房间")
@@ -1290,7 +1397,6 @@ class wzry_task:
         self.Tool.timelimit(timekey="确认匹配", limit=60*1, init=True)
         self.Tool.timelimit(timekey="超时确认匹配", limit=60*5, init=True)
         self.Tool.timelimit(timekey="未检测到确认匹配", limit=60*3, init=True)
-        #
         # 不同活动中,开始按钮的图标不同,这里进行排序寻找
         # 开始按钮的位置(房主)可以不断点击
         # 房主的取消匹配在上方的叉号
@@ -1426,7 +1532,7 @@ class wzry_task:
                 return True
             addtime = 60*10 if self.本循环参数.标准模式 else 0
             addtime = 60*20 if self.对战模式 in ["5v5排位"] else addtime
-            addtime = -60*5 if self.对战模式 in ["人机闯关", "火焰山"] else addtime
+            addtime = -60*5 if self.对战模式 in ["人机闯关", "火焰山", "1v1人人"] else addtime
             if self.Tool.timelimit(timekey="结束人机匹配", limit=60*20 + addtime, init=False):
                 content = "结束人机匹配时间超时"
                 return self.创建同步文件(content)
@@ -1469,7 +1575,7 @@ class wzry_task:
             self.Tool.existsTHENtouch(点击此处继续, f"{fun_name(1)}.点击此处继续")
             #
             继续按钮 = Template(r"tpl1690545762580.png", record_pos=(-0.001, 0.233), resolution=(960, 540))
-            if self.对战模式 in ["火焰山"]:
+            if self.对战模式 in ["火焰山", "1v1人人"]:
                 self.Tool.LoopTouch(继续按钮, "火焰山等继续按钮", savepos=False)
             #
             # 对战结算时的弹窗
@@ -2904,7 +3010,7 @@ class wzry_task:
                     # 排位时随机走
                     # 可以卡在坑里，但是如果卡在水晶就会被警告，这里是为了强制移动已快速脱离水晶
                     # 但是容易卡在坑里，这个不管
-                    if self.对战模式 in ["5v5排位", "人机闯关"]:
+                    if self.对战模式 in ["5v5排位", "人机闯关", "1v1人人"]:
                         for _ in range(5):
                             swipe(移动pos, vector=[x, -y])
                         touch(普攻pos)
@@ -2919,7 +3025,7 @@ class wzry_task:
         return True
 
     def 无脑移动保护信誉分(self):
-        if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
+        if self.对战模式 in ["5v5排位", "人机闯关", "火焰山", "1v1人人"]:
             移动poskey = f"移动pos({self.mynode})"
             普攻poskey = f"普攻pos({self.mynode})"
             if 移动poskey in self.Tool.var_dict.keys():
@@ -3421,7 +3527,7 @@ class wzry_task:
                 TimeECHO(f"因此助手不会开发Ai排位的功能。")
                 TimeECHO(f"助手当前的排位模式是基于边走边平A的无脑模式运行，需要针对自己账户微调才能尽量少扣信誉分，请自行承担使用后果。")
                 TimeECHO(f"==="*20)
-            if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
+            if self.对战模式 in ["5v5排位", "人机闯关", "火焰山", "1v1人人"]:
                 TimeECHO(f"=⚠="*20)
                 TimeECHO(f"⚠警告: {self.对战模式}存在被举报的风险, 请为自己的账户负责. 详见手册网站说明")
                 if not self.触摸对战:
@@ -3431,7 +3537,7 @@ class wzry_task:
             elif self.对战模式 in ["模拟战"]:
                 self.触摸对战 = True
             # 人机闯关回大厅闯第一关
-            if self.对战模式 in ["人机闯关"]:
+            if self.对战模式 in ["人机闯关", "1v1人人"]:
                 self.对战结束返回房间 = False
             # 火焰山不支持选择英雄, "5v5排位"界面改了,暂未开发选英雄功能
             if self.对战模式 in ["火焰山", "5v5排位"]:
