@@ -3421,13 +3421,15 @@ class wzry_task:
                 TimeECHO(f"因此助手不会开发Ai排位的功能。")
                 TimeECHO(f"助手当前的排位模式是基于边走边平A的无脑模式运行，需要针对自己账户微调才能尽量少扣信誉分，请自行承担使用后果。")
                 TimeECHO(f"==="*20)
-            if self.对战模式 in ["5v5排位", "模拟战", "人机闯关", "火焰山"]:
+            if self.对战模式 in ["5v5排位", "人机闯关", "火焰山"]:
                 TimeECHO(f"=⚠="*20)
                 TimeECHO(f"⚠警告: {self.对战模式}存在被举报的风险, 请为自己的账户负责. 详见手册网站说明")
                 if not self.触摸对战:
                     TimeECHO(f"对战模式[{self.对战模式}]必须采用触摸模式, 正在设置[self.触摸对战 = True]")
                     self.触摸对战 = True
                 TimeECHO(f"=⚠="*20)
+            elif self.对战模式 in ["模拟战"]:
+                self.触摸对战 = True
             # 人机闯关回大厅闯第一关
             if self.对战模式 in ["人机闯关"]:
                 self.对战结束返回房间 = False
