@@ -18,10 +18,14 @@
 <br/>
 </div>
 
-## WZRY
-
+## 免责声明
 [WZRY](https://github.com/cndaqiang/WZRY) 是基于 [airtest-mobileauto](https://github.com/cndaqiang/airtest_mobileauto) 开发的王者荣耀农活自动化免费开源脚本。**7*24h 完全无人值守运行**，支持自动启动模拟器、更新游戏、错误自修复、全自动对战及礼包领取，解放双手专注生活。
+
+> 本脚本通过图像识别、模拟人手点击的方式实现自动化, 不会修改读取游戏数据。
+> 虽然理论上没有封号风险，但使用本脚本的后果需由用户自行承担。
 > **本项目完全免费，且未在任何平台或渠道提供付费服务或收费支持。请勿相信任何形式的收费信息。**
+> ⚠️ **本项目不会在咸鱼、淘宝、拼多多等平台售卖，发现售卖请帮忙举报**⚠️
+> ⚠️ **本项目不允许以任何方式在咸鱼、淘宝、拼多多等平台是售卖**⚠️
 
 
 ## 自动化
@@ -68,11 +72,8 @@
   - [airtest_mobileauto](https://github.com/cndaqiang/airtest_mobileauto)  
   - [WZRY_AirtestIDE](https://github.com/XRSec/WZRY_AirtestIDE)  
   - [Airtest Project](https://github.com/AirtestProject)
+  - [StarRailAssistant](https://github.com/Starry-Wind/StarRailAssistant)
+  - [March7thAssistant](https://github.com/moesnow/March7thAssistant)
 
 - 感谢所有提问 issue 和为本项目打星的用户!
 - 感谢b站的老哥们点赞推广!
-
-## 重要声明
-- 本脚本不会修改游戏数据，虽然理论上没有封号风险，但使用本脚本的后果需由用户自行承担。
-- 本脚本由个人开发，且不用于商业目的。开发者保留随时停止更新或删除项目的权利。
-- **本项目完全免费，且未在任何平台或渠道提供付费服务或收费支持。请勿相信任何形式的收费信息。**
