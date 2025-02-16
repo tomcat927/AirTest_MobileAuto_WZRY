@@ -202,3 +202,12 @@ KPL观赛入口: !!python/tuple
 赛事入口: !!python/tuple
 - 241
 - 34
+进入1v1匹配: !!python/tuple
+- 293
+- 322
+进入1v1模式: !!python/tuple
+- 839
+- 124
+进入1v1预选: !!python/tuple
+- 386
+- 381
